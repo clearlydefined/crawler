@@ -1,7 +1,11 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// SPDX-License-Identifier: MIT
 
-
-const run = require('ghcrawler').run;
 const config = require('painless-config');
 const defaults = require(config.get('CRAWLER_OPTIONS') || './cdConfig');
+const run = require('ghcrawler').run;
 const searchPath = [require('./providers')];
-run(defaults, searchPath);
+const VisitorMap = require('ghcrawler').visitorMap;
+const maps = require('./config/map');
+
+run(defaults, searchPath, maps);

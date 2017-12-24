@@ -18,6 +18,7 @@ module.exports =
       git: {}
     },
     process: {
+      source: {},
       scancode: {}
     },
     store: {

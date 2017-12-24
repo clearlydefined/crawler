@@ -7,6 +7,9 @@
       "name": "ClearlyDefined",
       "program": "${workspaceRoot}/run.js",
       "cwd": "${workspaceRoot}",
+      "runtimeArgs": [
+        "--nolazy"
+      ],
       "env": {
         "NODE_ENV": "localhost",
         "CRAWLER_OPTIONS": "./config/cdConfig"

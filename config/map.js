@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // SPDX-License-Identifier: MIT
 
-const VisitorMap = require('../').visitorMap;
-
 // Map building blocks
 const self = {};
 
@@ -30,11 +28,12 @@ const maven = {
 const entities = {
   self,
   neighbors,
-  orgs,
   source,
+  scancode,
   npm,
   maven
 };
 
-VisitorMap.register('initialize', VisitorMap.copy(entities));
-VisitorMap.register('default', VisitorMap.copy(entities));
+module.exports = {
+  default: entities
+}
