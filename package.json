@@ -1,0 +1,47 @@
+{
+  "name": "clearlydefined-crawler",
+  "version": "0.2.23",
+  "description": "A crawler that walks projects and packages looking for data of interest to the ClearlyDefined project.",
+  "main": "./index.js",
+  "scripts": {
+    "start": "node ./bin/www.js",
+    "test": "./node_modules/mocha/bin/mocha test/unit/**/*.js",
+    "integration": "./node_modules/mocha/bin/mocha test/integration/**/*.js --timeout 20000"
+  },
+  "keywords": [
+    "license",
+    "api",
+    "crawler",
+    "clearlydefined"
+  ],
+  "author": "Jeff Mcaffer <jmcaffer@microsoft.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/clearlydefined/crawler.git"
+  },
+  "homepage": "https://github.com/clearlydefined/crawler#readme",
+  "bugs": {
+    "url": "https://github.com/clearlydefined/crawler"
+  },
+  "dependencies": {
+    "debug": "^2.6.9",
+    "extend": "^3.0.0",
+    "ghcrawler": "github:microsoft/ghcrawler#jm/apicrawler",
+    "moment": "^2.15.2",
+    "morgan": "^1.9.0",
+    "node-uuid": "^1.4.8",
+    "nodegit": "^0.20.3",
+    "painless-config": "^0.1.0",
+    "promise-retry": "^1.1.1",
+    "tmp": "0.0.33"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "grunt": "^1.0.1",
+    "grunt-mocha-test": "^0.13.2",
+    "istanbul": "^0.4.5",
+    "mocha": "^3.1.2",
+    "sinon": "^1.17.6"
+  }
+}
