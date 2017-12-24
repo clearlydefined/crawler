@@ -10,6 +10,7 @@ const clearlyDefined = {
 
 module.exports =
   {
+    searchPath: [module],
     crawler: {
       count: 1
     },
