@@ -5,11 +5,11 @@
       "type": "node",
       "request": "launch",
       "name": "ClearlyDefined",
-      "program": "${workspaceRoot}/bin/www.js",
+      "program": "${workspaceRoot}/run.js",
       "cwd": "${workspaceRoot}",
       "env": {
         "NODE_ENV": "localhost",
-        "CRAWLER_OPTIONS": "./cdConfig"
+        "CRAWLER_OPTIONS": "./config/cdConfig"
       },
     },
     {
