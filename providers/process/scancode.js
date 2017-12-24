@@ -4,20 +4,27 @@
 const tmp = require('tmp');
 
 class ScanCodeProcessor {
+
+  constructor(options) {
+    this.options = options;
+    this.logger = options.logger;
+  }
+
   getHandler(request, type = request.type) {
     return type === 'scancode' ? this._scan.bind(this) : null;
   }
 
   _scan(request) {
+    const document = request.document;
     request.addRootSelfLink(this._getConfigurationId());
     const dir = this._createTempLocation(request);
+    this.logger.info(`Running ScanCode on ${request.document.location} with output going to ${dir.name}`);
+    document.output = dir.name;
 
-    console.log(`Running ScanCode on ${request.document.location} with output going to ${dir.name}`);
-    request.document.output = dir.name;
+    // TODO really run the scan here
     return new Promise((resolve, reject) => {
-      // TODO really run the scan here
-      require('fs').appendFile(request.document.output, 'this is some scancode output', error => {
-        error ? reject(error) : resolve(request);
+      require('fs').appendFile(document.output, 'this is some scancode output', error => {
+        error ? reject(error) : resolve(document);
       });
     });
   }
@@ -38,4 +45,4 @@ class ScanCodeProcessor {
   }
 }
 
-module.exports = () => new ScanCodeProcessor();
+module.exports = options => new ScanCodeProcessor(options);

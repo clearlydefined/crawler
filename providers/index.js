@@ -6,6 +6,7 @@ module.exports = {
     git: require('./fetch/gitCloner')
   },
   process: {
+    source: require('./process/source'),
     scancode: require('./process/scancode')
   },
   store: {
