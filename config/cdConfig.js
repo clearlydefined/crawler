@@ -15,18 +15,20 @@ module.exports =
       count: 1
     },
     fetch: {
-      git: {}
+      git: {},
+      npm: {}
     },
     process: {
       source: {},
-      scancode: {}
+      scancode: {},
+      npm: {}
     },
     store: {
-      provider: 'clearlyDefined',
+      provider: 'memory',
       clearlyDefined
     },
     deadletter: {
-      provider: 'clearlyDefined',
+      provider: 'memory',
       clearlyDefined
     },
     queue: {

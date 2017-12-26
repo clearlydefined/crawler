@@ -3,11 +3,13 @@
 
 module.exports = {
   fetch: {
-    git: require('./fetch/gitCloner')
+    git: require('./fetch/gitCloner'),
+    npm: require('./fetch/npmFetch')
   },
   process: {
     source: require('./process/source'),
-    scancode: require('./process/scancode')
+    scancode: require('./process/scancode'),
+    npm: require('./process/npmExtract')
   },
   store: {
     clearlyDefined: require('./store/clearlyDefined')

@@ -26,13 +26,18 @@
   },
   "dependencies": {
     "debug": "^2.6.9",
+    "decompress": "^4.2.0",
     "extend": "^3.0.0",
+    "ghrequestor": "^0.1.7",
     "moment": "^2.15.2",
     "morgan": "^1.9.0",
     "node-uuid": "^1.4.8",
     "nodegit": "^0.20.3",
     "painless-config": "^0.1.0",
+    "parse-github-url": "^1.0.2",
     "promise-retry": "^1.1.1",
+    "request-promise-native": "^1.0.5",
+    "requestretry": "^1.12.2",
     "tmp": "0.0.33"
   },
   "devDependencies": {
