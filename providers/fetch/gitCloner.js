@@ -1,62 +1,47 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // SPDX-License-Identifier: MIT
 
-const URL = require('url');
+const BaseHandler = require('../../lib/baseHandler');
 const Git = require('nodegit');
-const tmp = require('tmp');
+const SourceSpec = require('../../lib/sourceSpec');
 
-const providerMap = {
-  github: "https://github.com"
-}
+class GitHubCloner extends BaseHandler {
 
-class GitHubCloner {
-
-  constructor() {
+  get schemaVersion() {
+    return 1;
   }
 
   getHandler(request, type = request.type) {
-    if (URL.parse(request.url).path.split('/')[1].toLowerCase() !== 'git')
-      return null;
-    return this._fetch.bind(this);
+    const spec = this.toSpec(request);
+    return spec && spec.type === 'git' ? this._fetch.bind(this) : null;
   }
 
   async _fetch(request) {
-    const segments = URL.parse(request.url).path.split('/');
-    const name = `${segments[3]}/${segments[4]}`;
-    const revision = segments.length === 5 ? null : segments[5];
+    const spec = this.toSpec(request);
+    if (!spec.tool) {
+      // shortcut. if there is no tool to run then no need to get the repo
+      request.document = {};
+      return request;
+    }
+    const sourceSpec = this._toSourceSpec(spec);
+    const options = { version: sourceSpec.revision };
+    const dir = this._createTempDir(request);
 
-    const url = this._buildUrl(name);
-    const options = this._buildOptions(revision);
-    const dir = this._createTempLocation(request);
-
-    const repo = await Git.Clone(url, dir.name, options)
+    const repo = await Git.Clone(sourceSpec.url, dir.name, options)
 
     request.contentOrigin = 'origin';
-    request.document = this._createCloneRecordDocument(request, dir, repo);
-    request.trackCleanup(dir.removeCallback);
+    request.document = this._createDocument(dir);
     return request;
   }
 
-  _buildOptions(version) {
-    return { version };
+  _createDocument(dir) {
+    // Create a simple document that records the location of the repo that was fetched
+    return { location: dir.name };
   }
 
-  _buildUrl(name) {
-    return `https://github.com/${name}.git`
-  }
-
-  _createTempLocation(request) {
-    return tmp.dirSync({ unsafeCleanup: true, prefix: 'cd-' });
-  }
-
-  _createCloneRecordDocument(request, dir, repo) {
-    const url = URL.parse(request.url);
-    const id = url.path.slice(1).replace('/', ':');
-    return {
-      id,
-      location: dir.name,
-      repo
-    }
+  _toSourceSpec(spec) {
+    const url = `https://github.com/${spec.namespace}/${spec.name}.git`
+    return new SourceSpec('git', 'github', url, spec.revision);
   }
 }
 

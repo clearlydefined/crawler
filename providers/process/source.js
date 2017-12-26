@@ -1,27 +1,26 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // SPDX-License-Identifier: MIT
 
-const tmp = require('tmp');
+const BaseHandler = require('../../lib/baseHandler');
 
-class SourceProcessor {
+class SourceProcessor extends BaseHandler {
+
+  get schemaVersion() {
+    return 1;
+  }
+
   getHandler(request, type = request.type) {
-    return type === 'source' ? this._process.bind(this) : null;
+    const spec = this.toSpec(request);
+    // if there is no tool and it is a source related request, it's for us
+    return (!spec.tool && ['git'].includes(type)) ? this._process.bind(this) : null;
   }
 
   _process(request) {
-    const document = request.document;
-    request.markNoSave();
-    if (!request.payload) {
-      return document;
-    }
-    this._addScan(request, 'scancode', 'scancode');
+    const { document, spec } = super._process(request);
+    this.addSelfLink(request);
+    this.linkAndQueueTool(request, 'scancode', 'scancode');
     return document;
-  }
-
-  _addScan(request, name, type) {
-    const newPolicy = request.getNextPolicy(name);
-    request.queue(type, request.url, newPolicy);
   }
 }
 
-module.exports = () => new SourceProcessor();
+module.exports = options => new SourceProcessor(options);

@@ -1,25 +1,30 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // SPDX-License-Identifier: MIT
 
-const tmp = require('tmp');
+const BaseHandler = require('../../lib/baseHandler');
 
-class ScanCodeProcessor {
+class ScanCodeProcessor extends BaseHandler {
 
-  constructor(options) {
-    this.options = options;
-    this.logger = options.logger;
+  get schemaVersion() {
+    return 1;
   }
 
-  getHandler(request, type = request.type) {
-    return type === 'scancode' ? this._scan.bind(this) : null;
+  get toolVersion() {
+    return 1;
   }
 
-  _scan(request) {
-    const document = request.document;
-    request.addRootSelfLink(this._getConfigurationId());
-    const dir = this._createTempLocation(request);
-    this.logger.info(`Running ScanCode on ${request.document.location} with output going to ${dir.name}`);
-    document.output = dir.name;
+  getHandler(request) {
+    const spec = this.toSpec(request);
+    return spec && spec.tool === 'scancode' ? this._process.bind(this) : null;
+  }
+
+  _process(request) {
+    const { document, spec } = super._process(request);
+    this.addSelfLink(request, this._getUrn(spec));
+    this.linkToolResult(request, spec.toUrn());
+    const file = this._createTempFile(request);
+    this.logger.info(`Running ScanCode on ${request.document.location} with output going to ${file.name}`);
+    document.output = file.name;
 
     // TODO really run the scan here
     return new Promise((resolve, reject) => {
@@ -29,19 +34,9 @@ class ScanCodeProcessor {
     });
   }
 
-  _createTempLocation(request) {
-    const result = tmp.fileSync({ unsafeCleanup: true, prefix: 'cd-' });
-    request.trackCleanup(result.removeCallback);
-    return result;
-  }
-
-  _getConfigurationId() {
-    return `scancode--${this._getVersion()}`;
-  }
-
-  _getVersion() {
-    // TODO get the real version of the configured tool
-    return '1';
+  _getUrn(spec) {
+    const newSpec = Object.assign(Object.create(spec), spec, { tool: `scancode--${this.toolVersion}` });
+    return newSpec.toUrn();
   }
 }
 
