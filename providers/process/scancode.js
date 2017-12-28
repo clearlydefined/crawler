@@ -9,8 +9,9 @@ class ScanCodeProcessor extends BaseHandler {
     return 1;
   }
 
-  get toolVersion() {
-    return 1;
+  get toolSpec() {
+    // TODO get the version directly from the tool
+    return { tool: 'scancode', toolVersion: this.options.version || 1 };
   }
 
   getHandler(request) {
@@ -20,8 +21,7 @@ class ScanCodeProcessor extends BaseHandler {
 
   _process(request) {
     const { document, spec } = super._process(request);
-    this.addSelfLink(request, this._getUrn(spec));
-    this.linkToolResult(request, spec.toUrn());
+    this.addBasicToolLinks(request, spec);
     const file = this._createTempFile(request);
     document._metadata.contentLocation = file.name;
     document._metadata.contentType = 'application/json';

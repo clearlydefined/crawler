@@ -9,6 +9,10 @@ class SourceProcessor extends BaseHandler {
     return 1;
   }
 
+  get toolSpec() {
+    return { tool: 'clearlydescribed', toolVersion: 1 };
+  }
+
   getHandler(request, type = request.type) {
     const spec = this.toSpec(request);
     // if there is no tool and it is a source related request, it's for us
@@ -17,7 +21,7 @@ class SourceProcessor extends BaseHandler {
 
   _process(request) {
     const { document, spec } = super._process(request);
-    this.addSelfLink(request);
+    this.addBasicToolLinks(request, spec);
     this.linkAndQueueTool(request, 'scancode', 'scancode');
     return document;
   }
