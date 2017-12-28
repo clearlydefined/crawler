@@ -17,13 +17,17 @@ class NpmExtract extends BaseHandler {
     return 1;
   }
 
+  get toolSpec() {
+    return { tool: 'clearlydescribed', toolVersion: 1 };
+  }
+
   getHandler(request, type = request.type) {
     return type === 'npm' ? this._process.bind(this) : null;
   }
 
   _process(request) {
-    const { document } = super._process(request);
-    this.addSelfLink(request);
+    const { document, spec } = super._process(request);
+    this.addBasicToolLinks(request, spec);
     return document.location
       ? this._processKnownVersion(request)
       : this._discoverVersionAndQueue(request);
