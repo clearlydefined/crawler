@@ -8,6 +8,11 @@ const clearlyDefined = {
   token: config.get('CRAWLER_STORE_TOKEN')
 };
 
+const azblob = {
+  connection: config.get('AZURE_BLOB_CONNECTION_STRING'),
+  container: config.get('AZURE_BLOB_CONTAINER')
+}
+
 module.exports =
   {
     searchPath: [module],
@@ -24,12 +29,14 @@ module.exports =
       npm: {}
     },
     store: {
-      provider: 'memory',
-      clearlyDefined
+      provider: 'azblob',
+      clearlyDefined,
+      azblob
     },
     deadletter: {
-      provider: 'memory',
-      clearlyDefined
+      provider: 'azblob',
+      clearlyDefined,
+      azblob
     },
     queue: {
       provider: 'memory',

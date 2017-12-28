@@ -24,19 +24,20 @@ class ScanCodeProcessor extends BaseHandler {
     this.linkToolResult(request, spec.toUrn());
     const file = this._createTempFile(request);
     document._metadata.contentLocation = file.name;
-    document._metadata.contentType = 'application/xml';
+    document._metadata.contentType = 'application/json';
     this.logger.info(`Running ScanCode on ${request.document.location} with output going to ${file.name}`);
 
     // TODO really run the scan here
     return new Promise((resolve, reject) => {
-      require('fs').appendFile(file.name, JSON.stringify({ scancode: 'is cool' }), error => {
+      const output = require('../../scancodeSample.json');
+      require('fs').appendFile(file.name, JSON.stringify(output), error => {
         error ? reject(error) : resolve(document);
       });
     });
   }
 
   _getUrn(spec) {
-    const newSpec = Object.assign(Object.create(spec), spec, { tool: `scancode--${this.toolVersion}` });
+    const newSpec = Object.assign(Object.create(spec), spec, { tool: 'scancode', toolVersion: this.toolVersion });
     return newSpec.toUrn();
   }
 }

@@ -1,0 +1,283 @@
+{
+  "scancode_notice": "Generated with ScanCode and provided on an \"AS IS\" BASIS, WITHOUT WARRANTIES\nOR CONDITIONS OF ANY KIND, either express or implied. No content created from\nScanCode should be considered or used as legal advice. Consult an Attorney\nfor any legal advice.\nScanCode is a free software code scanning tool from nexB Inc. and others.\nVisit https://github.com/nexB/scancode-toolkit/ for support and download.",
+  "scancode_version": "2.2.1",
+  "scancode_options": {
+    "--copyright": true,
+    "--license": true,
+    "--info": true,
+    "--license-score": 0,
+    "--strip-root": true,
+    "--format": "json",
+    "--diag": true,
+    "--only-findings": true
+  },
+  "files_count": 4,
+  "files": [
+    {
+      "path": "LICENSE",
+      "type": "file",
+      "name": "LICENSE",
+      "base_name": "LICENSE",
+      "extension": "",
+      "date": "2017-12-12",
+      "size": 1087,
+      "sha1": "abb6bd03bea71e8684cd8036a3383bb0839a84b6",
+      "md5": "78c705080a639d3bb4085a9d1bb22987",
+      "files_count": null,
+      "mime_type": "text/plain",
+      "file_type": "ASCII text",
+      "programming_language": null,
+      "is_binary": false,
+      "is_text": true,
+      "is_archive": false,
+      "is_media": false,
+      "is_source": false,
+      "is_script": false,
+      "scan_errors": [],
+      "licenses": [
+        {
+          "key": "mit",
+          "score": 15.0,
+          "short_name": "MIT License",
+          "category": "Permissive",
+          "owner": "MIT",
+          "homepage_url": "http://opensource.org/licenses/mit-license.php",
+          "text_url": "http://opensource.org/licenses/mit-license.php",
+          "reference_url": "https://enterprise.dejacode.com/urn/urn:dje:license:mit",
+          "spdx_license_key": "MIT",
+          "spdx_url": "https://spdx.org/licenses/MIT",
+          "start_line": 1,
+          "end_line": 1,
+          "matched_rule": {
+            "identifier": "mit_27.RULE",
+            "license_choice": false,
+            "licenses": [
+              "mit"
+            ],
+            "matcher": "2-aho",
+            "rule_length": 3,
+            "matched_length": 3,
+            "match_coverage": 100.0,
+            "rule_relevance": 15
+          }
+        },
+        {
+          "key": "mit",
+          "score": 100.0,
+          "short_name": "MIT License",
+          "category": "Permissive",
+          "owner": "MIT",
+          "homepage_url": "http://opensource.org/licenses/mit-license.php",
+          "text_url": "http://opensource.org/licenses/mit-license.php",
+          "reference_url": "https://enterprise.dejacode.com/urn/urn:dje:license:mit",
+          "spdx_license_key": "MIT",
+          "spdx_url": "https://spdx.org/licenses/MIT",
+          "start_line": 5,
+          "end_line": 21,
+          "matched_rule": {
+            "identifier": "mit.LICENSE",
+            "license_choice": false,
+            "licenses": [
+              "mit"
+            ],
+            "matcher": "2-aho",
+            "rule_length": 163,
+            "matched_length": 163,
+            "match_coverage": 100.0,
+            "rule_relevance": 100
+          }
+        }
+      ],
+      "copyrights": [
+        {
+          "statements": [
+            "Copyright (c) 2015-2017, Jon Schlinkert."
+          ],
+          "holders": [
+            "Jon Schlinkert."
+          ],
+          "authors": [],
+          "start_line": 3,
+          "end_line": 3
+        }
+      ]
+    },
+    {
+      "path": "index.js",
+      "type": "file",
+      "name": "index.js",
+      "base_name": "index",
+      "extension": ".js",
+      "date": "2017-12-12",
+      "size": 2395,
+      "sha1": "6da03f3dac0f495773548ce084b539f5dbbc30d0",
+      "md5": "4abaa35f0cdbf8b58e55091bb2204ca4",
+      "files_count": null,
+      "mime_type": "text/plain",
+      "file_type": "ASCII text",
+      "programming_language": "JavaScript",
+      "is_binary": false,
+      "is_text": true,
+      "is_archive": false,
+      "is_media": false,
+      "is_source": true,
+      "is_script": false,
+      "scan_errors": [],
+      "licenses": [
+        {
+          "key": "mit",
+          "score": 25.0,
+          "short_name": "MIT License",
+          "category": "Permissive",
+          "owner": "MIT",
+          "homepage_url": "http://opensource.org/licenses/mit-license.php",
+          "text_url": "http://opensource.org/licenses/mit-license.php",
+          "reference_url": "https://enterprise.dejacode.com/urn/urn:dje:license:mit",
+          "spdx_license_key": "MIT",
+          "spdx_url": "https://spdx.org/licenses/MIT",
+          "start_line": 5,
+          "end_line": 5,
+          "matched_rule": {
+            "identifier": "mit_16.RULE",
+            "license_choice": false,
+            "licenses": [
+              "mit"
+            ],
+            "matcher": "2-aho",
+            "rule_length": 5,
+            "matched_length": 5,
+            "match_coverage": 100.0,
+            "rule_relevance": 25
+          }
+        }
+      ],
+      "copyrights": [
+        {
+          "statements": [
+            "Copyright (c) 2015-2017, Jon Schlinkert."
+          ],
+          "holders": [
+            "Jon Schlinkert."
+          ],
+          "authors": [],
+          "start_line": 4,
+          "end_line": 5
+        }
+      ]
+    },
+    {
+      "path": "package.json",
+      "type": "file",
+      "name": "package.json",
+      "base_name": "package",
+      "extension": ".json",
+      "date": "2017-12-12",
+      "size": 1938,
+      "sha1": "bbd550299c8ce93141b8d0d8640f5a4e46899557",
+      "md5": "f6e3dd3d522e4607650ce238887602fb",
+      "files_count": null,
+      "mime_type": "text/plain",
+      "file_type": "ASCII text",
+      "programming_language": "JSON",
+      "is_binary": false,
+      "is_text": true,
+      "is_archive": false,
+      "is_media": false,
+      "is_source": true,
+      "is_script": false,
+      "scan_errors": [],
+      "licenses": [
+        {
+          "key": "mit",
+          "score": 10.0,
+          "short_name": "MIT License",
+          "category": "Permissive",
+          "owner": "MIT",
+          "homepage_url": "http://opensource.org/licenses/mit-license.php",
+          "text_url": "http://opensource.org/licenses/mit-license.php",
+          "reference_url": "https://enterprise.dejacode.com/urn/urn:dje:license:mit",
+          "spdx_license_key": "MIT",
+          "spdx_url": "https://spdx.org/licenses/MIT",
+          "start_line": 17,
+          "end_line": 17,
+          "matched_rule": {
+            "identifier": "mit_34.RULE",
+            "license_choice": false,
+            "licenses": [
+              "mit"
+            ],
+            "matcher": "2-aho",
+            "rule_length": 2,
+            "matched_length": 2,
+            "match_coverage": 100.0,
+            "rule_relevance": 10
+          }
+        }
+      ],
+      "copyrights": []
+    },
+    {
+      "path": "README.md",
+      "type": "file",
+      "name": "README.md",
+      "base_name": "README",
+      "extension": ".md",
+      "date": "2017-12-12",
+      "size": 6862,
+      "sha1": "c318e15e5f7e89252e030d680bd49295b9196ce7",
+      "md5": "4cec2faaa253eb37ddf2dcaa930a6898",
+      "files_count": null,
+      "mime_type": "text/plain",
+      "file_type": "UTF-8 Unicode text, with very long lines",
+      "programming_language": null,
+      "is_binary": false,
+      "is_text": true,
+      "is_archive": false,
+      "is_media": false,
+      "is_source": false,
+      "is_script": false,
+      "scan_errors": [],
+      "licenses": [
+        {
+          "key": "mit",
+          "score": 25.0,
+          "short_name": "MIT License",
+          "category": "Permissive",
+          "owner": "MIT",
+          "homepage_url": "http://opensource.org/licenses/mit-license.php",
+          "text_url": "http://opensource.org/licenses/mit-license.php",
+          "reference_url": "https://enterprise.dejacode.com/urn/urn:dje:license:mit",
+          "spdx_license_key": "MIT",
+          "spdx_url": "https://spdx.org/licenses/MIT",
+          "start_line": 199,
+          "end_line": 199,
+          "matched_rule": {
+            "identifier": "mit_16.RULE",
+            "license_choice": false,
+            "licenses": [
+              "mit"
+            ],
+            "matcher": "2-aho",
+            "rule_length": 5,
+            "matched_length": 5,
+            "match_coverage": 100.0,
+            "rule_relevance": 25
+          }
+        }
+      ],
+      "copyrights": [
+        {
+          "statements": [
+            "Copyright (c) 2017, Jon Schlinkert"
+          ],
+          "holders": [
+            "Jon Schlinkert"
+          ],
+          "authors": [],
+          "start_line": 198,
+          "end_line": 199
+        }
+      ]
+    }
+  ]
+}
