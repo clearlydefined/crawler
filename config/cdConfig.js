@@ -26,7 +26,8 @@ module.exports =
     process: {
       source: {},
       scancode: {},
-      npm: {}
+      npm: {},
+      top: {}
     },
     store: {
       provider: 'azblob',

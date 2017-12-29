@@ -9,7 +9,8 @@ module.exports = {
   process: {
     source: require('./process/source'),
     scancode: require('./process/scancode'),
-    npm: require('./process/npmExtract')
+    npm: require('./process/npmExtract'),
+    top: require('./process/top')
   },
   store: {
     clearlyDefined: require('./store/clearlyDefined')
