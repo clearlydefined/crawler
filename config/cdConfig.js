@@ -29,7 +29,7 @@ module.exports =
         installDir: config.get('SCANCODE_HOME') || 'C:\\installs\\scancode-toolkit-2.2.1',
         options: ['--copyright', '--license', '--info', '--diag', '--only-findings', ' --strip-root', '--quiet'],
         timeout: 300,
-        processes: 6,
+        processes: 3,
         format: 'json-pp'
       },
       npm: {},
