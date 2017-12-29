@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 const BaseHandler = require('../../lib/baseHandler');
+const { exec } = require('child_process');
+const fs = require('fs');
+
+let toolVersion = null;
 
 class ScanCodeProcessor extends BaseHandler {
 
@@ -10,8 +14,7 @@ class ScanCodeProcessor extends BaseHandler {
   }
 
   get toolSpec() {
-    // TODO get the version directly from the tool
-    return { tool: 'scancode', toolVersion: this.options.version || 1 };
+    return { tool: 'scancode', toolVersion };
   }
 
   getHandler(request) {
@@ -19,7 +22,9 @@ class ScanCodeProcessor extends BaseHandler {
     return spec && spec.tool === 'scancode' ? this._process.bind(this) : null;
   }
 
-  _process(request) {
+  async _process(request) {
+    // need to do this first so the urns have the right version.
+    await this._detectVersion();
     const { document, spec } = super._process(request);
     this.addBasicToolLinks(request, spec);
     const file = this._createTempFile(request);
@@ -29,16 +34,48 @@ class ScanCodeProcessor extends BaseHandler {
 
     // TODO really run the scan here
     return new Promise((resolve, reject) => {
-      const output = require('../../scancodeSample.json');
-      require('fs').appendFile(file.name, JSON.stringify(output), error => {
-        error ? reject(error) : resolve(document);
+      const parameters = [...this.options.options,
+        "--timeout", this.options.timeout.toString(),
+        "-n", this.options.processes.toString(),
+        "-f", this.options.format,
+        request.document.location,
+        file.name
+      ];
+      exec(`cd ${this.options.installDir} && scancode ${parameters}`, (error, stdout, stderr) => {
+        if (error || this._hasRealErrors(file.name))
+          return reject(error);
+        resolve(request);
       });
     });
+  }
+
+  // Scan the results file for any errors that are not just timeouts
+  _hasRealErrors(resultFile) {
+    const results = JSON.parse(fs.readFileSync(resultFile));
+    return results.files.some(file =>
+      file.scan_errors.some(error => {
+        const [timeout] = error.match(/ERROR: Processing interrupted: timeout after (?<timeout>\\d+) seconds./);
+        return timeout !== this.options.timeout.toString();
+      }));
   }
 
   _getUrn(spec) {
     const newSpec = Object.assign(Object.create(spec), spec, { tool: 'scancode', toolVersion: this.toolVersion });
     return newSpec.toUrn();
+  }
+
+  async _detectVersion() {
+    if (toolVersion)
+      return toolVersion;
+    return new Promise((resolve, reject) => {
+      exec(`cd ${this.options.installDir} && scancode --version`, (error, stdout, stderr) => {
+        if (error)
+          return reject(error);
+        console.log(stdout);
+        toolVersion = stdout.replace('ScanCode version ', '').trim();
+        resolve(toolVersion);
+      });
+    });
   }
 }
 

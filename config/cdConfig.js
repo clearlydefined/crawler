@@ -25,7 +25,13 @@ module.exports =
     },
     process: {
       source: {},
-      scancode: {},
+      scancode: {
+        installDir: config.get('SCANCODE_HOME') || 'C:\\installs\\scancode-toolkit-2.2.1',
+        options: ['--copyright', '--license', '--info', '--diag', '--only-findings', ' --strip-root', '--quiet'],
+        timeout: 300,
+        processes: 6,
+        format: 'json-pp'
+      },
       npm: {},
       top: {}
     },
