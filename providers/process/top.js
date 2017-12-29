@@ -1,0 +1,55 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// SPDX-License-Identifier: MIT
+
+const BaseHandler = require('../../lib/baseHandler');
+const Request = require('ghcrawler').request;
+const npm1k = require('npm1k');
+
+class TopProcessor extends BaseHandler {
+
+  get schemaVersion() {
+    return 1;
+  }
+
+  get toolSpec() {
+    return { tool: 'toploader', toolVersion: 1 };
+  }
+
+  getHandler(request, type = request.type) {
+    const spec = this.toSpec(request);
+    // if there is no tool and it is a source related request, it's for us
+    return spec.tool === 'top' ? this._process.bind(this) : null;
+  }
+
+  _process(request) {
+    const { document, spec } = super._process(request);
+    this.addBasicToolLinks(request, spec);
+    switch (spec.type) {
+      case 'npm':
+        return this._processTopNpms(request);
+      default:
+        return request;
+    }
+  }
+
+  async _processTopNpms(request) {
+    return new Promise((resolve, reject) => {
+      npm1k((error, list) => {
+        if (error)
+          return reject(error);
+        const requests = list.map(p => {
+          let [namespace, name] = p.split('/');
+          if (!name) {
+            name = namespace;
+            namespace = '-';
+          }
+          return new Request('npm', `cd:/npm/npmjs/${namespace}/${name}`)
+        });
+        request.queueRequests(requests);
+        resolve(request);
+      });
+    });
+  }
+}
+
+module.exports = options => new TopProcessor(options);
