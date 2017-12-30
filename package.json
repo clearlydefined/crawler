@@ -1,10 +1,10 @@
 {
   "name": "clearlydefined-crawler",
-  "version": "0.2.23",
+  "version": "0.1.0",
   "description": "A crawler that walks projects and packages looking for data of interest to the ClearlyDefined project.",
   "main": "./index.js",
   "scripts": {
-    "start": "node ./bin/www.js",
+    "start": "node ./run.js",
     "test": "./node_modules/mocha/bin/mocha test/unit/**/*.js",
     "integration": "./node_modules/mocha/bin/mocha test/integration/**/*.js --timeout 20000"
   },
@@ -28,6 +28,7 @@
     "debug": "^2.6.9",
     "decompress": "^4.2.0",
     "extend": "^3.0.0",
+    "ghcrawler": "github:microsoft/ghcrawler#jm/apicrawler",
     "ghrequestor": "^0.1.7",
     "moment": "^2.15.2",
     "morgan": "^1.9.0",
