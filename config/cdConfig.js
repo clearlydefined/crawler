@@ -36,7 +36,9 @@ module.exports =
         processes: 3,
         format: 'json-pp'
       },
-      npm: {},
+      npm: {
+        githubToken: config.get('CRAWLER_GITHUB_TOKEN')
+      },
       top: {}
     },
     store: {

@@ -71,7 +71,6 @@ class ScanCodeProcessor extends BaseHandler {
       exec(`cd ${this.options.installDir} && scancode --version`, (error, stdout, stderr) => {
         if (error)
           return reject(error);
-        console.log(stdout);
         toolVersion = stdout.replace('ScanCode version ', '').trim();
         resolve(toolVersion);
       });
