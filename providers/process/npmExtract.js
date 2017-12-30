@@ -44,7 +44,8 @@ class NpmExtract extends BaseHandler {
     if (manifest.bugs && manifest.bugs.url)
       candidateUrls.push(manifest.bugs.url);
 
-    return sourceDiscovery(manifest.version, candidateUrls);
+    // TODO lookup source discovery in a set of services that have their own configuration
+    return sourceDiscovery(manifest.version, candidateUrls, { githubToken: this.options.githubToken });
   }
 
   async _updateDocument(request, manifest) {

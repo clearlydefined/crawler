@@ -11,9 +11,8 @@
         "--nolazy"
       ],
       "env": {
-        "NODE_ENV": "localhost",
-        "CRAWLER_OPTIONS": "./config/cdConfig"
-      },
+        "NODE_ENV": "localhost"
+      }
     },
     {
       "type": "node",
