@@ -13,6 +13,10 @@ const azblob = {
   container: config.get('AZURE_BLOB_CONTAINER')
 }
 
+const file = {
+  location: config.get('FILE_STORE_LOCATION') || process.platform === 'win32' ? 'c:/temp/cd' : '/tmp/cd'
+};
+
 module.exports =
   {
     searchPath: [module],
@@ -36,14 +40,16 @@ module.exports =
       top: {}
     },
     store: {
-      provider: 'azblob',
+      provider: 'file',
       clearlyDefined,
-      azblob
+      azblob,
+      file
     },
     deadletter: {
-      provider: 'azblob',
+      provider: 'file',
       clearlyDefined,
-      azblob
+      azblob,
+      file
     },
     queue: {
       provider: 'memory',
