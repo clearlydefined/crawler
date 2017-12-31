@@ -30,7 +30,7 @@ class ScanCodeProcessor extends BaseHandler {
     const file = this._createTempFile(request);
     document._metadata.contentLocation = file.name;
     document._metadata.contentType = 'application/json';
-    this.logger.info(`Running ScanCode on ${request.document.location} with output going to ${file.name}`);
+    this.logger.info(`Analyzing ${request.toString()} using ScanCode. input: ${request.document.location} output: ${file.name}`);
 
     // TODO really run the scan here
     return new Promise((resolve, reject) => {
