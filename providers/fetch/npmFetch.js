@@ -24,12 +24,10 @@ class NpmFetch extends BaseHandler {
   async _fetch(request) {
     const spec = this.toSpec(request);
     // if there is no revision, return an empty doc. The processor will find
-    if (!spec.revision) {
-      const latest = await this._findLatestVersion(request);
-      spec.revision = latest.version;
-      // rewrite the request URL as it is used throughout the system to derive locations and urns etc.
-      request.url = spec.toUrl();
-    }
+    const metadata = await this._getMetadata(request);
+    spec.revision = metadata.version;
+    // rewrite the request URL as it is used throughout the system to derive locations and urns etc.
+    request.url = spec.toUrl();
     const uri = this._buildUrl(spec);
     const file = this._createTempFile(request);
     var options = {
@@ -41,7 +39,7 @@ class NpmFetch extends BaseHandler {
         if (error)
           return reject(error);
         if (response.statusCode === 200) {
-          request.document = this._createDocument(spec, file);
+          request.document = this._createDocument(spec, file, metadata);
           request.contentOrigin = 'origin';
           return resolve(request);
         }
@@ -50,15 +48,16 @@ class NpmFetch extends BaseHandler {
     });
   }
 
-  // query npmjs to find the latest version of the give package
-  async _findLatestVersion(request) {
+  // query npmjs to get the latest and fullest metadata. Turns out that there is somehow more in the
+  // service than in the package manifest in some cases (e.g., lodash).
+  async _getMetadata(request) {
     const spec = this.toSpec(request);
     // Per https://github.com/npm/registry/issues/45 we should retrieve the whole package and get the version we want from that.
     // The version-specific API (e.g. append /x.y.z to URL) does NOT work for scoped packages.
     const baseUrl = providerMap[spec.provider];
     if (!baseUrl)
       throw new Error(`Could not find definition for NPM provider: ${spec.provider}.`)
-    const fullName = `${spec.namespace ? '/' + spec.namespace : ''}${spec.name}`;
+    const fullName = `${spec.namespace ? spec.namespace + '/' : ''}${spec.name}`;
     const packageInfo = await requestPromise({
       url: `${baseUrl}/${encodeURIComponent(fullName).replace('%40', '@')}`, // npmjs doesn't handle the escaped version
       json: true
@@ -66,7 +65,7 @@ class NpmFetch extends BaseHandler {
 
     if (!packageInfo.versions)
       return null;
-    const version = this.getLatestVersion(Object.keys(packageInfo.versions));
+    const version = spec.revision || this.getLatestVersion(Object.keys(packageInfo.versions));
     return {
       packageManifest: packageInfo.versions[version],
       version
@@ -78,8 +77,8 @@ class NpmFetch extends BaseHandler {
     return `${providerMap[spec.provider]}/${fullName}/-/${spec.name}-${spec.revision}.tgz`
   }
 
-  _createDocument(spec, file) {
-    return { id: spec.toUrn(), location: file.name }
+  _createDocument(spec, file, metadata) {
+    return { id: spec.toUrn(), location: file.name, metadata }
   }
 }
 
