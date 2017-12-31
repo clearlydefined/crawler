@@ -20,6 +20,8 @@ class NpmExtract extends BaseHandler {
     return type === 'npm' ? this._process.bind(this) : null;
   }
 
+  // Coming in here we expect the request.document to have id, location and metadata properties.
+  // Do interesting processing...
   async _process(request) {
     const { document, spec } = super._process(request);
     this.addBasicToolLinks(request, spec);
@@ -29,11 +31,11 @@ class NpmExtract extends BaseHandler {
     if (files.length !== 1)
       throw new Error('missing package.json file');
     const manifest = JSON.parse(files[0].data.toString());
-    await this._updateDocument(request, manifest);
+    await this._updateDocument(request, manifest, request.document.metadata.packageManifest);
     return request;
   }
 
-  async _discoverSourceLocation(manifest) {
+  _discoverCandidateSourceLocations(manifest) {
     const candidateUrls = [];
     if (manifest.repository && manifest.repository.url)
       candidateUrls.push(manifest.repository.url);
@@ -43,16 +45,21 @@ class NpmExtract extends BaseHandler {
       candidateUrls.push(manifest.homepage);
     if (manifest.bugs && manifest.bugs.url)
       candidateUrls.push(manifest.bugs.url);
-
-    // TODO lookup source discovery in a set of services that have their own configuration
-    return sourceDiscovery(manifest.version, candidateUrls, { githubToken: this.options.githubToken });
+    return candidateUrls;
   }
 
-  async _updateDocument(request, manifest) {
+  async _discoverSource(version, locations) {
+    // TODO lookup source discovery in a set of services that have their own configuration
+    return sourceDiscovery(version, locations, { githubToken: this.options.githubToken });
+  }
+
+  async _updateDocument(request, manifest, metadata) {
     // setup the manifest to be the new document for the request
-    request.document = { _metadata: request.document._metadata, manifest };
+    request.document = { _metadata: request.document._metadata, manifest, metadata };
     // Add interesting info
-    const sourceInfo = await this._discoverSourceLocation(manifest);
+    const manifestCandidates = this._discoverCandidateSourceLocations(manifest);
+    const metadataCandidates = this._discoverCandidateSourceLocations(metadata);
+    const sourceInfo = await this._discoverSource(metadata.version, [...manifestCandidates, ...metadataCandidates]);
     if (sourceInfo) {
       request.document.sourceInfo = sourceInfo;
       this.linkAndQueue(request, 'source', sourceInfo.toEntitySpec());
