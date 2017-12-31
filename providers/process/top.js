@@ -37,6 +37,8 @@ class TopProcessor extends BaseHandler {
       npm1k((error, list) => {
         if (error)
           return reject(error);
+        const { start, end } = request.document;
+        list = start || end ? list.slice(start || 0, end) : list;
         const requests = list.map(p => {
           let [namespace, name] = p.split('/');
           if (!name) {
