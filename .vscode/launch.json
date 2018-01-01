@@ -11,7 +11,8 @@
         "--nolazy"
       ],
       "env": {
-        "NODE_ENV": "localhost"
+        "NODE_ENV": "localhost",
+        "PORT": "5000"
       }
     },
     {
