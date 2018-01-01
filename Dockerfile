@@ -3,6 +3,8 @@
 
 FROM node:8-alpine
 ENV APPDIR=/opt/service
+RUN apk update && apk upgrade && \
+    apk add --no-cache bash git openssh
 
 COPY package.json /tmp/package.json
 RUN cd /tmp && npm install --production
