@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 const BaseHandler = require('../../lib/baseHandler');
-const Git = require('nodegit');
 const SourceSpec = require('../../lib/sourceSpec');
 
 class GitHubCloner extends BaseHandler {
@@ -27,7 +26,8 @@ class GitHubCloner extends BaseHandler {
     const options = { version: sourceSpec.revision };
     const dir = this._createTempDir(request);
 
-    const repo = await Git.Clone(sourceSpec.url, dir.name, options)
+    // TODO exec the git client here to do the clone and wait for the output
+    // const repo = await Git.Clone(sourceSpec.url, dir.name, options)
 
     request.contentOrigin = 'origin';
     request.document = this._createDocument(dir);
