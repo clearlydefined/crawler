@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 const BaseHandler = require('../../lib/baseHandler');
-const Git = require('nodegit');
+const { exec } = require('child_process');
 const SourceSpec = require('../../lib/sourceSpec');
 
 class GitHubCloner extends BaseHandler {
@@ -27,7 +27,7 @@ class GitHubCloner extends BaseHandler {
     const options = { version: sourceSpec.revision };
     const dir = this._createTempDir(request);
 
-    const repo = await Git.Clone(sourceSpec.url, dir.name, options)
+    await this._cloneRepo(sourceSpec.url, dir.name, options.version);
 
     request.contentOrigin = 'origin';
     request.document = this._createDocument(dir);
@@ -42,6 +42,17 @@ class GitHubCloner extends BaseHandler {
   _toSourceSpec(spec) {
     const url = `https://github.com/${spec.namespace}/${spec.name}.git`
     return new SourceSpec('git', 'github', url, spec.revision);
+  }
+
+  _cloneRepo(sourceUrl, dirName, commit) {
+    return new Promise((resolve, reject) => {
+      exec(`cd ${dirName} && git init && git remote add origin ${sourceUrl} && git fetch origin ${commit} && git reset --hard ${commit}`, (error, stdout, stderr) => {
+        if (error) {
+          return reject(error);
+        }
+        resolve(stdout);
+      });
+    });
   }
 }
 
