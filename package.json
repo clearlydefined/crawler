@@ -5,7 +5,7 @@
   "main": "./index.js",
   "scripts": {
     "start": "node ./run.js",
-    "test": "./node_modules/mocha/bin/mocha test/unit/**/*.js",
+    "test": "node node_modules/eslint/bin/eslint.js . ; ./node_modules/mocha/bin/mocha test/unit/**/*.js",
     "integration": "./node_modules/mocha/bin/mocha test/integration/**/*.js --timeout 20000"
   },
   "keywords": [
@@ -43,6 +43,7 @@
   },
   "devDependencies": {
     "chai": "^3.5.0",
+    "eslint": "^4.14.0",
     "grunt": "^1.0.1",
     "grunt-mocha-test": "^0.13.2",
     "istanbul": "^0.4.5",
