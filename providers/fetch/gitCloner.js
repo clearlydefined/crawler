@@ -30,13 +30,13 @@ class GitHubCloner extends BaseHandler {
     await this._cloneRepo(sourceSpec.url, dir.name, spec.name, options.version);
 
     request.contentOrigin = 'origin';
-    request.document = this._createDocument(dir + '/' + spec.name);
+    request.document = this._createDocument(dir.name + '/' + spec.name);
     return request;
   }
 
   _createDocument(dir) {
     // Create a simple document that records the location of the repo that was fetched
-    return { location: dir.name };
+    return { location: dir };
   }
 
   _toSourceSpec(spec) {
