@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # SPDX-License-Identifier: MIT
 
-FROM node:6-alpine
+FROM node:8-alpine
 ENV APPDIR=/opt/service
 RUN apk update && apk upgrade && \
     apk add --no-cache bash git openssh libcurl curl libgcrypt build-base libgit2-dev python tzdata pkgconfig
