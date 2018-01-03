@@ -27,10 +27,10 @@ class GitHubCloner extends BaseHandler {
     const options = { version: sourceSpec.revision };
     const dir = this._createTempDir(request);
 
-    await this._cloneRepo(sourceSpec.url, dir.name, options.version);
+    await this._cloneRepo(sourceSpec.url, dir.name, spec.name, options.version);
 
     request.contentOrigin = 'origin';
-    request.document = this._createDocument(dir);
+    request.document = this._createDocument(dir + '/' + spec.name);
     return request;
   }
 
@@ -44,9 +44,9 @@ class GitHubCloner extends BaseHandler {
     return new SourceSpec('git', 'github', url, spec.revision);
   }
 
-  _cloneRepo(sourceUrl, dirName, commit) {
+  _cloneRepo(sourceUrl, dirName, specName, commit) {
     return new Promise((resolve, reject) => {
-      exec(`cd ${dirName} && git init && git remote add origin ${sourceUrl} && git fetch origin ${commit} && git reset --hard ${commit}`, (error, stdout, stderr) => {
+      exec(`cd ${dirName} && git clone ${sourceUrl} && cd ${specName} && git reset --hard ${commit}`, (error, stdout, stderr) => {
         if (error) {
           return reject(error);
         }
