@@ -9,8 +9,8 @@ const clearlyDefined = {
 };
 
 const azblob = {
-  connection: config.get('AZURE_BLOB_CONNECTION_STRING'),
-  container: config.get('AZURE_BLOB_CONTAINER')
+  connection: config.get('HARVEST_AZBLOB_CONNECTION_STRING'),
+  container: config.get('HARVEST_AZBLOB_CONTAINER_NAME')
 }
 
 const file = {
@@ -19,6 +19,7 @@ const file = {
 
 module.exports =
   {
+    provider: 'memory',  // change this to redis if/when we want distributed config
     searchPath: [module],
     crawler: {
       count: 1
@@ -42,21 +43,44 @@ module.exports =
       top: {}
     },
     store: {
-      provider: 'file',
+      provider: config.get('CRAWLER_STORE_PROVIDER') || 'file',
       clearlyDefined,
       azblob,
       file
     },
     deadletter: {
-      provider: 'file',
+      provider: config.get('CRAWLER_STORE_PROVIDER') || 'file',
       clearlyDefined,
       azblob,
       file
     },
     queue: {
-      provider: 'memory',
+      provider: config.get('CRAWLER_QUEUE_PROVIDER') || 'memory',
       memory: {
         weights: { immediate: 3, soon: 2, normal: 3, later: 2 }
+      },
+      amqp10: {
+        weights: { immediate: 3, soon: 2, normal: 3, later: 2 },
+        managementEndpoint: "dfdf",
+        url: "dfsf",
+        queueName: config.get('CRAWLER_QUEUE_PREFIX') || "cdcrawler-dev"
+//    TODO possibly some of this stuff here
+//         credit: 100,
+//         messageSize: 240,
+//         parallelPush: 10,
+//         pushRateLimit: 200,
+//         metricsStore: 'redis',
+//         attenuation: {
+//           ttl: 3000
+//         },
+//         tracker: {
+//           ttl: 60 * 60 * 1000
+      }
+    },
+    redis: {
+      // provider: redis
+      redis: {
+        // redis config options go here
       }
     }
   };
