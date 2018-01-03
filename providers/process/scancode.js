@@ -40,8 +40,8 @@ class ScanCodeProcessor extends BaseHandler {
         "-f", this.options.format,
         request.document.location,
         file.name
-      ];
-      exec(`cd ${this.options.installDir} && scancode ${parameters}`, (error, stdout, stderr) => {
+      ].join(' ');
+      exec(`cd ${this.options.installDir} && ./scancode ${parameters}`, (error, stdout, stderr) => {
         if (error || this._hasRealErrors(file.name))
           return reject(error);
         resolve(request);
@@ -68,7 +68,7 @@ class ScanCodeProcessor extends BaseHandler {
     if (toolVersion)
       return toolVersion;
     return new Promise((resolve, reject) => {
-      exec(`cd ${this.options.installDir} && scancode --version`, (error, stdout, stderr) => {
+      exec(`cd ${this.options.installDir} && ./scancode --version`, (error, stdout, stderr) => {
         if (error)
           return reject(error);
         toolVersion = stdout.replace('ScanCode version ', '').trim();
