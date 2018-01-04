@@ -61,20 +61,17 @@ module.exports =
       },
       amqp10: {
         weights: { immediate: 3, soon: 2, normal: 3, later: 2 },
-        managementEndpoint: "dfdf",
-        url: "dfsf",
-        queueName: config.get('CRAWLER_QUEUE_PREFIX') || "cdcrawler-dev"
-//    TODO possibly some of this stuff here
-//         credit: 100,
-//         messageSize: 240,
-//         parallelPush: 10,
-//         pushRateLimit: 200,
-//         metricsStore: 'redis',
-//         attenuation: {
-//           ttl: 3000
-//         },
-//         tracker: {
-//           ttl: 60 * 60 * 1000
+        managementEndpoint: config.get('CRAWLER_SERVICEBUS_MANAGER_ENDPOINT'),
+        url: config.get('CRAWLER_AMQP10_URL'),
+        queueName: config.get('CRAWLER_QUEUE_PREFIX') || 'cdcrawlerdev',
+        credit: 100,
+        messageSize: 240,
+        parallelPush: 10,
+        pushRateLimit: 200,
+        // metricsStore: 'redis',
+        attenuation: {
+          ttl: 3000
+        }
       }
     },
     redis: {
