@@ -64,7 +64,7 @@ module.exports =
         managementEndpoint: config.get('CRAWLER_SERVICEBUS_MANAGER_ENDPOINT'),
         url: config.get('CRAWLER_AMQP10_URL'),
         queueName: config.get('CRAWLER_QUEUE_PREFIX') || 'cdcrawlerdev',
-        credit: 100,
+        credit: 5,
         messageSize: 240,
         parallelPush: 10,
         pushRateLimit: 200,
