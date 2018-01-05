@@ -4,6 +4,7 @@
 const BaseHandler = require('../../lib/baseHandler');
 const { exec } = require('child_process');
 const fs = require('fs');
+const path = require('path');
 
 let toolVersion = null;
 
@@ -41,9 +42,11 @@ class ScanCodeProcessor extends BaseHandler {
         request.document.location,
         file.name
       ].join(' ');
-      exec(`cd ${this.options.installDir} && ./scancode ${parameters}`, (error, stdout, stderr) => {
-        if (error || this._hasRealErrors(file.name))
+      exec(`cd ${this.options.installDir} && .${path.sep}scancode ${parameters}`, (error, stdout, stderr) => {
+        if (error || this._hasRealErrors(file.name)) {
+          request.markDead('Error', error ? error.message : 'ScanCode run failed');
           return reject(error);
+        }
         resolve(request);
       });
     });
@@ -68,7 +71,7 @@ class ScanCodeProcessor extends BaseHandler {
     if (toolVersion)
       return toolVersion;
     return new Promise((resolve, reject) => {
-      exec(`cd ${this.options.installDir} && ./scancode --version`, (error, stdout, stderr) => {
+      exec(`cd ${this.options.installDir} && .${path.sep}scancode --version`, (error, stdout, stderr) => {
         if (error)
           return reject(error);
         toolVersion = stdout.replace('ScanCode version ', '').trim();
