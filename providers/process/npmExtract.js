@@ -5,6 +5,7 @@ const BaseHandler = require('../../lib/baseHandler');
 const decompress = require('decompress');
 const path = require('path');
 const sourceDiscovery = require('../../lib/sourceDiscovery');
+const SourceSpec = require('../../lib/sourceSpec');
 
 class NpmExtract extends BaseHandler {
 
@@ -13,25 +14,32 @@ class NpmExtract extends BaseHandler {
   }
 
   get toolSpec() {
-    return { tool: 'clearlydescribed', toolVersion: 1 };
+    return { tool: 'clearlydescribed', toolVersion: this.schemaVersion };
   }
 
-  getHandler(request, type = request.type) {
-    return type === 'npm' ? this._process.bind(this) : null;
+  canHandle(request, type = request.type) {
+    return type === 'npm' ? this : null;
   }
 
   // Coming in here we expect the request.document to have id, location and metadata properties.
   // Do interesting processing...
-  async _process(request) {
-    const { document, spec } = super._process(request);
-    this.addBasicToolLinks(request, spec);
-    const file = request.document.location;
-    const dir = this._createTempDir(request);
-    const files = await decompress(file, dir.name, { filter: entry => entry.path === 'package/package.json' });
-    if (files.length !== 1)
-      throw new Error('missing package.json file');
-    const manifest = JSON.parse(files[0].data.toString());
-    await this._updateDocument(request, manifest, request.document.metadata.packageManifest);
+  async handle(request) {
+    if (this.isProcessing(request)) {
+      // skip all the hard work if we are just traversing.
+      const { document, spec } = super._process(request);
+      this.addBasicToolLinks(request, spec);
+      const file = request.document.location;
+      const dir = this._createTempDir(request);
+      const files = await decompress(file, dir.name, { filter: entry => entry.path === 'package/package.json' });
+      if (files.length !== 1)
+        throw new Error('missing package.json file');
+      const manifest = JSON.parse(files[0].data.toString());
+      await this._createDocument(request, manifest, request.document.metadata.packageManifest);
+    }
+    if (request.document.sourceInfo) {
+      const sourceSpec = SourceSpec.adopt(request.document.sourceInfo);
+      this.linkAndQueue(request, 'source', sourceSpec.toEntitySpec());
+    }
     return request;
   }
 
@@ -53,17 +61,15 @@ class NpmExtract extends BaseHandler {
     return sourceDiscovery(version, locations, { githubToken: this.options.githubToken });
   }
 
-  async _updateDocument(request, manifest, metadata) {
+  async _createDocument(request, manifest, metadata) {
     // setup the manifest to be the new document for the request
     request.document = { _metadata: request.document._metadata, manifest, metadata };
     // Add interesting info
     const manifestCandidates = this._discoverCandidateSourceLocations(manifest);
     const metadataCandidates = this._discoverCandidateSourceLocations(metadata);
     const sourceInfo = await this._discoverSource(metadata.version, [...manifestCandidates, ...metadataCandidates]);
-    if (sourceInfo) {
+    if (sourceInfo)
       request.document.sourceInfo = sourceInfo;
-      this.linkAndQueue(request, 'source', sourceInfo.toEntitySpec());
-    }
   }
 }
 

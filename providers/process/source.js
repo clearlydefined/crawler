@@ -10,16 +10,16 @@ class SourceProcessor extends BaseHandler {
   }
 
   get toolSpec() {
-    return { tool: 'clearlydescribed', toolVersion: 1 };
+    return { tool: 'clearlydescribed', toolVersion: this.schemaVersion };
   }
 
-  getHandler(request, type = request.type) {
+  canHandle(request, type = request.type) {
     const spec = this.toSpec(request);
     // if there is no tool and it is a source related request, it's for us
-    return (!spec.tool && ['git'].includes(type)) ? this._process.bind(this) : null;
+    return !spec.tool && ['git'].includes(type);
   }
 
-  _process(request) {
+  handle(request) {
     const { document, spec } = super._process(request);
     this.addBasicToolLinks(request, spec);
     this.linkAndQueueTool(request, 'scancode', 'scancode');
