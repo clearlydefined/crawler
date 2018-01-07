@@ -24,7 +24,13 @@ module.exports =
     crawler: {
       count: 1
     },
+    filter: {
+      provider: 'filter',
+      filter: {}
+    },
     fetch: {
+      dispatcher: 'cdDispatch',
+      cdDispatch: {},
       git: {},
       npm: {}
     },

@@ -6,26 +6,32 @@ const { exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-let toolVersion = null;
+let _toolVersion;
 
 class ScanCodeProcessor extends BaseHandler {
 
+  constructor(options) {
+    super(options);
+    // TODO little questionable here. Kick off an async operation on load with the expecation that
+    // by the time someone actually uses this instance, the call will have completed.
+    // Need to detect the tool version before anyone tries to run this processor.
+    this._detectVersion();
+  }
+
   get schemaVersion() {
-    return 1;
+    return _toolVersion;
   }
 
   get toolSpec() {
-    return { tool: 'scancode', toolVersion };
+    return { tool: 'scancode', toolVersion: this.schemaVersion };
   }
 
-  getHandler(request) {
+  canHandle(request) {
     const spec = this.toSpec(request);
-    return spec && spec.tool === 'scancode' ? this._process.bind(this) : null;
+    return spec && spec.tool === 'scancode';
   }
 
-  async _process(request) {
-    // need to do this first so the urns have the right version.
-    await this._detectVersion();
+  async handle(request) {
     const { document, spec } = super._process(request);
     this.addBasicToolLinks(request, spec);
     const file = this._createTempFile(request);
@@ -39,8 +45,8 @@ class ScanCodeProcessor extends BaseHandler {
         "--timeout", this.options.timeout.toString(),
         "-n", this.options.processes.toString(),
         "-f", this.options.format,
-        request.document.location,
-        file.name
+      request.document.location,
+      file.name
       ].join(' ');
       exec(`cd ${this.options.installDir} && .${path.sep}scancode ${parameters}`, (error, stdout, stderr) => {
         if (error || this._hasRealErrors(file.name)) {
@@ -67,15 +73,15 @@ class ScanCodeProcessor extends BaseHandler {
     return newSpec.toUrn();
   }
 
-  async _detectVersion() {
-    if (toolVersion)
-      return toolVersion;
+  _detectVersion() {
+    if (_toolVersion)
+      return _toolVersion;
     return new Promise((resolve, reject) => {
       exec(`cd ${this.options.installDir} && .${path.sep}scancode --version`, (error, stdout, stderr) => {
         if (error)
           return reject(error);
-        toolVersion = stdout.replace('ScanCode version ', '').trim();
-        resolve(toolVersion);
+        _toolVersion = stdout.replace('ScanCode version ', '').trim();
+        resolve(_toolVersion);
       });
     });
   }

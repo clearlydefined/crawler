@@ -2,7 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 module.exports = {
+  filter: {
+    provider: 'filter',
+    filter: require('./filter/filter')
+  },
   fetch: {
+    cdDispatch: require('./fetch/dispatcher'),
     git: require('./fetch/gitCloner'),
     npm: require('./fetch/npmFetch')
   },

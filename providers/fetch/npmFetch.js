@@ -12,16 +12,12 @@ const providerMap = {
 
 class NpmFetch extends BaseHandler {
 
-  get schemaVersion() {
-    return 1;
-  }
-
-  getHandler(request, type = request.type) {
+  canHandle(request, type = request.type) {
     const spec = this.toSpec(request);
-    return spec && spec.type === 'npm' ? this._fetch.bind(this) : null;
+    return spec && spec.type === 'npm';
   }
 
-  async _fetch(request) {
+  async handle(request) {
     const spec = this.toSpec(request);
     // if there is no revision, return an empty doc. The processor will find
     const metadata = await this._getMetadata(request);
@@ -32,7 +28,7 @@ class NpmFetch extends BaseHandler {
     const file = this._createTempFile(request);
     var options = {
       method: 'GET',
-      uri,
+      uri
     };
     return new Promise((resolve, reject) => {
       nodeRequest(options, (error, response, body) => {
