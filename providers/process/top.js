@@ -16,9 +16,8 @@ class TopProcessor extends BaseHandler {
   }
 
   canHandle(request, type = request.type) {
-    const spec = this.toSpec(request);
     // if there is no tool and it is a source related request, it's for us
-    return spec.tool === 'top';
+    return type === 'top';
   }
 
   handle(request) {

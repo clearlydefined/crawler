@@ -12,7 +12,7 @@ const providerMap = {
 
 class NpmFetch extends BaseHandler {
 
-  canHandle(request, type = request.type) {
+  canHandle(request) {
     const spec = this.toSpec(request);
     return spec && spec.type === 'npm';
   }

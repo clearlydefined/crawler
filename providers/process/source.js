@@ -16,7 +16,7 @@ class SourceProcessor extends BaseHandler {
   canHandle(request, type = request.type) {
     const spec = this.toSpec(request);
     // if there is no tool and it is a source related request, it's for us
-    return !spec.tool && ['git'].includes(type);
+    return type === 'source' && !spec.tool && ['git'].includes(spec.type);
   }
 
   handle(request) {
