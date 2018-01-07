@@ -13,7 +13,7 @@ class FetchDispatcher extends BaseHandler {
     this.filter = filter;
   }
 
-  canHandle(request, type = request.type) {
+  canHandle(request) {
     // handle all fetch requests
     return true;
   }

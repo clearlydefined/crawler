@@ -7,7 +7,7 @@ const SourceSpec = require('../../lib/sourceSpec');
 
 class GitHubCloner extends BaseHandler {
 
-  canHandle(request, type = request.type) {
+  canHandle(request) {
     const spec = this.toSpec(request);
     return spec && spec.type === 'git';
   }
