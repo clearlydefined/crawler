@@ -7,20 +7,17 @@ const SourceSpec = require('../../lib/sourceSpec');
 
 class GitHubCloner extends BaseHandler {
 
-  get schemaVersion() {
-    return 1;
-  }
-
-  getHandler(request, type = request.type) {
+  canHandle(request, type = request.type) {
     const spec = this.toSpec(request);
-    return spec && spec.type === 'git' ? this._fetch.bind(this) : null;
+    return spec && spec.type === 'git';
   }
 
-  async _fetch(request) {
+  async handle(request) {
     const spec = this.toSpec(request);
     if (!spec.tool) {
       // shortcut. if there is no tool to run then no need to get the repo
       request.document = {};
+      request.contentOrigin = 'origin';
       return request;
     }
     const sourceSpec = this._toSourceSpec(spec);
