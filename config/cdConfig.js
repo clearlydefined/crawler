@@ -22,8 +22,7 @@ module.exports =
     provider: 'memory',  // change this to redis if/when we want distributed config
     searchPath: [module],
     crawler: {
-      count: 1,
-      drainPulse: 1
+      count: 1
     },
     filter: {
       provider: 'filter',
