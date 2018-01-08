@@ -21,7 +21,10 @@ class FetchDispatcher extends BaseHandler {
   async handle(request) {
     const start = Date.now();
     try {
-      const documentKey = this._getDocumentKey(request);
+      const processor = this._getProcessor(request);
+      if (!processor.shouldFetch(request))
+        return request.markNoSave();
+      const documentKey = processor.getUrnFor(request);
       const document = await this.store.get(request.type, documentKey);
       if (!document)
         return this._fetchMissing(request);
@@ -36,11 +39,11 @@ class FetchDispatcher extends BaseHandler {
     }
   }
 
-  _getDocumentKey(request) {
+  _getProcessor(request) {
     const processors = this._getHandlers(request, this.processors);
     if (processors.length !== 1)
       throw new Error(`Wrong number of processors for ${request.toString()}: ${processors.length}`);
-    return processors[0].getUrnFor(request);
+    return processors[0];
   }
 
   async _fetchMissing(request) {
