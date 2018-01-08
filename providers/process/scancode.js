@@ -27,8 +27,7 @@ class ScanCodeProcessor extends BaseHandler {
   }
 
   canHandle(request) {
-    const spec = this.toSpec(request);
-    return spec && spec.tool === 'scancode';
+    return request.type === 'scancode';
   }
 
   async handle(request) {

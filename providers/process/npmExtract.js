@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 const BaseHandler = require('../../lib/baseHandler');
-const decompress = require('decompress');
+const fs = require('fs');
 const path = require('path');
 const sourceDiscovery = require('../../lib/sourceDiscovery');
 const SourceSpec = require('../../lib/sourceSpec');
@@ -17,8 +17,9 @@ class NpmExtract extends BaseHandler {
     return { tool: 'clearlydescribed', toolVersion: this.schemaVersion };
   }
 
-  canHandle(request, type = request.type) {
-    return type === 'npm' ? this : null;
+  canHandle(request) {
+    const spec = this.toSpec(request);
+    return request.type === 'npm' && spec && spec.type === 'npm';
   }
 
   // Coming in here we expect the request.document to have id, location and metadata properties.
@@ -28,14 +29,12 @@ class NpmExtract extends BaseHandler {
       // skip all the hard work if we are just traversing.
       const { document, spec } = super._process(request);
       this.addBasicToolLinks(request, spec);
-      const file = request.document.location;
-      const dir = this._createTempDir(request);
-      const files = await decompress(file, dir.name, { filter: entry => entry.path === 'package/package.json' });
-      if (files.length !== 1)
-        throw new Error('missing package.json file');
-      const manifest = JSON.parse(files[0].data.toString());
+      const dir = request.document.location;
+      const manifestContent = fs.readFileSync(path.join(dir, 'package/package.json'));
+      const manifest = JSON.parse(manifestContent);
       await this._createDocument(request, manifest, request.document.metadata.packageManifest);
     }
+    this.linkAndQueueTool(request, 'scancode');
     if (request.document.sourceInfo) {
       const sourceSpec = SourceSpec.adopt(request.document.sourceInfo);
       this.linkAndQueue(request, 'source', sourceSpec.toEntitySpec());
