@@ -5,6 +5,7 @@ const BaseHandler = require('../../lib/baseHandler');
 const nodeRequest = require('request');
 const requestPromise = require('request-promise-native');
 const fs = require('fs');
+const decompress = require('decompress');
 
 const providerMap = {
   npmjs: "https://registry.npmjs.org"
@@ -14,7 +15,7 @@ class NpmFetch extends BaseHandler {
 
   canHandle(request) {
     const spec = this.toSpec(request);
-    return spec && spec.type === 'npm';
+    return spec && spec.provider === 'npmjs';
   }
 
   async handle(request) {
@@ -24,8 +25,17 @@ class NpmFetch extends BaseHandler {
     spec.revision = metadata.version;
     // rewrite the request URL as it is used throughout the system to derive locations and urns etc.
     request.url = spec.toUrl();
-    const uri = this._buildUrl(spec);
     const file = this._createTempFile(request);
+    await this._getPackage(spec, file.name);
+    const dir = this._createTempDir(request);
+    await decompress(file.name, dir.name);
+    request.document = this._createDocument(spec, dir, metadata);
+    request.contentOrigin = 'origin';
+    return request;
+  }
+
+  async _getPackage(spec, destination) {
+    const uri = this._buildUrl(spec);
     var options = {
       method: 'GET',
       uri
@@ -34,13 +44,10 @@ class NpmFetch extends BaseHandler {
       nodeRequest(options, (error, response, body) => {
         if (error)
           return reject(error);
-        if (response.statusCode === 200) {
-          request.document = this._createDocument(spec, file, metadata);
-          request.contentOrigin = 'origin';
-          return resolve(request);
-        }
+        if (response.statusCode === 200)
+          return resolve(null);
         reject(new Error(`${response.statusCode} ${response.statusMessage}`))
-      }).pipe(fs.createWriteStream(file.name));
+      }).pipe(fs.createWriteStream(destination));
     });
   }
 

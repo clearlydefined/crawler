@@ -15,19 +15,19 @@ class TopProcessor extends BaseHandler {
     return { tool: 'toploader', toolVersion: this.schemaVersion };
   }
 
-  canHandle(request, type = request.type) {
-    // if there is no tool and it is a source related request, it's for us
-    return type === 'top';
+  canHandle(request) {
+    const spec = this.toSpec(request);
+    return request.type === 'top' && spec && spec.provider === 'npmjs';
   }
 
   handle(request) {
     const { document, spec } = super._process(request);
     this.addBasicToolLinks(request, spec);
-    switch (spec.type) {
-      case 'npm':
+    switch (spec.provider) {
+      case 'npmjs':
         return this._processTopNpms(request);
       default:
-        return request;
+        throw new Error(`Unknown provider type for 'top' request: ${spec.provider}`);
     }
   }
 

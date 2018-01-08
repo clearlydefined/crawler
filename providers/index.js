@@ -9,9 +9,10 @@ module.exports = {
   fetch: {
     cdDispatch: require('./fetch/dispatcher'),
     git: require('./fetch/gitCloner'),
-    npm: require('./fetch/npmFetch')
+    npmjs: require('./fetch/npmjsFetch')
   },
   process: {
+    package: require('./process/package'),
     source: require('./process/source'),
     scancode: require('./process/scancode'),
     npm: require('./process/npmExtract'),

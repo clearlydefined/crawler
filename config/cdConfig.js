@@ -33,9 +33,10 @@ module.exports =
       dispatcher: 'cdDispatch',
       cdDispatch: {},
       git: {},
-      npm: {}
+      npmjs: {}
     },
     process: {
+      package: {},
       source: {},
       scancode: {
         installDir: config.get('SCANCODE_HOME') || 'C:\\installs\\scancode-toolkit-2.2.1',

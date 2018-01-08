@@ -3,7 +3,7 @@
 
 const BaseHandler = require('../../lib/baseHandler');
 
-class SourceProcessor extends BaseHandler {
+class PackageProcessor extends BaseHandler {
 
   get schemaVersion() {
     return 1;
@@ -19,15 +19,16 @@ class SourceProcessor extends BaseHandler {
 
   canHandle(request) {
     const spec = this.toSpec(request);
-    return request.type === 'source' && spec && ['git'].includes(spec.type);
+    return request.type === 'package' && spec && ['npm'].includes(spec.type);
   }
 
   handle(request) {
     const { document, spec } = super._process(request);
     this.addBasicToolLinks(request, spec);
-    this.linkAndQueueTool(request, 'scancode');
-    return document;
+    this.linkAndQueueTool(request, spec.type);
+    request.markNoSave();
+    return request;
   }
 }
 
-module.exports = options => new SourceProcessor(options);
+module.exports = options => new PackageProcessor(options);
