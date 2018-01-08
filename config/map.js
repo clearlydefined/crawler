@@ -10,25 +10,40 @@ function neighbors() {
 
 const scancode = self;
 
+// default ClearlyDefined tool
+const cd = self;
+
 const source = {
   _type: 'source',
-  scancode
+  scancode,
+  cd
 }
 
 const npm = {
   _type: 'npm',
-  source
+  source,
+  scancode,
+  cd
 };
 
 const maven = {
   _type: 'maven',
-  source
+  source,
+  cd
+};
+
+const package = {
+  _type: 'package',
+  npm,
+  maven
 };
 
 const entities = {
   self,
   neighbors,
   source,
+  package,
+  cd,
   scancode,
   npm,
   maven

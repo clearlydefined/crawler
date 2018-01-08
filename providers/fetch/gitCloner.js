@@ -5,21 +5,15 @@ const BaseHandler = require('../../lib/baseHandler');
 const { exec } = require('child_process');
 const SourceSpec = require('../../lib/sourceSpec');
 
-class GitHubCloner extends BaseHandler {
+class GitCloner extends BaseHandler {
 
-  canHandle(request, type = request.type) {
+  canHandle(request) {
     const spec = this.toSpec(request);
-    return spec && spec.type === 'git';
+    return request.type !== 'source' && spec && spec.type === 'git';
   }
 
   async handle(request) {
     const spec = this.toSpec(request);
-    if (!spec.tool) {
-      // shortcut. if there is no tool to run then no need to get the repo
-      request.document = {};
-      request.contentOrigin = 'origin';
-      return request;
-    }
     const sourceSpec = this._toSourceSpec(spec);
     const options = { version: sourceSpec.revision };
     const dir = this._createTempDir(request);
@@ -53,4 +47,4 @@ class GitHubCloner extends BaseHandler {
   }
 }
 
-module.exports = options => new GitHubCloner(options);
+module.exports = options => new GitCloner(options);

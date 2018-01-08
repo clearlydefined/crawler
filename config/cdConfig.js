@@ -22,7 +22,8 @@ module.exports =
     provider: 'memory',  // change this to redis if/when we want distributed config
     searchPath: [module],
     crawler: {
-      count: 1
+      count: 1,
+      drainPulse: 1
     },
     filter: {
       provider: 'filter',
@@ -32,9 +33,10 @@ module.exports =
       dispatcher: 'cdDispatch',
       cdDispatch: {},
       git: {},
-      npm: {}
+      npmjs: {}
     },
     process: {
+      package: {},
       source: {},
       scancode: {
         installDir: config.get('SCANCODE_HOME') || 'C:\\installs\\scancode-toolkit-2.2.1',
