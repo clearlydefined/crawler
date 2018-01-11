@@ -1,0 +1,6 @@
+language: node_js
+# node version specified in .nvmrc
+
+cache:
+  directories:
+    - "node_modules"
