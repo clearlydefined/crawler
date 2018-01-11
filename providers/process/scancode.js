@@ -34,8 +34,6 @@ class ScanCodeProcessor extends BaseHandler {
     const { document, spec } = super._process(request);
     this.addBasicToolLinks(request, spec);
     const file = this._createTempFile(request);
-    document._metadata.contentLocation = file.name;
-    document._metadata.contentType = 'application/json';
     this.logger.info(`Analyzing ${request.toString()} using ScanCode. input: ${request.document.location} output: ${file.name}`);
 
     // TODO really run the scan here
@@ -52,6 +50,8 @@ class ScanCodeProcessor extends BaseHandler {
           request.markDead('Error', error ? error.message : 'ScanCode run failed');
           return reject(error);
         }
+        document._metadata.contentLocation = file.name;
+        document._metadata.contentType = 'application/json';
         resolve(request);
       });
     });
