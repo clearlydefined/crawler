@@ -28,8 +28,9 @@ class NpmFetch extends BaseHandler {
     const file = this._createTempFile(request);
     await this._getPackage(spec, file.name);
     const dir = this._createTempDir(request);
-    await decompress(file.name, dir.name);
-    request.document = this._createDocument(spec, dir, metadata);
+    const files = await decompress(file.name, dir.name);
+    const sizeInBytes = files.map(file => file.data.length).reduce((previousValue, currentValue) => previousValue + currentValue);
+    request.document = this._createDocument(spec, dir, Math.round(sizeInBytes / 1024), metadata);
     request.contentOrigin = 'origin';
     return request;
   }
@@ -41,7 +42,7 @@ class NpmFetch extends BaseHandler {
       uri
     };
     return new Promise((resolve, reject) => {
-      nodeRequest(options, (error, response, body) => {
+      nodeRequest(options, (error, response) => {
         if (error)
           return reject(error);
         if (response.statusCode === 200)
@@ -80,8 +81,8 @@ class NpmFetch extends BaseHandler {
     return `${providerMap[spec.provider]}/${fullName}/-/${spec.name}-${spec.revision}.tgz`
   }
 
-  _createDocument(spec, file, metadata) {
-    return { id: spec.toUrn(), location: file.name, metadata }
+  _createDocument(spec, file, sizeInKb, metadata) {
+    return { id: spec.toUrn(), location: file.name, sizeInKb, metadata }
   }
 }
 

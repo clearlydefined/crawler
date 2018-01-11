@@ -39,9 +39,9 @@ class ScanCodeProcessor extends BaseHandler {
     // TODO really run the scan here
     return new Promise((resolve, reject) => {
       const parameters = [...this.options.options,
-        "--timeout", this.options.timeout.toString(),
-        "-n", this.options.processes.toString(),
-        "-f", this.options.format,
+        '--timeout', this.options.timeout.toString(),
+        '-n', this.options.processes.toString(),
+        '-f', this.options.format,
       request.document.location,
       file.name
       ].join(' ');
