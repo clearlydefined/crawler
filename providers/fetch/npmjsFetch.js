@@ -41,7 +41,7 @@ class NpmFetch extends BaseHandler {
       uri
     };
     return new Promise((resolve, reject) => {
-      nodeRequest(options, (error, response, body) => {
+      nodeRequest(options, (error, response) => {
         if (error)
           return reject(error);
         if (response.statusCode === 200)

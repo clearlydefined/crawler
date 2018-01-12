@@ -18,16 +18,16 @@ class GitCloner extends BaseHandler {
     const options = { version: sourceSpec.revision };
     const dir = this._createTempDir(request);
 
-    await this._cloneRepo(sourceSpec.url, dir.name, spec.name, options.version);
+    const repoSize = await this._cloneRepo(sourceSpec.url, dir.name, spec.name, options.version);
 
     request.contentOrigin = 'origin';
-    request.document = this._createDocument(dir.name + '/' + spec.name);
+    request.document = this._createDocument(dir.name + '/' + spec.name, repoSize);
     return request;
   }
 
-  _createDocument(dir) {
-    // Create a simple document that records the location of the repo that was fetched
-    return { location: dir };
+  _createDocument(dir, size) {
+    // Create a simple document that records the location and the size of the repo that was fetched
+    return { location: dir, size };
   }
 
   _toSourceSpec(spec) {
@@ -37,13 +37,17 @@ class GitCloner extends BaseHandler {
 
   _cloneRepo(sourceUrl, dirName, specName, commit) {
     return new Promise((resolve, reject) => {
-      exec(`cd ${dirName} && git clone ${sourceUrl} && cd ${specName} && git reset --hard ${commit}`, (error, stdout, stderr) => {
+      exec(`cd ${dirName} && git clone ${sourceUrl} --quiet && cd ${specName} && git reset --hard ${commit} --quiet && git count-objects -v`, (error, stdout) => {
         if (error) {
           return reject(error);
         }
-        resolve(stdout);
+        resolve(this._getRepoSize(stdout));
       });
     });
+  }
+
+  _getRepoSize(gitCountObjectsResult = '') { // ...\nsize-pack: 3\n... (in KB)
+    return Number(gitCountObjectsResult.match('size-pack: (.*)\n')[1]);
   }
 }
 
