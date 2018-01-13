@@ -40,6 +40,7 @@ class ScanCodeProcessor extends BaseHandler {
         await vstsBuild.queueBuild(document, spec, request.url);
       } catch (error) {
         this.logger.error(error, `${request.toString()} - error queueing build`);
+        return request.markRequeue('VSTS', 'Error queueing build');
       }
       return request.markNoSave();
     }

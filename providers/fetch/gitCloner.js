@@ -19,6 +19,7 @@ class GitCloner extends BaseHandler {
     const dir = this._createTempDir(request);
 
     const repoSize = await this._cloneRepo(sourceSpec.url, dir.name, spec.name, options.version);
+    request.addMeta({ gitSize: repoSize });
 
     request.contentOrigin = 'origin';
     request.document = this._createDocument(dir.name + '/' + spec.name, repoSize);
