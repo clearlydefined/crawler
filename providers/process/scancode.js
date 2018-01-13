@@ -5,6 +5,7 @@ const BaseHandler = require('../../lib/baseHandler');
 const { exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const VstsBuild = require('../../lib/build/vsts');
 
 let _toolVersion;
 
@@ -32,11 +33,21 @@ class ScanCodeProcessor extends BaseHandler {
 
   async handle(request) {
     const { document, spec } = super._process(request);
+    if (document.size && document.size > this.options.maxSize) {
+      this.logger.info(`Analyzing ${request.toString()} using ScanCode in VSTS build. Repo size: ${document.size} KB.`);
+      try {
+        const vstsBuild = new VstsBuild(this.options.build);
+        await vstsBuild.queueBuild(document, spec, request.url);
+      } catch (error) {
+        this.logger.error(error, `${request.toString()} - error queueing build`);
+        return request.markRequeue('VSTS', 'Error queueing build');
+      }
+      return request.markNoSave();
+    }
     this.addBasicToolLinks(request, spec);
     const file = this._createTempFile(request);
     this.logger.info(`Analyzing ${request.toString()} using ScanCode. input: ${request.document.location} output: ${file.name}`);
 
-    // TODO really run the scan here
     return new Promise((resolve, reject) => {
       const parameters = [...this.options.options,
         '--timeout', this.options.timeout.toString(),
