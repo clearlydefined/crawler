@@ -58,6 +58,9 @@ module.exports =
       npm: {
         githubToken: config.get('CRAWLER_GITHUB_TOKEN')
       },
+      vsts: {
+        apiToken: config.get('VSTS_API_TOKEN')
+      },
       top: {}
     },
     store: {

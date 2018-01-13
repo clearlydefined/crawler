@@ -16,6 +16,7 @@ module.exports = {
     source: require('./process/source'),
     scancode: require('./process/scancode'),
     npm: require('./process/npmExtract'),
+    vsts: require('./process/vsts'),
     top: require('./process/top')
   },
   store: {
