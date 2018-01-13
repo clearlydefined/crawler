@@ -28,7 +28,7 @@ class VstsProcessor extends BaseHandler {
   }
 
   get authToken() {
-    return 'Basic ' + new Buffer(this.options.apiToken + ':', 'utf8').toString('base64'); // TODO
+    return 'Basic ' + new Buffer(this.options.apiToken + ':', 'utf8').toString('base64');
   }
 
   canHandle(request) {
