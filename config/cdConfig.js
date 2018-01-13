@@ -42,7 +42,18 @@ module.exports =
         options: ['--copyright', '--license', '--info', '--diag', '--only-findings', ' --strip-root', '--quiet'],
         timeout: 300,
         processes: 3,
-        format: 'json-pp'
+        format: 'json-pp',
+        maxSize: 1000 * 1024, // (TODO: decrease) Maximum repo size in KB after which scancode would run in build and not directly in crawler
+        build: {
+          crawlerUrl: config.get('CRAWLER_SERVICE_URL') || 'http://localhost:5000',
+          crawlerAuthToken: config.get('CRAWLER_SERVICE_AUTH_TOKEN') || 'secret',
+          vsts: {
+            collectionUrl: config.get('VSTS_BUILD_COLLECTION_URL') || 'https://clearlydefined.visualstudio.com/DefaultCollection',
+            apiToken: config.get('VSTS_API_TOKEN'),
+            project: config.get('VSTS_BUILD_PROJECT_NAME') || 'ClearlyDefined',
+            definitionName: config.get('VSTS_BUILD_DEFINITION_NAME') || 'Run scancode'
+          }
+        }
       },
       npm: {
         githubToken: config.get('CRAWLER_GITHUB_TOKEN')
