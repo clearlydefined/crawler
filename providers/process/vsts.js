@@ -6,18 +6,11 @@ const decompress = require('decompress');
 const fs = require('fs');
 const nodeRequest = require('request');
 const path = require('path');
+const { promisify } = require('util');
 
-let _toolVersion = '2.2.1'; // TODO
+let _toolVersion;
 
 class VstsProcessor extends BaseHandler {
-
-  constructor(options) {
-    super(options);
-    // TODO little questionable here. Kick off an async operation on load with the expecation that
-    // by the time someone actually uses this instance, the call will have completed.
-    // Need to detect the tool version before anyone tries to run this processor.
-    // this._detectVersion();
-  }
 
   get schemaVersion() {
     return _toolVersion;
@@ -32,6 +25,7 @@ class VstsProcessor extends BaseHandler {
   }
 
   canHandle(request) {
+    _toolVersion = request.document.toolVersion || '2.2.1';
     return request.type === 'ingest-vsts';
   }
 
@@ -43,9 +37,16 @@ class VstsProcessor extends BaseHandler {
     await this._getBuildOutput(document.buildOutput, file.name);
     const dir = this._createTempDir(request);
     await decompress(file.name, dir.name, { strip: 1 });
-    document._metadata.contentLocation = `${dir.name}${path.sep}scancode-${_toolVersion}.json`;
-    document._metadata.contentType = 'application/json';
-    return request;
+    try {
+      const scancodeFilePath = `${dir.name}${path.sep}scancode.json`;
+      await promisify(fs.access)(scancodeFilePath);
+      document._metadata.contentLocation = scancodeFilePath;
+      document._metadata.contentType = 'application/json';
+      return request;
+    } catch (error) {
+      const buildError = (await promisify(fs.readFile)(`${dir.name}${path.sep}error.json`)).toString();
+      throw new Error(JSON.parse(buildError).error);
+    }
   }
 
   _getBuildOutput(outputUrl, destination) {
