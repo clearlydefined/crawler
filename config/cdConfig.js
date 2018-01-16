@@ -43,7 +43,7 @@ module.exports =
         timeout: 300,
         processes: 3,
         format: 'json-pp',
-        maxSize: 1000 * 1024, // (TODO: decrease) Maximum repo size in KB after which scancode would run in build and not directly in crawler
+        maxSize: 50 * 1024, // Maximum repo size in KB after which scancode would run in build and not directly in crawler
         build: {
           crawlerUrl: config.get('CRAWLER_SERVICE_URL') || 'http://localhost:5000',
           crawlerAuthToken: config.get('CRAWLER_SERVICE_AUTH_TOKEN') || 'secret',
@@ -51,7 +51,10 @@ module.exports =
             collectionUrl: config.get('VSTS_BUILD_COLLECTION_URL') || 'https://clearlydefined.visualstudio.com/DefaultCollection',
             apiToken: config.get('VSTS_API_TOKEN'),
             project: config.get('VSTS_BUILD_PROJECT_NAME') || 'ClearlyDefined',
-            definitionName: config.get('VSTS_BUILD_DEFINITION_NAME') || 'Run scancode'
+            definitionName: config.get('VSTS_BUILD_DEFINITION_NAME') || 'Run scancode',
+            emptyRepoUrl: config.get('VSTS_REPO') || 'https://clearlydefined.visualstudio.com/_git/ClearlyDefined',
+            azureSubscriptionEndpoint: config.get('VSTS_AZURE_SUBSCRIPTION_ENDPOINT'),
+            azureContainerRegistry: config.get('VSTS_AZURE_CONTAINER_REGISTRY')
           }
         }
       },
