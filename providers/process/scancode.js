@@ -37,7 +37,8 @@ class ScanCodeProcessor extends BaseHandler {
       this.logger.info(`Analyzing ${request.toString()} using ScanCode in VSTS build. Repo size: ${document.size} KB.`);
       try {
         const vstsBuild = new VstsBuild(this.options.build);
-        await vstsBuild.queueBuild(document, spec, request.url);
+        const build = await vstsBuild.queueBuild(document, spec, request.url);
+        this.logger.info(`Queued VSTS build ${build.id}`, { url: build._links.web.href });
       } catch (error) {
         this.logger.error(error, `${request.toString()} - error queueing build`);
         return request.markRequeue('VSTS', 'Error queueing build');
