@@ -8,7 +8,7 @@ const fs = require('fs');
 const decompress = require('decompress');
 
 const providerMap = {
-  npmjs: "https://registry.npmjs.org"
+  npmjs: "https://registry.npmjs.com"
 }
 
 class NpmFetch extends BaseHandler {
