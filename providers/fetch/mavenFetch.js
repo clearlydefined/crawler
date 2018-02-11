@@ -14,7 +14,7 @@ class MavenFetch extends BaseHandler {
 
   canHandle(request) {
     const spec = this.toSpec(request);
-    return request.type === 'maven' && spec && spec.provider === 'maven-central';
+    return request.type === 'maven' && spec && spec.provider === 'mavenCentral';
   }
 
   async handle(request) {
@@ -51,8 +51,8 @@ class MavenFetch extends BaseHandler {
   // query maven to get the latest version if we don't already have that.
   async _getMetadata(request) {
     const spec = this.toSpec(request);
-    if (spec.version)
-      return { version: spec.version }
+    if (spec.revision)
+      return { version: spec.revision }
     const url = `https://search.maven.org/solrsearch/select?q=g:"${spec.namespace}"+AND+a:"${spec.name}"&rows=1&wt=json`;
     const packageInfo = await requestPromise({ url, json: true });
     if (!packageInfo.response.docs.length === 0)
@@ -61,8 +61,8 @@ class MavenFetch extends BaseHandler {
   }
 
   _buildUrl(spec) {
-    const fullName = `${spec.namespace}/${spec.name}`;
-    return `${providerMap[spec.provider]}/${fullName}-${spec.revision}.pom`
+    const fullName = `${spec.namespace}/${spec.name}`.replace(/\./g, '/');
+    return `${providerMap[spec.provider]}${fullName}/${spec.revision}/${spec.name}-${spec.revision}.pom`
   }
 
   _createDocument(spec, file) {

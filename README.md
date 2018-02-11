@@ -38,7 +38,7 @@ cd:/type/provider/namespace/name/revision
 
 Where the segments are:
 * type -- the type of the component to be crawled. For exammple, npm, git, nuget, maven, ... This talks about the *shape* of the component.
-* provider -- where the component can be found. Examples include npmjs, maven-central, github, nuget, ...
+* provider -- where the component can be found. Examples include npmjs, mavenCentral, github, nuget, ...
 * namespace -- many component systems have namespaces. GitHub orgs, NPM namespace, Maven group id, ... This segment must be supplied. If your component does not have a namespace, use '-' (ASCII hyphen).
 * name -- the name of the component you want to crawl. Given the `namespace` segment mentioned above, this is just the simple name.
 * revision -- components typically have some differentiator like a version or commit id. Use that here. If this segment is omitted, the latest revision is used (if that makes sense for the provider).
