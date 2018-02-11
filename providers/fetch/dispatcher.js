@@ -20,11 +20,11 @@ class FetchDispatcher extends BaseHandler {
 
   async handle(request) {
     const start = Date.now();
+    const processor = this._getProcessor(request);
+    if (!processor.shouldFetch(request))
+      return request.markNoSave();
+    const documentKey = processor.getUrnFor(request);
     try {
-      const processor = this._getProcessor(request);
-      if (!processor.shouldFetch(request))
-        return request.markNoSave();
-      const documentKey = processor.getUrnFor(request);
       const document = await this.store.get(request.type, documentKey);
       if (!document)
         return this._fetchMissing(request);
@@ -33,17 +33,17 @@ class FetchDispatcher extends BaseHandler {
       request.document = document;
       request.contentOrigin = 'storage';
       return this._dispatchFetch(request);
-    } catch (erorr) {
+    } catch (error) {
       // TODO eating the error here. at least log
       return this._fetchMissing(request);
     }
   }
 
   _getProcessor(request) {
-    const processors = this._getHandlers(request, this.processors);
-    if (processors.length !== 1)
-      throw new Error(`Wrong number of processors for ${request.toString()}: ${processors.length}`);
-    return processors[0];
+    const processor = this._getHandler(request, this.processors);
+    if (!processor)
+      throw new Error(`No processor found for ${request.toString()}`);
+    return processor;
   }
 
   async _fetchMissing(request) {
@@ -57,15 +57,17 @@ class FetchDispatcher extends BaseHandler {
   async _dispatchFetch(request, force = false) {
     if (!force && this.filter && !this.filter.shouldFetch(request))
       return request;
-    // get the right real fetcher(s) for this request and dispatch
-    const handlers = this._getHandlers(request, this.fetchers);
-    return Promise.all(handlers.map(fetcher => fetcher.handle(request)))
-      .then(results => request);
+    // get the right real fetcher for this request and dispatch
+    const handler = this._getHandler(request, this.fetchers);
+    if (!handler)
+      throw new Error(`No fetcher found for ${request.toString()}`);
+    await handler.handle(request);
+    return request;
   }
 
-  // get all the handlers that apply to this request
-  _getHandlers(request, list) {
-    return list.filter(element => element.canHandle(request));
+  // get all the handler that apply to this request from the given list of handlers
+  _getHandler(request, list) {
+    return list.filter(element => element.canHandle(request))[0];
   }
 }
 

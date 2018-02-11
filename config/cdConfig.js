@@ -32,11 +32,16 @@ module.exports =
       dispatcher: 'cdDispatch',
       cdDispatch: {},
       git: {},
+      mavenCentral: {},
+      mavenCentralSource: {},
       npmjs: {}
     },
     process: {
+      maven: {},
+      npm: {
+        githubToken: config.get('CRAWLER_GITHUB_TOKEN')
+      },
       package: {},
-      source: {},
       scancode: {
         installDir: config.get('SCANCODE_HOME') || 'C:\\installs\\scancode-toolkit-2.2.1',
         options: ['--copyright', '--license', '--info', '--diag', '--only-findings', ' --strip-root', '--quiet'],
@@ -58,13 +63,11 @@ module.exports =
           }
         }
       },
-      npm: {
-        githubToken: config.get('CRAWLER_GITHUB_TOKEN')
-      },
+      source: {},
+      top: {},
       vsts: {
         apiToken: config.get('VSTS_API_TOKEN')
-      },
-      top: {}
+      }
     },
     store: {
       provider: config.get('CRAWLER_STORE_PROVIDER') || 'file',

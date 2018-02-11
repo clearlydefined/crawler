@@ -9,15 +9,18 @@ module.exports = {
   fetch: {
     cdDispatch: require('./fetch/dispatcher'),
     git: require('./fetch/gitCloner'),
+    mavenCentral: require('./fetch/mavenFetch'),
+    mavenCentralSource: require('./fetch/mavenSourceFetch'),
     npmjs: require('./fetch/npmjsFetch')
   },
   process: {
-    package: require('./process/package'),
-    source: require('./process/source'),
-    scancode: require('./process/scancode'),
+    maven: require('./process/mavenExtract'),
     npm: require('./process/npmExtract'),
-    vsts: require('./process/vsts'),
-    top: require('./process/top')
+    package: require('./process/package'),
+    scancode: require('./process/scancode'),
+    source: require('./process/source'),
+    top: require('./process/top'),
+    vsts: require('./process/vsts')
   },
   store: {
     clearlyDefined: require('./store/clearlyDefined')

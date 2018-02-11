@@ -7,14 +7,14 @@ const requestPromise = require('request-promise-native');
 const fs = require('fs');
 
 const providerMap = {
-  npmjs: "https://registry.npmjs.com"
+  mavenCentral: "https://search.maven.org/remotecontent?filepath="
 }
 
-class NpmFetch extends BaseHandler {
+class MavenSourceFetch extends BaseHandler {
 
   canHandle(request) {
     const spec = this.toSpec(request);
-    return spec && spec.provider === 'npmjs';
+    return spec && spec.type === 'sourceArchive' && spec.provider === 'mavenCentral';
   }
 
   async handle(request) {
@@ -25,7 +25,9 @@ class NpmFetch extends BaseHandler {
     // rewrite the request URL as it is used throughout the system to derive locations and urns etc.
     request.url = spec.toUrl();
     const file = this._createTempFile(request);
-    await this._getPackage(spec, file.name);
+    const code = await this._getPackage(spec, file.name);
+    if (code === 404)
+      return request.markSkip('Missing  ');
     const dir = this._createTempDir(request);
     await this.unzip(file.name, dir.name);
     request.document = this._createDocument(spec, dir, metadata);
@@ -43,40 +45,28 @@ class NpmFetch extends BaseHandler {
       nodeRequest(options, (error, response) => {
         if (error)
           return reject(error);
-        if (response.statusCode === 200)
-          return resolve(null);
+        if (response.statusCode === 200 || response.statusCode === 404)
+          return resolve(response.statusCode);
         reject(new Error(`${response.statusCode} ${response.statusMessage}`))
       }).pipe(fs.createWriteStream(destination));
     });
   }
 
-  // query npmjs to get the latest and fullest metadata. Turns out that there is somehow more in the
-  // service than in the package manifest in some cases (e.g., lodash).
+  // query maven to get the latest version if we don't already have that.
   async _getMetadata(request) {
     const spec = this.toSpec(request);
-    // Per https://github.com/npm/registry/issues/45 we should retrieve the whole package and get the version we want from that.
-    // The version-specific API (e.g. append /x.y.z to URL) does NOT work for scoped packages.
-    const baseUrl = providerMap[spec.provider];
-    if (!baseUrl)
-      throw new Error(`Could not find definition for NPM provider: ${spec.provider}.`)
-    const fullName = `${spec.namespace ? spec.namespace + '/' : ''}${spec.name}`;
-    const packageInfo = await requestPromise({
-      url: `${baseUrl}/${encodeURIComponent(fullName).replace('%40', '@')}`, // npmjs doesn't handle the escaped version
-      json: true
-    });
-
-    if (!packageInfo.versions)
+    if (spec.revision)
+      return { version: spec.revision }
+    const url = this._buildUrl(spec);
+    const packageInfo = await requestPromise({ url, json: true });
+    if (!packageInfo.response.docs.length === 0)
       return null;
-    const version = spec.revision || this.getLatestVersion(Object.keys(packageInfo.versions));
-    return {
-      packageManifest: packageInfo.versions[version],
-      version
-    };
+    return { version: packageInfo.response.docs[0].v };
   }
 
   _buildUrl(spec) {
-    const fullName = spec.namespace ? `${spec.namespace}/${spec.name}` : spec.name;
-    return `${providerMap[spec.provider]}/${fullName}/-/${spec.name}-${spec.revision}.tgz`
+    const fullName = `${spec.namespace}/${spec.name}`.replace(/\./g, '/');
+    return `${providerMap[spec.provider]}${fullName}/${spec.revision}/${spec.name}-${spec.revision}-sources.jar`
   }
 
   _createDocument(spec, file, metadata) {
@@ -84,4 +74,4 @@ class NpmFetch extends BaseHandler {
   }
 }
 
-module.exports = options => new NpmFetch(options);
+module.exports = options => new MavenSourceFetch(options);
