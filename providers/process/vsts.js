@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 const BaseHandler = require('../../lib/baseHandler');
-const decompress = require('decompress');
 const fs = require('fs');
 const nodeRequest = require('request');
 const path = require('path');
@@ -36,15 +35,19 @@ class VstsProcessor extends BaseHandler {
     const file = this._createTempFile(request);
     await this._getBuildOutput(document.buildOutput, file.name);
     const dir = this._createTempDir(request);
-    await decompress(file.name, dir.name, { strip: 1 });
+    await this.unzip(file.name, dir.name);
+    const folders = await promisify(fs.readdir)(dir.name);
+    if (folders.length !== 1)
+      throw new Error('Malformed build output zip. Too many root folders');
+    const root = path.join(dir.name, folders[0]);
     try {
-      const scancodeFilePath = `${dir.name}${path.sep}scancode.json`;
+      const scancodeFilePath = path.join(root, 'scancode.json');
       await promisify(fs.access)(scancodeFilePath);
       document._metadata.contentLocation = scancodeFilePath;
       document._metadata.contentType = 'application/json';
       return request;
     } catch (error) {
-      const buildError = (await promisify(fs.readFile)(`${dir.name}${path.sep}error.json`)).toString();
+      const buildError = (await promisify(fs.readFile)(path.join(root, 'error.json'))).toString();
       throw new Error(JSON.parse(buildError).error);
     }
   }

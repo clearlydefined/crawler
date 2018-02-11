@@ -19,7 +19,7 @@ class SourceProcessor extends BaseHandler {
 
   canHandle(request) {
     const spec = this.toSpec(request);
-    return request.type === 'source' && spec && ['git'].includes(spec.type);
+    return request.type === 'source' && spec && ['git', 'sourceArchive'].includes(spec.type);
   }
 
   handle(request) {

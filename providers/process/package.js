@@ -19,7 +19,7 @@ class PackageProcessor extends BaseHandler {
 
   canHandle(request) {
     const spec = this.toSpec(request);
-    return request.type === 'package' && spec && ['npm'].includes(spec.type);
+    return request.type === 'package' && spec && ['npm', 'maven'].includes(spec.type);
   }
 
   handle(request) {
