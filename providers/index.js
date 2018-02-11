@@ -9,8 +9,8 @@ module.exports = {
   fetch: {
     cdDispatch: require('./fetch/dispatcher'),
     git: require('./fetch/gitCloner'),
-    // "maven-central": require('./fetch/mavenFetch'),
-    // "maven-source": require('./fetch/mavenSourceFetch'),
+    mavenCentral: require('./fetch/mavenFetch'),
+    mavenCentralSource: require('./fetch/mavenSourceFetch'),
     npmjs: require('./fetch/npmjsFetch')
   },
   process: {
