@@ -5,7 +5,6 @@ const BaseHandler = require('../../lib/baseHandler');
 const nodeRequest = require('request');
 const requestPromise = require('request-promise-native');
 const fs = require('fs');
-const decompress = require('decompress');
 
 const providerMap = {
   npmjs: "https://registry.npmjs.com"
@@ -28,7 +27,7 @@ class NpmFetch extends BaseHandler {
     const file = this._createTempFile(request);
     await this._getPackage(spec, file.name);
     const dir = this._createTempDir(request);
-    await decompress(file.name, dir.name);
+    await this.unzip(file.name, dir.name);
     request.document = this._createDocument(spec, dir, metadata);
     request.contentOrigin = 'origin';
     return request;
