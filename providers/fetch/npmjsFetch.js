@@ -27,7 +27,7 @@ class NpmFetch extends BaseHandler {
     const file = this._createTempFile(request);
     await this._getPackage(spec, file.name);
     const dir = this._createTempDir(request);
-    await this.unzip(file.name, dir.name);
+    await this.decompress(file.name, dir.name);
     request.document = this._createDocument(spec, dir, metadata);
     request.contentOrigin = 'origin';
     return request;

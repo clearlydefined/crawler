@@ -7,14 +7,14 @@ const requestPromise = require('request-promise-native');
 const fs = require('fs');
 
 const providerMap = {
-  mavenCentral: "https://search.maven.org/remotecontent?filepath="
+  mavencentral: "https://search.maven.org/remotecontent?filepath="
 }
 
 class MavenFetch extends BaseHandler {
 
   canHandle(request) {
     const spec = this.toSpec(request);
-    return request.type === 'maven' && spec && spec.provider === 'mavenCentral';
+    return request.type === 'maven' && spec && spec.provider === 'mavencentral';
   }
 
   async handle(request) {
