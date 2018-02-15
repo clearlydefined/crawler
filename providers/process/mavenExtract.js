@@ -71,7 +71,7 @@ class MavenExtract extends BaseHandler {
     // We may not be guaranteed to have come here via those earlier paths however...
     // TODO the manifest may have more accurate info but we need to understand more about how
     // POMs are structured. For now use what we have in the request/spec
-    const mavenSourceInfo = { type: 'sourceArchive', provider: 'mavenCentral', url: `${spec.namespace}/${spec.name}`, revision: spec.revision };
+    const mavenSourceInfo = { type: 'sourcearchive', provider: 'mavencentral', url: `${spec.namespace}/${spec.name}`, revision: spec.revision };
     request.document.sourceInfo = mavenSourceInfo;
   }
 }
