@@ -32,7 +32,7 @@ class NpmExtract extends BaseHandler {
       const dir = request.document.location;
       const manifestContent = fs.readFileSync(path.join(dir, 'package/package.json'));
       const manifest = JSON.parse(manifestContent);
-      await this._createDocument(request, manifest, request.document.metadata.packageManifest);
+      await this._createDocument(request, manifest, request.document.registryData);
     }
     this.linkAndQueueTool(request, 'scancode');
     if (request.document.sourceInfo) {
@@ -55,18 +55,19 @@ class NpmExtract extends BaseHandler {
     return candidateUrls;
   }
 
-  async _discoverSource(version, locations) {
-    // TODO lookup source discovery in a set of services that have their own configuration
-    return sourceDiscovery(version, locations, { githubToken: this.options.githubToken });
-  }
-
-  async _createDocument(request, manifest, metadata) {
-    // setup the manifest to be the new document for the request
-    request.document = { _metadata: request.document._metadata, manifest, metadata };
+  async _discoverSource(manifest, registryManifest) {
     // Add interesting info
     const manifestCandidates = this._discoverCandidateSourceLocations(manifest);
-    const metadataCandidates = this._discoverCandidateSourceLocations(metadata);
-    const sourceInfo = await this._discoverSource(metadata.version, [...manifestCandidates, ...metadataCandidates]);
+    const registryCandidates = this._discoverCandidateSourceLocations(registryManifest);
+    const candidates = [...manifestCandidates, ...registryCandidates];
+    // TODO lookup source discovery in a set of services that have their own configuration
+    return sourceDiscovery(registryManifest.version, candidates, { githubToken: this.options.githubToken });
+  }
+
+  async _createDocument(request, manifest, registryData) {
+    // setup the manifest to be the new document for the request
+    request.document = { _metadata: request.document._metadata, 'package.json': manifest, registryData };
+    const sourceInfo = await this._discoverSource(manifest, registryData.manifest);
     if (sourceInfo)
       request.document.sourceInfo = sourceInfo;
   }
