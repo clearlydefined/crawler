@@ -44,7 +44,7 @@ class TopProcessor extends BaseHandler {
             name = namespace;
             namespace = '-';
           }
-          return new Request('npm', `cd:/npm/npmjs/${namespace}/${name}`)
+          return new Request('package', `cd:/npm/npmjs/${namespace}/${name}`)
         });
         request.queueRequests(requests);
         resolve(request);

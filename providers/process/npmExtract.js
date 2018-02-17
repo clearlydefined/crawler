@@ -29,9 +29,10 @@ class NpmExtract extends BaseHandler {
       // skip all the hard work if we are just traversing.
       const { document, spec } = super._process(request);
       this.addBasicToolLinks(request, spec);
-      const dir = request.document.location;
-      const manifestContent = fs.readFileSync(path.join(dir, 'package/package.json'));
-      const manifest = JSON.parse(manifestContent);
+      const location = this._getManifestLocation(request.document.location);
+      const manifest = location ? JSON.parse(fs.readFileSync(location)) : null;
+      if (!manifest)
+        console.log(`NPM without package.json: ${request.url}`);
       await this._createDocument(request, manifest, request.document.registryData);
     }
     this.linkAndQueueTool(request, 'scancode');
@@ -42,8 +43,18 @@ class NpmExtract extends BaseHandler {
     return request;
   }
 
+  _getManifestLocation(dir) {
+    if (fs.existsSync(path.join(dir, 'package/package.json')))
+      return path.join(dir, 'package/package.json');
+    if (fs.existsSync(path.join(dir, 'package.json')))
+      return path.join(dir, 'package.json');
+    return null;
+  }
+
   _discoverCandidateSourceLocations(manifest) {
     const candidateUrls = [];
+    if (!manifest)
+      return candidateUrls;
     if (manifest.repository && manifest.repository.url)
       candidateUrls.push(manifest.repository.url);
     if (manifest.url)
