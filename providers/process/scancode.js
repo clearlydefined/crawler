@@ -64,6 +64,7 @@ class ScanCodeProcessor extends BaseHandler {
         }
         document._metadata.contentLocation = file.name;
         document._metadata.contentType = 'application/json';
+        document._metadata.releaseDate = request.document.releaseDate;
         resolve(request);
       });
     });
