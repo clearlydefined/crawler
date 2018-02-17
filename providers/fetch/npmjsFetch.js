@@ -84,7 +84,8 @@ class NpmFetch extends BaseHandler {
   }
 
   _createDocument(dir, registryData) {
-    return { location: dir.name, registryData }
+    const releaseDate = registryData.releaseDate;
+    return { location: dir.name, registryData, releaseDate };
   }
 }
 
