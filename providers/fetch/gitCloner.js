@@ -27,9 +27,9 @@ class GitCloner extends BaseHandler {
     return request;
   }
 
-  _createDocument(dir, size, releaseDate) {
+  _createDocument(location, size, releaseDate) {
     // Create a simple document that records the location and the size of the repo that was fetched
-    return { location: dir, size, releaseDate };
+    return { location, size, releaseDate };
   }
 
   _toSourceSpec(spec) {
