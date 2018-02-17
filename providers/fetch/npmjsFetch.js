@@ -27,7 +27,7 @@ class NpmFetch extends BaseHandler {
     await this._getPackage(spec, file.name);
     const dir = this._createTempDir(request);
     await this.decompress(file.name, dir.name);
-    request.document = this._createDocument(spec, dir, registryData);
+    request.document = this._createDocument(dir, registryData);
     request.contentOrigin = 'origin';
     return request;
   }
@@ -83,8 +83,8 @@ class NpmFetch extends BaseHandler {
     return `${providerMap[spec.provider]}/${fullName}/-/${spec.name}-${spec.revision}.tgz`
   }
 
-  _createDocument(spec, dir, registryData) {
-    return { id: spec.toUrn(), location: dir.name, registryData }
+  _createDocument(dir, registryData) {
+    return { location: dir.name, registryData }
   }
 }
 

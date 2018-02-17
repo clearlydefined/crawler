@@ -30,7 +30,7 @@ class MavenExtract extends BaseHandler {
       const { spec } = super._process(request);
       this.addBasicToolLinks(request, spec);
       const manifest = await this._getManifest(request.document.location);
-      await this._createDocument(request, spec, manifest, request.document.metadata);
+      await this._createDocument(request, spec, manifest, request.document.registryData);
     }
     if (request.document.sourceInfo) {
       const sourceSpec = SourceSpec.adopt(request.document.sourceInfo);
@@ -57,20 +57,21 @@ class MavenExtract extends BaseHandler {
     return sourceDiscovery(version, locations, { githubToken: this.options.githubToken });
   }
 
-  async _createDocument(request, spec, manifest, metadata) {
+  async _createDocument(request, spec, manifest, registryData) {
     // setup the manifest to be the new document for the request
-    request.document = { _metadata: request.document._metadata, manifest, metadata };
+    request.document = { _metadata: request.document._metadata, manifest, registryData };
     // Add interesting info
+    if (registryData.timestamp)
+      request.document.releaseDate = new Date(registryData.timestamp).toISOString();
+
     const manifestCandidates = this._discoverCandidateSourceLocations(manifest);
     const sourceInfo = await this._discoverSource(spec.revision, [...manifestCandidates]);
     if (sourceInfo)
       return request.document.sourceInfo = sourceInfo;
 
-    // didn't find any source so make up a sources url to try
-    // TODO see if we can get this info from the earlier searches.
-    // We may not be guaranteed to have come here via those earlier paths however...
-    // TODO the manifest may have more accurate info but we need to understand more about how
-    // POMs are structured. For now use what we have in the request/spec
+    // didn't find any source so make up a sources url to try if the registry thinks there is source
+    if (!registryData.ec.includes('-sources.jar'))
+      return;
     const mavenSourceInfo = { type: 'sourcearchive', provider: 'mavencentral', url: `${spec.namespace}/${spec.name}`, revision: spec.revision };
     request.document.sourceInfo = mavenSourceInfo;
   }

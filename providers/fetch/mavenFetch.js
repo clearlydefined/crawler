@@ -14,25 +14,37 @@ class MavenFetch extends BaseHandler {
 
   canHandle(request) {
     const spec = this.toSpec(request);
-    return request.type === 'maven' && spec && spec.provider === 'mavencentral';
+    return spec && spec.provider === 'mavencentral';
   }
 
   async handle(request) {
     const spec = this.toSpec(request);
     // if there is no revision, return an empty doc. The processor will find
-    const metadata = await this._getMetadata(request);
-    spec.revision = metadata.version;
+    const registryData = await this._getRegistryData(request);
+    spec.revision = spec.revision ? registryData.v : registryData.latestVersion;
     // rewrite the request URL as it is used throughout the system to derive locations and urns etc.
     request.url = spec.toUrl();
     const file = this._createTempFile(request);
-    await this._getPOM(spec, file.name);
-    request.document = this._createDocument(spec, file);
+    const code = await this._getArtifact(spec, file.name);
+    if (code === 404)
+      return request.markSkip('Missing  ');
+    const location = await this._postProcessArtifact(request, spec, file);
+    request.document = this._createDocument(location, registryData);
     request.contentOrigin = 'origin';
     return request;
   }
 
-  async _getPOM(spec, destination) {
-    const uri = this._buildUrl(spec);
+  async _postProcessArtifact(request, spec, file) {
+    if (spec.type !== 'sourcearchive')
+      return file;
+    const dir = this._createTempDir(request);
+    await this.unzip(file.name, dir.name);
+    return dir;
+  }
+
+  async _getArtifact(spec, destination) {
+    const extension = spec.type === 'sourcearchive' ? '-sources.jar' : '.pom';
+    const uri = this._buildUrl(spec, extension);
     var options = {
       method: 'GET',
       uri
@@ -41,32 +53,32 @@ class MavenFetch extends BaseHandler {
       nodeRequest(options, (error, response) => {
         if (error)
           return reject(error);
-        if (response.statusCode === 200)
-          return resolve(null);
+        if (response.statusCode === 200 || response.statusCode === 404)
+          return resolve(response.statusCode);
         reject(new Error(`${response.statusCode} ${response.statusMessage}`))
       }).pipe(fs.createWriteStream(destination));
     });
   }
 
   // query maven to get the latest version if we don't already have that.
-  async _getMetadata(request) {
+  async _getRegistryData(request) {
     const spec = this.toSpec(request);
-    if (spec.revision)
-      return { version: spec.revision }
-    const url = `https://search.maven.org/solrsearch/select?q=g:"${spec.namespace}"+AND+a:"${spec.name}"&rows=1&wt=json`;
+    const versionClause = spec.revision ? `+AND+v:"${spec.revision}"` : '';
+    const url = `https://search.maven.org/solrsearch/select?q=g:"${spec.namespace}"+AND+a:"${spec.name}"${versionClause}&rows=1&wt=json`;
     const packageInfo = await requestPromise({ url, json: true });
     if (!packageInfo.response.docs.length === 0)
       return null;
-    return { version: packageInfo.response.docs[0].v };
+    return packageInfo.response.docs[0];
   }
 
-  _buildUrl(spec) {
+  _buildUrl(spec, extension) {
     const fullName = `${spec.namespace}/${spec.name}`.replace(/\./g, '/');
-    return `${providerMap[spec.provider]}${fullName}/${spec.revision}/${spec.name}-${spec.revision}.pom`
+    return `${providerMap[spec.provider]}${fullName}/${spec.revision}/${spec.name}-${spec.revision}${extension}`
   }
 
-  _createDocument(spec, file) {
-    return { id: spec.toUrn(), location: file.name }
+  _createDocument(location, registryData) {
+    const releaseDate = new Date(registryData.timestamp).toISOString();
+    return { location: location.name, registryData, releaseDate }
   }
 }
 
