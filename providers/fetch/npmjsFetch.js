@@ -19,16 +19,15 @@ class NpmFetch extends BaseHandler {
 
   async handle(request) {
     const spec = this.toSpec(request);
-    // if there is no revision, return an empty doc. The processor will find
-    const metadata = await this._getMetadata(request);
-    spec.revision = metadata.version;
+    const registryData = await this._getRegistryData(request);
+    spec.revision = registryData ? registryData.manifest.version : spec.revision;
     // rewrite the request URL as it is used throughout the system to derive locations and urns etc.
     request.url = spec.toUrl();
     const file = this._createTempFile(request);
     await this._getPackage(spec, file.name);
     const dir = this._createTempDir(request);
     await this.decompress(file.name, dir.name);
-    request.document = this._createDocument(spec, dir, metadata);
+    request.document = this._createDocument(dir, registryData);
     request.contentOrigin = 'origin';
     return request;
   }
@@ -52,7 +51,7 @@ class NpmFetch extends BaseHandler {
 
   // query npmjs to get the latest and fullest metadata. Turns out that there is somehow more in the
   // service than in the package manifest in some cases (e.g., lodash).
-  async _getMetadata(request) {
+  async _getRegistryData(request) {
     const spec = this.toSpec(request);
     // Per https://github.com/npm/registry/issues/45 we should retrieve the whole package and get the version we want from that.
     // The version-specific API (e.g. append /x.y.z to URL) does NOT work for scoped packages.
@@ -60,18 +59,23 @@ class NpmFetch extends BaseHandler {
     if (!baseUrl)
       throw new Error(`Could not find definition for NPM provider: ${spec.provider}.`)
     const fullName = `${spec.namespace ? spec.namespace + '/' : ''}${spec.name}`;
-    const packageInfo = await requestPromise({
+    const registryData = await requestPromise({
       url: `${baseUrl}/${encodeURIComponent(fullName).replace('%40', '@')}`, // npmjs doesn't handle the escaped version
       json: true
     });
 
-    if (!packageInfo.versions)
+    if (!registryData.versions)
       return null;
-    const version = spec.revision || this.getLatestVersion(Object.keys(packageInfo.versions));
-    return {
-      packageManifest: packageInfo.versions[version],
-      version
-    };
+    const version = spec.revision || this.getLatestVersion(Object.keys(registryData.versions));
+    if (!registryData.versions[version])
+      return null;
+    const date = registryData.time[version];
+    const registryManifest = registryData.versions[version];
+    delete registryData.versions;
+    delete registryData.time;
+    registryData.manifest = registryManifest;
+    registryData.releaseDate = date;
+    return registryData;
   }
 
   _buildUrl(spec) {
@@ -79,8 +83,8 @@ class NpmFetch extends BaseHandler {
     return `${providerMap[spec.provider]}/${fullName}/-/${spec.name}-${spec.revision}.tgz`
   }
 
-  _createDocument(spec, file, metadata) {
-    return { id: spec.toUrn(), location: file.name, metadata }
+  _createDocument(dir, registryData) {
+    return { location: dir.name, registryData }
   }
 }
 

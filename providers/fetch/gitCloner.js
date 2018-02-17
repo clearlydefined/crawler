@@ -20,15 +20,16 @@ class GitCloner extends BaseHandler {
 
     const repoSize = await this._cloneRepo(sourceSpec.url, dir.name, spec.name, options.version);
     request.addMeta({ gitSize: repoSize });
+    const releaseDate = await this._getDate(dir.name, spec.name);
 
     request.contentOrigin = 'origin';
-    request.document = this._createDocument(dir.name + '/' + spec.name, repoSize);
+    request.document = this._createDocument(dir.name + '/' + spec.name, repoSize, releaseDate);
     return request;
   }
 
-  _createDocument(dir, size) {
+  _createDocument(location, size, releaseDate) {
     // Create a simple document that records the location and the size of the repo that was fetched
-    return { location: dir, size };
+    return { location, size, releaseDate };
   }
 
   _toSourceSpec(spec) {
@@ -38,12 +39,15 @@ class GitCloner extends BaseHandler {
 
   _cloneRepo(sourceUrl, dirName, specName, commit) {
     return new Promise((resolve, reject) => {
-      exec(`cd ${dirName} && git clone ${sourceUrl} --quiet && cd ${specName} && git reset --hard ${commit} --quiet && git count-objects -v`, (error, stdout) => {
-        if (error) {
-          return reject(error);
-        }
-        resolve(this._getRepoSize(stdout));
-      });
+      exec(`cd ${dirName} && git clone ${sourceUrl} --quiet && cd ${specName} && git reset --hard ${commit} --quiet && git count-objects -v`, (error, stdout) =>
+        error ? reject(error) : resolve(this._getRepoSize(stdout)));
+    });
+  }
+
+  _getDate(dirName, specName) {
+    return new Promise((resolve, reject) => {
+      exec(`cd ${dirName}/${specName} && git show -s --format=%cI`, (error, stdout) =>
+        error ? reject(error) : resolve(stdout));
     });
   }
 

@@ -33,7 +33,6 @@ module.exports =
       cdDispatch: {},
       git: {},
       mavenCentral: {},
-      mavenCentralSource: {},
       npmjs: {}
     },
     process: {
