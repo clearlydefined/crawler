@@ -6,6 +6,7 @@ const { exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const VstsBuild = require('../../lib/build/vsts');
+const recursive = require('recursive-readdir');
 
 let _toolVersion;
 
@@ -33,11 +34,13 @@ class ScanCodeProcessor extends BaseHandler {
 
   async handle(request) {
     const { document, spec } = super._process(request);
-    if (document.size && document.size > this.options.maxSize) {
-      this.logger.info(`Analyzing ${request.toString()} using ScanCode in VSTS build. Repo size: ${document.size} KB.`);
+    const size = await this._computeSize(document);
+    request.addMeta({ k: size.k, fileCount: size.count });
+    if (spec.provider === 'github' && size.k > this.options.maxSize || size.count > this.options.maxCount) {
+      this.logger.info(`Analyzing ${request.toString()} using ScanCode in VSTS build. Files: ${size.count} Size: ${size.k} KB.`);
       try {
         const vstsBuild = new VstsBuild(this.options.build);
-        const build = await vstsBuild.queueBuild(document, spec, request.url);
+        const build = await vstsBuild.queueBuild(request, spec);
         this.logger.info(`Queued VSTS build ${build.id}`, { url: build._links.web.href });
       } catch (error) {
         this.logger.error(error, `${request.toString()} - error queueing build`);
@@ -68,6 +71,24 @@ class ScanCodeProcessor extends BaseHandler {
         resolve(request);
       });
     });
+  }
+
+  async _computeSize(document) {
+    const files = await recursive(document.location);
+    const bytes = files.reduce((sum, file) => {
+      if (!this._shouldCountFile(file, document.location))
+        return sum;
+      const stat = fs.lstatSync(file);
+      return sum + stat.size;
+    }, 0);
+    return { k: Math.round(bytes / 1024), count: files.length };
+  }
+
+  _shouldCountFile(file, location) {
+    const filePath = file.slice(location.length + 1);
+    if (filePath.startsWith('.git'))
+      return false;
+    return true;
   }
 
   // Scan the results file for any errors that are not just timeouts
