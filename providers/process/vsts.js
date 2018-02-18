@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 const BaseHandler = require('../../lib/baseHandler');
+const EntitySpec = require('../../lib/entitySpec');
 const fs = require('fs');
 const nodeRequest = require('request');
 const path = require('path');
@@ -29,19 +30,38 @@ class VstsProcessor extends BaseHandler {
   }
 
   async handle(request) {
-    const { document, spec } = super._process(request);
-    this.addBasicToolLinks(request, spec);
+    const { document } = super._process(request);
     this.logger.info(`Processing ${request.toString()}`);
-    const file = this._createTempFile(request);
-    await this._getBuildOutput(document.buildOutput, file.name);
+
+    // Get the build output and unzip
+    let file = document.file;
+    if (!file) {
+      // if no file name is given then get the output from the build system
+      file = this._createTempFile(request).name;
+      await this._getBuildOutput(document.buildOutput, file);
+    }
     const dir = this._createTempDir(request);
-    await this.unzip(file.name, dir.name);
+    await this.unzip(file, dir.name);
     const folders = await promisify(fs.readdir)(dir.name);
     if (folders.length !== 1)
       throw new Error('Malformed build output zip. Too many root folders');
     const root = path.join(dir.name, folders[0]);
+
+    // Get the original request from the output and update this request to match
+    const originalRequest = JSON.parse((await promisify(fs.readFile)(path.join(root, 'request.json'))).toString());
+    if (request.url !== originalRequest.url) {
+      request.url = originalRequest.url;
+      document._metadata.url = originalRequest.url;
+      document._metadata.type = originalRequest.type;
+    }
+    const spec = EntitySpec.fromUrl(request.url);
+    spec.tool = originalRequest.type;
+    spec.toolVersion = document.toolVersion;
+    this.addBasicToolLinks(request, spec);
+
+    // Add the output content to the document
+    const scancodeFilePath = path.join(root, 'scancode.json');
     try {
-      const scancodeFilePath = path.join(root, 'scancode.json');
       await promisify(fs.access)(scancodeFilePath);
       document._metadata.contentLocation = scancodeFilePath;
       document._metadata.contentType = 'application/json';
@@ -55,14 +75,11 @@ class VstsProcessor extends BaseHandler {
   _getBuildOutput(outputUrl, destination) {
     return new Promise((resolve, reject) => {
       nodeRequest.get(outputUrl, { headers: { Authorization: this.authToken } }, (error, response) => {
-        if (error) {
+        if (error)
           return reject(error);
-        }
-        if (response.statusCode === 200) {
-          return resolve(null);
-        }
-        reject(new Error(`${response.statusCode} ${response.statusMessage}`));
-      }).pipe(fs.createWriteStream(destination));
+        if (response.statusCode !== 200)
+          reject(new Error(`${response.statusCode} ${response.statusMessage}`))
+      }).pipe(fs.createWriteStream(destination).on('finish', () => resolve(null)));
     });
   }
 }

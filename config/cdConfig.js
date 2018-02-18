@@ -22,7 +22,7 @@ module.exports =
     provider: 'memory',  // change this to redis if/when we want distributed config
     searchPath: [module],
     crawler: {
-      count: 1
+      count: 2
     },
     filter: {
       provider: 'filter',
@@ -44,10 +44,11 @@ module.exports =
       scancode: {
         installDir: config.get('SCANCODE_HOME') || 'C:\\installs\\scancode-toolkit-2.2.1',
         options: ['--copyright', '--license', '--info', '--diag', '--only-findings', ' --strip-root', '--quiet'],
-        timeout: 300,
-        processes: 3,
+        timeout: 1000,
+        processes: 2,
         format: 'json-pp',
-        maxSize: 30 * 1024, // Maximum repo size in KB after which scancode would run in build and not directly in crawler
+        maxCount: 1000,  // Maximum file count in repo for local processing. Above this scanning is done as a build
+        maxSize: 5 * 1024, // Maximum repo size in KB after which scancode would run in build and not directly in crawler
         build: {
           crawlerUrl: config.get('CRAWLER_SERVICE_URL') || 'http://localhost:5000',
           crawlerAuthToken: config.get('CRAWLER_SERVICE_AUTH_TOKEN') || 'secret',
