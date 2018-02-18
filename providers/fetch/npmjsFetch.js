@@ -33,19 +33,13 @@ class NpmFetch extends BaseHandler {
   }
 
   async _getPackage(spec, destination) {
-    const uri = this._buildUrl(spec);
-    var options = {
-      method: 'GET',
-      uri
-    };
     return new Promise((resolve, reject) => {
-      nodeRequest(options, (error, response) => {
+      nodeRequest.get(this._buildUrl(spec), (error, response) => {
         if (error)
           return reject(error);
-        if (response.statusCode === 200)
-          return resolve(null);
-        reject(new Error(`${response.statusCode} ${response.statusMessage}`))
-      }).pipe(fs.createWriteStream(destination));
+        if (response.statusCode !== 200)
+          reject(new Error(`${response.statusCode} ${response.statusMessage}`))
+      }).pipe(fs.createWriteStream(destination).on('finish', () => resolve(null)));
     });
   }
 

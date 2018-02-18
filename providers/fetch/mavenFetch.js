@@ -43,20 +43,16 @@ class MavenFetch extends BaseHandler {
   }
 
   async _getArtifact(spec, destination) {
-    const extension = spec.type === 'sourcearchive' ? '-sources.jar' : '.pom';
-    const uri = this._buildUrl(spec, extension);
-    var options = {
-      method: 'GET',
-      uri
-    };
     return new Promise((resolve, reject) => {
-      nodeRequest(options, (error, response) => {
+      const extension = spec.type === 'sourcearchive' ? '-sources.jar' : '.pom';
+      nodeRequest.get(this._buildUrl(spec, extension), (error, response) => {
         if (error)
           return reject(error);
-        if (response.statusCode === 200 || response.statusCode === 404)
-          return resolve(response.statusCode);
-        reject(new Error(`${response.statusCode} ${response.statusMessage}`))
-      }).pipe(fs.createWriteStream(destination));
+        if (response.statusCode === 404)
+          resolve(response.statusCode);
+        if (response.statusCode !== 200)
+          reject(new Error(`${response.statusCode} ${response.statusMessage}`))
+      }).pipe(fs.createWriteStream(destination).on('finish', () => resolve(null)));
     });
   }
 
