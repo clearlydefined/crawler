@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 const request = require('request-promise-native');
-const fs = require('fs');
 
 class ClearlyDefinedStore {
   constructor(options) {
@@ -27,8 +26,8 @@ class ClearlyDefinedStore {
     };
     return request(options).then(response => {
       if (response.statusCode === 201)
-        return resolve(document);
-      reject(new Error(`${response.statusCode} ${response.statusMessage}`));
+        return Promise.resolve(document);
+      Promise.reject(new Error(`${response.statusCode} ${response.statusMessage}`));
     });
   }
 
