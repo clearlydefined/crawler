@@ -56,7 +56,7 @@ module.exports =
             collectionUrl: config.get('VSTS_BUILD_COLLECTION_URL') || 'https://clearlydefined.visualstudio.com/DefaultCollection',
             apiToken: config.get('VSTS_API_TOKEN'),
             project: config.get('VSTS_BUILD_PROJECT_NAME') || 'ClearlyDefined',
-            definitionName: config.get('VSTS_BUILD_DEFINITION_NAME') || 'Run scancode',
+            definitionName: config.get('VSTS_BUILD_DEFINITION_NAME') || 'Run scancode (master)',
             emptyRepoUrl: config.get('VSTS_REPO') || 'https://clearlydefined.visualstudio.com/_git/ClearlyDefined',
             azureSubscriptionEndpoint: config.get('VSTS_AZURE_SUBSCRIPTION_ENDPOINT'),
             azureContainerRegistry: config.get('VSTS_AZURE_CONTAINER_REGISTRY')
