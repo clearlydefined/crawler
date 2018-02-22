@@ -12,7 +12,7 @@ RUN curl -sL https://github.com/nexB/scancode-toolkit/releases/download/v2.2.1/s
 && /opt/scancode-toolkit-2.2.1/scancode --version
 ENV SCANCODE_HOME=/opt/scancode-toolkit-2.2.1
 
-COPY package.json /tmp/package.json
+COPY package*.json /tmp/
 RUN cd /tmp && npm install --production
 RUN mkdir -p "${APPDIR}" && cp -a /tmp/node_modules "${APPDIR}"
 
