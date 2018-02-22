@@ -42,7 +42,7 @@
     "request-promise-native": "^1.0.5",
     "requestretry": "^1.12.2",
     "tmp": "0.0.33",
-    "vso-node-api": "^6.2.8-preview"
+    "vso-node-api": "~6.3.2"
   },
   "devDependencies": {
     "chai": "^3.5.0",
