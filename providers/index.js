@@ -22,6 +22,7 @@ module.exports = {
     vsts: require('./process/vsts')
   },
   store: {
-    clearlyDefined: require('./store/clearlyDefined')
+    cdDispatch: require('./store/storeDispatcher'),
+    webhook: require('./store/webhookDeltaStore')
   }
 }
