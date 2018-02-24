@@ -40,6 +40,7 @@ class ScanCodeProcessor extends BaseHandler {
       this.logger.info(`Analyzing ${request.toString()} using ScanCode in VSTS build. Files: ${size.count} Size: ${size.k} KB.`);
       try {
         const vstsBuild = new VstsBuild(this.options.build);
+        request.context.releaseDate = document.releaseDate;
         const build = await vstsBuild.queueBuild(request, spec);
         this.logger.info(`Queued VSTS build ${build.id}`, { url: build._links.web.href });
       } catch (error) {
@@ -57,8 +58,8 @@ class ScanCodeProcessor extends BaseHandler {
         '--timeout', this.options.timeout.toString(),
         '-n', this.options.processes.toString(),
         '-f', this.options.format,
-      request.document.location,
-      file.name
+        request.document.location,
+        file.name
       ].join(' ');
       exec(`cd ${this.options.installDir} && .${path.sep}scancode ${parameters}`, (error, stdout, stderr) => {
         if (error || this._hasRealErrors(file.name)) {
