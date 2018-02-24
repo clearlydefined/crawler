@@ -3,11 +3,6 @@
 
 const config = require('painless-config');
 
-const clearlyDefined = {
-  url: config.get('CRAWLER_STORE_URL'),
-  token: config.get('CRAWLER_STORE_TOKEN')
-};
-
 const azblob = {
   connection: config.get('HARVEST_AZBLOB_CONNECTION_STRING'),
   container: config.get('HARVEST_AZBLOB_CONTAINER_NAME')
@@ -43,7 +38,7 @@ module.exports =
       package: {},
       scancode: {
         installDir: config.get('SCANCODE_HOME') || 'C:\\installs\\scancode-toolkit-2.2.1',
-        options: ['--copyright', '--license', '--info', '--diag', '--only-findings', ' --strip-root', '--quiet'],
+        options: ['--copyright', '--license', '--info', '--package', '--diag', '--only-findings', ' --strip-root', '--quiet'],
         timeout: 1000,
         processes: 2,
         format: 'json-pp',
@@ -70,14 +65,17 @@ module.exports =
       }
     },
     store: {
-      provider: config.get('CRAWLER_STORE_PROVIDER') || 'file',
-      clearlyDefined,
+      dispatcher: config.get('CRAWLER_STORE_PROVIDER') || 'file',
+      cdDispatch: {},
+      webhook: {
+        url: config.get('CRAWLER_WEBHOOK_URL') || 'http://localhost:4000/webhook',
+        token: config.get('CRAWLER_WEBHOOK_TOKEN'),
+      },
       azblob,
       file
     },
     deadletter: {
-      provider: config.get('CRAWLER_STORE_PROVIDER') || 'file',
-      clearlyDefined,
+      provider: config.get('CRAWLER_DEADLETTER_PROVIDER') || config.get('CRAWLER_STORE_PROVIDER') || 'file',
       azblob,
       file
     },
