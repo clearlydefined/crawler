@@ -7,6 +7,7 @@ const fs = require('fs');
 const nodeRequest = require('request');
 const path = require('path');
 const { promisify } = require('util');
+const { get } = require('lodash');
 
 let _toolVersion;
 
@@ -47,13 +48,16 @@ class VstsProcessor extends BaseHandler {
       throw new Error('Malformed build output zip. Too many root folders');
     const root = path.join(dir.name, folders[0]);
 
-    // Get the original request from the output and update this request to match
+    // Get the original request info from the output and update this request to match
     const originalRequest = JSON.parse((await promisify(fs.readFile)(path.join(root, 'request.json'))).toString());
     if (request.url !== originalRequest.url) {
       request.url = originalRequest.url;
       document._metadata.url = originalRequest.url;
       document._metadata.type = originalRequest.type;
     }
+    document._metadata.releaseDate = get(originalRequest, 'context.releaseDate');
+
+    // construct the right urn and link
     const spec = EntitySpec.fromUrl(request.url);
     spec.tool = originalRequest.type;
     spec.toolVersion = document.toolVersion;
