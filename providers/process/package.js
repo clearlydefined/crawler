@@ -10,7 +10,7 @@ class PackageProcessor extends BaseHandler {
   }
 
   get toolSpec() {
-    return { tool: 'clearlydescribed', toolVersion: this.schemaVersion };
+    return { tool: 'cdpackagetraversal', toolVersion: this.schemaVersion };
   }
 
   shouldFetch(request) {
