@@ -13,6 +13,7 @@ module.exports = {
     npmjs: require('./fetch/npmjsFetch')
   },
   process: {
+    cdsource: require('./process/sourceExtract'),
     maven: require('./process/mavenExtract'),
     npm: require('./process/npmExtract'),
     package: require('./process/package'),

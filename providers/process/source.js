@@ -10,7 +10,7 @@ class SourceProcessor extends BaseHandler {
   }
 
   get toolSpec() {
-    return { tool: 'clearlydescribed', toolVersion: this.schemaVersion };
+    return { tool: 'cdsourcetraversal', toolVersion: this.schemaVersion };
   }
 
   shouldFetch(request) {
@@ -25,7 +25,9 @@ class SourceProcessor extends BaseHandler {
   handle(request) {
     const { document, spec } = super._process(request);
     this.addBasicToolLinks(request, spec);
+    this.linkAndQueueTool(request, 'clearlydefined');
     this.linkAndQueueTool(request, 'scancode');
+    request.markNoSave();
     return document;
   }
 }

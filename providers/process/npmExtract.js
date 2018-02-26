@@ -14,7 +14,7 @@ class NpmExtract extends BaseHandler {
   }
 
   get toolSpec() {
-    return { tool: 'clearlydescribed', toolVersion: this.schemaVersion };
+    return { tool: 'clearlydefined', toolVersion: this.schemaVersion };
   }
 
   canHandle(request) {
