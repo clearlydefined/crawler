@@ -11,25 +11,25 @@ function neighbors() {
 const scancode = self;
 
 // default ClearlyDefined tool
-const cd = self;
+const clearlydefined = self;
 
 const source = {
   _type: 'source',
   scancode,
-  cd
+  clearlydefined
 }
 
 const npm = {
   _type: 'npm',
   source,
   scancode,
-  cd
+  clearlydefined
 };
 
 const maven = {
   _type: 'maven',
   source,
-  cd
+  clearlydefined
 };
 
 const package = {
@@ -43,7 +43,7 @@ const entities = {
   neighbors,
   source,
   package,
-  cd,
+  clearlydefined,
   scancode,
   npm,
   maven

@@ -31,6 +31,7 @@ module.exports =
       npmjs: {}
     },
     process: {
+      cdsource: {},
       maven: {},
       npm: {
         githubToken: config.get('CRAWLER_GITHUB_TOKEN')
