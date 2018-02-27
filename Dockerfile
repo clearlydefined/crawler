@@ -1,4 +1,4 @@
-# Copyright (c) Microsoft Corporation. All rights reserved.
+# Copyright (c) Microsoft Corporation.
 # SPDX-License-Identifier: MIT
 
 #FROM node:8-alpine # switch back to node:8-alpine after removing Scancode
