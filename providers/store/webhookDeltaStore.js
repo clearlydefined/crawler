@@ -1,20 +1,20 @@
 // Copyright (c) Microsoft Corporation.
 // SPDX-License-Identifier: MIT
 
-const request = require('request-promise-native');
+const request = require('request-promise-native')
 
 class WebhookDeltaStore {
   constructor(options, baseStore) {
-    this.options = options;
-    this.baseStore = baseStore;
+    this.options = options
+    this.baseStore = baseStore
   }
 
   connect() {
-    return null;
+    return null
   }
 
   async upsert(document) {
-    const uri = this.options.url;
+    const uri = this.options.url
     var options = {
       method: 'POST',
       uri,
@@ -24,39 +24,39 @@ class WebhookDeltaStore {
         'x-crawler': this.options.token || 'secret'
       },
       resolveWithFullResponse: true
-    };
+    }
     try {
       const response = await request(options)
       if (response.statusCode !== 200)
-        this.options.logger.info(`Failure  Firing webhook failed: ${response.statusCode} ${response.statusMessage}`);
+        this.options.logger.info(`Failure  Firing webhook failed: ${response.statusCode} ${response.statusMessage}`)
     } catch (error) {
-        this.options.logger.info(`Failure  Firing webhook failed: ${error.message}`);
+      this.options.logger.info(`Failure  Firing webhook failed: ${error.message}`)
     }
   }
 
   get(type, key) {
-    return null;
+    return null
   }
 
   etag(type, key) {
-    return null;
+    return null
   }
 
   list(type) {
-    return null;
+    return null
   }
 
   count(type) {
-    return null;
+    return null
   }
 
   close() {
-    return null;
+    return null
   }
 
   delete(type, key) {
-    return null;
+    return null
   }
 }
 
-module.exports = options => new WebhookDeltaStore(options);
+module.exports = options => new WebhookDeltaStore(options)
