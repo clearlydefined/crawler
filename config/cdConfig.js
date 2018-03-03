@@ -90,11 +90,25 @@ module.exports =
         managementEndpoint: config.get('CRAWLER_SERVICEBUS_MANAGER_ENDPOINT'),
         url: config.get('CRAWLER_AMQP10_URL'),
         queueName: config.get('CRAWLER_QUEUE_PREFIX') || 'cdcrawlerdev',
+        enablePartitioning: true,
         credit: 5,
         messageSize: 240,
         parallelPush: 10,
         pushRateLimit: 200,
         // metricsStore: 'redis',
+        attenuation: {
+          ttl: 3000
+        }
+      },
+      serviceBus: {
+        weights: { immediate: 3, soon: 2, normal: 3, later: 2 },
+        connectionString: config.get('CRAWLER_SERVICEBUS_CONNECTION_STRING') || config.get('CRAWLER_SERVICEBUS_MANAGER_ENDPOINT'),
+        queueName: config.get('CRAWLER_QUEUE_PREFIX') || 'cdcrawlerdev',
+        enablePartitioning: 'false', // Service Bus APIs do not support partitioning yet
+        maxSizeInMegabytes: '5120',
+        lockDuration: 'PT5M', // 5 min
+        lockRenewal: 4.75 * 60 * 1000, // 4 min 45 sec
+        maxDeliveryCount: 100,
         attenuation: {
           ttl: 3000
         }
