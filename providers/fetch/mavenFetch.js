@@ -1,10 +1,9 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler');
-const mavenCentral = require('../../lib/mavenCentral');
-const nodeRequest = require('request');
-const requestPromise = require('request-promise-native');
+const BaseHandler = require('../../lib/baseHandler')
+const mavenCentral = require('../../lib/mavenCentral')
+const requestPromise = require('request-promise-native')
 
 class MavenFetch extends BaseHandler {
   canHandle(request) {
@@ -36,10 +35,8 @@ class MavenFetch extends BaseHandler {
   }
 
   async _getArtifact(spec, destination) {
-    if (spec.type === 'sourcearchive')
-      return await mavenCentral.fetchSourcesJar(spec, destination);
-    else
-      return await mavenCentral.fetchPom(spec, destination);
+    if (spec.type === 'sourcearchive') return await mavenCentral.fetchSourcesJar(spec, destination)
+    else return await mavenCentral.fetchPom(spec, destination)
   }
 
   // query maven to get the latest version if we don't already have that.

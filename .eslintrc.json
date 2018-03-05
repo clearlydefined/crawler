@@ -16,6 +16,7 @@
     "no-unreachable": "warn",
     "no-unused-vars": "warn",
     "constructor-super": "warn",
-    "valid-typeof": "warn"
+    "valid-typeof": "warn",
+    "quotes": ["warn", "single"]
   }
 }
