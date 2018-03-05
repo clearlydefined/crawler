@@ -48,8 +48,8 @@ class GitCloner extends BaseHandler {
   _getDate(dirName, specName) {
     return new Promise((resolve, reject) => {
       exec(
-        `cd ${dirName}/${specName} && git show -s --format=%cI`,
-        (error, stdout) => (error ? reject(error) : resolve(stdout.trim()))
+        `cd ${dirName}/${specName} && git show -s --format=%ci`,
+        (error, stdout) => (error ? reject(error) : resolve(new Date(stdout.trim())))
       )
     })
   }
