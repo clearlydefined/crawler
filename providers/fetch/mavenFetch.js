@@ -1,14 +1,10 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler')
-const nodeRequest = require('request')
-const requestPromise = require('request-promise-native')
-const fs = require('fs')
-
-const providerMap = {
-  mavencentral: 'https://search.maven.org/remotecontent?filepath='
-}
+const BaseHandler = require('../../lib/baseHandler');
+const mavenCentral = require('../../lib/mavenCentral');
+const nodeRequest = require('request');
+const requestPromise = require('request-promise-native');
 
 class MavenFetch extends BaseHandler {
   canHandle(request) {
@@ -40,16 +36,10 @@ class MavenFetch extends BaseHandler {
   }
 
   async _getArtifact(spec, destination) {
-    return new Promise((resolve, reject) => {
-      const extension = spec.type === 'sourcearchive' ? '-sources.jar' : '.pom'
-      nodeRequest
-        .get(this._buildUrl(spec, extension), (error, response) => {
-          if (error) return reject(error)
-          if (response.statusCode === 404) resolve(response.statusCode)
-          if (response.statusCode !== 200) reject(new Error(`${response.statusCode} ${response.statusMessage}`))
-        })
-        .pipe(fs.createWriteStream(destination).on('finish', () => resolve(null)))
-    })
+    if (spec.type === 'sourcearchive')
+      return await mavenCentral.fetchSourcesJar(spec, destination);
+    else
+      return await mavenCentral.fetchPom(spec, destination);
   }
 
   // query maven to get the latest version if we don't already have that.
@@ -62,11 +52,6 @@ class MavenFetch extends BaseHandler {
     const packageInfo = await requestPromise({ url, json: true })
     if (!packageInfo.response.docs.length === 0) return null
     return packageInfo.response.docs[0]
-  }
-
-  _buildUrl(spec, extension) {
-    const fullName = `${spec.namespace}/${spec.name}`.replace(/\./g, '/')
-    return `${providerMap[spec.provider]}${fullName}/${spec.revision}/${spec.name}-${spec.revision}${extension}`
   }
 
   _createDocument(location, registryData) {
