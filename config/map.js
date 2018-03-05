@@ -1,17 +1,17 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
 // Map building blocks
-const self = {};
+const self = {}
 
 function neighbors() {
-  return self;
+  return self
 }
 
-const scancode = self;
+const scancode = self
 
 // default ClearlyDefined tool
-const clearlydefined = self;
+const clearlydefined = self
 
 const source = {
   _type: 'source',
@@ -24,19 +24,19 @@ const npm = {
   source,
   scancode,
   clearlydefined
-};
+}
 
 const maven = {
   _type: 'maven',
   source,
   clearlydefined
-};
+}
 
 const package = {
   _type: 'package',
   npm,
   maven
-};
+}
 
 const entities = {
   self,
@@ -47,7 +47,7 @@ const entities = {
   scancode,
   npm,
   maven
-};
+}
 
 module.exports = {
   default: entities

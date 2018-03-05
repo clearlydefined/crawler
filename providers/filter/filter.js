@@ -1,13 +1,12 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler');
+const BaseHandler = require('../../lib/baseHandler')
 
 class StandardFilter extends BaseHandler {
-
   constructor(options, processors) {
-    super(options);
-    this.processors = processors;
+    super(options)
+    this.processors = processors
   }
 
   shouldFetchMissing(request, spec) {
@@ -15,17 +14,17 @@ class StandardFilter extends BaseHandler {
   }
 
   shouldFetch(request, spec) {
-    return !request.document || this.shouldProcess(request, spec);
+    return !request.document || this.shouldProcess(request, spec)
   }
 
   shouldProcess(request, spec) {
-    const processor = this._getProcessor(request, this.processors);
-    return processor.shouldProcess(request);
+    const processor = this._getProcessor(request, this.processors)
+    return processor.shouldProcess(request)
   }
 
   _getProcessor(request) {
-    return this.processors.filter(processor => processor.canHandle(request))[0];
+    return this.processors.filter(processor => processor.canHandle(request))[0]
   }
 }
 
-module.exports = (options, processors) => new StandardFilter(options, processors);
+module.exports = (options, processors) => new StandardFilter(options, processors)
