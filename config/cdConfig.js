@@ -122,6 +122,15 @@ module.exports = {
       attenuation: {
         ttl: 3000
       }
+    },
+    storageQueue: {
+      weights: { immediate: 3, soon: 2, normal: 3, later: 2 },
+      connectionString: azblob.connection,
+      queueName: config.get('CRAWLER_QUEUE_PREFIX') || 'cdcrawlerdev',
+      visibilityTimeout: 60 * 60, // 1 hour
+      attenuation: {
+        ttl: 3000
+      }
     }
   },
   redis: {
