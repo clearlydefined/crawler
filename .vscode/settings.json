@@ -6,6 +6,7 @@
   "editor.folding": false,
   "editor.tabSize": 2,
   "editor.detectIndentation": false,
+  "editor.formatOnSave": true,
   "editor.formatOnType": true,
   "editor.insertSpaces": true,
   "files.trimTrailingWhitespace": true
