@@ -63,10 +63,9 @@ class ScanCodeProcessor extends BaseHandler {
         this.options.timeout.toString(),
         '-n',
         this.options.processes.toString(),
-        '-f',
         this.options.format,
-        request.document.location,
-        file.name
+        file.name,
+        request.document.location
       ].join(' ')
       exec(`cd ${this.options.installDir} && .${path.sep}scancode ${parameters}`, (error, stdout, stderr) => {
         if (error || this._hasRealErrors(file.name)) {
@@ -102,7 +101,8 @@ class ScanCodeProcessor extends BaseHandler {
     const results = JSON.parse(fs.readFileSync(resultFile))
     return results.files.some(file =>
       file.scan_errors.some(error => {
-        const [timeout] = error.match(/ERROR: Processing interrupted: timeout after (?<timeout>\\d+) seconds./)
+        const matches = error.match(/ERROR: Processing interrupted: timeout after (\d+) seconds./)
+        const timeout = matches ? matches[1] : null
         return timeout !== this.options.timeout.toString()
       })
     )
