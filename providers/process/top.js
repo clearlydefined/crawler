@@ -57,7 +57,7 @@ class TopProcessor extends BaseHandler {
   /* Example:
   {
     "type": "top",
-    "url":"cd:/maven/mavencentral/-/-",
+    "url":"cd:/maven/mavencentral/junit/junit",
     "payload": {
       "body": {
         "start": 0,
