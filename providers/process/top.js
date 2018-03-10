@@ -28,7 +28,7 @@ class TopProcessor extends BaseHandler {
       case 'npmjs':
         return this._processTopNpms(request)
       case 'mavencentral':
-        return this._processTopMavenCenrals(request)
+        return this._processTopMavenCentrals(request)
       default:
         throw new Error(`Unknown provider type for 'top' request: ${spec.provider}`)
     }
@@ -49,7 +49,7 @@ class TopProcessor extends BaseHandler {
           return new Request('package', `cd:/npm/npmjs/${namespace}/${name}`)
         })
         request.queueRequests(requests)
-        resolve(request)
+        resolve(request.markNoSave())
       })
     })
   }
@@ -66,7 +66,7 @@ class TopProcessor extends BaseHandler {
     }
   }
   */
-  async _processTopMavenCenrals(request) {
+  async _processTopMavenCentrals(request) {
     const contents = fs.readFileSync(path.join(__dirname, '..', '..', 'data', 'mvn1.5k.csv'))
     const fileLines = contents.toString().split('\n')
     let { start, end } = request.document
@@ -77,9 +77,10 @@ class TopProcessor extends BaseHandler {
       let [, groupId, artifactId] = line.split(',')
       groupId = groupId.substring(1, groupId.length - 1) // Remove quotes
       artifactId = artifactId.substring(1, artifactId.length - 1)
-      return new Request('maven', `cd:/maven/mavencentral/${groupId}/${artifactId}`)
+      return new Request('package', `cd:/maven/mavencentral/${groupId}/${artifactId}`)
     })
     await request.queueRequests(requests)
+    return request.markNoSave()
   }
 }
 
