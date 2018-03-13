@@ -30,7 +30,7 @@ class MavenFetch extends BaseHandler {
   async _postProcessArtifact(request, spec, file) {
     if (spec.type !== 'sourcearchive') return file
     const dir = this._createTempDir(request)
-    await this.unzip(file.name, dir.name)
+    await this.decompress(file.name, dir.name) // Warning: may not clean files up on Windows due to a bug. Switch back to unzip once https://github.com/maxogden/extract-zip/issues/65 is resolved
     return dir
   }
 
