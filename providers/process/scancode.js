@@ -69,7 +69,7 @@ class ScanCodeProcessor extends BaseHandler {
       ].join(' ')
       exec(`cd ${this.options.installDir} && .${path.sep}scancode ${parameters}`, (error, stdout, stderr) => {
         if (error || this._hasRealErrors(file.name)) {
-          request.markDead('Error', error ? error.message : 'ScanCode run failed')
+          request.markDead('Error', error ? error.message + stderr : 'ScanCode run failed')
           return reject(error)
         }
         document._metadata.contentLocation = file.name
