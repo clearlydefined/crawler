@@ -41,7 +41,10 @@ class MavenExtract extends BaseHandler {
   }
 
   async _getManifest(request, location) {
-    const pomContent = fs.readFileSync(location)
+    const pomContent = fs
+      .readFileSync(location)
+      .toString()
+      .trim()
     const pom = await new Promise((resolve, reject) =>
       parseString(pomContent, (error, result) => (error ? reject(error) : resolve(result)))
     )
