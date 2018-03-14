@@ -64,7 +64,13 @@ class MavenExtract extends BaseHandler {
 
   async _fetchParentPomManifest(request, pom) {
     const parent = pom.project.parent[0]
-    const spec = new EntitySpec('maven', 'mavencentral', parent.groupId[0], parent.artifactId[0], parent.version[0])
+    const spec = new EntitySpec(
+      'maven',
+      'mavencentral',
+      parent.groupId[0].trim(),
+      parent.artifactId[0].trim(),
+      parent.version[0].trim()
+    )
     const file = this._createTempFile(request)
 
     const code = await mavenCentral.fetchPom(spec, file.name)
