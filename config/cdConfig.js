@@ -45,8 +45,8 @@ module.exports = {
         '--package',
         '--license-diag',
         '--only-findings',
-        ' --strip-root',
-        '--quiet'
+        ' --strip-root'
+        // '--quiet'
       ],
       timeout: 1000,
       processes: 2,
