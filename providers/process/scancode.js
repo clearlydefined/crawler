@@ -81,7 +81,12 @@ class ScanCodeProcessor extends BaseHandler {
   }
 
   async _computeSize(document) {
-    const files = await recursive(document.location)
+    let files = []
+    try {
+      files = await recursive(document.location)
+    } catch (error) {
+      this.logger.error(`Failed to read directory recursively: ${error}`)
+    }
     const bytes = files.reduce((sum, file) => {
       if (!this._shouldCountFile(file, document.location)) return sum
       const stat = fs.lstatSync(file)
