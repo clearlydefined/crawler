@@ -5,8 +5,9 @@ const BaseHandler = require('../../lib/baseHandler')
 const { exec } = require('child_process')
 const fs = require('fs')
 const path = require('path')
+const { promisify } = require('util')
 const VstsBuild = require('../../lib/build/vsts')
-const recursive = require('recursive-readdir')
+const du = require('du')
 
 let _toolVersion
 
@@ -81,24 +82,17 @@ class ScanCodeProcessor extends BaseHandler {
   }
 
   async _computeSize(document) {
-    let files = []
-    try {
-      files = await recursive(document.location)
-    } catch (error) {
-      this.logger.error(`Failed to read directory recursively: ${error}`)
-    }
-    const bytes = files.reduce((sum, file) => {
-      if (!this._shouldCountFile(file, document.location)) return sum
-      const stat = fs.lstatSync(file)
-      return sum + stat.size
-    }, 0)
-    return { k: Math.round(bytes / 1024), count: files.length }
-  }
-
-  _shouldCountFile(file, location) {
-    const filePath = file.slice(location.length + 1)
-    if (filePath.startsWith('.git')) return false
-    return true
+    let count = 0
+    const bytes = await promisify(du)(document.location, {
+      filter: file => {
+        if (path.basename(file) === '.git') {
+          return false
+        }
+        count++
+        return true
+      }
+    })
+    return { k: Math.round(bytes / 1024), count }
   }
 
   // Scan the results file for any errors that are not just timeouts
