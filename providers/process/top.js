@@ -19,7 +19,7 @@ class TopProcessor extends BaseHandler {
 
   canHandle(request) {
     const spec = this.toSpec(request)
-    return request.type === 'top' && spec && ['npmjs', 'mavencentral', 'nugetorg'].includes(spec.provider)
+    return request.type === 'top' && spec && ['npmjs', 'mavencentral', 'nuget'].includes(spec.provider)
   }
 
   handle(request) {
@@ -30,7 +30,7 @@ class TopProcessor extends BaseHandler {
         return this._processTopNpms(request)
       case 'mavencentral':
         return this._processTopMavenCentrals(request)
-      case 'nugetorg':
+      case 'nuget':
         return this._processTopNugets(request)
       default:
         throw new Error(`Unknown provider type for 'top' request: ${spec.provider}`)
@@ -89,7 +89,7 @@ class TopProcessor extends BaseHandler {
   /* Example:
   {
     "type": "top",
-    "url":"cd:/nuget/nugetorg/-/moq",
+    "url":"cd:/nuget/nuget/-/moq",
     "payload": {
       "body": {
         "start": 0,
@@ -108,7 +108,7 @@ class TopProcessor extends BaseHandler {
       `https://api-v2v3search-0.nuget.org/query?prerelease=false&skip=${start}&take=${end - start}`
     )
     const requests = topComponents.data.map(component => {
-      return new Request('package', `cd:/nuget/nugetorg/-/${component.id}`)
+      return new Request('package', `cd:/nuget/nuget/-/${component.id}`)
     })
     await request.queueRequests(requests)
     return request.markNoSave()

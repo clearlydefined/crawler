@@ -5,13 +5,13 @@ const BaseHandler = require('../../lib/baseHandler')
 const requestRetry = require('requestretry').defaults({ json: true, maxAttempts: 3, fullResponse: true })
 
 const providerMap = {
-  nugetorg: 'https://api.nuget.org'
+  nuget: 'https://api.nuget.org'
 }
 
 class NugetFetch extends BaseHandler {
   canHandle(request) {
     const spec = this.toSpec(request)
-    return spec && spec.provider === 'nugetorg'
+    return spec && spec.provider === 'nuget'
   }
 
   async handle(request) {
@@ -33,7 +33,7 @@ class NugetFetch extends BaseHandler {
   async _getRegistryData(request) {
     const spec = this.toSpec(request)
     spec.revision = spec.revision || (await this._getLatestVersion(spec.name))
-    const baseUrl = providerMap.nugetorg
+    const baseUrl = providerMap.nuget
     // https://docs.microsoft.com/en-us/nuget/api/registration-base-url-resource
     // Example: https://api.nuget.org/v3/registration3/moq/4.8.2.json and follow catalogEntry
     const { body, statusCode } = await requestRetry.get(
@@ -46,7 +46,7 @@ class NugetFetch extends BaseHandler {
   async _getLatestVersion(name) {
     // https://docs.microsoft.com/en-us/nuget/api/package-base-address-resource
     // Example: https://api.nuget.org/v3-flatcontainer/moq/index.json
-    const baseUrl = providerMap.nugetorg
+    const baseUrl = providerMap.nuget
     const { body, statusCode } = await requestRetry.get(`${baseUrl}/v3-flatcontainer/${name}/index.json`)
     // If statusCode is not 200, XML may be returned
     if (statusCode === 200 && body.versions) {

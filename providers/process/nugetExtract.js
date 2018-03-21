@@ -50,7 +50,7 @@ class NugetExtract extends BaseHandler {
     if (registryData.published) request.document.releaseDate = new Date(registryData.published).toISOString()
     const manifestCandidates = this._discoverCandidateSourceLocations(manifest)
     const nuspecCandidates = await this._discoverCandidateSourceLocationsFromNuspec(spec)
-    const candidates = [...new Set([...manifestCandidates, ...nuspecCandidates])]
+    const candidates = [...manifestCandidates, ...nuspecCandidates]
     const sourceInfo = await sourceDiscovery(spec.revision, candidates, { githubToken: this.options.githubToken })
     if (sourceInfo) return (request.document.sourceInfo = sourceInfo)
   }
