@@ -6,6 +6,7 @@ const fs = require('fs')
 const path = require('path')
 const Request = require('ghcrawler').request
 const npm1k = require('npm1k')
+const requestRetry = require('requestretry').defaults({ json: true, maxAttempts: 3, fullResponse: false })
 
 class TopProcessor extends BaseHandler {
   get schemaVersion() {
@@ -18,7 +19,7 @@ class TopProcessor extends BaseHandler {
 
   canHandle(request) {
     const spec = this.toSpec(request)
-    return request.type === 'top' && spec && ['npmjs', 'mavencentral'].includes(spec.provider)
+    return request.type === 'top' && spec && ['npmjs', 'mavencentral', 'nugetorg'].includes(spec.provider)
   }
 
   handle(request) {
@@ -29,6 +30,8 @@ class TopProcessor extends BaseHandler {
         return this._processTopNpms(request)
       case 'mavencentral':
         return this._processTopMavenCentrals(request)
+      case 'nugetorg':
+        return this._processTopNugets(request)
       default:
         throw new Error(`Unknown provider type for 'top' request: ${spec.provider}`)
     }
@@ -78,6 +81,34 @@ class TopProcessor extends BaseHandler {
       groupId = groupId.substring(1, groupId.length - 1) // Remove quotes
       artifactId = artifactId.substring(1, artifactId.length - 1)
       return new Request('package', `cd:/maven/mavencentral/${groupId}/${artifactId}`)
+    })
+    await request.queueRequests(requests)
+    return request.markNoSave()
+  }
+
+  /* Example:
+  {
+    "type": "top",
+    "url":"cd:/nuget/nugetorg/-/moq",
+    "payload": {
+      "body": {
+        "start": 0,
+        "end": 100
+      }
+    }
+  }
+  */
+  async _processTopNugets(request) {
+    // https://docs.microsoft.com/en-us/nuget/api/search-query-service-resource
+    // Example: https://api-v2v3search-0.nuget.org/query?prerelease=false&skip=5&take=10
+    let { start, end } = request.document
+    if (start < 0) start = 0
+    if (end - start > 1000 || end - start <= 0) end = start + 1000
+    const topComponents = await requestRetry.get(
+      `https://api-v2v3search-0.nuget.org/query?prerelease=false&skip=${start}&take=${end - start}`
+    )
+    const requests = topComponents.data.map(component => {
+      return new Request('package', `cd:/nuget/nugetorg/-/${component.id}`)
     })
     await request.queueRequests(requests)
     return request.markNoSave()
