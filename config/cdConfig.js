@@ -30,7 +30,7 @@ module.exports = {
     git: {},
     mavenCentral: {},
     npmjs: {},
-    nugetorg: {}
+    nuget: {}
   },
   process: {
     cdsource: {},

@@ -11,7 +11,7 @@ module.exports = {
     git: require('./fetch/gitCloner'),
     mavenCentral: require('./fetch/mavenFetch'),
     npmjs: require('./fetch/npmjsFetch'),
-    nugetorg: require('./fetch/nugetorgFetch')
+    nuget: require('./fetch/nugetFetch')
   },
   process: {
     cdsource: require('./process/sourceExtract'),
