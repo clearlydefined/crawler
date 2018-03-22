@@ -6,6 +6,7 @@ const fs = require('fs')
 const { promisify } = require('util')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
 const SourceSpec = require('../../lib/sourceSpec')
+const { parseString } = require('xml2js')
 
 class NuGetExtract extends BaseHandler {
   get schemaVersion() {
@@ -55,8 +56,11 @@ class NuGetExtract extends BaseHandler {
     // Add interesting info
     if (registryData.published) request.document.releaseDate = new Date(registryData.published).toISOString()
     const manifestCandidates = this._discoverCandidateSourceLocations(manifest)
-    const nuspec = await this._getNuspec(nuspecLocation)
-    const nuspecCandidates = this._discoverCandidateSourceLocationsFromNuspec(nuspec)
+    const nuspecXml = await this._getNuspec(nuspecLocation)
+    const nuspec = await promisify(parseString)(nuspecXml, { trim: true, mergeAttrs: true, explicitArray: false })
+    const nuspecCandidates = this._discoverCandidateSourceLocations(
+      nuspec && nuspec.package ? nuspec.package.metadata : null
+    )
     const candidates = [...manifestCandidates, ...nuspecCandidates]
     const sourceInfo = await sourceDiscovery(manifest.version, candidates, { githubToken: this.options.githubToken })
     if (sourceInfo) return (request.document.sourceInfo = sourceInfo)
@@ -69,12 +73,6 @@ class NuGetExtract extends BaseHandler {
     if (manifest.projectUrl) candidateUrls.push(manifest.projectUrl)
     if (manifest.licenseUrl) candidateUrls.push(manifest.licenseUrl)
     return candidateUrls
-  }
-
-  _discoverCandidateSourceLocationsFromNuspec(nuspec) {
-    if (!nuspec) return []
-    const matched = nuspec.match(/https:\/\/github.com\/.*["<]{1}/g) || []
-    return matched.map(url => url.substring(0, url.length - 1))
   }
 }
 
