@@ -43,7 +43,7 @@ module.exports = {
     },
     package: {},
     scancode: {
-      installDir: config.get('SCANCODE_HOME') || 'C:\\installs\\scancode-toolkit-2.9.0b1',
+      installDir: config.get('SCANCODE_HOME') || 'C:\\installs\\scancode-toolkit-2.9.1',
       options: [
         '--copyright',
         '--license',
