@@ -10,12 +10,14 @@ module.exports = {
     cdDispatch: require('./fetch/dispatcher'),
     git: require('./fetch/gitCloner'),
     mavenCentral: require('./fetch/mavenFetch'),
-    npmjs: require('./fetch/npmjsFetch')
+    npmjs: require('./fetch/npmjsFetch'),
+    nuget: require('./fetch/nugetFetch')
   },
   process: {
     cdsource: require('./process/sourceExtract'),
     maven: require('./process/mavenExtract'),
     npm: require('./process/npmExtract'),
+    nuget: require('./process/nugetExtract'),
     package: require('./process/package'),
     scancode: require('./process/scancode'),
     source: require('./process/source'),

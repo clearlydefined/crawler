@@ -3,6 +3,7 @@
 
 const chai = require('chai')
 
+const { describe, it } = require('mocha')
 const expect = chai.expect
 
 describe('Test', () => {

@@ -8,6 +8,8 @@ const azblob = {
   container: config.get('HARVEST_AZBLOB_CONTAINER_NAME')
 }
 
+const githubToken = config.get('CRAWLER_GITHUB_TOKEN')
+
 const file = {
   location: config.get('FILE_STORE_LOCATION') || (process.platform === 'win32' ? 'c:/temp/cd' : '/tmp/cd')
 }
@@ -27,17 +29,21 @@ module.exports = {
     cdDispatch: {},
     git: {},
     mavenCentral: {},
-    npmjs: {}
+    npmjs: {},
+    nuget: {}
   },
   process: {
     cdsource: {},
     maven: {},
     npm: {
-      githubToken: config.get('CRAWLER_GITHUB_TOKEN')
+      githubToken
+    },
+    nuget: {
+      githubToken
     },
     package: {},
     scancode: {
-      installDir: config.get('SCANCODE_HOME') || 'C:\\installs\\scancode-toolkit-2.9.0b1',
+      installDir: config.get('SCANCODE_HOME') || 'C:\\installs\\scancode-toolkit-2.9.1',
       options: [
         '--copyright',
         '--license',
