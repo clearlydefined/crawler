@@ -7,7 +7,7 @@ const { promisify } = require('util')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
 const SourceSpec = require('../../lib/sourceSpec')
 
-class NugetExtract extends BaseHandler {
+class NuGetExtract extends BaseHandler {
   get schemaVersion() {
     return 1
   }
@@ -78,4 +78,4 @@ class NugetExtract extends BaseHandler {
   }
 }
 
-module.exports = options => new NugetExtract(options)
+module.exports = options => new NuGetExtract(options)

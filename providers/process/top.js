@@ -31,7 +31,7 @@ class TopProcessor extends BaseHandler {
       case 'mavencentral':
         return this._processTopMavenCentrals(request)
       case 'nuget':
-        return this._processTopNugets(request)
+        return this._processTopNuGets(request)
       default:
         throw new Error(`Unknown provider type for 'top' request: ${spec.provider}`)
     }
@@ -98,12 +98,12 @@ class TopProcessor extends BaseHandler {
     }
   }
   */
-  async _processTopNugets(request) {
+  async _processTopNuGets(request) {
     // https://docs.microsoft.com/en-us/nuget/api/search-query-service-resource
     // Example: https://api-v2v3search-0.nuget.org/query?prerelease=false&skip=5&take=10
     let { start, end } = request.document
-    if (start < 0) start = 0
-    if (end - start > 1000 || end - start <= 0) end = start + 1000
+    if (!start || start < 0) start = 0
+    if (!end || end - start > 1000 || end - start <= 0) end = start + 1000
     const topComponents = await requestRetry.get(
       `https://api-v2v3search-0.nuget.org/query?prerelease=false&skip=${start}&take=${end - start}`
     )
