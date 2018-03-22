@@ -11,7 +11,7 @@ const providerMap = {
   nuget: 'https://api.nuget.org'
 }
 
-class NugetFetch extends BaseHandler {
+class NuGetFetch extends BaseHandler {
   canHandle(request) {
     const spec = this.toSpec(request)
     return spec && spec.provider === 'nuget'
@@ -92,4 +92,4 @@ class NugetFetch extends BaseHandler {
   }
 }
 
-module.exports = options => new NugetFetch(options)
+module.exports = options => new NuGetFetch(options)
