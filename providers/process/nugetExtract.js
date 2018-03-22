@@ -58,7 +58,7 @@ class NuGetExtract extends BaseHandler {
     const nuspec = await this._getNuspec(nuspecLocation)
     const nuspecCandidates = this._discoverCandidateSourceLocationsFromNuspec(nuspec)
     const candidates = [...manifestCandidates, ...nuspecCandidates]
-    const sourceInfo = await sourceDiscovery(spec.revision, candidates, { githubToken: this.options.githubToken })
+    const sourceInfo = await sourceDiscovery(manifest.version, candidates, { githubToken: this.options.githubToken })
     if (sourceInfo) return (request.document.sourceInfo = sourceInfo)
   }
 

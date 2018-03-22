@@ -43,7 +43,7 @@ class NuGetFetch extends BaseHandler {
     // https://docs.microsoft.com/en-us/nuget/api/registration-base-url-resource
     // Example: https://api.nuget.org/v3/registration3/moq/4.8.2.json and follow catalogEntry
     const { body, statusCode } = await requestRetry.get(
-      `${baseUrl}/v3/registration3/${spec.name.toLowerCase()}/${spec.revision}.json`,
+      `${baseUrl}/v3/registration3/${spec.name}/${spec.revision}.json`,
       { json: true }
     )
     if (statusCode !== 200 || !body) return null
@@ -70,7 +70,7 @@ class NuGetFetch extends BaseHandler {
     return body
   }
 
-  // Nuspec is needed because package metadata API is not able to parse repository URL: https://github.com/NuGet/Home/issues/6725
+  // Nuspec is needed because package metadata API is not able to parse repository URL: https://github.com/NuGet/NuGetGallery/issues/5671
   async _getNuspec(spec) {
     // https://docs.microsoft.com/en-us/nuget/api/package-base-address-resource#download-package-manifest-nuspec
     // Example: https://api.nuget.org/v3-flatcontainer/newtonsoft.json/11.0.1/newtonsoft.json.nuspec
