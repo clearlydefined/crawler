@@ -32,10 +32,17 @@ const maven = {
   clearlydefined
 }
 
+const nuget = {
+  _type: 'nuget',
+  source,
+  clearlydefined
+}
+
 const package = {
   _type: 'package',
   npm,
-  maven
+  maven,
+  nuget
 }
 
 const entities = {
@@ -46,7 +53,8 @@ const entities = {
   clearlydefined,
   scancode,
   npm,
-  maven
+  maven,
+  nuget
 }
 
 module.exports = {

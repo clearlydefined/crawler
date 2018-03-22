@@ -69,8 +69,8 @@ class ScanCodeProcessor extends BaseHandler {
         request.document.location
       ].join(' ')
       exec(`cd ${this.options.installDir} && .${path.sep}scancode ${parameters}`, (error, stdout, stderr) => {
-        if (error || this._hasRealErrors(file.name)) {
-          request.markDead('Error', error ? error.message + stderr : 'ScanCode run failed')
+        if (this._isRealError(error) || this._hasRealErrors(file.name)) {
+          request.markDead('Error', error ? error.message : 'ScanCode run failed')
           return reject(error)
         }
         document._metadata.contentLocation = file.name
@@ -95,14 +95,17 @@ class ScanCodeProcessor extends BaseHandler {
     return { k: Math.round(bytes / 1024), count }
   }
 
-  // Scan the results file for any errors that are not just timeouts
+  // Workaround until https://github.com/nexB/scancode-toolkit/issues/983 is resolved
+  _isRealError(error) {
+    return error && error.message && !error.message.includes('Some files failed to scan properly')
+  }
+
+  // Scan the results file for any errors that are not just timeouts or other known errors
   _hasRealErrors(resultFile) {
     const results = JSON.parse(fs.readFileSync(resultFile))
     return results.files.some(file =>
       file.scan_errors.some(error => {
-        const matches = error.match(/ERROR: Processing interrupted: timeout after (\d+) seconds./)
-        const timeout = matches ? matches[1] : null
-        return timeout !== this.options.timeout.toString()
+        return !(error.includes('ERROR: Processing interrupted: timeout after') || error.includes('ValueError:'))
       })
     )
   }
@@ -118,9 +121,6 @@ class ScanCodeProcessor extends BaseHandler {
       exec(`cd ${this.options.installDir} && .${path.sep}scancode --version`, (error, stdout, stderr) => {
         if (error) return reject(error)
         _toolVersion = stdout.replace('ScanCode version ', '').trim()
-        if (_toolVersion === '2.9.0b1') {
-          _toolVersion = '2.9.0+b1'
-        }
         resolve(_toolVersion)
       })
     })
