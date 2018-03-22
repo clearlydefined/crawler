@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 const BaseHandler = require('../../lib/baseHandler')
-const requestRetry = require('requestretry').defaults({ maxAttempts: 3, fullResponse: true })
+const fs = require('fs')
+const { promisify } = require('util')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
 const SourceSpec = require('../../lib/sourceSpec')
 
@@ -27,7 +28,7 @@ class NugetExtract extends BaseHandler {
       // skip all the hard work if we are just traversing.
       const { spec } = super._process(request)
       this.addBasicToolLinks(request, spec)
-      const manifest = await this._getManifest(request.document.location)
+      const manifest = await this._getManifest(request.document.location.manifest)
       await this._createDocument(request, spec, manifest, request.document.registryData)
     }
     if (request.document.sourceInfo) {
@@ -38,18 +39,24 @@ class NugetExtract extends BaseHandler {
   }
 
   async _getManifest(location) {
-    const { body, statusCode } = await requestRetry.get(location, { json: true })
-    if (statusCode !== 200) return null
-    return body
+    const manifest = await promisify(fs.readFile)(location)
+    return JSON.parse(manifest.toString())
+  }
+
+  async _getNuspec(location) {
+    const nuspec = await promisify(fs.readFile)(location)
+    return nuspec.toString()
   }
 
   async _createDocument(request, spec, manifest, registryData) {
+    const nuspecLocation = request.document.location.nuspec
     // setup the manifest to be the new document for the request
     request.document = { _metadata: request.document._metadata, manifest, registryData }
     // Add interesting info
     if (registryData.published) request.document.releaseDate = new Date(registryData.published).toISOString()
     const manifestCandidates = this._discoverCandidateSourceLocations(manifest)
-    const nuspecCandidates = await this._discoverCandidateSourceLocationsFromNuspec(spec)
+    const nuspec = await this._getNuspec(nuspecLocation)
+    const nuspecCandidates = this._discoverCandidateSourceLocationsFromNuspec(nuspec)
     const candidates = [...manifestCandidates, ...nuspecCandidates]
     const sourceInfo = await sourceDiscovery(spec.revision, candidates, { githubToken: this.options.githubToken })
     if (sourceInfo) return (request.document.sourceInfo = sourceInfo)
@@ -64,15 +71,9 @@ class NugetExtract extends BaseHandler {
     return candidateUrls
   }
 
-  // For some reason catalogEntry API is not able to parse repository URL, so nuspec XML is needed ("repository": "" instead of <repository type="git" url="https://github.com/castleproject/Core"/>)
-  async _discoverCandidateSourceLocationsFromNuspec(spec) {
-    // https://docs.microsoft.com/en-us/nuget/api/package-base-address-resource#download-package-manifest-nuspec
-    // Example: https://api.nuget.org/v3-flatcontainer/newtonsoft.json/11.0.1/newtonsoft.json.nuspec
-    const { body, statusCode } = await requestRetry.get(
-      `https://api.nuget.org/v3-flatcontainer/${spec.name}/${spec.revision}/${spec.name}.nuspec`
-    )
-    if (statusCode !== 200) return []
-    const matched = body.match(/https:\/\/github.com\/.*["<]{1}/g) || []
+  _discoverCandidateSourceLocationsFromNuspec(nuspec) {
+    if (!nuspec) return []
+    const matched = nuspec.match(/https:\/\/github.com\/.*["<]{1}/g) || []
     return matched.map(url => url.substring(0, url.length - 1))
   }
 }
