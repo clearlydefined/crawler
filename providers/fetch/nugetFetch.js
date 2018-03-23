@@ -59,7 +59,8 @@ class NuGetFetch extends BaseHandler {
     })
     // If statusCode is not 200, XML may be returned
     if (statusCode === 200 && body.versions) {
-      return body.versions[body.versions.length - 1] // the versions are already sorted
+      const versions = body.versions.filter(version => !version.includes('build'))
+      return versions[versions.length - 1] // the versions are already sorted
     }
     return null
   }
