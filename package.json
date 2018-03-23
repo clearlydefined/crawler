@@ -35,7 +35,6 @@
     "moment": "^2.20.1",
     "morgan": "^1.9.0",
     "node-uuid": "^1.4.8",
-    "npm1k": "^1.0.2",
     "painless-config": "^0.1.0",
     "parse-github-url": "^1.0.2",
     "promise-retry": "^1.1.1",

@@ -5,7 +5,6 @@ const BaseHandler = require('../../lib/baseHandler')
 const fs = require('fs')
 const path = require('path')
 const Request = require('ghcrawler').request
-const npm1k = require('npm1k')
 const requestRetry = require('requestretry').defaults({ json: true, maxAttempts: 3, fullResponse: false })
 
 class TopProcessor extends BaseHandler {
@@ -37,24 +36,40 @@ class TopProcessor extends BaseHandler {
     }
   }
 
+  /* Example:
+  {
+    "type": "top",
+    "url":"cd:/npm/npmjs/-/redie/0.3.0",
+    "payload": {
+      "body": {
+        "start": 0,
+        "end": 100
+      }
+    }
+  }
+  */
   async _processTopNpms(request) {
-    return new Promise((resolve, reject) => {
-      npm1k((error, list) => {
-        if (error) return reject(error)
-        const { start, end } = request.document
-        list = start || end ? list.slice(start || 0, end) : list
-        const requests = list.map(p => {
-          let [namespace, name] = p.split('/')
-          if (!name) {
-            name = namespace
-            namespace = '-'
-          }
-          return new Request('package', `cd:/npm/npmjs/${namespace}/${name}`)
-        })
-        request.queueRequests(requests)
-        resolve(request.markNoSave())
+    let { start, end } = request.document
+    if (!start || start < 0) start = 0
+    if (!end || end - start > 1000 || end - start <= 0) end = start + 1000
+    const initialOffset = Math.floor(start / 36) * 36
+    let requests = []
+    for (let offset = initialOffset; offset < end; offset += 36) {
+      const response = await requestRetry.get(`https://www.npmjs.com/browse/depended?offset=${offset}`, {
+        headers: { 'x-spiferack': 1 }
       })
-    })
+      const requestsPage = response.packages.map(pkg => {
+        let [namespace, name] = pkg.name.split('/')
+        if (!name) {
+          name = namespace
+          namespace = '-'
+        }
+        return new Request('package', `cd:/npm/npmjs/${namespace}/${name}/${pkg.version}`)
+      })
+      requests = requests.concat(requestsPage)
+    }
+    await request.queueRequests(requests.slice(start - initialOffset, end - initialOffset))
+    return request.markNoSave()
   }
 
   /* Example:
