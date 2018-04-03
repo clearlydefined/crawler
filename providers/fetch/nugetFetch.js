@@ -40,7 +40,7 @@ class NuGetFetch extends BaseHandler {
   // query nuget to get the latest version if we don't already have that.
   async _getRegistryData(request) {
     const spec = this.toSpec(request)
-    spec.revision = spec.revision || (await this._getLatestVersion(spec.name))
+    spec.revision = this._normalizeVersion(spec.revision) || (await this._getLatestVersion(spec.name))
     const baseUrl = providerMap.nuget
     // https://docs.microsoft.com/en-us/nuget/api/registration-base-url-resource
     // Example: https://api.nuget.org/v3/registration3/moq/4.8.2.json and follow catalogEntry
@@ -50,6 +50,31 @@ class NuGetFetch extends BaseHandler {
     )
     if (statusCode !== 200 || !body) return null
     return body
+  }
+
+  // https://docs.microsoft.com/en-us/nuget/reference/package-versioning#normalized-version-numbers
+  _normalizeVersion(version) {
+    // 1.00 is treated as 1.0, 1.01.1 is treated as 1.1.1, 1.00.0.1 is treated as 1.0.0.1
+    let parts = version.split('.')
+    for (let i = 0; i < parts.length; i++) {
+      if (parts[i].startsWith('0') && parts[i].length > 1) {
+        let start = 0
+        for (let j = 0; j < parts[i].length - 1; j++) {
+          if (parts[i][j] === '0') {
+            start = j + 1
+          }
+        }
+        parts[i] = parts[i].slice(start)
+      }
+    }
+    version = parts.join('.')
+    // 1.0.0.0 is treated as 1.0.0, 1.0.01.0 is treated as 1.0.1
+    parts = version.split('.')
+    if (parts.length === 4 && parts[3] === '0') {
+      parts.pop()
+      return parts.join('.')
+    }
+    return version
   }
 
   async _getLatestVersion(name) {
@@ -77,8 +102,9 @@ class NuGetFetch extends BaseHandler {
   async _getNuspec(spec) {
     // https://docs.microsoft.com/en-us/nuget/api/package-base-address-resource#download-package-manifest-nuspec
     // Example: https://api.nuget.org/v3-flatcontainer/newtonsoft.json/11.0.1/newtonsoft.json.nuspec
+    const version = this._normalizeVersion(spec.revision)
     const { body, statusCode } = await requestRetry.get(
-      `https://api.nuget.org/v3-flatcontainer/${spec.name}/${spec.revision}/${spec.name}.nuspec`
+      `https://api.nuget.org/v3-flatcontainer/${spec.name}/${version}/${spec.name}.nuspec`
     )
     if (statusCode !== 200) return []
     return body
