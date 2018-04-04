@@ -57,8 +57,8 @@ module.exports = {
       timeout: 1000,
       processes: 2,
       format: '--json-pp',
-      maxCount: 10000, // Maximum file count in repo for local processing. Above this scanning is done as a build
-      maxSize: 500 * 1024, // Maximum repo size in KB after which scancode would run in build and not directly in crawler
+      maxCount: 100000, // Maximum file count in repo for local processing. Above this scanning is done as a build
+      maxSize: 5000 * 1024, // Maximum repo size in KB after which scancode would run in build and not directly in crawler
       build: {
         crawlerUrl: config.get('CRAWLER_SERVICE_URL') || 'http://localhost:5000',
         crawlerAuthToken: config.get('CRAWLER_SERVICE_AUTH_TOKEN') || 'secret',
