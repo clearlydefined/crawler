@@ -8,7 +8,7 @@ const { describe, it } = require('mocha')
 const expect = chai.expect
 
 describe('NuGet fetch', () => {
-  it('Should normalize version correctly', () => {
+  it('should normalize version correctly', () => {
     expect(NuGetFetch._normalizeVersion('1.0.0.0')).to.equal('1.0.0')
     expect(NuGetFetch._normalizeVersion('1.0.01.0')).to.equal('1.0.1')
     expect(NuGetFetch._normalizeVersion('1.00')).to.equal('1.0')
