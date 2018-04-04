@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
+const _ = require('lodash')
 const BaseHandler = require('../../lib/baseHandler')
 const fs = require('fs')
 const path = require('path')
@@ -54,27 +55,8 @@ class NuGetFetch extends BaseHandler {
 
   // https://docs.microsoft.com/en-us/nuget/reference/package-versioning#normalized-version-numbers
   _normalizeVersion(version) {
-    // 1.00 is treated as 1.0, 1.01.1 is treated as 1.1.1, 1.00.0.1 is treated as 1.0.0.1
-    let parts = version.split('.')
-    for (let i = 0; i < parts.length; i++) {
-      if (parts[i].startsWith('0') && parts[i].length > 1) {
-        let start = 0
-        for (let j = 0; j < parts[i].length - 1; j++) {
-          if (parts[i][j] === '0') {
-            start = j + 1
-          }
-        }
-        parts[i] = parts[i].slice(start)
-      }
-    }
-    version = parts.join('.')
-    // 1.0.0.0 is treated as 1.0.0, 1.0.01.0 is treated as 1.0.1
-    parts = version.split('.')
-    if (parts.length === 4 && parts[3] === '0') {
-      parts.pop()
-      return parts.join('.')
-    }
-    return version
+    const trimmed = version.split('.').map(part => _.trimStart(part, '0') || '0')
+    return (trimmed[3] === '0' ? trimmed.slice(0, 3) : trimmed).join('.')
   }
 
   async _getLatestVersion(name) {
