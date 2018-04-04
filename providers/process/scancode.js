@@ -105,7 +105,11 @@ class ScanCodeProcessor extends BaseHandler {
     const results = JSON.parse(fs.readFileSync(resultFile))
     return results.files.some(file =>
       file.scan_errors.some(error => {
-        return !(error.includes('ERROR: Processing interrupted: timeout after') || error.includes('ValueError:'))
+        return !(
+          error.includes('ERROR: Processing interrupted: timeout after') ||
+          error.includes('ValueError:') ||
+          error.includes('package.json')
+        )
       })
     )
   }
