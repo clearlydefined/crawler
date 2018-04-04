@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
+const _ = require('lodash')
 const BaseHandler = require('../../lib/baseHandler')
 const fs = require('fs')
 const path = require('path')
@@ -40,7 +41,7 @@ class NuGetFetch extends BaseHandler {
   // query nuget to get the latest version if we don't already have that.
   async _getRegistryData(request) {
     const spec = this.toSpec(request)
-    spec.revision = spec.revision || (await this._getLatestVersion(spec.name))
+    spec.revision = this._normalizeVersion(spec.revision) || (await this._getLatestVersion(spec.name))
     const baseUrl = providerMap.nuget
     // https://docs.microsoft.com/en-us/nuget/api/registration-base-url-resource
     // Example: https://api.nuget.org/v3/registration3/moq/4.8.2.json and follow catalogEntry
@@ -50,6 +51,12 @@ class NuGetFetch extends BaseHandler {
     )
     if (statusCode !== 200 || !body) return null
     return body
+  }
+
+  // https://docs.microsoft.com/en-us/nuget/reference/package-versioning#normalized-version-numbers
+  _normalizeVersion(version) {
+    const trimmed = version.split('.').map(part => _.trimStart(part, '0') || '0')
+    return (trimmed[3] === '0' ? trimmed.slice(0, 3) : trimmed).join('.')
   }
 
   async _getLatestVersion(name) {
@@ -77,8 +84,9 @@ class NuGetFetch extends BaseHandler {
   async _getNuspec(spec) {
     // https://docs.microsoft.com/en-us/nuget/api/package-base-address-resource#download-package-manifest-nuspec
     // Example: https://api.nuget.org/v3-flatcontainer/newtonsoft.json/11.0.1/newtonsoft.json.nuspec
+    const version = this._normalizeVersion(spec.revision)
     const { body, statusCode } = await requestRetry.get(
-      `https://api.nuget.org/v3-flatcontainer/${spec.name}/${spec.revision}/${spec.name}.nuspec`
+      `https://api.nuget.org/v3-flatcontainer/${spec.name}/${version}/${spec.name}.nuspec`
     )
     if (statusCode !== 200) return []
     return body
