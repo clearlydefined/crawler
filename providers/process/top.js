@@ -3,6 +3,7 @@
 
 const BaseHandler = require('../../lib/baseHandler')
 const fs = require('fs')
+const ghrequestor = require('ghrequestor')
 const path = require('path')
 const Request = require('ghcrawler').request
 const requestRetry = require('requestretry').defaults({ json: true, maxAttempts: 3, fullResponse: false })
@@ -18,7 +19,7 @@ class TopProcessor extends BaseHandler {
 
   canHandle(request) {
     const spec = this.toSpec(request)
-    return request.type === 'top' && spec && ['npmjs', 'mavencentral', 'nuget'].includes(spec.provider)
+    return request.type === 'top' && spec && ['npmjs', 'mavencentral', 'nuget', 'github'].includes(spec.provider)
   }
 
   handle(request) {
@@ -31,6 +32,8 @@ class TopProcessor extends BaseHandler {
         return this._processTopMavenCentrals(request)
       case 'nuget':
         return this._processTopNuGets(request)
+      case 'github':
+        return this._processAllGitHubOrgRepos(request)
       default:
         throw new Error(`Unknown provider type for 'top' request: ${spec.provider}`)
     }
@@ -125,6 +128,38 @@ class TopProcessor extends BaseHandler {
     const requests = topComponents.data.map(component => {
       return new Request('package', `cd:/nuget/nuget/-/${component.id}`)
     })
+    await request.queueRequests(requests)
+    return request.markNoSave()
+  }
+
+  /* Example:
+  {
+    "type": "top",
+    "url":"cd:/git/github/contosodev/test",
+    "payload": {
+    }
+  }
+  */
+  async _processAllGitHubOrgRepos(request) {
+    const { namespace } = this.toSpec(request)
+    const headers = {
+      'User-Agent': 'clearlydefined/scanning'
+    }
+    const token = this.options.githubToken
+    if (token) headers.Authorization = 'token ' + token
+    const repos = await ghrequestor.getAll(`https://api.github.com/orgs/${namespace}/repos`, {
+      headers,
+      tokenLowerBound: 10
+    })
+    const requests = []
+    for (let i = 0; i < repos.length; i++) {
+      const commits = await requestRetry.get(`https://api.github.com/repos/${namespace}/${repos[i].name}/commits`, {
+        headers
+      })
+      if (commits.length > 0) {
+        requests.push(new Request('source', `cd:/git/github/${namespace}/${repos[i].name}/${commits[0].sha}`))
+      }
+    }
     await request.queueRequests(requests)
     return request.markNoSave()
   }
