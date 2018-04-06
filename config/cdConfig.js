@@ -75,7 +75,9 @@ module.exports = {
       }
     },
     source: {},
-    top: {},
+    top: {
+      githubToken
+    },
     vsts: {
       apiToken: config.get('VSTS_API_TOKEN')
     }
