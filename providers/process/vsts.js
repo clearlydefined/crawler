@@ -25,7 +25,7 @@ class VstsProcessor extends BaseHandler {
   }
 
   canHandle(request) {
-    _toolVersion = (request.document && request.document.toolVersion) || '2.9.1'
+    _toolVersion = (request.document && request.document.toolVersion) || '2.9.2'
     return request.type === 'ingest-vsts'
   }
 
