@@ -8,9 +8,9 @@ ENV APPDIR=/opt/service
 #    apk add --no-cache bash git openssh
 
 # Scancode
-RUN curl -sL https://github.com/nexB/scancode-toolkit/releases/download/v2.9.1/scancode-toolkit-2.9.1.tar.bz2 | tar -C /opt -jx \
-  && /opt/scancode-toolkit-2.9.1/scancode --version
-ENV SCANCODE_HOME=/opt/scancode-toolkit-2.9.1
+RUN curl -sL https://github.com/nexB/scancode-toolkit/releases/download/v2.9.2/scancode-toolkit-2.9.2.tar.bz2 | tar -C /opt -jx \
+  && /opt/scancode-toolkit-2.9.2/scancode --version
+ENV SCANCODE_HOME=/opt/scancode-toolkit-2.9.2
 
 COPY package*.json /tmp/
 RUN cd /tmp && npm install --production
