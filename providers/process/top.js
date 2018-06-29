@@ -54,9 +54,8 @@ class TopProcessor extends BaseHandler {
   async _processTopNpms(request) {
     let { start, end } = request.document
     if (!start || start < 0) start = 0
-    if (!end || end - start > 1000 || end - start <= 0) end = start + 1000
+    if (!end || end - start <= 0) end = start + 1000
     const initialOffset = Math.floor(start / 36) * 36
-    let requests = []
     for (let offset = initialOffset; offset < end; offset += 36) {
       const response = await requestRetry.get(`https://www.npmjs.com/browse/depended?offset=${offset}`, {
         headers: { 'x-spiferack': 1 }
@@ -69,9 +68,8 @@ class TopProcessor extends BaseHandler {
         }
         return new Request('package', `cd:/npm/npmjs/${namespace}/${name}/${pkg.version}`)
       })
-      requests = requests.concat(requestsPage)
+      await request.queueRequests(requestsPage)
     }
-    await request.queueRequests(requests.slice(start - initialOffset, end - initialOffset))
     return request.markNoSave()
   }
 
@@ -119,16 +117,19 @@ class TopProcessor extends BaseHandler {
   async _processTopNuGets(request) {
     // https://docs.microsoft.com/en-us/nuget/api/search-query-service-resource
     // Example: https://api-v2v3search-0.nuget.org/query?prerelease=false&skip=5&take=10
+    const pageSize = 20
     let { start, end } = request.document
     if (!start || start < 0) start = 0
-    if (!end || end - start > 1000 || end - start <= 0) end = start + 1000
-    const topComponents = await requestRetry.get(
-      `https://api-v2v3search-0.nuget.org/query?prerelease=false&skip=${start}&take=${end - start}`
-    )
-    const requests = topComponents.data.map(component => {
-      return new Request('package', `cd:/nuget/nuget/-/${component.id}`)
-    })
-    await request.queueRequests(requests)
+    if (!end || end - start <= 0) end = start + 1000
+    for (let offset = start; offset < end; offset += pageSize) {
+      const topComponents = await requestRetry.get(
+        `https://api-v2v3search-0.nuget.org/query?prerelease=false&skip=${offset}&take=${pageSize}`
+      )
+      const requests = topComponents.data.map(component => {
+        return new Request('package', `cd:/nuget/nuget/-/${component.id}`)
+      })
+      await request.queueRequests(requests)
+    }
     return request.markNoSave()
   }
 
