@@ -60,7 +60,8 @@ class TopProcessor extends BaseHandler {
       const response = await requestRetry.get(`https://www.npmjs.com/browse/depended?offset=${offset}`, {
         headers: { 'x-spiferack': 1 }
       })
-      const requestsPage = response.packages.map(pkg => {
+      const packages = response.packages || []
+      const requestsPage = packages.map(pkg => {
         let [namespace, name] = pkg.name.split('/')
         if (!name) {
           name = namespace
