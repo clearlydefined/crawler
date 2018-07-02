@@ -9,21 +9,24 @@ function neighbors() {
 }
 
 const scancode = self
+const fossology = self
 
 // default ClearlyDefined tool
 const clearlydefined = self
 
 const source = {
   _type: 'source',
+  clearlydefined,
   scancode,
-  clearlydefined
+  fossology
 }
 
 const npm = {
   _type: 'npm',
   source,
+  clearlydefined,
   scancode,
-  clearlydefined
+  fossology
 }
 
 const maven = {
@@ -52,6 +55,7 @@ const entities = {
   package,
   clearlydefined,
   scancode,
+  fossology,
   npm,
   maven,
   nuget
