@@ -12,6 +12,22 @@ RUN curl -sL https://github.com/nexB/scancode-toolkit/releases/download/v2.9.2/s
   && /opt/scancode-toolkit-2.9.2/scancode --version
 ENV SCANCODE_HOME=/opt/scancode-toolkit-2.9.2
 
+# FOSSology
+WORKDIR /opt
+RUN git clone https://github.com/fossology/fossology.git
+
+WORKDIR /opt/fossology
+RUN apt-get update && \
+    apt-get install -y lsb-release sudo postgresql php5-curl libpq-dev libdbd-sqlite3-perl libspreadsheet-writeexcel-perl && \
+    /opt/fossology/utils/fo-installdeps -e -y && \
+    rm -rf /var/lib/apt/lists/*
+RUN curl -sS https://getcomposer.org/installer | php && \
+    mv composer.phar /usr/local/bin/composer
+RUN /opt/fossology/install/scripts/install-spdx-tools.sh
+RUN /opt/fossology/install/scripts/install-ninka.sh
+RUN make install
+ENV FOSSOLOGY_HOME=/usr/local/share/fossology
+
 COPY package*.json /tmp/
 RUN cd /tmp && npm install --production
 RUN mkdir -p "${APPDIR}" && cp -a /tmp/node_modules "${APPDIR}"
