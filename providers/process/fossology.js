@@ -6,7 +6,6 @@ const { exec } = require('child_process')
 const fs = require('fs')
 const path = require('path')
 const { promisify } = require('util')
-const VstsBuild = require('../../lib/build/vsts')
 const du = require('du')
 
 let _toolVersion
