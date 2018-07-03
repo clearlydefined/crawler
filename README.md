@@ -13,7 +13,10 @@ A service that crawls projects and packages for information relevant to ClearlyD
 
 That results in the ClearlyDefined crawler starting up and listening for POSTs on port 3000. See the [Configuration](#configuration) section for info on how to change the port.
 
-The crawler takes _requests_ to rummage around and find relevant information about projects. For example, to crawl an NPM, or a GitHub repo, POST one of the following JSON bodies to `http://localhost:3000/requests`. Be sure to include the `content-type: application/json` header in the request. Note that you can also queue an array of requests by POSTing a JSON array of request objects.
+## Queuing work with the crawler
+The crawler takes _requests_ to rummage around and find relevant information about projects. For example, to crawl an NPM, or a GitHub repo, POST one of the following JSON bodies to `http://localhost:3000/requests`. Note that you can also queue an array of requests by POSTing a JSON array of request objects. Be sure to include the following headers in your request:
+* `content-type: application/json` 
+* `authorization: bearer <your token>` - set the value here the same as you put in your `env.json`'s `CRAWLER_SERVICE_AUTH_TOKEN ` property or `secret` if you did not set the env value.
 
 ```json
 {
