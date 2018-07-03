@@ -41,7 +41,7 @@ class NuGetFetch extends BaseHandler {
   // query nuget to get the latest version if we don't already have that.
   async _getRegistryData(request) {
     const spec = this.toSpec(request)
-    spec.revision = this._normalizeVersion(spec.revision) || (await this._getLatestVersion(spec.name))
+    spec.revision = spec.revision ? this._normalizeVersion(spec.revision) : await this._getLatestVersion(spec.name)
     const baseUrl = providerMap.nuget
     // https://docs.microsoft.com/en-us/nuget/api/registration-base-url-resource
     // Example: https://api.nuget.org/v3/registration3/moq/4.8.2.json and follow catalogEntry
@@ -84,7 +84,7 @@ class NuGetFetch extends BaseHandler {
   async _getNuspec(spec) {
     // https://docs.microsoft.com/en-us/nuget/api/package-base-address-resource#download-package-manifest-nuspec
     // Example: https://api.nuget.org/v3-flatcontainer/newtonsoft.json/11.0.1/newtonsoft.json.nuspec
-    const version = this._normalizeVersion(spec.revision)
+    const version = spec.revision ? this._normalizeVersion(spec.revision) : await this._getLatestVersion(spec.name)
     const { body, statusCode } = await requestRetry.get(
       `https://api.nuget.org/v3-flatcontainer/${spec.name}/${version}/${spec.name}.nuspec`
     )
