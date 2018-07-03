@@ -70,6 +70,7 @@ class TopProcessor extends BaseHandler {
         return new Request('package', `cd:/npm/npmjs/${namespace}/${name}/${pkg.version}`)
       })
       await request.queueRequests(requestsPage)
+      console.log(`Queued ${requestsPage.length} NPM packages. Offset: ${offset}`)
     }
     return request.markNoSave()
   }
@@ -130,6 +131,7 @@ class TopProcessor extends BaseHandler {
         return new Request('package', `cd:/nuget/nuget/-/${component.id}`)
       })
       await request.queueRequests(requests)
+      console.log(`Queued ${requests.length} NuGet packages. Offset: ${offset}`)
     }
     return request.markNoSave()
   }
