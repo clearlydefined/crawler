@@ -18,10 +18,10 @@ class NpmFetch extends BaseHandler {
 
   async handle(request) {
     const spec = this.toSpec(request)
-    const registryData = await this._getRegistryData(request)
     spec.revision = registryData ? registryData.manifest.version : spec.revision
     // rewrite the request URL as it is used throughout the system to derive locations and urns etc.
     request.url = spec.toUrl()
+    const registryData = await this._getRegistryData(spec)
     const file = this._createTempFile(request)
     await this._getPackage(spec, file.name)
     const dir = this._createTempDir(request)
@@ -44,8 +44,7 @@ class NpmFetch extends BaseHandler {
 
   // query npmjs to get the latest and fullest metadata. Turns out that there is somehow more in the
   // service than in the package manifest in some cases (e.g., lodash).
-  async _getRegistryData(request) {
-    const spec = this.toSpec(request)
+  async _getRegistryData(spec) {
     // Per https://github.com/npm/registry/issues/45 we should retrieve the whole package and get the version we want from that.
     // The version-specific API (e.g. append /x.y.z to URL) does NOT work for scoped packages.
     const baseUrl = providerMap[spec.provider]
