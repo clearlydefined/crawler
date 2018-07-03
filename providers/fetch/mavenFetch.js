@@ -13,11 +13,10 @@ class MavenFetch extends BaseHandler {
 
   async handle(request) {
     const spec = this.toSpec(request)
-    // if there is no revision, return an empty doc. The processor will find
-    const registryData = await this._getRegistryData(request)
     spec.revision = spec.revision ? registryData.v : registryData.latestVersion
     // rewrite the request URL as it is used throughout the system to derive locations and urns etc.
     request.url = spec.toUrl()
+    const registryData = await this._getRegistryData(spec)
     const file = this._createTempFile(request)
     const code = await this._getArtifact(spec, file.name)
     if (code === 404) return request.markSkip('Missing  ')
@@ -40,8 +39,7 @@ class MavenFetch extends BaseHandler {
   }
 
   // query maven to get the latest version if we don't already have that.
-  async _getRegistryData(request) {
-    const spec = this.toSpec(request)
+  async _getRegistryData(spec) {
     const versionClause = spec.revision ? `+AND+v:"${spec.revision}"` : ''
     const url = `https://search.maven.org/solrsearch/select?q=g:"${spec.namespace}"+AND+a:"${
       spec.name
