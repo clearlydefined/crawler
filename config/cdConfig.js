@@ -74,6 +74,15 @@ module.exports = {
         }
       }
     },
+    fossology: {
+      installDir: config.get('FOSSOLOGY_HOME'),
+      options: [
+      ],
+      build: {
+        crawlerUrl: config.get('CRAWLER_SERVICE_URL') || 'http://localhost:5000',
+        crawlerAuthToken: config.get('CRAWLER_SERVICE_AUTH_TOKEN') || 'secret'
+     }
+    },
     source: {},
     top: {
       githubToken

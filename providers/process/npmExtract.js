@@ -34,6 +34,7 @@ class NpmExtract extends BaseHandler {
       await this._createDocument(request, manifest, request.document.registryData)
     }
     this.linkAndQueueTool(request, 'scancode')
+    this.linkAndQueueTool(request, 'fossology')
     if (request.document.sourceInfo) {
       const sourceSpec = SourceSpec.adopt(request.document.sourceInfo)
       this.linkAndQueue(request, 'source', sourceSpec.toEntitySpec())

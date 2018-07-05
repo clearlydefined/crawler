@@ -26,7 +26,9 @@ RUN curl -sS https://getcomposer.org/installer | php && \
 RUN /opt/fossology/install/scripts/install-spdx-tools.sh
 RUN /opt/fossology/install/scripts/install-ninka.sh
 RUN make install
-ENV FOSSOLOGY_HOME=/usr/local/share/fossology
+RUN /etc/init.d/postgresql start
+RUN /usr/local/lib/fossology/fo-postinstall
+ENV FOSSOLOGY_HOME=/usr/local/etc/fossology/mods-enabled
 
 COPY package*.json /tmp/
 RUN cd /tmp && npm install --production
