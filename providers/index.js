@@ -20,6 +20,7 @@ module.exports = {
     nuget: require('./process/nugetExtract'),
     package: require('./process/package'),
     scancode: require('./process/scancode'),
+    fossology: require('./process/fossology'),
     source: require('./process/source'),
     top: require('./process/top'),
     vsts: require('./process/vsts')

@@ -43,16 +43,15 @@ class FossologyProcessor extends BaseHandler {
 
     return new Promise((resolve, reject) => {
       // TODO add correct parameters and command line here
-      const parameters = [file.name, request.document.location].join(' ')
-      exec(`cd ${this.options.installDir} && .${path.sep}fossology ${parameters}`, (error, stdout, stderr) => {
-        if (this._isRealError(error) || this._hasRealErrors(file.name)) {
+      const parameters = ['-ld', request.document.location, '>', file.name].join(' ')
+      exec(`cd ${this.options.installDir} && .${path.sep}nomos${path.sep}agent${path.sep}nomos ${parameters}`, (error, stdout, stderr) => {
+        if (error) {
           request.markDead('Error', error ? error.message : 'FOSSology run failed')
           return reject(error)
         }
-
         // TODO update to indicate the correct content type for the FOSSology output
         document._metadata.contentLocation = file.name
-        document._metadata.contentType = 'application/json'
+        document._metadata.contentType = 'text/plain'
         document._metadata.releaseDate = request.document.releaseDate
         resolve(request)
       })
@@ -81,9 +80,9 @@ class FossologyProcessor extends BaseHandler {
   _detectVersion() {
     if (_toolVersion) return _toolVersion
     return new Promise((resolve, reject) => {
-      exec(`cd ${this.options.installDir} && .${path.sep}fossology --version`, (error, stdout, stderr) => {
+      exec(`cd ${this.options.installDir} && .${path.sep}nomos${path.sep}agent${path.sep}nomos -V`, (error, stdout, stderr) => {
         if (error) return reject(error)
-        _toolVersion = stdout.replace('FOSSology version ', '').trim()
+        _toolVersion = stdout.replace('nomos build version ', '').trim()
         resolve(_toolVersion)
       })
     })
