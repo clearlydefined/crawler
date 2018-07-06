@@ -38,11 +38,19 @@ const nuget = {
   clearlydefined
 }
 
+const gem = {
+  _type: 'gem',
+  source,
+  scancode,
+  clearlydefined
+}
+
 const package = {
   _type: 'package',
   npm,
   maven,
-  nuget
+  nuget,
+  gem
 }
 
 const entities = {
@@ -54,7 +62,8 @@ const entities = {
   scancode,
   npm,
   maven,
-  nuget
+  nuget,
+  gem
 }
 
 module.exports = {

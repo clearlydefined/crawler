@@ -18,10 +18,10 @@ class NpmFetch extends BaseHandler {
 
   async handle(request) {
     const spec = this.toSpec(request)
+    const registryData = await this._getRegistryData(spec)
     spec.revision = registryData ? registryData.manifest.version : spec.revision
     // rewrite the request URL as it is used throughout the system to derive locations and urns etc.
     request.url = spec.toUrl()
-    const registryData = await this._getRegistryData(spec)
     const file = this._createTempFile(request)
     await this._getPackage(spec, file.name)
     const dir = this._createTempDir(request)

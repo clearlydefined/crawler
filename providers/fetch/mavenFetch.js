@@ -13,10 +13,10 @@ class MavenFetch extends BaseHandler {
 
   async handle(request) {
     const spec = this.toSpec(request)
+    const registryData = await this._getRegistryData(spec)
     spec.revision = spec.revision ? registryData.v : registryData.latestVersion
     // rewrite the request URL as it is used throughout the system to derive locations and urns etc.
     request.url = spec.toUrl()
-    const registryData = await this._getRegistryData(spec)
     const file = this._createTempFile(request)
     const code = await this._getArtifact(spec, file.name)
     if (code === 404) return request.markSkip('Missing  ')

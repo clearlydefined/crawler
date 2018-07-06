@@ -20,7 +20,9 @@ class FetchDispatcher extends BaseHandler {
   async handle(request) {
     const start = Date.now()
     const processor = this._getProcessor(request)
-    if (!processor.shouldFetch(request)) return request.markNoSave()
+    if (!processor.shouldFetch(request)) {
+      return request.markNoSave()
+    }
     const documentKey = processor.getUrnFor(request)
     try {
       const document = await this.store.get(request.type, documentKey)
