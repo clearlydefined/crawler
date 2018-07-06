@@ -4,9 +4,9 @@
 const BaseHandler = require('../../lib/baseHandler')
 const fs = require('fs')
 const path = require('path')
-const request = require('request')
-var zlib = require('zlib')
-const decompressGz = require('decompress-gz')
+const yaml = require('js-yaml')
+const SourceSpec = require('../../lib/sourceSpec')
+const sourceDiscovery = require('../../lib/sourceDiscovery')
 
 class GemExtract extends BaseHandler {
   get schemaVersion() {
@@ -27,24 +27,37 @@ class GemExtract extends BaseHandler {
     if (this.isProcessing(request)) {
       const { document, spec } = super._process(request)
       this.addBasicToolLinks(request, spec)
-      const location = this._getMetadataLocation(request.document.location)
+      await this._createDocument(request, request.document.registryData)
     }
+    //queue scancode here
+    if (request.document.sourceInfo) {
+      const sourceSpec = SourceSpec.adopt(request.document.sourceInfo)
+      this.linkAndQueue(request, 'source', sourceSpec.toEntitySpec())
+    }
+    return request
   }
 
   async _getMetadataLocation(dir) {
-    if (fs.existsSync(path.join(dir, 'metadata.gz'))) {
-      await this.decompress(path.join(dir, 'metadata.gz'), dir, {
-        plugins: [decompressGz()]
-      })
-      // const gzBuffer = fs.createReadStream(`${dir}/metadata.gz`, { encoding: 'utf8' })
-      // const output = fs.createWriteStream(`${dir}/metadata.yaml`)
-      // await zlib
-      //   .createGunzip()
-      //   .pipe(gzBuffer)
-      //   .pipe(output)
+    if (fs.existsSync(path.join(dir, 'metadata.yaml'))) {
       return path.join(dir, 'metadata.yaml')
     }
-    return null
+  }
+
+  async _discoverSource(registryData) {
+    const candidates = []
+    registryData.bug_tracker_uri && candidates.push(registryData.bug_tracker_uri)
+    registryData.changelog_uri && candidates.push(registryData.changelog_uri)
+    registryData.documentation_uri && candidates.push(registryData.documentation_uri)
+    registryData.gem_uri && candidates.push(registryData.gem_uri)
+    registryData.homepage_uri && candidates.push(registryData.homepage_uri)
+    registryData.mailing_list_uri && candidates.push(registryData.mailing_list_uri)
+    registryData.source_code_uri && candidates.push(registryData.source_code_uri)
+    return sourceDiscovery(registryData.version, candidates, { githubToken: this.options.githubToken })
+  }
+
+  async _createDocument(request, registryData) {
+    const sourceInfo = await this._discoverSource(registryData)
+    if (sourceInfo) request.document.sourceInfo = sourceInfo
   }
 }
 
