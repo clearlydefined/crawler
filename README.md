@@ -93,7 +93,7 @@ The crawler tries to figure out details of the packages and source being travers
 
 See local.env.list, dev.env.list and prod.env.list tempate files.
 
-`HARVEST_AZBLOB_CONNECTION_STRING` can be a SAS connection string generated from clearlydefinedprod storage account with the following minimal set of permissions:
+`HARVEST_AZBLOB_CONNECTION_STRING` can be a Shared Access Signature connection string generated from clearlydefinedprod storage account with the following minimal set of permissions:
 
 - Allowed services: Blob, Queue
 - Allowed resource types: Container, Object
