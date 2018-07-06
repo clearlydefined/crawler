@@ -85,7 +85,7 @@ The directory where ScanCode is installed. If you don't set this, running ScanCo
 
 The crawler tries to figure out details of the packages and source being traversed using various GitHub API calls. For this it needs an API token. This can be a Personal Access Token (PAT) or the token for an OAuth App. The token does not need any special permissions, only public data is accessed. Without this key GitHub will severely rate limit the crawler (as it should) and you won't get very far.
 
-# Production configuration
+# Production environment configuration
 
 In order to run ClearlyDefined Crawler against Azure production environment, the crawler should be configured as specified in prod.env.json file.
 `HARVEST_AZBLOB_CONNECTION_STRING` can be a SAS connection string generated from clearlydefinedprod storage account with the following minimal set of permissions:
