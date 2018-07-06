@@ -85,14 +85,25 @@ The directory where ScanCode is installed. If you don't set this, running ScanCo
 
 The crawler tries to figure out details of the packages and source being traversed using various GitHub API calls. For this it needs an API token. This can be a Personal Access Token (PAT) or the token for an OAuth App. The token does not need any special permissions, only public data is accessed. Without this key GitHub will severely rate limit the crawler (as it should) and you won't get very far.
 
-# Production environment configuration
+# Docker
 
-In order to run ClearlyDefined Crawler against Azure production environment, the crawler should be configured as specified in prod.env.json file.
+## Run Docker image from Docker Hub
+
+`docker run --env-file ./<env_name>.env.list clearlydefined/crawler`
+
+See local.env.list, dev.env.list and prod.env.list tempate files.
+
 `HARVEST_AZBLOB_CONNECTION_STRING` can be a SAS connection string generated from clearlydefinedprod storage account with the following minimal set of permissions:
 
 - Allowed services: Blob, Queue
 - Allowed resource types: Container, Object
 - Allowed permissions: Read, Write, Add, Process
+
+## Build and run Docker image locally
+
+`docker build -t crawler .`
+
+`docker run --rm --env-file ./local.env.list crawler`
 
 # ClearlyDefined, defined.
 

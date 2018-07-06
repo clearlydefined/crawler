@@ -12,6 +12,14 @@ RUN curl -sL https://github.com/nexB/scancode-toolkit/releases/download/v2.9.2/s
   && /opt/scancode-toolkit-2.9.2/scancode --version
 ENV SCANCODE_HOME=/opt/scancode-toolkit-2.9.2
 
+ENV CRAWLER_DEADLETTER_PROVIDER=azblob
+ENV CRAWLER_NAME=cdcrawlerprod
+ENV CRAWLER_QUEUE_PREFIX=cdcrawlerprod
+ENV CRAWLER_QUEUE_PROVIDER=storageQueue
+ENV CRAWLER_STORE_PROVIDER=cdDispatch+azblob+webhook
+ENV CRAWLER_WEBHOOK_URL=https://api.clearlydefined.io/webhook
+ENV HARVEST_AZBLOB_CONTAINER_NAME=production
+
 COPY package*.json /tmp/
 RUN cd /tmp && npm install --production
 RUN mkdir -p "${APPDIR}" && cp -a /tmp/node_modules "${APPDIR}"
