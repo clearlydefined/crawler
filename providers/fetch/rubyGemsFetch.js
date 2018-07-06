@@ -1,0 +1,64 @@
+// Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
+// SPDX-License-Identifier: MIT
+
+const BaseHandler = require('../../lib/baseHandler')
+const nodeRequest = require('request')
+const requestRetry = require('requestretry').defaults({ maxAttempts: 3, fullResponse: true })
+const fs = require('fs')
+const zlib = require('zlib')
+
+const providerMap = {
+  rubyGems: 'https://rubygems.org'
+}
+
+class RubyGemsFetch extends BaseHandler {
+  canHandle(request) {
+    const spec = this.toSpec(request)
+    return spec && spec.provider === 'rubygems'
+  }
+
+  async handle(request) {
+    const spec = this.toSpec(request)
+    const registryData = await this._getRegistryData(spec)
+    spec.revision = spec.revision || registryData.version
+    request.url = spec.toUrl()
+    const file = this._createTempFile(request)
+    await this._getPackage(spec, file.name)
+    const dir = this._createTempDir(request)
+    await this.decompress(file.name, dir.name)
+    request.document = this._createDocument(dir, registryData)
+    request.contentOrigin = 'origin'
+    return request
+  }
+
+  async _getRegistryData(spec) {
+    const baseUrl = providerMap.rubyGems
+    const { body, statusCode } = await requestRetry.get(`${baseUrl}/api/v1/gems/${spec.name}.json`, {
+      json: true
+    })
+    if (statusCode !== 200 || !body) return null
+    return body
+  }
+
+  async _getPackage(spec, destination) {
+    return new Promise((resolve, reject) => {
+      nodeRequest
+        .get(this._buildUrl(spec), (error, response) => {
+          if (error) return reject(error)
+          if (response.statusCode !== 200) reject(new Error(`${response.statusCode} ${response.statusMessage}`))
+        })
+        .pipe(fs.createWriteStream(destination).on('finish', () => resolve(null)))
+    })
+  }
+
+  _buildUrl(spec) {
+    const fullName = spec.namespace ? `${spec.namespace}/${spec.name}` : spec.name
+    return `${providerMap.rubyGems}/downloads/${fullName}-${spec.revision}.gem`
+  }
+
+  _createDocument(dir, registryData) {
+    return { location: dir.name, registryData }
+  }
+}
+
+module.exports = options => new RubyGemsFetch(options)

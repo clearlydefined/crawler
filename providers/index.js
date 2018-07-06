@@ -11,10 +11,12 @@ module.exports = {
     git: require('./fetch/gitCloner'),
     mavenCentral: require('./fetch/mavenFetch'),
     npmjs: require('./fetch/npmjsFetch'),
-    nuget: require('./fetch/nugetFetch')
+    nuget: require('./fetch/nugetFetch'),
+    rubygems: require('./fetch/rubyGemsFetch')
   },
   process: {
     cdsource: require('./process/sourceExtract'),
+    gem: require('./process/gemExtract'),
     maven: require('./process/mavenExtract'),
     npm: require('./process/npmExtract'),
     nuget: require('./process/nugetExtract'),
