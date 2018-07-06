@@ -14,9 +14,11 @@ A service that crawls projects and packages for information relevant to ClearlyD
 That results in the ClearlyDefined crawler starting up and listening for POSTs on port 3000. See the [Configuration](#configuration) section for info on how to change the port.
 
 ## Queuing work with the crawler
+
 The crawler takes _requests_ to rummage around and find relevant information about projects. For example, to crawl an NPM, or a GitHub repo, POST one of the following JSON bodies to `http://localhost:3000/requests`. Note that you can also queue an array of requests by POSTing a JSON array of request objects. Be sure to include the following headers in your request:
-* `content-type: application/json` 
-* `authorization: bearer <your token>` - set the value here the same as you put in your `env.json`'s `CRAWLER_SERVICE_AUTH_TOKEN ` property or `secret` if you did not set the env value.
+
+- `content-type: application/json`
+- `authorization: bearer <your token>` - set the value here the same as you put in your `env.json`'s `CRAWLER_SERVICE_AUTH_TOKEN` property or `secret` if you did not set the env value.
 
 ```json
 {
@@ -82,6 +84,15 @@ The directory where ScanCode is installed. If you don't set this, running ScanCo
 ### CRAWLER_GITHUB_TOKEN
 
 The crawler tries to figure out details of the packages and source being traversed using various GitHub API calls. For this it needs an API token. This can be a Personal Access Token (PAT) or the token for an OAuth App. The token does not need any special permissions, only public data is accessed. Without this key GitHub will severely rate limit the crawler (as it should) and you won't get very far.
+
+# Production configuration
+
+In order to run ClearlyDefined Crawler against Azure production environment, the crawler should be configured as specified in prod.env.json file.
+`HARVEST_AZBLOB_CONNECTION_STRING` can be a SAS connection string generated from clearlydefinedprod storage account with the following minimal set of permissions:
+
+- Allowed services: Blob, Queue
+- Allowed resource types: Container, Object
+- Allowed permissions: Read, Write, Add, Process
 
 # ClearlyDefined, defined.
 
