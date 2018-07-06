@@ -6,6 +6,7 @@ const nodeRequest = require('request')
 const requestRetry = require('requestretry').defaults({ maxAttempts: 3, fullResponse: true })
 const fs = require('fs')
 const zlib = require('zlib')
+const path = require('path')
 
 const providerMap = {
   rubyGems: 'https://rubygems.org'
@@ -26,7 +27,8 @@ class RubyGemsFetch extends BaseHandler {
     await this._getPackage(spec, file.name)
     const dir = this._createTempDir(request)
     await this.decompress(file.name, dir.name)
-    request.document = this._createDocument(dir, registryData)
+    await this._extractFiles(dir.name)
+    request.document = await this._createDocument(dir, registryData)
     request.contentOrigin = 'origin'
     return request
   }
@@ -57,7 +59,41 @@ class RubyGemsFetch extends BaseHandler {
   }
 
   _createDocument(dir, registryData) {
-    return { location: dir.name, registryData }
+    const authors = registryData.authors
+    const licenses = registryData.licenses
+    const releaseDate = this._extractReleaseDate(dir.name)
+    return { location: dir.name, registryData, authors, licenses, releaseDate }
+  }
+
+  async _extractFiles(dirName) {
+    if (fs.existsSync(path.join(dirName, 'metadata.gz'))) {
+      await new Promise((resolve, reject) => {
+        fs.createReadStream(`${dirName}/metadata.gz`)
+          .pipe(zlib.createGunzip())
+          .on('data', data => {
+            fs.writeFile(`${dirName}/metadata.txt`, data, error => {
+              if (error) return reject(error)
+              return resolve()
+            })
+          })
+      })
+    }
+    if (fs.existsSync(path.join(dirName, 'data.tar.gz'))) {
+      await this.decompress(`${dirName}/data.tar.gz`, `${dirName}/content`)
+    }
+  }
+
+  _extractReleaseDate(dirName) {
+    if (fs.existsSync(path.join(dirName, 'metadata.txt'))) {
+      const file = fs.readFileSync(`${dirName}/metadata.txt`, 'utf8')
+      const regexp = /date:\s\d{4}-\d{1,2}-\d{1,2}/
+      const releaseDate = file.match(regexp)
+      if (releaseDate) {
+        const date = releaseDate[0].match(/\d{4}-\d{1,2}-\d{1,2}/)
+        return date
+      }
+      return null
+    }
   }
 }
 
