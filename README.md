@@ -89,7 +89,7 @@ The crawler tries to figure out details of the packages and source being travers
 
 ## Run Docker image from Docker Hub
 
-`docker run --env-file ./<env_name>.env.list clearlydefined/crawler`
+`docker run --env-file ./<env_name>.env.list -p 5000:4000 clearlydefined/crawler`
 
 See local.env.list, dev.env.list and prod.env.list tempate files.
 
@@ -103,7 +103,7 @@ See local.env.list, dev.env.list and prod.env.list tempate files.
 
 `docker build -t crawler .`
 
-`docker run --rm --env-file ./local.env.list crawler`
+`docker run --rm --env-file ./local.env.list -p 5000:4000 crawler`
 
 # ClearlyDefined, defined.
 
