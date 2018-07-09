@@ -21,7 +21,7 @@ class RubyGemsFetch extends BaseHandler {
   async handle(request) {
     const spec = this.toSpec(request)
     const registryData = await this._getRegistryData(spec)
-    spec.revision = spec.revision || registryData.version
+    spec.revision = spec.revision || registryData ? registryData.version : null
     request.url = spec.toUrl()
     const file = this._createTempFile(request)
     await this._getPackage(spec, file.name)
@@ -59,10 +59,8 @@ class RubyGemsFetch extends BaseHandler {
   }
 
   _createDocument(dir, registryData) {
-    const authors = registryData.authors
-    const licenses = registryData.licenses
     const releaseDate = this._extractReleaseDate(dir.name)
-    return { location: dir.name, registryData, authors, licenses, releaseDate }
+    return { location: dir.name + '/content', registryData, releaseDate }
   }
 
   async _extractFiles(dirName) {
@@ -88,11 +86,7 @@ class RubyGemsFetch extends BaseHandler {
       const file = fs.readFileSync(`${dirName}/metadata.txt`, 'utf8')
       const regexp = /date:\s\d{4}-\d{1,2}-\d{1,2}/
       const releaseDate = file.match(regexp)
-      if (releaseDate) {
-        const date = releaseDate[0].match(/\d{4}-\d{1,2}-\d{1,2}/)
-        return date
-      }
-      return null
+      return releaseDate[0] ? releaseDate[0].substring(5).trim() : null
     }
   }
 }
