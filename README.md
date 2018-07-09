@@ -11,12 +11,14 @@ A service that crawls projects and packages for information relevant to ClearlyD
 1.  Install [ScanCode](https://github.com/nexB/scancode-toolkit) if desired.
 1.  Run `npm start`
 
-That results in the ClearlyDefined crawler starting up and listening for POSTs on port 3000. See the [Configuration](#configuration) section for info on how to change the port.
+That results in the ClearlyDefined crawler starting up and listening for POSTs on port 5000. See the [Configuration](#configuration) section for info on how to change the port.
 
 ## Queuing work with the crawler
-The crawler takes _requests_ to rummage around and find relevant information about projects. For example, to crawl an NPM, or a GitHub repo, POST one of the following JSON bodies to `http://localhost:3000/requests`. Note that you can also queue an array of requests by POSTing a JSON array of request objects. Be sure to include the following headers in your request:
-* `content-type: application/json` 
-* `authorization: bearer <your token>` - set the value here the same as you put in your `env.json`'s `CRAWLER_SERVICE_AUTH_TOKEN ` property or `secret` if you did not set the env value.
+
+The crawler takes _requests_ to rummage around and find relevant information about projects. For example, to crawl an NPM, or a GitHub repo, POST one of the following JSON bodies to `http://localhost:5000/requests`. Note that you can also queue an array of requests by POSTing a JSON array of request objects. Be sure to include the following headers in your request:
+
+- `content-type: application/json`
+- `authorization: bearer <your token>` - set the value here the same as you put in your `env.json`'s `CRAWLER_SERVICE_AUTH_TOKEN` property or `secret` if you did not set the env value.
 
 ```json
 {
@@ -82,6 +84,26 @@ The directory where ScanCode is installed. If you don't set this, running ScanCo
 ### CRAWLER_GITHUB_TOKEN
 
 The crawler tries to figure out details of the packages and source being traversed using various GitHub API calls. For this it needs an API token. This can be a Personal Access Token (PAT) or the token for an OAuth App. The token does not need any special permissions, only public data is accessed. Without this key GitHub will severely rate limit the crawler (as it should) and you won't get very far.
+
+# Docker
+
+## Run Docker image from Docker Hub
+
+`docker run --env-file ../<env_name>.env.list -p 5000:5000 clearlydefined/crawler`
+
+See local.env.list, dev.env.list and prod.env.list tempate files.
+
+`HARVEST_AZBLOB_CONNECTION_STRING` can be either an account key-based connection string or a Shared Access Signature (SAS) connection string. SAS connection string must be generated from `clearlydefinedprod` storage account with the following minimal set of permissions:
+
+- Allowed services: Blob, Queue
+- Allowed resource types: Container, Object
+- Allowed permissions: Read, Write, Add, Process
+
+## Build and run Docker image locally
+
+`docker build -t crawler .`
+
+`docker run --rm --env-file ../local.env.list -p 5000:5000 crawler`
 
 # ClearlyDefined, defined.
 
