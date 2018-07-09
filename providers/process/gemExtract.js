@@ -23,13 +23,12 @@ class GemExtract extends BaseHandler {
   }
 
   async handle(request) {
-    console.log('gem extract')
     if (this.isProcessing(request)) {
-      const { document, spec } = super._process(request)
+      const { spec } = super._process(request)
       this.addBasicToolLinks(request, spec)
       await this._createDocument(request, request.document.registryData)
     }
-    //queue scancode here
+    this.linkAndQueueTool(request, 'scancode')
     if (request.document.sourceInfo) {
       const sourceSpec = SourceSpec.adopt(request.document.sourceInfo)
       this.linkAndQueue(request, 'source', sourceSpec.toEntitySpec())
@@ -37,14 +36,11 @@ class GemExtract extends BaseHandler {
     return request
   }
 
-  async _getMetadataLocation(dir) {
-    if (fs.existsSync(path.join(dir, 'metadata.yaml'))) {
-      return path.join(dir, 'metadata.yaml')
-    }
-  }
-
   async _discoverSource(registryData) {
     const candidates = []
+    if (!registryData) {
+      return null
+    }
     registryData.bug_tracker_uri && candidates.push(registryData.bug_tracker_uri)
     registryData.changelog_uri && candidates.push(registryData.changelog_uri)
     registryData.documentation_uri && candidates.push(registryData.documentation_uri)
