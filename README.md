@@ -103,7 +103,7 @@ See local.env.list, dev.env.list and prod.env.list tempate files.
 
 `docker build -t crawler .`
 
-`docker run --rm --env-file ./local.env.list -p 5000:4000 crawler`
+`docker run --rm --env-file ../local.env.list -p 5000:4000 crawler`
 
 # ClearlyDefined, defined.
 
