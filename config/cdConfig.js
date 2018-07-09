@@ -86,7 +86,7 @@ module.exports = {
     dispatcher: config.get('CRAWLER_STORE_PROVIDER') || 'file',
     cdDispatch: {},
     webhook: {
-      url: config.get('CRAWLER_WEBHOOK_URL') || 'http://localhost:5000/webhook',
+      url: config.get('CRAWLER_WEBHOOK_URL') || 'http://localhost:4000/webhook',
       token: config.get('CRAWLER_WEBHOOK_TOKEN')
     },
     azblob,
