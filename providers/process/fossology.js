@@ -8,6 +8,7 @@ const path = require('path')
 const { promisify } = require('util')
 const du = require('du')
 
+const writeFile = promisify(fs.writeFile)
 let _toolVersion
 
 class FossologyProcessor extends BaseHandler {
@@ -41,19 +42,57 @@ class FossologyProcessor extends BaseHandler {
       `Analyzing ${request.toString()} using FOSSology. input: ${request.document.location} output: ${file.name}`
     )
 
+    // get file list need to process 
+    const file_list = await this._getFilelist(document)
+    // get nomos output
+    const nomosStdout = await this._getNomos(request)
+    // get copyright output
+    const copyrightStdout = await this._getCopyright(request, file_list)
+
+    console.log(nomosStdout)
+    console.log(copyrightStdout)
+    // TODO update to indicate the correct content type for the FOSSology output
+    request.document._metadata.contentLocation = file.name
+    request.document._metadata.contentType = 'text/plain'
+    request.document._metadata.releaseDate = request.document.releaseDate
+  }
+
+  async _getNomos(request) {
     return new Promise((resolve, reject) => {
       // TODO add correct parameters and command line here
-      const parameters = ['-ld', request.document.location, '>', file.name].join(' ')
-      exec(`cd ${this.options.installDir} && .${path.sep}nomos${path.sep}agent${path.sep}nomos ${parameters}`, (error, stdout, stderr) => {
+      const parameters = ['-ld', request.document.location].join(' ')
+      exec(`cd ${this.options.installDir} && ./nomos/agent/nomos ${parameters}`, (error, stdout, stderr) => {
         if (error) {
           request.markDead('Error', error ? error.message : 'FOSSology run failed')
           return reject(error)
         }
-        // TODO update to indicate the correct content type for the FOSSology output
-        document._metadata.contentLocation = file.name
-        document._metadata.contentType = 'text/plain'
-        document._metadata.releaseDate = request.document.releaseDate
-        resolve(request)
+        resolve(stdout)
+      })
+    })
+  }
+
+  async _getCopyright(request, files) {
+    return new Promise((resolve, reject) => {
+      // TODO add correct parameters and command line here
+      const parameters = ['--files', files].join(' ')
+      exec(`cd ${this.options.installDir} && ./copyright/agent/copyright ${parameters}`, (error, stdout, stderr) => {
+        if (error) {
+          request.markDead('Error', error ? error.message : 'FOSSology CopyRight tool run failed')
+          return reject(error)
+        }
+        resolve(stdout)
+      })
+    })
+  }
+
+  async _getFilelist(document) {
+    return new Promise((resolve, reject) => {
+      exec(`find ${document.location} -type f -print |tr "\\n" " "`, (error, stdout, stderr) => {
+        if (error) {
+          return reject(error)
+        }
+        //this.logger.info(stdout)
+        resolve(stdout)
       })
     })
   }
@@ -82,7 +121,8 @@ class FossologyProcessor extends BaseHandler {
     return new Promise((resolve, reject) => {
       exec(`cd ${this.options.installDir} && .${path.sep}nomos${path.sep}agent${path.sep}nomos -V`, (error, stdout, stderr) => {
         if (error) return reject(error)
-        _toolVersion = stdout.replace('nomos build version ', '').trim()
+        _toolVersion = stdout.replace('nomos\ build\ version:', '').trim()
+        _toolVersion = _toolVersion.replace(/r\(.*\)./, '').trim()
         resolve(_toolVersion)
       })
     })
