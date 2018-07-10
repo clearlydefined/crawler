@@ -48,9 +48,12 @@ class FossologyProcessor extends BaseHandler {
     const nomosStdout = await this._getNomos(request)
     // get copyright output
     const copyrightStdout = await this._getCopyright(request, file_list)
+    // get monk output
+    const monkStdout = await this._getMonk(request, file_list)
 
     console.log(nomosStdout)
     console.log(copyrightStdout)
+    console.log(monkStdout)
     // TODO update to indicate the correct content type for the FOSSology output
     request.document._metadata.contentLocation = file.name
     request.document._metadata.contentType = 'text/plain'
@@ -78,6 +81,20 @@ class FossologyProcessor extends BaseHandler {
       exec(`cd ${this.options.installDir} && ./copyright/agent/copyright ${parameters}`, (error, stdout, stderr) => {
         if (error) {
           request.markDead('Error', error ? error.message : 'FOSSology CopyRight tool run failed')
+          return reject(error)
+        }
+        resolve(stdout)
+      })
+    })
+  }
+
+  async _getMonk(request, files) {
+    return new Promise((resolve, reject) => {
+      // TODO add correct parameters and command line here
+      const parameters = [files]
+      exec(`cd ${this.options.installDir} && ./monk/agent/monk ${parameters}`, (error, stdout, stderr) => {
+        if (error) {
+          request.markDead('Error', error ? error.message : 'FOSSology Monk tool run failed')
           return reject(error)
         }
         resolve(stdout)
