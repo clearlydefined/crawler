@@ -38,11 +38,19 @@ const nuget = {
   clearlydefined
 }
 
+const pypi = {
+  _type: 'pypi',
+  source,
+  scancode,
+  clearlydefined
+}
+
 const package = {
   _type: 'package',
   npm,
   maven,
-  nuget
+  nuget,
+  pypi
 }
 
 const entities = {
@@ -54,7 +62,8 @@ const entities = {
   scancode,
   npm,
   maven,
-  nuget
+  nuget,
+  pypi
 }
 
 module.exports = {
