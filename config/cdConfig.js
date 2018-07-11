@@ -30,11 +30,13 @@ module.exports = {
     git: {},
     mavenCentral: {},
     npmjs: {},
-    nuget: {}
+    nuget: {},
+    pypi: {}
   },
   process: {
     cdsource: {},
     maven: {},
+    pypi: {},
     npm: {
       githubToken
     },
