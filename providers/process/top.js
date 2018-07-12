@@ -34,8 +34,6 @@ class TopProcessor extends BaseHandler {
         return this._processTopMavenCentrals(request)
       case 'nuget':
         return this._processTopNuGets(request)
-      case 'pypi':
-        return this._processTopPyPis(request)
       case 'github':
         return this._processAllGitHubOrgRepos(request)
       default:
@@ -91,20 +89,20 @@ class TopProcessor extends BaseHandler {
     }
   }
   */
-  async _processTopPyPis(request) {
-    let { start, end } = request.document
-    const response = await requestRetry.get(
-      `https://hugovk.github.io/top-pypi-packages/top-pypi-packages-30-days.min.json`,
-      {}
-    )
-    const requests = []
-    for (let offset = start; offset < end; offset++) {
-      const packageName = response.rows[offset].project
-      requests.push(new Request('package', `cd:/pypi/pypi/-/${packageName}`))
-    }
-    await request.queueRequests(requests)
-    return request.markNoSave()
-  }
+  // async _processTopPyPis(request) {
+  //   let { start, end } = request.document
+  //   const response = await requestRetry.get(
+  //     `https://hugovk.github.io/top-pypi-packages/top-pypi-packages-30-days.min.json`,
+  //     {}
+  //   )
+  //   const requests = []
+  //   for (let offset = start; offset < end; offset++) {
+  //     const packageName = response.rows[offset].project
+  //     requests.push(new Request('package', `cd:/pypi/pypi/-/${packageName}`))
+  //   }
+  //   await request.queueRequests(requests)
+  //   return request.markNoSave()
+  // }
 
   /* Example:
   {
