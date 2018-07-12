@@ -38,8 +38,7 @@ class RubyGemsFetch extends BaseHandler {
     const { body, statusCode } = await requestRetry.get(`${baseUrl}/api/v1/gems/${spec.name}.json`, {
       json: true
     })
-    if (statusCode !== 200 || !body) return null
-    return body
+    return statusCode === 200 && body ? body : null
   }
 
   async _getPackage(spec, destination) {
@@ -60,7 +59,7 @@ class RubyGemsFetch extends BaseHandler {
 
   _createDocument(dir, registryData) {
     const releaseDate = this._extractReleaseDate(dir.name)
-    return { location: dir.name + '/content', registryData, releaseDate }
+    return { location: dir.name + '/data', registryData, releaseDate }
   }
 
   async _extractFiles(dirName) {
@@ -76,9 +75,8 @@ class RubyGemsFetch extends BaseHandler {
           })
       })
     }
-    if (fs.existsSync(path.join(dirName, 'data.tar.gz'))) {
-      await this.decompress(`${dirName}/data.tar.gz`, `${dirName}/content`)
-    }
+    if (fs.existsSync(path.join(dirName, 'data.tar.gz')))
+      await this.decompress(`${dirName}/data.tar.gz`, `${dirName}/data`)
   }
 
   _extractReleaseDate(dirName) {
