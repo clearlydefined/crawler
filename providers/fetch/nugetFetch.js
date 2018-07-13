@@ -32,7 +32,7 @@ class NuGetFetch extends BaseHandler {
     request.document = {
       registryData,
       location,
-      releaseDate: new Date(registryData.published).toISOString()
+      releaseDate: registryData ? new Date(registryData.published).toISOString() : null
     }
     request.contentOrigin = 'origin'
     return request

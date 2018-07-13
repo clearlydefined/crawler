@@ -32,11 +32,13 @@ module.exports = {
     npmjs: {},
     nuget: {},
     pypi: {}
+    rubygems: {}
   },
   process: {
     cdsource: {},
     maven: {},
     pypi: {},
+    gem: {},
     npm: {
       githubToken
     },
