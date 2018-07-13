@@ -54,7 +54,8 @@ class NuGetExtract extends BaseHandler {
     // setup the manifest to be the new document for the request
     request.document = { _metadata: request.document._metadata, manifest, registryData }
     // Add interesting info
-    if (registryData.published) request.document.releaseDate = new Date(registryData.published).toISOString()
+    if (registryData && registryData.published)
+      request.document.releaseDate = new Date(registryData.published).toISOString()
     const manifestCandidates = this._discoverCandidateSourceLocations(manifest)
     const nuspecXml = await this._getNuspec(nuspecLocation)
     const nuspec = await promisify(parseString)(nuspecXml, { trim: true, mergeAttrs: true, explicitArray: false })

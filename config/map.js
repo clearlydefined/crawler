@@ -45,12 +45,20 @@ const pypi = {
   clearlydefined
 }
 
+const gem = {
+  _type: 'gem',
+  source,
+  scancode,
+  clearlydefined
+}
+
 const package = {
   _type: 'package',
   npm,
   maven,
   nuget,
-  pypi
+  pypi,
+  gem
 }
 
 const entities = {
@@ -63,7 +71,8 @@ const entities = {
   npm,
   maven,
   nuget,
-  pypi
+  pypi,
+  gem
 }
 
 module.exports = {
