@@ -38,6 +38,13 @@ const nuget = {
   clearlydefined
 }
 
+const pypi = {
+  _type: 'pypi',
+  source,
+  scancode,
+  clearlydefined
+}
+
 const gem = {
   _type: 'gem',
   source,
@@ -50,6 +57,7 @@ const package = {
   npm,
   maven,
   nuget,
+  pypi,
   gem
 }
 
@@ -63,6 +71,7 @@ const entities = {
   npm,
   maven,
   nuget,
+  pypi,
   gem
 }
 
