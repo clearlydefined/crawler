@@ -89,9 +89,9 @@ The crawler tries to figure out details of the packages and source being travers
 
 ## Run Docker image from Docker Hub
 
-`docker run --env-file ../<env_name>.env.list -p 5000:5000 clearlydefined/crawler`
+`docker run --env-file ../<env_name>.env.list clearlydefined/crawler`
 
-See local.env.list, dev.env.list and prod.env.list tempate files.
+See `local.env.list`, `dev.env.list` and `prod.env.list` tempate files.
 
 `HARVEST_AZBLOB_CONNECTION_STRING` can be either an account key-based connection string or a Shared Access Signature (SAS) connection string. SAS connection string must be generated from `clearlydefinedprod` storage account with the following minimal set of permissions:
 
