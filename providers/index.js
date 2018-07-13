@@ -12,6 +12,7 @@ module.exports = {
     mavenCentral: require('./fetch/mavenFetch'),
     npmjs: require('./fetch/npmjsFetch'),
     nuget: require('./fetch/nugetFetch'),
+    pypi: require('./fetch/pypiFetch'),
     rubygems: require('./fetch/rubyGemsFetch')
   },
   process: {
@@ -20,6 +21,7 @@ module.exports = {
     maven: require('./process/mavenExtract'),
     npm: require('./process/npmExtract'),
     nuget: require('./process/nugetExtract'),
+    pypi: require('./process/pypiExtract'),
     package: require('./process/package'),
     scancode: require('./process/scancode'),
     source: require('./process/source'),
