@@ -13,7 +13,8 @@ module.exports = {
     npmjs: require('./fetch/npmjsFetch'),
     nuget: require('./fetch/nugetFetch'),
     pypi: require('./fetch/pypiFetch'),
-    rubygems: require('./fetch/rubyGemsFetch')
+    rubygems: require('./fetch/rubyGemsFetch'),
+    launchpad: require('./fetch/launchpadFetch')
   },
   process: {
     cdsource: require('./process/sourceExtract'),
@@ -22,6 +23,7 @@ module.exports = {
     npm: require('./process/npmExtract'),
     nuget: require('./process/nugetExtract'),
     pypi: require('./process/pypiExtract'),
+    launchpad: require('./process/launchpadExtract'),
     package: require('./process/package'),
     scancode: require('./process/scancode'),
     source: require('./process/source'),

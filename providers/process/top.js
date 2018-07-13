@@ -20,7 +20,7 @@ class TopProcessor extends BaseHandler {
   canHandle(request) {
     const spec = this.toSpec(request)
     return (
-      request.type === 'top' && spec && ['npmjs', 'mavencentral', 'nuget', 'github', 'pypi'].includes(spec.provider)
+      request.type === 'top' && spec && ['npmjs', 'mavencentral', 'nuget', 'github', 'pypi', 'launchpad'].includes(spec.provider)
     )
   }
 
