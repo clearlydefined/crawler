@@ -31,7 +31,7 @@ module.exports = {
     mavenCentral: {},
     npmjs: {},
     nuget: {},
-    pypi: {}
+    pypi: {},
     rubygems: {}
   },
   process: {
