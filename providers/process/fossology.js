@@ -47,13 +47,12 @@ class FossologyProcessor extends BaseHandler {
     // get nomos output
     const nomosStdout = await this._getNomos(request)
     // get copyright output
-    const copyrightStdout = await this._getCopyright(request, file_list)
+    //const copyrightStdout = await this._getCopyright(request, file_list)
     // get monk output
-    const monkStdout = await this._getMonk(request, file_list)
+    //const monkStdout = await this._getMonk(request, file_list)
 
     console.log(nomosStdout)
-    console.log(copyrightStdout)
-    console.log(monkStdout)
+    await writeFile(file.name, nomosStdout)
     // TODO update to indicate the correct content type for the FOSSology output
     request.document._metadata.contentLocation = file.name
     request.document._metadata.contentType = 'text/plain'
@@ -64,7 +63,7 @@ class FossologyProcessor extends BaseHandler {
     return new Promise((resolve, reject) => {
       // TODO add correct parameters and command line here
       const parameters = ['-ld', request.document.location].join(' ')
-      exec(`cd ${this.options.installDir} && ./nomos/agent/nomos ${parameters}`, (error, stdout, stderr) => {
+      exec(`cd ${this.options.installDir} && ./nomossa ${parameters}`, (error, stdout, stderr) => {
         if (error) {
           request.markDead('Error', error ? error.message : 'FOSSology run failed')
           return reject(error)
@@ -74,6 +73,7 @@ class FossologyProcessor extends BaseHandler {
     })
   }
 
+  //TODO: will revisit after FOSSology have copyright standalone version
   async _getCopyright(request, files) {
     return new Promise((resolve, reject) => {
       // TODO add correct parameters and command line here
@@ -88,6 +88,7 @@ class FossologyProcessor extends BaseHandler {
     })
   }
 
+  //TODO: will revisit after FOSSology have monk standalone version
   async _getMonk(request, files) {
     return new Promise((resolve, reject) => {
       // TODO add correct parameters and command line here
@@ -136,7 +137,7 @@ class FossologyProcessor extends BaseHandler {
   _detectVersion() {
     if (_toolVersion) return _toolVersion
     return new Promise((resolve, reject) => {
-      exec(`cd ${this.options.installDir} && .${path.sep}nomos${path.sep}agent${path.sep}nomos -V`, (error, stdout, stderr) => {
+      exec(`cd ${this.options.installDir} && ./nomossa -V`, (error, stdout, stderr) => {
         if (error) return reject(error)
         _toolVersion = stdout.replace('nomos\ build\ version:', '').trim()
         _toolVersion = _toolVersion.replace(/r\(.*\)./, '').trim()
