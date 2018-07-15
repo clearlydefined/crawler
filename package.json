@@ -4,7 +4,7 @@
   "description": "A crawler that walks projects and packages looking for data of interest to the ClearlyDefined project.",
   "main": "./index.js",
   "scripts": {
-    "start": "CRAWLER_SERVICE_PORT=5000 node ./run.js",
+    "start": "node ./run.js",
     "test": "node node_modules/eslint/bin/eslint.js . ; ./node_modules/mocha/bin/mocha test/unit/**/*.js",
     "integration": "./node_modules/mocha/bin/mocha test/integration/**/*.js --timeout 20000"
   },
