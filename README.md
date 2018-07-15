@@ -18,7 +18,7 @@ That results in the ClearlyDefined crawler starting up and listening for POSTs o
 The crawler takes _requests_ to rummage around and find relevant information about projects. For example, to crawl an NPM, or a GitHub repo, POST one of the following JSON bodies to `http://localhost:5000/requests`. Note that you can also queue an array of requests by POSTing a JSON array of request objects. Be sure to include the following headers in your request:
 
 - `content-type: application/json`
-- `authorization: bearer <your token>` - set the value here the same as you put in your `env.json`'s `CRAWLER_SERVICE_AUTH_TOKEN` property or `secret` if you did not set the env value.
+- `X-token: <your token>` - set the value here the same as you put in your `env.json`'s `CRAWLER_SERVICE_AUTH_TOKEN` property or `secret` if you did not set the env value.
 
 ```json
 {
@@ -36,7 +36,7 @@ The crawler takes _requests_ to rummage around and find relevant information abo
 
 The request `type` describes the crawling activity being requested. For example, "do `npm` crawling". It is typically the same as the `type` in the url (see below). There are some more advanced scenarios where the two values are different but for starters, treat them as the same.
 
-The general form of a request URL is
+The general form of a request URL is (note: it is a URL because of the underlying crawling infrastructure, the `cd` scheme is not particularly relevant)
 
 ```
 cd:/type/provider/namespace/name/revision
