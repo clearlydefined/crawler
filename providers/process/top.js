@@ -36,6 +36,8 @@ class TopProcessor extends BaseHandler {
         return this._processTopNuGets(request)
       case 'github':
         return this._processAllGitHubOrgRepos(request)
+      // case 'pypi':
+      //   return this._processTopPyPis(request)
       default:
         throw new Error(`Unknown provider type for 'top' request: ${spec.provider}`)
     }
