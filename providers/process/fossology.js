@@ -7,8 +7,9 @@ const fs = require('fs')
 const path = require('path')
 const { promisify } = require('util')
 const du = require('du')
+const dir = require('node-dir')
 
-const writeFile = promisify(fs.writeFile)
+const getFiles = promisify(dir.files)
 let _toolVersion
 
 class FossologyProcessor extends BaseHandler {
@@ -37,29 +38,14 @@ class FossologyProcessor extends BaseHandler {
     const size = await this._computeSize(document)
     request.addMeta({ k: size.k, fileCount: size.count })
     this.addBasicToolLinks(request, spec)
-    const file = this._createTempFile(request)
     this.logger.info(
-      `Analyzing ${request.toString()} using FOSSology. input: ${request.document.location} output: ${file.name}`
+      `Analyzing ${request.toString()} using FOSSology. input: ${request.document.location}`
     )
-
-    // get file list need to process 
-    const file_list = await this._getFilelist(document)
-    // get nomos output
-    const nomosStdout = await this._getNomos(request)
-    // get copyright output
-    //const copyrightStdout = await this._getCopyright(request, file_list)
-    // get monk output
-    //const monkStdout = await this._getMonk(request, file_list)
-
-    console.log(nomosStdout)
-    await writeFile(file.name, nomosStdout)
-    // TODO update to indicate the correct content type for the FOSSology output
-    request.document._metadata.contentLocation = file.name
-    request.document._metadata.contentType = 'text/plain'
-    request.document._metadata.releaseDate = request.document.releaseDate
+    await this._createDocument(request)
+    return request
   }
 
-  async _getNomos(request) {
+  async _runNomos(request) {
     return new Promise((resolve, reject) => {
       // TODO add correct parameters and command line here
       const parameters = ['-ld', request.document.location].join(' ')
@@ -68,13 +54,22 @@ class FossologyProcessor extends BaseHandler {
           request.markDead('Error', error ? error.message : 'FOSSology run failed')
           return reject(error)
         }
-        resolve(stdout)
+        let buff = new Buffer(stdout)
+        const nomosOutput = {
+          version: this.schemaVersion,
+          parameters: parameters,
+          output: {
+            contentType: 'text/plain',
+            content: buff.toString('base64')
+          }
+        }
+        resolve(JSON.parse(JSON.stringify(nomosOutput)))
       })
     })
   }
 
   //TODO: will revisit after FOSSology have copyright standalone version
-  async _getCopyright(request, files) {
+  async _runCopyright(request, files) {
     return new Promise((resolve, reject) => {
       // TODO add correct parameters and command line here
       const parameters = ['--files', files].join(' ')
@@ -89,27 +84,15 @@ class FossologyProcessor extends BaseHandler {
   }
 
   //TODO: will revisit after FOSSology have monk standalone version
-  async _getMonk(request, files) {
+  async _runMonk(request, files) {
     return new Promise((resolve, reject) => {
       // TODO add correct parameters and command line here
-      const parameters = [files]
+      const parameters = [files].join(' ')
       exec(`cd ${this.options.installDir} && ./monk/agent/monk ${parameters}`, (error, stdout, stderr) => {
         if (error) {
           request.markDead('Error', error ? error.message : 'FOSSology Monk tool run failed')
           return reject(error)
         }
-        resolve(stdout)
-      })
-    })
-  }
-
-  async _getFilelist(document) {
-    return new Promise((resolve, reject) => {
-      exec(`find ${document.location} -type f -print |tr "\\n" " "`, (error, stdout, stderr) => {
-        if (error) {
-          return reject(error)
-        }
-        //this.logger.info(stdout)
         resolve(stdout)
       })
     })
@@ -144,6 +127,15 @@ class FossologyProcessor extends BaseHandler {
         resolve(_toolVersion)
       })
     })
+  }
+
+  async _createDocument(request) {
+    //const files = await getFiles(request.document.location)
+    const nomosOutput = await this._runNomos(request)
+    //const copyrightOutput = await this._runCopyright(request, files)
+    //const monkOutput = await this._runMonk(request, files)
+    request.document = { _metadata: request.document._metadata}
+    if (nomosOutput) request.document.nomos = nomosOutput
   }
 }
 
