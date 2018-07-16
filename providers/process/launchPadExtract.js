@@ -44,9 +44,11 @@ class LaunchpadExtract extends BaseHandler {
     registryData.wiki_url && candidates.push(registryData.wiki_url)
     registryData.download_url && candidates.push(registryData.download_url)
     registryData.homepage_url && candidates.push(registryData.homepage_url)
-    registryData.releases_collection_link && candidates.push(releases_collection_link)
+    registryData.releases_collection_link && candidates.push(registryData.releases_collection_link)
     // Most of these won't be useful for launchpad, I think there are other API calls to find
     // the launchpad mirror (code.launchpad.net) if it exists
+    // this is a branch URL: https://api.launchpad.net/1.0/~bzr-pqm/bzr/bzr.dev
+    // don't know how to navigate from the project
     return sourceDiscovery(spec.revision, candidates, { githubToken: this.options.githubToken })
   }
 

@@ -23,10 +23,10 @@ class LaunchpadFetch extends BaseHandler {
     const revisionData = spec.series && spec.revision ? await this._getRevision(spec) : null
     request.url = spec.toUrl()
     const file = this._createTempFile(request)
-    await this._getPackage(revisionData)
+    await this._getPackage(spec, revisionData, file)
     const dir = this._createTempDir(request)
     await this.decompress(file.name, dir.name)
-    request.document = await this._createDocument(dir, spec, registryData)
+    request.document = await this._createDocument(dir, spec, registryData, revisionData)
     request.contentOrigin = 'origin'
     return request
   }
@@ -67,6 +67,11 @@ class LaunchpadFetch extends BaseHandler {
   }
 
   async _getPackage(spec, revisionData, destination) {
+    // sometimes a "revision" seems to have multiple releases, but I think that is just some cases of 
+    // how teams are managing their packages and not standard, not sure wheter to return them all?
+    const baseUrl = providerMap.launchpad
+    const { files, statusCode } = await requestRetry.get(`${baseUrl}${spec.name}/${spec.series}/${spec.revision}/files`);
+    if (statusCode !== 200 || !files) return null
     const release = find(files.entries, entry => {
       return entry.file_type === 'Code Release Tarball'
     })
