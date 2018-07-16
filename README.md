@@ -1,6 +1,6 @@
 # ClearlyDefined crawler
 
-A service that crawls projects and packages for information relevant to ClearlyDefined.
+A service that crawls projects and packages for information relevant to ClearlyDefined. Typically users do not need to directly interact with the crawler. Rather, you would use the ClearlyDefined service API to queue "harvesting" of more component's data. It can be convenient to run the crawler directly if, for example, you are developing a handler for a new package type.
 
 # Quick start
 
@@ -15,28 +15,34 @@ That results in the ClearlyDefined crawler starting up and listening for POSTs o
 
 ## Queuing work with the crawler
 
-The crawler takes _requests_ to rummage around and find relevant information about projects. For example, to crawl an NPM, or a GitHub repo, POST one of the following JSON bodies to `http://localhost:5000/requests`. Note that you can also queue an array of requests by POSTing a JSON array of request objects. Be sure to include the following headers in your request:
+The crawler takes _requests_ to rummage around and find relevant information about projects. For example, to crawl an NPM, or a GitHub repo, POST one of the following JSON bodies to `http://localhost:5000/requests`. Note that you can also queue an array of requests by POSTing a single (or array of) JSON request object. For example, 
+
+```
+curl -d '{"type":"npm", "url":"cd:/npm/npmjs/-/redie/0.3.0"}' -H "Content-Type: application/json" -H "X-token: secret" -X POST http://localhost:5000/requests
+```
+
+Be sure to include the following headers in your request:
 
 - `content-type: application/json`
 - `X-token: <your token>` - set the value here the same as you put in your `env.json`'s `CRAWLER_SERVICE_AUTH_TOKEN` property or `secret` if you did not set the env value.
 
+Here are a few example request objects.
+
 ```json
 {
-  "type": "npm",
+  "type": "package",
   "url": "cd:/npm/npmjs/-/redie/0.3.0"
 }
 ```
 
 ```json
 {
-  "type": "git",
+  "type": "source",
   "url": "cd:/git/github/Microsoft/redie/194269b5b7010ad6f8dc4ef608c88128615031ca"
 }
 ```
 
-The request `type` describes the crawling activity being requested. For example, "do `npm` crawling". It is typically the same as the `type` in the url (see below). There are some more advanced scenarios where the two values are different but for starters, treat them as the same.
-
-The general form of a request URL is (note: it is a URL because of the underlying crawling infrastructure, the `cd` scheme is not particularly relevant)
+The request `type` describes the crawling activity being requested. For example, "do `package` crawling". It is typically the same as the `type` in the url (see below). There are some more advanced scenarios where the two values are different but for starters, treat them as the same. The general form of a request URL is (note: it is a URL because of the underlying crawling infrastructure, the `cd` scheme is not particularly relevant)
 
 ```
 cd:/type/provider/namespace/name/revision
@@ -52,11 +58,15 @@ Where the segments are:
 
 Given a request, the crawler does the following kinds of things (it does more or less work depending on the details found in its travels and the set of tools configured):
 
-1.  Looking up the package at npmjs.com and pull out interesting bits like the project location, issue tracker, and most importantly, the source code location.
-1.  With the source location, the crawler determines the revision (e.g., Git commit) that matches the version of the package.
+Process the component:
+1.  Look up the component in its registry (e.g., npmjs.com) and pull out interesting bits like the project location, issue tracker, release date, and most importantly, the source code location where possible. 
+1.  Run tools like ScanCode and others if they are likely to find anything interesting given the component type 
+
+Process the source, if any:
+1.  The crawler determines the revision (e.g., Git commit) that matches the version of the package.
 1.  Given the location and revision, the crawler fetches the source and runs any configured scan tools (e.g., ScanCode)
 
-The crawler's output is stored for use by the rest of the ClearlyDefined infrastructure -- it is not intended to be used directly by humans.
+The crawler's output is stored for use by the rest of the ClearlyDefined infrastructure -- it is not intended to be used directly by humans. Note that each tool's output is stored separately and the results of processing the component and the component source are alos separated. 
 
 # Configuration
 
