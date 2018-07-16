@@ -40,6 +40,7 @@
     "promise-retry": "^1.1.1",
     "request-promise-native": "^1.0.5",
     "requestretry": "^1.12.2",
+    "spdx-correct": "^3.0.0",
     "tmp": "0.0.33",
     "vso-node-api": "~6.3.2"
   },
