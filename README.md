@@ -8,10 +8,13 @@ A service that crawls projects and packages for information relevant to ClearlyD
 1.  `cd` to the repo dir and run `npm install`
 1.  Copy the `template.env.json` file to the **parent** directory of the repo and rename it to `env.json`. Ideally this repo is colocated with the other ClearlyDefined repos. You can share the `env.json` file. Just merge the two files. Some properties are meant to be shared.
 1.  After copying/merging, update the file to have the property values for your system. See the [Configuration](#configuration) section for more details.
-1.  Install [ScanCode](https://github.com/nexB/scancode-toolkit) if desired.
+1.  Install [ScanCode](https://github.com/nexB/scancode-toolkit) if desired (see below).
 1.  Run `npm start`
 
 That results in the ClearlyDefined crawler starting up and listening for POSTs on port 5000. See the [Configuration](#configuration) section for info on how to change the port.
+
+### ScanCode install notes
+Due to an issue with ScanCode's install configuration on Windows, you may need to **replace** the `bin` folder (actually a "junction") with the contents of the `Scripts` folder. That is, delete `bin` and copy `Scripts` to `bin`. See https://github.com/nexB/scancode-toolkit/issues/1129 for more details.
 
 ## Queuing work with the crawler
 
