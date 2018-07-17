@@ -11,6 +11,7 @@ const dir = require('node-dir')
 
 const getFiles = promisify(dir.files)
 let _toolVersion
+let _nomosVersion
 
 class FossologyProcessor extends BaseHandler {
   constructor(options) {
@@ -19,10 +20,15 @@ class FossologyProcessor extends BaseHandler {
     // by the time someone actually uses this instance, the call will have completed.
     // Need to detect the tool version before anyone tries to run this processor.
     this._detectVersion()
+    this._detectNomosVersion()
   }
 
   get schemaVersion() {
     return _toolVersion
+  }
+
+  get nomosVersion() {
+    return _nomosVersion
   }
 
   get toolSpec() {
@@ -56,44 +62,14 @@ class FossologyProcessor extends BaseHandler {
         }
         let buff = new Buffer(stdout)
         const nomosOutput = {
-          version: this.schemaVersion,
+          version: this.nomosVersion,
           parameters: parameters,
           output: {
-            contentType: 'text/plain',
+            contentType: 'application/base64',
             content: buff.toString('base64')
           }
         }
-        resolve(JSON.parse(JSON.stringify(nomosOutput)))
-      })
-    })
-  }
-
-  //TODO: will revisit after FOSSology have copyright standalone version
-  async _runCopyright(request, files) {
-    return new Promise((resolve, reject) => {
-      // TODO add correct parameters and command line here
-      const parameters = ['--files', files].join(' ')
-      exec(`cd ${this.options.installDir} && ./copyright/agent/copyright ${parameters}`, (error, stdout, stderr) => {
-        if (error) {
-          request.markDead('Error', error ? error.message : 'FOSSology CopyRight tool run failed')
-          return reject(error)
-        }
-        resolve(stdout)
-      })
-    })
-  }
-
-  //TODO: will revisit after FOSSology have monk standalone version
-  async _runMonk(request, files) {
-    return new Promise((resolve, reject) => {
-      // TODO add correct parameters and command line here
-      const parameters = [files].join(' ')
-      exec(`cd ${this.options.installDir} && ./monk/agent/monk ${parameters}`, (error, stdout, stderr) => {
-        if (error) {
-          request.markDead('Error', error ? error.message : 'FOSSology Monk tool run failed')
-          return reject(error)
-        }
-        resolve(stdout)
+        resolve(nomosOutput)
       })
     })
   }
@@ -125,6 +101,18 @@ class FossologyProcessor extends BaseHandler {
         _toolVersion = stdout.replace('nomos\ build\ version:', '').trim()
         _toolVersion = _toolVersion.replace(/r\(.*\)./, '').trim()
         resolve(_toolVersion)
+      })
+    })
+  }
+
+  _detectNomosVersion() {
+    if (_nomosVersion) return _nomosVersion
+    return new Promise((resolve, reject) => {
+      exec(`cd ${this.options.installDir} && ./nomossa -V`, (error, stdout, stderr) => {
+        if (error) return reject(error)
+        _nomosVersion = stdout.replace('nomos\ build\ version:', '').trim()
+        _nomosVersion = _nomosVersion.replace(/r\(.*\)./, '').trim()
+        resolve(_nomosVersion)
       })
     })
   }

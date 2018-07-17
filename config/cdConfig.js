@@ -76,8 +76,6 @@ module.exports = {
     },
     fossology: {
       installDir: config.get('FOSSOLOGY_HOME'),
-      options: [
-      ]
     },
     source: {},
     top: {
