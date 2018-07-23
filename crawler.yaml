@@ -1,0 +1,95 @@
+# Kubernetes configuration for the Clearly Defined crawler.
+# (includes Redis dependency)
+#
+# Exposes crawler API on port 5000
+#
+# Replace all occurences of <configure me> with proper values before using.
+#
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: crawler
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: crawler
+    spec:
+      containers:
+      - name: crawler
+        image: clearlydefined/crawler
+        ports:
+        - containerPort: 5000
+        # TODO: replace most of these with Secrets or ConfigMaps.
+        env:
+          - name: CRAWLER_NAME
+            value: <configure me>
+          - name: CRAWLER_QUEUE_PREFIX
+            value: <configure me>
+          - name: CRAWLER_WEBHOOK_URL
+            value: https://dev-api.clearlydefined.io/webhook
+            # value: https://api.clearlydefined.io/webhook
+          - name: HARVEST_AZBLOB_CONTAINER_NAME
+            value: <configure me>
+          - name: CRAWLER_GITHUB_TOKEN
+            value: <configure me>
+          - name: CRAWLER_INSIGHTS_KEY
+            value: <configure me>
+          - name: CRAWLER_WEBHOOK_TOKEN
+            value: <configure me>
+          - name: HARVEST_AZBLOB_CONNECTION_STRING
+            value: <configure me>
+  selector:
+    matchLabels:
+      app: crawler
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: crawler
+  labels:
+    app: crawler
+spec:
+  ports:
+  - port: 5000
+    protocol: TCP
+  selector:
+    app: crawler
+
+---
+
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: redis
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:latest
+        ports:
+        - containerPort: 6379
+  selector:
+    matchLabels:
+      app: redis
+      
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  labels:
+    app: redis
+spec:
+  ports:
+  - port: 6379
+    protocol: TCP
+  selector:
+    app: redis
