@@ -41,6 +41,9 @@ class FossologyProcessor extends BaseHandler {
 
   async handle(request) {
     const { document, spec } = super._process(request)
+    if(!this.nomosVersion)
+      return request.markSkip('No nomos tool found')
+
     const size = await this._computeSize(document)
     request.addMeta({ k: size.k, fileCount: size.count })
     this.addBasicToolLinks(request, spec)
@@ -95,14 +98,10 @@ class FossologyProcessor extends BaseHandler {
 
   _detectVersion() {
     if (_toolVersion) return _toolVersion
-    return new Promise((resolve, reject) => {
-      exec(`cd ${this.options.installDir} && ./nomossa -V`, (error, stdout, stderr) => {
-        if (error) return reject(error)
-        _toolVersion = stdout.replace('nomos\ build\ version:', '').trim()
-        _toolVersion = _toolVersion.replace(/r\(.*\)./, '').trim()
-        resolve(_toolVersion)
-      })
+    this._detectNomosVersion().then(function(value) {
+      _toolVersion = value
     })
+    return _toolVersion
   }
 
   _detectNomosVersion() {
@@ -111,7 +110,7 @@ class FossologyProcessor extends BaseHandler {
       exec(`cd ${this.options.installDir} && ./nomossa -V`, (error, stdout, stderr) => {
         if (error) return reject(error)
         _nomosVersion = stdout.replace('nomos\ build\ version:', '').trim()
-        _nomosVersion = _nomosVersion.replace(/r\(.*\)./, '').trim()
+        _nomosVersion = _nomosVersion.replace(/-.*/, '').trim()
         resolve(_nomosVersion)
       })
     })
