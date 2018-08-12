@@ -16,7 +16,7 @@ ENV CRAWLER_DEADLETTER_PROVIDER=azblob
 ENV CRAWLER_NAME=cdcrawlerprod
 ENV CRAWLER_QUEUE_PREFIX=cdcrawlerprod
 ENV CRAWLER_QUEUE_PROVIDER=storageQueue
-ENV CRAWLER_STORE_PROVIDER=cdDispatch+azblob+webhook
+ENV CRAWLER_STORE_PROVIDER=cdDispatch+azblob+content(azblob)+webhook
 ENV CRAWLER_WEBHOOK_URL=https://api.clearlydefined.io/webhook
 ENV HARVEST_AZBLOB_CONTAINER_NAME=production
 

@@ -24,15 +24,16 @@ class SourceExtract extends BaseHandler {
   async handle(request) {
     const { document, spec } = super._process(request)
     this.addBasicToolLinks(request, spec)
-    const clearlyFile = path.join(request.document.location, 'clearly.yaml')
-    const result = {
+    const location = request.document.location
+    request.document = {
       _metadata: document._metadata,
       releaseDate: request.document.releaseDate
     }
-    if (!fs.existsSync(clearlyFile)) return result
+    await BaseHandler.addInterestingFiles(request.document, location)
+    const clearlyFile = path.join(location, 'clearly.yaml')
+    if (!fs.existsSync(clearlyFile)) return
     const content = await promisfy(fs.readFileSync)(clearlyFile)
-    result.description = yaml.safeLoad(content)
-    return result
+    request.document.description = yaml.safeLoad(content)
   }
 }
 
