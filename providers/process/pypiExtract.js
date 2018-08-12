@@ -7,7 +7,7 @@ const SourceSpec = require('../../lib/sourceSpec')
 
 class PyPiExtract extends BaseHandler {
   get schemaVersion() {
-    return 1
+    return '1.1.0'
   }
 
   get toolSpec() {
