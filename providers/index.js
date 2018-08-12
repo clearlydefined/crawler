@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
+const HashedContentFactory = require('./store/hashedContentFactory')
+const providers = require('ghcrawler').providers
+
 module.exports = {
   filter: {
     provider: 'filter',
@@ -30,6 +33,8 @@ module.exports = {
   },
   store: {
     cdDispatch: require('./store/storeDispatcher'),
-    webhook: require('./store/webhookDeltaStore')
+    webhook: require('./store/webhookDeltaStore'),
+    'content(azblob)': HashedContentFactory(providers.store.azblob),
+    'content(file)': HashedContentFactory(providers.store.file)
   }
 }

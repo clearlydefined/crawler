@@ -23,7 +23,8 @@ class PyPiExtract extends BaseHandler {
     if (this.isProcessing(request)) {
       const { spec } = super._process(request)
       this.addBasicToolLinks(request, spec)
-      await this._createDocument(spec, request, request.document.registryData)
+      await this._createDocument(request, spec, request.document.registryData)
+      await BaseHandler.addInterestingFiles(request.document, request.document.location)
     }
     this.linkAndQueueTool(request, 'scancode')
     if (request.document.sourceInfo) {
@@ -34,10 +35,8 @@ class PyPiExtract extends BaseHandler {
   }
 
   async _discoverSource(spec, registryData) {
+    if (!registryData) return null
     const candidates = []
-    if (!registryData) {
-      return null
-    }
     registryData.info.bugtrack_url && candidates.push(registryData.info.bugtrack_url)
     registryData.info.docs_url && candidates.push(registryData.info.docs_url)
     registryData.info.download_url && candidates.push(registryData.info.download_url)
@@ -48,7 +47,7 @@ class PyPiExtract extends BaseHandler {
     return sourceDiscovery(spec.revision, candidates, { githubToken: this.options.githubToken })
   }
 
-  async _createDocument(spec, request, registryData) {
+  async _createDocument(request, spec, registryData) {
     const sourceInfo = await this._discoverSource(spec, registryData)
     if (sourceInfo) request.document.sourceInfo = sourceInfo
   }
