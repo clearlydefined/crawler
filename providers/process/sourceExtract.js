@@ -9,7 +9,7 @@ const yaml = require('js-yaml')
 
 class SourceExtract extends BaseHandler {
   get schemaVersion() {
-    return 1
+    return '1.1.0'
   }
 
   get toolSpec() {

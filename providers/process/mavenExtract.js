@@ -11,7 +11,7 @@ const parseString = require('xml2js').parseString
 
 class MavenExtract extends BaseHandler {
   get schemaVersion() {
-    return 1
+    return '1.1.0'
   }
 
   get toolSpec() {

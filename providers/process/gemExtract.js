@@ -10,7 +10,7 @@ const sourceDiscovery = require('../../lib/sourceDiscovery')
 
 class GemExtract extends BaseHandler {
   get schemaVersion() {
-    return 1
+    return '1.1.0'
   }
 
   get toolSpec() {
