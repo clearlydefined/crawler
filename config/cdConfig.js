@@ -13,6 +13,7 @@ const githubToken = config.get('CRAWLER_GITHUB_TOKEN')
 const file = {
   location: config.get('FILE_STORE_LOCATION') || (process.platform === 'win32' ? 'c:/temp/cd' : '/tmp/cd')
 }
+
 module.exports = {
   provider: 'memory', // change this to redis if/when we want distributed config
   searchPath: [module],
