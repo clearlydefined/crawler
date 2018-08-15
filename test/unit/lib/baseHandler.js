@@ -42,11 +42,10 @@ describe('BaseHandler interesting file discovery', () => {
     const document = {}
     await Handler.addInterestingFiles(document, '')
     assert.equal(12, document.interestingFiles.length)
-    assert.equal(12, document._fileContent.length)
     validateInterestingFile('license', document.interestingFiles)
-    validateInterestingFile('LICENSE.HTML', document._fileContent, true)
+    validateInterestingFile('LICENSE.HTML', document.interestingFiles, true)
     validateInterestingFile('NOtices', document.interestingFiles)
-    validateInterestingFile('notice.TXT', document._fileContent, true)
+    validateInterestingFile('notice.TXT', document.interestingFiles, true)
   })
 
   it('handles no files found', async () => {
@@ -63,9 +62,9 @@ describe('BaseHandler filesystem integration', () => {
     await BaseHandler.addInterestingFiles(document, path.join(__dirname, '../..', 'fixtures/package1'))
     assert.equal(3, document.interestingFiles.length)
     validateInterestingFile('license', document.interestingFiles)
-    validateInterestingFile('NOTICES', document._fileContent, true)
+    validateInterestingFile('NOTICES', document.interestingFiles, true)
     validateInterestingFile('NOTICES', document.interestingFiles)
-    validateInterestingFile('License.txt', document._fileContent, true)
+    validateInterestingFile('License.txt', document.interestingFiles, true)
   })
 })
 
