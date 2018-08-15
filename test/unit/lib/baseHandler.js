@@ -4,7 +4,10 @@
 const proxyquire = require('proxyquire')
 const sinon = require('sinon')
 const sandbox = sinon.createSandbox()
-const assert = require('assert')
+const deepEqualInAnyOrder = require('deep-equal-in-any-order')
+const chai = require('chai')
+chai.use(deepEqualInAnyOrder)
+const { expect } = chai
 const BaseHandler = require('../../../lib/baseHandler')
 const path = require('path')
 const { find } = require('lodash')
@@ -41,38 +44,40 @@ describe('BaseHandler interesting file discovery', () => {
     }
     const document = {}
     await Handler.addInterestingFiles(document, '')
-    assert.equal(12, document.interestingFiles.length)
+    expect(document.interestingFiles.length).to.equal(12)
+    expect(document.interestingFiles.map(file => file.path)).to.deep.equalInAnyOrder(
+      Object.getOwnPropertyNames(Handler._globResult.result)
+    )
     validateInterestingFile('license', document.interestingFiles)
-    validateInterestingFile('LICENSE.HTML', document.interestingFiles, true)
+    validateInterestingFile('LICENSE.HTML', document.interestingFiles)
     validateInterestingFile('NOtices', document.interestingFiles)
-    validateInterestingFile('notice.TXT', document.interestingFiles, true)
+    validateInterestingFile('notice.TXT', document.interestingFiles)
   })
 
   it('handles no files found', async () => {
     Handler._globResult.result = {}
     const document = {}
     await Handler.addInterestingFiles(document, '')
-    assert.equal(undefined, document.interestingFiles)
+    expect(document.interestingFiles).to.be.undefined
   })
 })
 
 describe('BaseHandler filesystem integration', () => {
-  it('actually works on files', async () => {
+  it('actually works on files and does not include extras', async () => {
     const document = {}
     await BaseHandler.addInterestingFiles(document, path.join(__dirname, '../..', 'fixtures/package1'))
-    assert.equal(3, document.interestingFiles.length)
+    expect(document.interestingFiles.length).to.equal(3)
     validateInterestingFile('license', document.interestingFiles)
-    validateInterestingFile('NOTICES', document.interestingFiles, true)
     validateInterestingFile('NOTICES', document.interestingFiles)
-    validateInterestingFile('License.txt', document.interestingFiles, true)
+    validateInterestingFile('License.txt', document.interestingFiles)
   })
 })
 
-function validateInterestingFile(name, list, checkContent = false) {
+function validateInterestingFile(name, list) {
   const content = `${name} content`
   const token = BaseHandler.computeToken(content)
   const entry = find(list, entry => entry.path === name)
-  assert.equal(true, !!entry)
-  assert.equal(token, entry.token)
-  if (checkContent) assert.equal(content, entry.content)
+  expect(!!entry).to.be.true
+  expect(entry.token).to.equal(token)
+  expect(entry.content).to.equal(content)
 }
