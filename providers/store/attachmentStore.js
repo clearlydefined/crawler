@@ -4,7 +4,7 @@
 const request = require('request-promise-native')
 const { get } = require('lodash')
 
-class HashedContentStore {
+class AttachmentStore {
   constructor(options) {
     this.options = options
     this.baseStore = options.baseStore
@@ -15,16 +15,17 @@ class HashedContentStore {
   }
 
   upsert(document) {
-    if (!document._fileContent) return
+    this.baseStore.upsert(document)
+    if (!document._attachments) return
     return Promise.all(
-      document._fileContent.map(entry => {
+      document._attachments.map(entry => {
         return this.baseStore.upsert({
           _metadata: {
-            type: 'content',
-            url: `cd:/content/${entry.token}`,
+            type: 'attachment',
+            url: `cd:/attachment/${entry.token}`,
             links: {
               self: {
-                href: `urn:content:${entry.token}`,
+                href: `urn:attachment:${entry.token}`,
                 type: 'resource'
               }
             },
@@ -32,7 +33,7 @@ class HashedContentStore {
             processedAt: get(document, '_metadata.processedAt'),
             version: '1'
           },
-          content: Buffer.from(entry.content).toString()
+          attachment: Buffer.from(entry.attachment).toString()
         })
       })
     )
@@ -63,4 +64,4 @@ class HashedContentStore {
   }
 }
 
-module.exports = options => new HashedContentStore(options)
+module.exports = options => new AttachmentStore(options)

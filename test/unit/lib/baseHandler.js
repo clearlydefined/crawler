@@ -26,27 +26,27 @@ describe('BaseHandler interesting file discovery', () => {
 
   it('finds multiple files', async () => {
     Handler._globResult.result = {
-      license: 'license content',
-      'License.md': 'License.md content',
-      'LICENSE.HTML': 'LICENSE.HTML content',
-      'license.txt': 'license.txt content',
-      NOtice: 'NOtice content',
-      'Notice.md': 'Notice.md content',
-      'notice.TXT': 'notice.TXT content',
-      'notice.html': 'notice.html content',
-      NOtices: 'NOtices content',
-      'Notices.md': 'Notices.md content',
-      'notices.TXT': 'notices.TXT content',
-      'notices.html': 'notices.html content'
+      license: 'license attachment',
+      'License.md': 'License.md attachment',
+      'LICENSE.HTML': 'LICENSE.HTML attachment',
+      'license.txt': 'license.txt attachment',
+      NOtice: 'NOtice attachment',
+      'Notice.md': 'Notice.md attachment',
+      'notice.TXT': 'notice.TXT attachment',
+      'notice.html': 'notice.html attachment',
+      NOtices: 'NOtices attachment',
+      'Notices.md': 'Notices.md attachment',
+      'notices.TXT': 'notices.TXT attachment',
+      'notices.html': 'notices.html attachment'
     }
     const document = {}
     await Handler.addInterestingFiles(document, '')
     assert.equal(12, document.interestingFiles.length)
-    assert.equal(12, document._fileContent.length)
+    assert.equal(12, document._attachments.length)
     validateInterestingFile('license', document.interestingFiles)
-    validateInterestingFile('LICENSE.HTML', document._fileContent, true)
+    validateInterestingFile('LICENSE.HTML', document._attachments, true)
     validateInterestingFile('NOtices', document.interestingFiles)
-    validateInterestingFile('notice.TXT', document._fileContent, true)
+    validateInterestingFile('notice.TXT', document._attachments, true)
   })
 
   it('handles no files found', async () => {
@@ -63,17 +63,17 @@ describe('BaseHandler filesystem integration', () => {
     await BaseHandler.addInterestingFiles(document, path.join(__dirname, '../..', 'fixtures/package1'))
     assert.equal(3, document.interestingFiles.length)
     validateInterestingFile('license', document.interestingFiles)
-    validateInterestingFile('NOTICES', document._fileContent, true)
+    validateInterestingFile('NOTICES', document._attachments, true)
     validateInterestingFile('NOTICES', document.interestingFiles)
-    validateInterestingFile('License.txt', document._fileContent, true)
+    validateInterestingFile('License.txt', document._attachments, true)
   })
 })
 
 function validateInterestingFile(name, list, checkContent = false) {
-  const content = `${name} content`
-  const token = BaseHandler.computeToken(content)
+  const attachment = `${name} attachment`
+  const token = BaseHandler.computeToken(attachment)
   const entry = find(list, entry => entry.path === name)
   assert.equal(true, !!entry)
   assert.equal(token, entry.token)
-  if (checkContent) assert.equal(content, entry.content)
+  if (checkContent) assert.equal(attachment, entry.attachment)
 }
