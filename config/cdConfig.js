@@ -8,17 +8,11 @@ const azblob = {
   container: config.get('HARVEST_AZBLOB_CONTAINER_NAME')
 }
 
-const azblobContent = {
-  connection: azblob.connection,
-  container: config.get('HARVEST_AZBLOB_CONTENT_CONTAINER_NAME') || azblob.container + '-content'
-}
-
 const githubToken = config.get('CRAWLER_GITHUB_TOKEN')
 
 const file = {
   location: config.get('FILE_STORE_LOCATION') || (process.platform === 'win32' ? 'c:/temp/cd' : '/tmp/cd')
 }
-const fileContent = file
 
 module.exports = {
   provider: 'memory', // change this to redis if/when we want distributed config
@@ -93,16 +87,14 @@ module.exports = {
     }
   },
   store: {
-    dispatcher: config.get('CRAWLER_STORE_PROVIDER') || 'cdDispatch+file+content(file)',
+    dispatcher: config.get('CRAWLER_STORE_PROVIDER') || 'cdDispatch+file',
     cdDispatch: {},
     webhook: {
       url: config.get('CRAWLER_WEBHOOK_URL') || 'http://localhost:4000/webhook',
       token: config.get('CRAWLER_WEBHOOK_TOKEN')
     },
     azblob,
-    'content(azblob)': azblobContent,
-    file,
-    'content(file)': fileContent
+    file
   },
   deadletter: {
     provider: config.get('CRAWLER_DEADLETTER_PROVIDER') || config.get('CRAWLER_STORE_PROVIDER') || 'file',

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const HashedContentFactory = require('./store/hashedContentFactory')
+const AttachmentStoreFactory = require('./store/attachmentStoreFactory')
 const providers = require('ghcrawler').providers
 
 module.exports = {
@@ -34,7 +34,7 @@ module.exports = {
   store: {
     cdDispatch: require('./store/storeDispatcher'),
     webhook: require('./store/webhookDeltaStore'),
-    'content(azblob)': HashedContentFactory(providers.store.azblob),
-    'content(file)': HashedContentFactory(providers.store.file)
+    azblob: AttachmentStoreFactory(providers.store.azblob),
+    file: AttachmentStoreFactory(providers.store.file)
   }
 }
