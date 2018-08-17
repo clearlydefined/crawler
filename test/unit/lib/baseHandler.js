@@ -4,7 +4,8 @@
 const proxyquire = require('proxyquire')
 const sinon = require('sinon')
 const sandbox = sinon.createSandbox()
-const assert = require('assert')
+const chai = require('chai')
+const expect = chai.expect
 const BaseHandler = require('../../../lib/baseHandler')
 const path = require('path')
 const { find } = require('lodash')
@@ -41,8 +42,9 @@ describe('BaseHandler interesting file discovery', () => {
     }
     const document = {}
     await Handler.addInterestingFiles(document, '')
-    assert.equal(12, document.interestingFiles.length)
-    assert.equal(12, document._attachments.length)
+    expect(document.interestingFiles.length).to.eq(12)
+    expect(document._attachments.length).to.eq(12)
+
     validateInterestingFile('license', document.interestingFiles)
     validateInterestingFile('LICENSE.HTML', document._attachments, true)
     validateInterestingFile('NOtices', document.interestingFiles)
@@ -53,7 +55,7 @@ describe('BaseHandler interesting file discovery', () => {
     Handler._globResult.result = {}
     const document = {}
     await Handler.addInterestingFiles(document, '')
-    assert.equal(undefined, document.interestingFiles)
+    expect(document.interestingFiles).to.be.undefined
   })
 })
 
@@ -61,7 +63,7 @@ describe('BaseHandler filesystem integration', () => {
   it('actually works on files', async () => {
     const document = {}
     await BaseHandler.addInterestingFiles(document, path.join(__dirname, '../..', 'fixtures/package1'))
-    assert.equal(3, document.interestingFiles.length)
+    expect(document.interestingFiles.length).to.eq(3)
     validateInterestingFile('license', document.interestingFiles)
     validateInterestingFile('NOTICES', document._attachments, true)
     validateInterestingFile('NOTICES', document.interestingFiles)
@@ -73,7 +75,7 @@ function validateInterestingFile(name, list, checkContent = false) {
   const attachment = `${name} attachment`
   const token = BaseHandler.computeToken(attachment)
   const entry = find(list, entry => entry.path === name)
-  assert.equal(true, !!entry)
-  assert.equal(token, entry.token)
-  if (checkContent) assert.equal(attachment, entry.attachment)
+  expect(!!entry).to.be.true
+  expect(entry.token).to.eq(token)
+  if (checkContent) expect(entry.attachment).to.eq(attachment)
 }
