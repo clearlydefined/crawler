@@ -15,28 +15,28 @@ class AttachmentStore {
   }
 
   upsert(document) {
-    this.baseStore.upsert(document)
-    if (!document._attachments) return
-    return Promise.all(
-      document._attachments.map(entry => {
-        return this.baseStore.upsert({
-          _metadata: {
-            type: 'attachment',
-            url: `cd:/attachment/${entry.token}`,
-            links: {
-              self: {
-                href: `urn:attachment:${entry.token}`,
-                type: 'resource'
-              }
-            },
-            fetchedAt: get(document, '_metadata.fetchedAt'),
-            processedAt: get(document, '_metadata.processedAt'),
-            version: '1'
+    const documentPromise = this.baseStore.upsert(document)
+    if (!document._attachments) return documentPromise
+    const attachmentPromises = document._attachments.map(entry => {
+      return this.baseStore.upsert({
+        _metadata: {
+          type: 'attachment',
+          url: `cd:/attachment/${entry.token}`,
+          links: {
+            self: {
+              href: `urn:attachment:${entry.token}`,
+              type: 'resource'
+            }
           },
-          attachment: Buffer.from(entry.attachment).toString()
-        })
+          fetchedAt: get(document, '_metadata.fetchedAt'),
+          processedAt: get(document, '_metadata.processedAt'),
+          version: '1'
+        },
+        attachment: Buffer.from(entry.attachment).toString()
       })
-    )
+    })
+    attachmentPromises.push(documentPromise)
+    return Promise.all(attachmentPromises)
   }
 
   get(type, key) {

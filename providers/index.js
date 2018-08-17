@@ -34,7 +34,7 @@ module.exports = {
   store: {
     cdDispatch: require('./store/storeDispatcher'),
     webhook: require('./store/webhookDeltaStore'),
-    azblob: AttachmentStoreFactory(providers.store.azblob),
-    file: AttachmentStoreFactory(providers.store.file)
+    'cd(azblob)': AttachmentStoreFactory(providers.store.azblob),
+    'cd(file)': AttachmentStoreFactory(providers.store.file)
   }
 }

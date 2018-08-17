@@ -2,24 +2,29 @@
 // SPDX-License-Identifier: MIT
 
 const chai = require('chai')
+const expect = chai.expect
 const factory = require('../../../../providers/store/attachmentStoreFactory')
 const { describe, it } = require('mocha')
-const expect = chai.expect
 const sinon = require('sinon')
 
 describe('AttachmentStore', () => {
-  it('have properly structured metadata', async () => {
+  it('stores the main doc and the attachments', async () => {
     const { store } = setup()
     const document = {
-      _metadata: { fetchedAt: 'now', processedAt: 'then', extra: 'value' },
+      _metadata: { type: 'test', fetchedAt: 'now', processedAt: 'then', extra: 'value' },
       _attachments: [{ token: '42', attachment: '42 attachment' }, { token: '13', attachment: '13 attachment' }]
     }
     await store.upsert(document)
     const baseStore = store.baseStore
     expect(baseStore.upsert.calledThrice).to.be.true
 
-    var storedDoc = baseStore.upsert.getCall(1).args[0]
+    var storedDoc = baseStore.upsert.getCall(0).args[0]
     var metadata = storedDoc._metadata
+    expect(metadata.type).to.be.eq('test')
+    expect(metadata.extra).to.be.eq('value')
+
+    storedDoc = baseStore.upsert.getCall(1).args[0]
+    metadata = storedDoc._metadata
     expect(metadata.type).to.be.eq('attachment')
     expect(metadata.fetchedAt).to.be.eq('now')
     expect(metadata.processedAt).to.be.eq('then')
@@ -41,12 +46,18 @@ describe('AttachmentStore', () => {
     expect(attachment).to.be.eq('13 attachment')
   })
 
-  it('should do nothing if no files', async () => {
+  it('works with no attachments', async () => {
     const { store } = setup()
-    const document = {}
+    const document = {
+      _metadata: { type: 'test', fetchedAt: 'now', processedAt: 'then', extra: 'value' }
+    }
     await store.upsert(document)
     const baseStore = store.baseStore
     expect(baseStore.upsert.calledOnce).to.be.true
+    var storedDoc = baseStore.upsert.getCall(0).args[0]
+    var metadata = storedDoc._metadata
+    expect(metadata.type).to.be.eq('test')
+    expect(metadata.extra).to.be.eq('value')
   })
 })
 
