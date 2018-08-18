@@ -7,9 +7,7 @@
       "name": "ClearlyDefined",
       "program": "${workspaceRoot}/run.js",
       "cwd": "${workspaceRoot}",
-      "runtimeArgs": [
-        "--nolazy"
-      ],
+      "runtimeArgs": ["--nolazy"],
       "env": {
         "NODE_ENV": "localhost",
         "PORT": "5000"
@@ -21,18 +19,16 @@
       "name": "Mocha",
       "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
       "stopOnEntry": false,
-      "args": [
-        "${workspaceRoot}/test/unit/*.js"
-      ],
+      "args": ["${workspaceRoot}/test/**/*.js", "--timeout", "999999"],
       "cwd": "${workspaceRoot}",
       "runtimeExecutable": null,
-      "runtimeArgs": [
-        "--nolazy"
-      ],
+      "runtimeArgs": ["--nolazy"],
       "env": {
         "NODE_ENV": "localhost"
       },
-      "console": "internalConsole"
+      "console": "internalConsole",
+      "skipFiles": ["<node_internals>/**/*.js"],
+      "showAsyncStacks": true
     },
     {
       "name": "Coverage",
@@ -40,16 +36,10 @@
       "request": "launch",
       "program": "${workspaceRoot}/node_modules/istanbul/lib/cli.js",
       "stopOnEntry": false,
-      "args": [
-        "cover",
-        "${workspaceRoot}/node_modules/mocha/bin/_mocha",
-        "${workspaceRoot}/test/unit/*.js"
-      ],
+      "args": ["cover", "${workspaceRoot}/node_modules/mocha/bin/_mocha", "${workspaceRoot}/test/unit/*.js"],
       "cwd": "${workspaceRoot}",
       "runtimeExecutable": null,
-      "runtimeArgs": [
-        "--nolazy"
-      ],
+      "runtimeArgs": ["--nolazy"],
       "env": {
         "NODE_ENV": "localhost"
       },
