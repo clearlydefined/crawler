@@ -12,6 +12,14 @@ RUN curl -sL https://github.com/nexB/scancode-toolkit/releases/download/v2.9.2/s
   && /opt/scancode-toolkit-2.9.2/scancode --version
 ENV SCANCODE_HOME=/opt/scancode-toolkit-2.9.2
 
+# FOSSology
+WORKDIR /opt
+RUN git clone https://github.com/fossology/fossology.git
+
+WORKDIR /opt/fossology/src/nomos/agent
+RUN make -f Makefile.sa
+ENV FOSSOLOGY_HOME=/opt/fossology/src/nomos/agent
+
 ENV CRAWLER_DEADLETTER_PROVIDER=cd(azblob)
 ENV CRAWLER_NAME=cdcrawlerprod
 ENV CRAWLER_QUEUE_PREFIX=cdcrawlerprod
