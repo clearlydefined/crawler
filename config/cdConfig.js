@@ -78,6 +78,9 @@ module.exports = {
         }
       }
     },
+    fossology: {
+      installDir: config.get('FOSSOLOGY_HOME'),
+    },
     source: {},
     top: {
       githubToken
