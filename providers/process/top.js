@@ -19,7 +19,9 @@ class TopProcessor extends BaseHandler {
 
   canHandle(request) {
     const spec = this.toSpec(request)
-    return request.type === 'top' && spec && ['npmjs', 'mavencentral', 'nuget', 'github'].includes(spec.provider)
+    return (
+      request.type === 'top' && spec && ['npmjs', 'mavencentral', 'nuget', 'github', 'pypi'].includes(spec.provider)
+    )
   }
 
   handle(request) {
@@ -34,6 +36,8 @@ class TopProcessor extends BaseHandler {
         return this._processTopNuGets(request)
       case 'github':
         return this._processAllGitHubOrgRepos(request)
+      // case 'pypi':
+      //   return this._processTopPyPis(request)
       default:
         throw new Error(`Unknown provider type for 'top' request: ${spec.provider}`)
     }
@@ -54,14 +58,14 @@ class TopProcessor extends BaseHandler {
   async _processTopNpms(request) {
     let { start, end } = request.document
     if (!start || start < 0) start = 0
-    if (!end || end - start > 1000 || end - start <= 0) end = start + 1000
+    if (!end || end - start <= 0) end = start + 1000
     const initialOffset = Math.floor(start / 36) * 36
-    let requests = []
     for (let offset = initialOffset; offset < end; offset += 36) {
       const response = await requestRetry.get(`https://www.npmjs.com/browse/depended?offset=${offset}`, {
         headers: { 'x-spiferack': 1 }
       })
-      const requestsPage = response.packages.map(pkg => {
+      const packages = response.packages || []
+      const requestsPage = packages.map(pkg => {
         let [namespace, name] = pkg.name.split('/')
         if (!name) {
           name = namespace
@@ -69,11 +73,38 @@ class TopProcessor extends BaseHandler {
         }
         return new Request('package', `cd:/npm/npmjs/${namespace}/${name}/${pkg.version}`)
       })
-      requests = requests.concat(requestsPage)
+      await request.queueRequests(requestsPage)
+      console.log(`Queued ${requestsPage.length} NPM packages. Offset: ${offset}`)
     }
-    await request.queueRequests(requests.slice(start - initialOffset, end - initialOffset))
     return request.markNoSave()
   }
+
+  /* Example:
+  {
+    "type": "top",
+    "url":"cd:/pypi/pypi/-/pip",
+    "payload": {
+      "body": {
+        "start": 0,
+        "end": 100
+      }
+    }
+  }
+  */
+  // async _processTopPyPis(request) {
+  //   let { start, end } = request.document
+  //   const response = await requestRetry.get(
+  //     `https://hugovk.github.io/top-pypi-packages/top-pypi-packages-30-days.min.json`,
+  //     {}
+  //   )
+  //   const requests = []
+  //   for (let offset = start; offset < end; offset++) {
+  //     const packageName = response.rows[offset].project
+  //     requests.push(new Request('package', `cd:/pypi/pypi/-/${packageName}`))
+  //   }
+  //   await request.queueRequests(requests)
+  //   return request.markNoSave()
+  // }
 
   /* Example:
   {
@@ -119,16 +150,20 @@ class TopProcessor extends BaseHandler {
   async _processTopNuGets(request) {
     // https://docs.microsoft.com/en-us/nuget/api/search-query-service-resource
     // Example: https://api-v2v3search-0.nuget.org/query?prerelease=false&skip=5&take=10
+    const pageSize = 20
     let { start, end } = request.document
     if (!start || start < 0) start = 0
-    if (!end || end - start > 1000 || end - start <= 0) end = start + 1000
-    const topComponents = await requestRetry.get(
-      `https://api-v2v3search-0.nuget.org/query?prerelease=false&skip=${start}&take=${end - start}`
-    )
-    const requests = topComponents.data.map(component => {
-      return new Request('package', `cd:/nuget/nuget/-/${component.id}`)
-    })
-    await request.queueRequests(requests)
+    if (!end || end - start <= 0) end = start + 1000
+    for (let offset = start; offset < end; offset += pageSize) {
+      const topComponents = await requestRetry.get(
+        `https://api-v2v3search-0.nuget.org/query?prerelease=false&skip=${offset}&take=${pageSize}`
+      )
+      const requests = topComponents.data.map(component => {
+        return new Request('package', `cd:/nuget/nuget/-/${component.id}`)
+      })
+      await request.queueRequests(requests)
+      console.log(`Queued ${requests.length} NuGet packages. Offset: ${offset}`)
+    }
     return request.markNoSave()
   }
 

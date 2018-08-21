@@ -41,11 +41,27 @@ const nuget = {
   clearlydefined
 }
 
+const pypi = {
+  _type: 'pypi',
+  source,
+  scancode,
+  clearlydefined
+}
+
+const gem = {
+  _type: 'gem',
+  source,
+  scancode,
+  clearlydefined
+}
+
 const package = {
   _type: 'package',
   npm,
   maven,
-  nuget
+  nuget,
+  pypi,
+  gem
 }
 
 const entities = {
@@ -58,7 +74,9 @@ const entities = {
   fossology,
   npm,
   maven,
-  nuget
+  nuget,
+  pypi,
+  gem
 }
 
 module.exports = {
