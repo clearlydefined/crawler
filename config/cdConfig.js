@@ -32,7 +32,8 @@ module.exports = {
     npmjs: {},
     nuget: {},
     pypi: {},
-    rubygems: {}
+    rubygems: {},
+    launchpad: {}
   },
   process: {
     cdsource: {},
@@ -45,6 +46,7 @@ module.exports = {
     nuget: {
       githubToken
     },
+    launchpad: {},
     package: {},
     scancode: {
       installDir: config.get('SCANCODE_HOME') || 'C:\\installs\\scancode-toolkit-2.9.2',

@@ -55,13 +55,21 @@ const gem = {
   clearlydefined
 }
 
+const launchpad = {
+  _type: 'launchpad',
+  source,
+  scancode,
+  clearlydefined
+}
+
 const package = {
   _type: 'package',
   npm,
   maven,
   nuget,
   pypi,
-  gem
+  gem,
+  launchpad
 }
 
 const entities = {
@@ -76,7 +84,8 @@ const entities = {
   maven,
   nuget,
   pypi,
-  gem
+  gem,
+  launchpad
 }
 
 module.exports = {
