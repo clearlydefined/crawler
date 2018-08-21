@@ -24,6 +24,7 @@ class PackageProcessor extends BaseHandler {
   handle(request) {
     const { document, spec } = super._process(request)
     this.addBasicToolLinks(request, spec)
+    this.addSelfLink(request)
     this.linkAndQueueTool(request, spec.type)
     request.markNoSave()
     return request

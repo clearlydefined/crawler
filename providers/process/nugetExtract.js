@@ -30,6 +30,7 @@ class NuGetExtract extends BaseHandler {
       const { spec } = super._process(request)
       this.addBasicToolLinks(request, spec)
       const manifest = await this._getManifest(request.document.location.manifest)
+      this.addSelfLink(request, manifest.id)
       await this._createDocument(request, manifest, request.document.registryData)
     }
     if (request.document.sourceInfo) {
