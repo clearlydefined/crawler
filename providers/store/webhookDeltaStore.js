@@ -4,9 +4,8 @@
 const request = require('request-promise-native')
 
 class WebhookDeltaStore {
-  constructor(options, baseStore) {
+  constructor(options) {
     this.options = options
-    this.baseStore = baseStore
   }
 
   connect() {

@@ -3,14 +3,14 @@
 
 const config = require('painless-config')
 
-const azblob = {
+const cd_azblob = {
   connection: config.get('HARVEST_AZBLOB_CONNECTION_STRING'),
   container: config.get('HARVEST_AZBLOB_CONTAINER_NAME')
 }
 
 const githubToken = config.get('CRAWLER_GITHUB_TOKEN')
 
-const file = {
+const cd_file = {
   location: config.get('FILE_STORE_LOCATION') || (process.platform === 'win32' ? 'c:/temp/cd' : '/tmp/cd')
 }
 
@@ -30,11 +30,15 @@ module.exports = {
     git: {},
     mavenCentral: {},
     npmjs: {},
-    nuget: {}
+    nuget: {},
+    pypi: {},
+    rubygems: {}
   },
   process: {
     cdsource: {},
     maven: {},
+    pypi: {},
+    gem: {},
     npm: {
       githubToken
     },
@@ -86,19 +90,19 @@ module.exports = {
     }
   },
   store: {
-    dispatcher: config.get('CRAWLER_STORE_PROVIDER') || 'file',
+    dispatcher: config.get('CRAWLER_STORE_PROVIDER') || 'cd(file)',
     cdDispatch: {},
     webhook: {
       url: config.get('CRAWLER_WEBHOOK_URL') || 'http://localhost:4000/webhook',
       token: config.get('CRAWLER_WEBHOOK_TOKEN')
     },
-    azblob,
-    file
+    'cd(azblob)': cd_azblob,
+    'cd(file)': cd_file
   },
   deadletter: {
     provider: config.get('CRAWLER_DEADLETTER_PROVIDER') || config.get('CRAWLER_STORE_PROVIDER') || 'file',
-    azblob,
-    file
+    'cd(azblob)': cd_azblob,
+    'cd(file)': cd_file
   },
   queue: {
     provider: config.get('CRAWLER_QUEUE_PROVIDER') || 'memory',
@@ -136,7 +140,7 @@ module.exports = {
     },
     storageQueue: {
       weights: { immediate: 3, soon: 2, normal: 3, later: 2 },
-      connectionString: azblob.connection,
+      connectionString: cd_azblob.connection,
       queueName: config.get('CRAWLER_QUEUE_PREFIX') || 'cdcrawlerdev',
       visibilityTimeout: 3 * 60 * 60, // 3 hours
       attenuation: {

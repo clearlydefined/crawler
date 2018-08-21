@@ -20,10 +20,10 @@ class NuGetFetch extends BaseHandler {
 
   async handle(request) {
     const spec = this.toSpec(request)
-    // if there is no revision, return an empty doc. The processor will find
-    const registryData = await this._getRegistryData(request)
+    spec.revision = this._normalizeVersion(spec.revision || (await this._getLatestVersion(spec.name)))
     // rewrite the request URL as it is used throughout the system to derive locations and urns etc.
     request.url = spec.toUrl()
+    const registryData = await this._getRegistryData(spec)
     const manifest = registryData ? await this._getManifest(registryData.catalogEntry) : null
     const nuspec = await this._getNuspec(spec)
     if (!manifest && !nuspec)
@@ -32,22 +32,22 @@ class NuGetFetch extends BaseHandler {
     request.document = {
       registryData,
       location,
-      releaseDate: new Date(registryData.published).toISOString()
+      releaseDate: registryData ? new Date(registryData.published).toISOString() : null
     }
     request.contentOrigin = 'origin'
     return request
   }
 
   // query nuget to get the latest version if we don't already have that.
-  async _getRegistryData(request) {
-    const spec = this.toSpec(request)
-    spec.revision = this._normalizeVersion(spec.revision) || (await this._getLatestVersion(spec.name))
+  async _getRegistryData(spec) {
     const baseUrl = providerMap.nuget
     // https://docs.microsoft.com/en-us/nuget/api/registration-base-url-resource
     // Example: https://api.nuget.org/v3/registration3/moq/4.8.2.json and follow catalogEntry
     const { body, statusCode } = await requestRetry.get(
       `${baseUrl}/v3/registration3/${spec.name}/${spec.revision}.json`,
-      { json: true }
+      {
+        json: true
+      }
     )
     if (statusCode !== 200 || !body) return null
     return body
@@ -84,9 +84,8 @@ class NuGetFetch extends BaseHandler {
   async _getNuspec(spec) {
     // https://docs.microsoft.com/en-us/nuget/api/package-base-address-resource#download-package-manifest-nuspec
     // Example: https://api.nuget.org/v3-flatcontainer/newtonsoft.json/11.0.1/newtonsoft.json.nuspec
-    const version = this._normalizeVersion(spec.revision)
     const { body, statusCode } = await requestRetry.get(
-      `https://api.nuget.org/v3-flatcontainer/${spec.name}/${version}/${spec.name}.nuspec`
+      `https://api.nuget.org/v3-flatcontainer/${spec.name}/${spec.revision}/${spec.name}.nuspec`
     )
     if (statusCode !== 200) return []
     return body

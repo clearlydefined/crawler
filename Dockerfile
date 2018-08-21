@@ -20,6 +20,14 @@ WORKDIR /opt/fossology/src/nomos/agent
 RUN make -f Makefile.sa
 ENV FOSSOLOGY_HOME=/opt/fossology/src/nomos/agent
 
+ENV CRAWLER_DEADLETTER_PROVIDER=cd(azblob)
+ENV CRAWLER_NAME=cdcrawlerprod
+ENV CRAWLER_QUEUE_PREFIX=cdcrawlerprod
+ENV CRAWLER_QUEUE_PROVIDER=storageQueue
+ENV CRAWLER_STORE_PROVIDER=cdDispatch+cd(azblob)+webhook
+ENV CRAWLER_WEBHOOK_URL=https://api.clearlydefined.io/webhook
+ENV HARVEST_AZBLOB_CONTAINER_NAME=production
+
 COPY package*.json /tmp/
 RUN cd /tmp && npm install --production
 RUN mkdir -p "${APPDIR}" && cp -a /tmp/node_modules "${APPDIR}"
@@ -27,6 +35,6 @@ RUN mkdir -p "${APPDIR}" && cp -a /tmp/node_modules "${APPDIR}"
 WORKDIR "${APPDIR}"
 COPY . "${APPDIR}"
 
-ENV PORT 4000
-EXPOSE 4000
+ENV PORT 5000
+EXPOSE 5000
 ENTRYPOINT ["npm", "start"]

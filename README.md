@@ -1,6 +1,6 @@
 # ClearlyDefined crawler
 
-A service that crawls projects and packages for information relevant to ClearlyDefined.
+A service that crawls projects and packages for information relevant to ClearlyDefined. Typically users do not need to directly interact with the crawler. Rather, you would use the ClearlyDefined service API to queue "harvesting" of more component's data. It can be convenient to run the crawler directly if, for example, you are developing a handler for a new package type.
 
 # Quick start
 
@@ -8,30 +8,44 @@ A service that crawls projects and packages for information relevant to ClearlyD
 1.  `cd` to the repo dir and run `npm install`
 1.  Copy the `template.env.json` file to the **parent** directory of the repo and rename it to `env.json`. Ideally this repo is colocated with the other ClearlyDefined repos. You can share the `env.json` file. Just merge the two files. Some properties are meant to be shared.
 1.  After copying/merging, update the file to have the property values for your system. See the [Configuration](#configuration) section for more details.
-1.  Install [ScanCode](https://github.com/nexB/scancode-toolkit) if desired.
+1.  Install [ScanCode](https://github.com/nexB/scancode-toolkit) if desired (see below).
 1.  Run `npm start`
 
-That results in the ClearlyDefined crawler starting up and listening for POSTs on port 3000. See the [Configuration](#configuration) section for info on how to change the port.
+That results in the ClearlyDefined crawler starting up and listening for POSTs on port 5000. See the [Configuration](#configuration) section for info on how to change the port.
 
-The crawler takes _requests_ to rummage around and find relevant information about projects. For example, to crawl an NPM, or a GitHub repo, POST one of the following JSON bodies to `http://localhost:3000/requests`. Be sure to include the `content-type: application/json` header in the request. Note that you can also queue an array of requests by POSTing a JSON array of request objects.
+### ScanCode install notes
+Due to an issue with ScanCode's install configuration on Windows, you may need to **replace** the `bin` folder (actually a "junction") with the contents of the `Scripts` folder. That is, delete `bin` and copy `Scripts` to `bin`. See https://github.com/nexB/scancode-toolkit/issues/1129 for more details.
+
+## Queuing work with the crawler
+
+The crawler takes _requests_ to rummage around and find relevant information about projects. For example, to crawl an NPM, or a GitHub repo, POST one of the following JSON bodies to `http://localhost:5000/requests`. Note that you can also queue an array of requests by POSTing a single (or array of) JSON request object. For example, 
+
+```
+curl -d '{"type":"npm", "url":"cd:/npm/npmjs/-/redie/0.3.0"}' -H "Content-Type: application/json" -H "X-token: secret" -X POST http://localhost:5000/requests
+```
+
+Be sure to include the following headers in your request:
+
+- `content-type: application/json`
+- `X-token: <your token>` - set the value here the same as you put in your `env.json`'s `CRAWLER_SERVICE_AUTH_TOKEN` property or `secret` if you did not set the env value.
+
+Here are a few example request objects.
 
 ```json
 {
-  "type": "npm",
+  "type": "package",
   "url": "cd:/npm/npmjs/-/redie/0.3.0"
 }
 ```
 
 ```json
 {
-  "type": "git",
+  "type": "source",
   "url": "cd:/git/github/Microsoft/redie/194269b5b7010ad6f8dc4ef608c88128615031ca"
 }
 ```
 
-The request `type` describes the crawling activity being requested. For example, "do `npm` crawling". It is typically the same as the `type` in the url (see below). There are some more advanced scenarios where the two values are different but for starters, treat them as the same.
-
-The general form of a request URL is
+The request `type` describes the crawling activity being requested. For example, "do `package` crawling". It is typically the same as the `type` in the url (see below). There are some more advanced scenarios where the two values are different but for starters, treat them as the same. The general form of a request URL is (note: it is a URL because of the underlying crawling infrastructure, the `cd` scheme is not particularly relevant)
 
 ```
 cd:/type/provider/namespace/name/revision
@@ -47,11 +61,15 @@ Where the segments are:
 
 Given a request, the crawler does the following kinds of things (it does more or less work depending on the details found in its travels and the set of tools configured):
 
-1.  Looking up the package at npmjs.com and pull out interesting bits like the project location, issue tracker, and most importantly, the source code location.
-1.  With the source location, the crawler determines the revision (e.g., Git commit) that matches the version of the package.
+Process the component:
+1.  Look up the component in its registry (e.g., npmjs.com) and pull out interesting bits like the project location, issue tracker, release date, and most importantly, the source code location where possible. 
+1.  Run tools like ScanCode and others if they are likely to find anything interesting given the component type 
+
+Process the source, if any:
+1.  The crawler determines the revision (e.g., Git commit) that matches the version of the package.
 1.  Given the location and revision, the crawler fetches the source and runs any configured scan tools (e.g., ScanCode)
 
-The crawler's output is stored for use by the rest of the ClearlyDefined infrastructure -- it is not intended to be used directly by humans.
+The crawler's output is stored for use by the rest of the ClearlyDefined infrastructure -- it is not intended to be used directly by humans. Note that each tool's output is stored separately and the results of processing the component and the component source are alos separated. 
 
 # Configuration
 
@@ -79,6 +97,26 @@ The directory where ScanCode is installed. If you don't set this, running ScanCo
 ### CRAWLER_GITHUB_TOKEN
 
 The crawler tries to figure out details of the packages and source being traversed using various GitHub API calls. For this it needs an API token. This can be a Personal Access Token (PAT) or the token for an OAuth App. The token does not need any special permissions, only public data is accessed. Without this key GitHub will severely rate limit the crawler (as it should) and you won't get very far.
+
+# Docker
+
+## Run Docker image from Docker Hub
+
+`docker run --env-file ../<env_name>.env.list clearlydefined/crawler`
+
+See `local.env.list`, `dev.env.list` and `prod.env.list` tempate files.
+
+`HARVEST_AZBLOB_CONNECTION_STRING` can be either an account key-based connection string or a Shared Access Signature (SAS) connection string. SAS connection string must be generated from `clearlydefinedprod` storage account with the following minimal set of permissions:
+
+- Allowed services: Blob, Queue
+- Allowed resource types: Container, Object
+- Allowed permissions: Read, Write, Add, Process
+
+## Build and run Docker image locally
+
+`docker build -t crawler .`
+
+`docker run --rm --env-file ../local.env.list -p 5000:5000 crawler`
 
 # ClearlyDefined, defined.
 
