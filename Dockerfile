@@ -12,11 +12,11 @@ RUN curl -sL https://github.com/nexB/scancode-toolkit/releases/download/v2.9.2/s
   && /opt/scancode-toolkit-2.9.2/scancode --version
 ENV SCANCODE_HOME=/opt/scancode-toolkit-2.9.2
 
-ENV CRAWLER_DEADLETTER_PROVIDER=azblob
+ENV CRAWLER_DEADLETTER_PROVIDER=cd(azblob)
 ENV CRAWLER_NAME=cdcrawlerprod
 ENV CRAWLER_QUEUE_PREFIX=cdcrawlerprod
 ENV CRAWLER_QUEUE_PROVIDER=storageQueue
-ENV CRAWLER_STORE_PROVIDER=cdDispatch+azblob+webhook
+ENV CRAWLER_STORE_PROVIDER=cdDispatch+cd(azblob)+webhook
 ENV CRAWLER_WEBHOOK_URL=https://api.clearlydefined.io/webhook
 ENV HARVEST_AZBLOB_CONTAINER_NAME=production
 

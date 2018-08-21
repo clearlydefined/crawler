@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
+const AttachmentStoreFactory = require('./store/attachmentStoreFactory')
+const providers = require('ghcrawler').providers
+
 module.exports = {
   filter: {
     provider: 'filter',
@@ -30,6 +33,8 @@ module.exports = {
   },
   store: {
     cdDispatch: require('./store/storeDispatcher'),
-    webhook: require('./store/webhookDeltaStore')
+    webhook: require('./store/webhookDeltaStore'),
+    'cd(azblob)': AttachmentStoreFactory(providers.store.azblob),
+    'cd(file)': AttachmentStoreFactory(providers.store.file)
   }
 }
