@@ -26,6 +26,7 @@ class GemExtract extends BaseHandler {
     if (this.isProcessing(request)) {
       const { spec } = super._process(request)
       this.addBasicToolLinks(request, spec)
+      this.addSelfLink(request) // TODO: add preserved name from the registry
       await this._createDocument(request, request.document.registryData)
       await BaseHandler.addInterestingFiles(request.document, request.document.location)
     }
