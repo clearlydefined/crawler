@@ -33,7 +33,8 @@ class ScanCodeProcessor extends BaseHandler {
   }
 
   async handle(request) {
-    const { document, spec } = super._process(request)
+    const document = super._process(request)
+    const spec = this.toSpec(request)
     const size = await this._computeSize(document)
     request.addMeta({ k: size.k, fileCount: size.count })
     if (spec.provider === 'github' && (size.k > this.options.maxSize || size.count > this.options.maxCount)) {

@@ -20,14 +20,15 @@ class PyPiExtract extends BaseHandler {
   }
 
   async handle(request) {
+    const spec = this.toSpec(request)
+    if (request.document.registryData.info.name) spec.name = request.document.registryData.info.name
     if (this.isProcessing(request)) {
-      const { spec } = super._process(request)
-      spec.name = request.document.registryData.info.name
+      super._process(request)
       this.addBasicToolLinks(request, spec)
       await this._createDocument(request, spec, request.document.registryData)
       await BaseHandler.addInterestingFiles(request.document, request.document.location)
     }
-    this.linkAndQueueTool(request, 'scancode')
+    this.linkAndQueueTool(request, spec, 'scancode')
     if (request.document.sourceInfo) {
       const sourceSpec = SourceSpec.adopt(request.document.sourceInfo)
       this.linkAndQueue(request, 'source', sourceSpec.toEntitySpec())

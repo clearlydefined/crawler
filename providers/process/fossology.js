@@ -40,7 +40,8 @@ class FossologyProcessor extends BaseHandler {
   }
 
   async handle(request) {
-    const { document, spec } = super._process(request)
+    const document = super._process(request)
+    const spec = this.toSpec()
     if(!this.nomosVersion)
       return request.markSkip('No nomos tool found')
 
