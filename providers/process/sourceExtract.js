@@ -22,7 +22,8 @@ class SourceExtract extends BaseHandler {
   }
 
   async handle(request) {
-    const { document, spec } = super._process(request)
+    super._process(request)
+    const spec = this.toSpec(request)
     this.addBasicToolLinks(request, spec)
     const location = request.document.location
     request.document = {

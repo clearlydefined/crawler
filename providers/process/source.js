@@ -22,11 +22,12 @@ class SourceProcessor extends BaseHandler {
   }
 
   handle(request) {
-    const { document, spec } = super._process(request)
+    const document = super._process(request)
+    const spec = this.toSpec()
     this.addBasicToolLinks(request, spec)
-    this.linkAndQueueTool(request, 'clearlydefined')
-    this.linkAndQueueTool(request, 'scancode')
-    this.linkAndQueueTool(request, 'fossology')
+    this.linkAndQueueTool(request, spec, 'clearlydefined')
+    this.linkAndQueueTool(request, spec, 'scancode')
+    this.linkAndQueueTool(request, spec, 'fossology')
     request.markNoSave()
     return document
   }

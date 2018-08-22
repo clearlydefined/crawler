@@ -30,7 +30,7 @@ class VstsProcessor extends BaseHandler {
   }
 
   async handle(request) {
-    const { document } = super._process(request)
+    const document = super._process(request)
     this.logger.info(`Processing ${request.toString()}`)
 
     // Get the build output and unzip

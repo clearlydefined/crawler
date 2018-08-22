@@ -22,9 +22,10 @@ class PackageProcessor extends BaseHandler {
   }
 
   handle(request) {
-    const { document, spec } = super._process(request)
+    super._process(request)
+    const spec = this.toSpec(request)
     this.addBasicToolLinks(request, spec)
-    this.linkAndQueueTool(request, spec.type)
+    this.linkAndQueueTool(request, spec, spec.type)
     request.markNoSave()
     return request
   }
