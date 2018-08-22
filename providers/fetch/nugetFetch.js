@@ -44,7 +44,7 @@ class NuGetFetch extends BaseHandler {
     // https://docs.microsoft.com/en-us/nuget/api/registration-base-url-resource
     // Example: https://api.nuget.org/v3/registration3/moq/4.8.2.json and follow catalogEntry
     const { body, statusCode } = await requestRetry.get(
-      `${baseUrl}/v3/registration3/${spec.name}/${spec.revision}.json`,
+      `${baseUrl}/v3/registration3/${spec.name.toLowerCase()}/${spec.revision}.json`,
       {
         json: true
       }
