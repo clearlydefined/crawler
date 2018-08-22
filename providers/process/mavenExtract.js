@@ -29,9 +29,9 @@ class MavenExtract extends BaseHandler {
     if (this.isProcessing(request)) {
       // skip all the hard work if we are just traversing.
       const { spec } = super._process(request)
+      spec.name = request.document.registryData.a
       this.addBasicToolLinks(request, spec)
       const manifest = await this._getManifest(request, request.document.location)
-      this.addSelfLink(request, request.document.registryData.a)
       await this._createDocument(request, spec, manifest, request.document.registryData)
       await BaseHandler.addInterestingFiles(request.document, request.document.location)
     }

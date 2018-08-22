@@ -22,8 +22,8 @@ class PyPiExtract extends BaseHandler {
   async handle(request) {
     if (this.isProcessing(request)) {
       const { spec } = super._process(request)
+      spec.name = request.document.registryData.info.name
       this.addBasicToolLinks(request, spec)
-      this.addSelfLink(request, request.document.registryData.info.name)
       await this._createDocument(request, spec, request.document.registryData)
       await BaseHandler.addInterestingFiles(request.document, request.document.location)
     }
