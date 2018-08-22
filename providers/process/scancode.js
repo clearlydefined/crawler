@@ -52,7 +52,6 @@ class ScanCodeProcessor extends BaseHandler {
       return request.markNoSave()
     }
     this.addBasicToolLinks(request, spec)
-    this.addSelfLink(request)
     const file = this._createTempFile(request)
     this.logger.info(
       `Analyzing ${request.toString()} using ScanCode. input: ${request.document.location} output: ${file.name}`

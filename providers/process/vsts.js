@@ -60,7 +60,6 @@ class VstsProcessor extends BaseHandler {
     spec.tool = originalRequest.type
     spec.toolVersion = document.toolVersion
     this.addBasicToolLinks(request, spec)
-    this.addSelfLink(request)
 
     // Add the output content to the document
     const scancodeFilePath = path.join(root, 'scancode.json')

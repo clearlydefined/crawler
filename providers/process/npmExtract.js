@@ -28,12 +28,13 @@ class NpmExtract extends BaseHandler {
     if (this.isProcessing(request)) {
       // skip all the hard work if we are just traversing.
       const { document, spec } = super._process(request)
+      spec.name = request.document.registryData.name
+      // spec.namespace = TODO
       this.addBasicToolLinks(request, spec)
       const location = request.document.location
       const manifestLocation = this._getManifestLocation(location)
       const manifest = manifestLocation ? JSON.parse(fs.readFileSync(manifestLocation)) : null
       if (!manifest) console.log(`NPM without package.json: ${request.url}`)
-      this.addSelfLink(request, request.document.registryData.name)
       this._createDocument(request, manifest, request.document.registryData)
       await BaseHandler.addInterestingFiles(request.document, path.join(location, 'package'))
     }

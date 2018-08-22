@@ -24,7 +24,6 @@ class SourceProcessor extends BaseHandler {
   handle(request) {
     const { document, spec } = super._process(request)
     this.addBasicToolLinks(request, spec)
-    this.addSelfLink(request)
     this.linkAndQueueTool(request, 'clearlydefined')
     this.linkAndQueueTool(request, 'scancode')
     this.linkAndQueueTool(request, 'fossology')

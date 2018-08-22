@@ -28,9 +28,10 @@ class NuGetExtract extends BaseHandler {
     if (this.isProcessing(request)) {
       // skip all the hard work if we are just traversing.
       const { spec } = super._process(request)
-      this.addBasicToolLinks(request, spec)
       const manifest = await this._getManifest(request.document.location.manifest)
-      this.addSelfLink(request, manifest.id)
+      spec.name = manifest.id
+      // spec.namespace = TODO
+      this.addBasicToolLinks(request, spec)
       await this._createDocument(request, manifest, request.document.registryData)
     }
     if (request.document.sourceInfo) {
