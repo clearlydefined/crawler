@@ -58,7 +58,7 @@ class FossologyProcessor extends BaseHandler {
     return new Promise((resolve, reject) => {
       // TODO add correct parameters and command line here
       const parameters = ['-ld', request.document.location].join(' ')
-      exec(`cd ${this.options.installDir} && ./nomossa ${parameters}`, (error, stdout, stderr) => {
+      exec(`cd ${this.options.installDir} && ./nomossa ${parameters}`, {maxBuffer: 5000 * 1024}, (error, stdout, stderr) => {
         if (error) {
           request.markDead('Error', error ? error.message : 'FOSSology run failed')
           return reject(error)
