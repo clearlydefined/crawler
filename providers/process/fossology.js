@@ -8,6 +8,7 @@ const path = require('path')
 const { promisify } = require('util')
 const du = require('du')
 const dir = require('node-dir')
+const bufferReplace = require('buffer-replace')
 
 const getFiles = promisify(dir.files)
 let _toolVersion
@@ -64,6 +65,7 @@ class FossologyProcessor extends BaseHandler {
           return reject(error)
         }
         let buff = new Buffer(stdout)
+        buff = bufferReplace(buff, request.document.location, '')
         const nomosOutput = {
           version: this.nomosVersion,
           parameters: parameters,
