@@ -25,6 +25,7 @@
     "url": "https://github.com/clearlydefined/crawler"
   },
   "dependencies": {
+    "buffer-replace": "^1.0.0",
     "decompress": "^4.2.0",
     "du": "^0.1.0",
     "extend": "^3.0.1",
