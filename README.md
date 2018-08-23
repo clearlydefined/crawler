@@ -118,6 +118,63 @@ See `local.env.list`, `dev.env.list` and `prod.env.list` tempate files.
 
 `docker run --rm --env-file ../local.env.list -p 5000:5000 crawler`
 
+
+# Clouds
+
+## Google Cloud
+
+
+### Environment Setup
+
+One time setup to make kubectl work:
+
+    gcloud --project <project> container clusters get-credentials <gke cluster> --region <region>
+
+Configure secrets:
+
+    go run tools/env2kubesecrets.go < dev.env.list | kubectl apply -f -
+
+Delete secrets:
+
+    kubectl delete Secrets secrets
+
+### Launch/Update
+
+Launch crawler and redis:
+
+    kubectl apply -f crawler.yaml
+
+### Debugging
+
+Shell in same cluster:
+
+    kubectl run alpine --image alpine:latest -i --tty --rm
+
+Add curl:
+
+    apk add curl
+
+Queue work:
+
+    curl -d '{"type":"npm", "url":"cd:/npm/npmjs/-/redie/0.3.0"}' \
+      -H "Content-Type: application/json" \
+      -H "X-token: secret" \
+      -X POST \
+      http://crawler:5000/requests
+
+Expose dashboard port:
+
+    kubectl expose deployment dashboard --type="LoadBalancer" --name=external-dashboard --port=80 --target-port=4000
+    kubectl get service external-dashboard
+
+It will now be availalbe on port 80 on the external IP returned by `kubectl get`.
+
+Un-expose dashboard port:
+
+    kubectl delete service external-dashboard
+
+
+
 # ClearlyDefined, defined.
 
 ## Mission
