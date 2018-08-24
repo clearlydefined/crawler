@@ -25,13 +25,9 @@ class NpmExtract extends BaseHandler {
   // Coming in here we expect the request.document to have id, location and metadata properties.
   // Do interesting processing...
   async handle(request) {
-    const spec = this.toSpec(request)
-    const { name, namespace } = this._getNameAndNamespaceFromRegistry(request.document.registryData.name)
-    if (name) spec.name = name
-    if (namespace) spec.namespace = namespace
     if (this.isProcessing(request)) {
       // skip all the hard work if we are just traversing.
-      super._process(request)
+      const { document, spec } = super._process(request)
       this.addBasicToolLinks(request, spec)
       const location = request.document.location
       const manifestLocation = this._getManifestLocation(location)
@@ -40,24 +36,13 @@ class NpmExtract extends BaseHandler {
       this._createDocument(request, manifest, request.document.registryData)
       await BaseHandler.addInterestingFiles(request.document, path.join(location, 'package'))
     }
-    this.linkAndQueueTool(request, spec, 'scancode')
-    this.linkAndQueueTool(request, spec, 'fossology')
+    this.linkAndQueueTool(request, 'scancode')
+    this.linkAndQueueTool(request, 'fossology')
     if (request.document.sourceInfo) {
       const sourceSpec = SourceSpec.adopt(request.document.sourceInfo)
       this.linkAndQueue(request, 'source', sourceSpec.toEntitySpec())
     }
     return request
-  }
-
-  _getNameAndNamespaceFromRegistry(registryName) {
-    if (!registryName) return {}
-    const parts = registryName.split('/')
-    switch (parts.length) {
-      case 1:
-        return { namespace: null, name: parts[0] }
-      case 2:
-        return { namespace: parts[0], name: parts[1] }
-    }
   }
 
   _getManifestLocation(dir) {

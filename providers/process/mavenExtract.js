@@ -28,10 +28,7 @@ class MavenExtract extends BaseHandler {
   async handle(request) {
     if (this.isProcessing(request)) {
       // skip all the hard work if we are just traversing.
-      super._process(request)
-      const spec = this.toSpec(request)
-      if (request.document.registryData.a) spec.name = request.document.registryData.a
-      if (request.document.registryData.g) spec.namespace = request.document.registryData.g
+      const { spec } = super._process(request)
       this.addBasicToolLinks(request, spec)
       const manifest = await this._getManifest(request, request.document.location)
       await this._createDocument(request, spec, manifest, request.document.registryData)
