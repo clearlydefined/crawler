@@ -5,6 +5,7 @@ const BaseHandler = require('../../lib/baseHandler')
 const nodeRequest = require('request')
 const requestPromise = require('request-promise-native')
 const fs = require('fs')
+const { clone } = require('lodash')
 
 const providerMap = {
   npmjs: 'https://registry.npmjs.com'
@@ -28,6 +29,8 @@ class NpmFetch extends BaseHandler {
     await this.decompress(file.name, dir.name)
     request.document = this._createDocument(dir, registryData)
     request.contentOrigin = 'origin'
+    const casedSpec = this._getCasedSpec(spec, registryData)
+    if (casedSpec) request.casedSpec = casedSpec
     return request
   }
 
@@ -75,6 +78,23 @@ class NpmFetch extends BaseHandler {
   _createDocument(dir, registryData) {
     const releaseDate = registryData.releaseDate
     return { location: dir.name, registryData, releaseDate }
+  }
+
+  _getCasedSpec(spec, registryData) {
+    if (!registryData || !registryData.name) return false
+    const parts = registryData.name.split('/')
+    const casedSpec = clone(spec)
+    switch (parts.length) {
+      case 1:
+        casedSpec.name = parts[0]
+        return casedSpec
+      case 2:
+        casedSpec.namespace = parts[0]
+        casedSpec.name = parts[1]
+        return casedSpec
+      default:
+        return false
+    }
   }
 }
 
