@@ -173,7 +173,11 @@ Un-expose dashboard port:
 
     kubectl delete service external-dashboard
 
+# Dashboard
 
+The ghcrawler dashboard does **not** work properly with the current version of
+ClearlyDefined crawler.  It uses a very different configuration scheme that is
+incompatible.
 
 # ClearlyDefined, defined.
 
