@@ -8,6 +8,7 @@ const path = require('path')
 const { promisify } = require('util')
 const du = require('du')
 const dir = require('node-dir')
+const bufferReplace = require('buffer-replace')
 
 const getFiles = promisify(dir.files)
 let _toolVersion
@@ -58,12 +59,13 @@ class FossologyProcessor extends BaseHandler {
     return new Promise((resolve, reject) => {
       // TODO add correct parameters and command line here
       const parameters = ['-ld', request.document.location].join(' ')
-      exec(`cd ${this.options.installDir} && ./nomossa ${parameters}`, (error, stdout, stderr) => {
+      exec(`cd ${this.options.installDir} && ./nomossa ${parameters}`, {maxBuffer: 5000 * 1024}, (error, stdout, stderr) => {
         if (error) {
           request.markDead('Error', error ? error.message : 'FOSSology run failed')
           return reject(error)
         }
         let buff = new Buffer(stdout)
+        buff = bufferReplace(buff, request.document.location, '')
         const nomosOutput = {
           version: this.nomosVersion,
           parameters: parameters,
