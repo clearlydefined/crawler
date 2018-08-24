@@ -81,7 +81,7 @@ class NuGetFetch extends BaseHandler {
   async _getManifest(catalogEntryUrl) {
     const { body, statusCode } = await requestRetry.get(catalogEntryUrl)
     if (statusCode !== 200) return null
-    return body
+    return JSON.parse(body)
   }
 
   // Nuspec is needed because package metadata API is not able to parse repository URL: https://github.com/NuGet/NuGetGallery/issues/5671
@@ -99,7 +99,7 @@ class NuGetFetch extends BaseHandler {
     const dir = this._createTempDir(request)
     const location = { manifest: path.join(dir.name, 'manifest.json'), nuspec: path.join(dir.name, 'nuspec.xml') }
     await Promise.all([
-      promisify(fs.writeFile)(location.manifest, manifest),
+      promisify(fs.writeFile)(location.manifest, JSON.stringify(manifest)),
       promisify(fs.writeFile)(location.nuspec, nuspec)
     ])
     return location
