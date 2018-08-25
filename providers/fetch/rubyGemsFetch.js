@@ -7,6 +7,7 @@ const requestRetry = require('requestretry').defaults({ maxAttempts: 3, fullResp
 const fs = require('fs')
 const zlib = require('zlib')
 const path = require('path')
+const { clone } = require('lodash')
 
 const providerMap = {
   rubyGems: 'https://rubygems.org'
@@ -30,6 +31,10 @@ class RubyGemsFetch extends BaseHandler {
     await this._extractFiles(dir.name)
     request.document = await this._createDocument(dir, registryData)
     request.contentOrigin = 'origin'
+    if (registryData.name) {
+      request.casedSpec = clone(spec)
+      request.casedSpec.name = registryData.name
+    }
     return request
   }
 
