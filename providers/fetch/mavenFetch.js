@@ -4,6 +4,7 @@
 const BaseHandler = require('../../lib/baseHandler')
 const mavenCentral = require('../../lib/mavenCentral')
 const requestPromise = require('request-promise-native')
+const { clone } = require('lodash')
 
 class MavenFetch extends BaseHandler {
   canHandle(request) {
@@ -23,6 +24,11 @@ class MavenFetch extends BaseHandler {
     const location = await this._postProcessArtifact(request, spec, file)
     request.document = this._createDocument(location, registryData)
     request.contentOrigin = 'origin'
+    if (registryData.g || registryData.a) {
+      request.casedSpec = clone(spec)
+      request.casedSpec.namespace = registryData.g || spec.namespace
+      request.casedSpec.name = registryData.a || spec.name
+    }
     return request
   }
 

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const _ = require('lodash')
+const { trimStart, clone } = require('lodash')
 const BaseHandler = require('../../lib/baseHandler')
 const fs = require('fs')
 const path = require('path')
@@ -35,6 +35,10 @@ class NuGetFetch extends BaseHandler {
       releaseDate: registryData ? new Date(registryData.published).toISOString() : null
     }
     request.contentOrigin = 'origin'
+    if (manifest.id) {
+      request.casedSpec = clone(spec)
+      request.casedSpec.name = manifest.id
+    }
     return request
   }
 
@@ -44,7 +48,7 @@ class NuGetFetch extends BaseHandler {
     // https://docs.microsoft.com/en-us/nuget/api/registration-base-url-resource
     // Example: https://api.nuget.org/v3/registration3/moq/4.8.2.json and follow catalogEntry
     const { body, statusCode } = await requestRetry.get(
-      `${baseUrl}/v3/registration3/${spec.name}/${spec.revision}.json`,
+      `${baseUrl}/v3/registration3/${spec.name.toLowerCase()}/${spec.revision}.json`,
       {
         json: true
       }
@@ -55,7 +59,7 @@ class NuGetFetch extends BaseHandler {
 
   // https://docs.microsoft.com/en-us/nuget/reference/package-versioning#normalized-version-numbers
   _normalizeVersion(version) {
-    const trimmed = version.split('.').map(part => _.trimStart(part, '0') || '0')
+    const trimmed = version.split('.').map(part => trimStart(part, '0') || '0')
     return (trimmed[3] === '0' ? trimmed.slice(0, 3) : trimmed).join('.')
   }
 
@@ -77,7 +81,7 @@ class NuGetFetch extends BaseHandler {
   async _getManifest(catalogEntryUrl) {
     const { body, statusCode } = await requestRetry.get(catalogEntryUrl)
     if (statusCode !== 200) return null
-    return body
+    return JSON.parse(body)
   }
 
   // Nuspec is needed because package metadata API is not able to parse repository URL: https://github.com/NuGet/NuGetGallery/issues/5671
@@ -95,7 +99,7 @@ class NuGetFetch extends BaseHandler {
     const dir = this._createTempDir(request)
     const location = { manifest: path.join(dir.name, 'manifest.json'), nuspec: path.join(dir.name, 'nuspec.xml') }
     await Promise.all([
-      promisify(fs.writeFile)(location.manifest, manifest),
+      promisify(fs.writeFile)(location.manifest, JSON.stringify(manifest)),
       promisify(fs.writeFile)(location.nuspec, nuspec)
     ])
     return location
