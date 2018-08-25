@@ -42,15 +42,12 @@ class FossologyProcessor extends BaseHandler {
 
   async handle(request) {
     const { document, spec } = super._process(request)
-    if(!this.nomosVersion)
-      return request.markSkip('No nomos tool found')
+    if (!this.nomosVersion) return request.markSkip('No nomos tool found')
 
     const size = await this._computeSize(document)
     request.addMeta({ k: size.k, fileCount: size.count })
     this.addBasicToolLinks(request, spec)
-    this.logger.info(
-      `Analyzing ${request.toString()} using FOSSology. input: ${request.document.location}`
-    )
+    this.logger.info(`Analyzing ${request.toString()} using FOSSology. input: ${request.document.location}`)
     await this._createDocument(request)
     return request
   }
@@ -59,23 +56,27 @@ class FossologyProcessor extends BaseHandler {
     return new Promise((resolve, reject) => {
       // TODO add correct parameters and command line here
       const parameters = ['-ld', request.document.location].join(' ')
-      exec(`cd ${this.options.installDir} && ./nomossa ${parameters}`, {maxBuffer: 5000 * 1024}, (error, stdout, stderr) => {
-        if (error) {
-          request.markDead('Error', error ? error.message : 'FOSSology run failed')
-          return reject(error)
-        }
-        let buff = new Buffer(stdout)
-        buff = bufferReplace(buff, request.document.location, '')
-        const nomosOutput = {
-          version: this.nomosVersion,
-          parameters: parameters,
-          output: {
-            contentType: 'application/base64',
-            content: buff.toString('base64')
+      exec(
+        `cd ${this.options.installDir} && ./nomossa ${parameters}`,
+        { maxBuffer: 5000 * 1024 },
+        (error, stdout, stderr) => {
+          if (error) {
+            request.markDead('Error', error ? error.message : 'FOSSology run failed')
+            return reject(error)
           }
+          let buffer = new Buffer(stdout)
+          buffer = bufferReplace(buffer, request.document.location + '/', '')
+          const nomosOutput = {
+            version: this.nomosVersion,
+            parameters: parameters,
+            output: {
+              contentType: 'text/plain',
+              content: buffer.toString()
+            }
+          }
+          resolve(nomosOutput)
         }
-        resolve(nomosOutput)
-      })
+      )
     })
   }
 
@@ -83,9 +84,7 @@ class FossologyProcessor extends BaseHandler {
     let count = 0
     const bytes = await promisify(du)(document.location, {
       filter: file => {
-        if (path.basename(file) === '.git') {
-          return false
-        }
+        if (path.basename(file) === '.git') return false
         count++
         return true
       }
@@ -100,9 +99,7 @@ class FossologyProcessor extends BaseHandler {
 
   _detectVersion() {
     if (_toolVersion) return _toolVersion
-    this._detectNomosVersion().then(function(value) {
-      _toolVersion = value
-    })
+    this._detectNomosVersion().then(value => (_toolVersion = value))
     return _toolVersion
   }
 
@@ -111,7 +108,7 @@ class FossologyProcessor extends BaseHandler {
     return new Promise((resolve, reject) => {
       exec(`cd ${this.options.installDir} && ./nomossa -V`, (error, stdout, stderr) => {
         if (error) return reject(error)
-        _nomosVersion = stdout.replace('nomos\ build\ version:', '').trim()
+        _nomosVersion = stdout.replace('nomos build version:', '').trim()
         _nomosVersion = _nomosVersion.replace(/-.*/, '').trim()
         resolve(_nomosVersion)
       })
@@ -123,7 +120,7 @@ class FossologyProcessor extends BaseHandler {
     const nomosOutput = await this._runNomos(request)
     //const copyrightOutput = await this._runCopyright(request, files)
     //const monkOutput = await this._runMonk(request, files)
-    request.document = { _metadata: request.document._metadata}
+    request.document = { _metadata: request.document._metadata }
     if (nomosOutput) request.document.nomos = nomosOutput
   }
 }
