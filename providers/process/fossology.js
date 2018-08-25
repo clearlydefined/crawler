@@ -21,7 +21,6 @@ class FossologyProcessor extends BaseHandler {
     // by the time someone actually uses this instance, the call will have completed.
     // Need to detect the tool version before anyone tries to run this processor.
     this._detectVersion()
-    this._detectNomosVersion()
   }
 
   get schemaVersion() {
@@ -97,17 +96,20 @@ class FossologyProcessor extends BaseHandler {
     return newSpec.toUrn()
   }
 
-  _detectVersion() {
+  async _detectVersion() {
     if (_toolVersion) return _toolVersion
-    this._detectNomosVersion().then(value => (_toolVersion = value))
-    return _toolVersion
+    return (_toolVersion = await this._detectNomosVersion())
   }
 
   _detectNomosVersion() {
-    if (_nomosVersion) return _nomosVersion
+    if (_nomosVersion !== undefined) return _nomosVersion
     return new Promise((resolve, reject) => {
       exec(`cd ${this.options.installDir} && ./nomossa -V`, (error, stdout, stderr) => {
-        if (error) return reject(error)
+        if (error) {
+          // TODO log here
+          _nomosVersion = null
+          return resolve(null)
+        }
         _nomosVersion = stdout.replace('nomos build version:', '').trim()
         _nomosVersion = _nomosVersion.replace(/-.*/, '').trim()
         resolve(_nomosVersion)
