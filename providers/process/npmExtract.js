@@ -10,7 +10,7 @@ const { get } = require('lodash')
 
 class NpmExtract extends BaseHandler {
   get schemaVersion() {
-    return '1.1.0'
+    return '1.1.1'
   }
 
   get toolSpec() {
