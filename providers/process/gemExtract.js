@@ -10,7 +10,7 @@ const sourceDiscovery = require('../../lib/sourceDiscovery')
 
 class GemExtract extends BaseHandler {
   get schemaVersion() {
-    return 1
+    return '1.1.0'
   }
 
   get toolSpec() {
@@ -27,6 +27,7 @@ class GemExtract extends BaseHandler {
       const { spec } = super._process(request)
       this.addBasicToolLinks(request, spec)
       await this._createDocument(request, request.document.registryData)
+      await BaseHandler.addInterestingFiles(request.document, request.document.location)
     }
     this.linkAndQueueTool(request, 'scancode')
     if (request.document.sourceInfo) {

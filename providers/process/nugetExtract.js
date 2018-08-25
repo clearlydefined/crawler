@@ -30,7 +30,7 @@ class NuGetExtract extends BaseHandler {
       const { spec } = super._process(request)
       this.addBasicToolLinks(request, spec)
       const manifest = await this._getManifest(request.document.location.manifest)
-      await this._createDocument(request, spec, manifest, request.document.registryData)
+      await this._createDocument(request, manifest, request.document.registryData)
     }
     if (request.document.sourceInfo) {
       const sourceSpec = SourceSpec.adopt(request.document.sourceInfo)
@@ -49,7 +49,7 @@ class NuGetExtract extends BaseHandler {
     return nuspec.toString()
   }
 
-  async _createDocument(request, spec, manifest, registryData) {
+  async _createDocument(request, manifest, registryData) {
     const nuspecLocation = request.document.location.nuspec
     // setup the manifest to be the new document for the request
     request.document = { _metadata: request.document._metadata, manifest, registryData }
