@@ -5,6 +5,7 @@ const BaseHandler = require('../../lib/baseHandler')
 const requestRetry = require('requestretry').defaults({ maxAttempts: 3, fullResponse: true })
 const nodeRequest = require('request')
 const fs = require('fs')
+const spdxCorrect = require('spdx-correct')
 const { findLastKey, get, find } = require('lodash')
 
 const providerMap = {
@@ -46,7 +47,8 @@ class PyPiFetch extends BaseHandler {
 
   _createDocument(dir, spec, registryData) {
     const releaseDate = this._extractReleaseDate(spec, registryData)
-    return { location: dir.name, registryData, releaseDate }
+    const declaredLicense = this._extractDeclaredLicense(registryData)
+    return { location: dir.name, registryData, releaseDate, declaredLicense }
   }
 
   _extractReleaseDate(spec, registryData) {
@@ -56,6 +58,19 @@ class PyPiFetch extends BaseHandler {
     })
     if (!release) return
     return release.upload_time
+  }
+
+  _extractDeclaredLicense(registryData) {
+    const classifiers = get(registryData, 'info.classifiers')
+    if (!classifiers) return null
+    for (const classifier in classifiers) {
+      if (classifiers[classifier].includes('License :: OSI Approved ::')) {
+        const lastColon = classifiers[classifier].lastIndexOf(':')
+        const rawLicense = classifiers[classifier].slice(lastColon + 1)
+        return spdxCorrect(rawLicense)
+      }
+    }
+    return null
   }
 
   async _getPackage(spec, registryData, destination) {

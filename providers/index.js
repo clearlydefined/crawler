@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
+const AttachmentStoreFactory = require('./store/attachmentStoreFactory')
+const providers = require('ghcrawler').providers
+
 module.exports = {
   filter: {
     provider: 'filter',
@@ -24,12 +27,15 @@ module.exports = {
     pypi: require('./process/pypiExtract'),
     package: require('./process/package'),
     scancode: require('./process/scancode'),
+    fossology: require('./process/fossology'),
     source: require('./process/source'),
     top: require('./process/top'),
     vsts: require('./process/vsts')
   },
   store: {
     cdDispatch: require('./store/storeDispatcher'),
-    webhook: require('./store/webhookDeltaStore')
+    webhook: require('./store/webhookDeltaStore'),
+    'cd(azblob)': AttachmentStoreFactory(providers.store.azblob),
+    'cd(file)': AttachmentStoreFactory(providers.store.file)
   }
 }
