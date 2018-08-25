@@ -10,7 +10,7 @@ const { get } = require('lodash')
 
 class NpmExtract extends BaseHandler {
   get schemaVersion() {
-    return '1.1.0'
+    return '1.1.1'
   }
 
   get toolSpec() {
@@ -33,7 +33,7 @@ class NpmExtract extends BaseHandler {
       const manifestLocation = this._getManifestLocation(location)
       const manifest = manifestLocation ? JSON.parse(fs.readFileSync(manifestLocation)) : null
       if (!manifest) console.log(`NPM without package.json: ${request.url}`)
-      this._createDocument(request, manifest, request.document.registryData)
+      await this._createDocument(request, manifest, request.document.registryData)
       await BaseHandler.addInterestingFiles(request.document, path.join(location, 'package'))
     }
     this.linkAndQueueTool(request, 'scancode')

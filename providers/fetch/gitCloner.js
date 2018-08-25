@@ -4,6 +4,7 @@
 const BaseHandler = require('../../lib/baseHandler')
 const { exec } = require('child_process')
 const SourceSpec = require('../../lib/sourceSpec')
+const { clone } = require('lodash')
 
 class GitCloner extends BaseHandler {
   canHandle(request) {
@@ -23,6 +24,11 @@ class GitCloner extends BaseHandler {
 
     request.contentOrigin = 'origin'
     request.document = this._createDocument(dir.name + '/' + spec.name, repoSize, releaseDate)
+    if (spec.provider === 'github') {
+      request.casedSpec = clone(spec)
+      request.casedSpec.namespace = spec.namespace.toLowerCase()
+      request.casedSpec.name = spec.name.toLowerCase()
+    }
     return request
   }
 
