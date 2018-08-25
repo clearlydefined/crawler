@@ -6,7 +6,7 @@ const requestRetry = require('requestretry').defaults({ maxAttempts: 3, fullResp
 const nodeRequest = require('request')
 const fs = require('fs')
 const spdxCorrect = require('spdx-correct')
-const { findLastKey, get, find } = require('lodash')
+const { findLastKey, get, find, clone } = require('lodash')
 
 const providerMap = {
   pypi: 'https://pypi.python.org'
@@ -28,6 +28,10 @@ class PyPiFetch extends BaseHandler {
     await this.decompress(file.name, dir.name)
     request.document = await this._createDocument(dir, spec, registryData)
     request.contentOrigin = 'origin'
+    if (registryData.info.name) {
+      request.casedSpec = clone(spec)
+      request.casedSpec.name = registryData.info.name
+    }
     return request
   }
 
