@@ -9,8 +9,13 @@ const SourceSpec = require('../../lib/sourceSpec')
 const { get } = require('lodash')
 
 class NpmExtract extends BaseHandler {
+  constructor(options, sourceFinder) {
+    super(options)
+    this.sourceFinder = sourceFinder
+  }
+
   get schemaVersion() {
-    return '1.1.1'
+    return '1.1.2'
   }
 
   get toolSpec() {
@@ -39,7 +44,7 @@ class NpmExtract extends BaseHandler {
     this.linkAndQueueTool(request, 'scancode')
     this.linkAndQueueTool(request, 'fossology')
     if (request.document.sourceInfo) {
-      const sourceSpec = SourceSpec.adopt(request.document.sourceInfo)
+      const sourceSpec = SourceSpec.fromObject(request.document.sourceInfo)
       this.linkAndQueue(request, 'source', sourceSpec.toEntitySpec())
     }
     return request
@@ -70,7 +75,9 @@ class NpmExtract extends BaseHandler {
     const registryCandidates = this._discoverCandidateSourceLocations(registryManifest)
     const candidates = [...manifestCandidates, ...registryCandidates]
     // TODO lookup source discovery in a set of services that have their own configuration
-    return sourceDiscovery(registryManifest.version, candidates, { githubToken: this.options.githubToken })
+    return this.sourceFinder(registryManifest.version, candidates, {
+      githubToken: this.options.githubToken
+    })
   }
 
   async _createDocument(request, manifest, registryData) {
@@ -81,4 +88,4 @@ class NpmExtract extends BaseHandler {
   }
 }
 
-module.exports = options => new NpmExtract(options)
+module.exports = (options, sourceFinder) => new NpmExtract(options, sourceFinder || sourceDiscovery)

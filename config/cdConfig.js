@@ -4,8 +4,8 @@
 const config = require('painless-config')
 
 const cd_azblob = {
-  connection: config.get('HARVEST_AZBLOB_CONNECTION_STRING'),
-  container: config.get('HARVEST_AZBLOB_CONTAINER_NAME')
+  connection: config.get('CRAWLER_AZBLOB_CONNECTION_STRING'),
+  container: config.get('CRAWLER_AZBLOB_CONTAINER_NAME')
 }
 
 const githubToken = config.get('CRAWLER_GITHUB_TOKEN')
@@ -13,6 +13,7 @@ const githubToken = config.get('CRAWLER_GITHUB_TOKEN')
 const cd_file = {
   location: config.get('FILE_STORE_LOCATION') || (process.platform === 'win32' ? 'c:/temp/cd' : '/tmp/cd')
 }
+const crawlerStoreProvider = config.get('CRAWLER_STORE_PROVIDER') || 'cd(file)'
 
 module.exports = {
   provider: 'memory', // change this to redis if/when we want distributed config
@@ -36,15 +37,11 @@ module.exports = {
   },
   process: {
     cdsource: {},
-    maven: {},
-    pypi: {},
-    gem: {},
-    npm: {
-      githubToken
-    },
-    nuget: {
-      githubToken
-    },
+    maven: { githubToken },
+    pypi: { githubToken },
+    gem: { githubToken },
+    npm: { githubToken },
+    nuget: { githubToken },
     package: {},
     scancode: {
       installDir: config.get('SCANCODE_HOME') || 'C:\\installs\\scancode-toolkit-2.9.2',
@@ -79,18 +76,16 @@ module.exports = {
       }
     },
     fossology: {
-      installDir: config.get('FOSSOLOGY_HOME'),
+      installDir: config.get('FOSSOLOGY_HOME')
     },
     source: {},
-    top: {
-      githubToken
-    },
+    top: { githubToken },
     vsts: {
       apiToken: config.get('VSTS_API_TOKEN')
     }
   },
   store: {
-    dispatcher: config.get('CRAWLER_STORE_PROVIDER') || 'cd(file)',
+    dispatcher: crawlerStoreProvider,
     cdDispatch: {},
     webhook: {
       url: config.get('CRAWLER_WEBHOOK_URL') || 'http://localhost:4000/webhook',
@@ -100,7 +95,7 @@ module.exports = {
     'cd(file)': cd_file
   },
   deadletter: {
-    provider: config.get('CRAWLER_DEADLETTER_PROVIDER') || config.get('CRAWLER_STORE_PROVIDER') || 'file',
+    provider: config.get('CRAWLER_DEADLETTER_PROVIDER') || crawlerStoreProvider,
     'cd(azblob)': cd_azblob,
     'cd(file)': cd_file
   },
