@@ -7,10 +7,16 @@ const { promisify } = require('util')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
 const SourceSpec = require('../../lib/sourceSpec')
 const { parseString } = require('xml2js')
+const { get } = require('lodash')
 
 class NuGetExtract extends BaseHandler {
+  constructor(options, sourceFinder) {
+    super(options)
+    this.sourceFinder = sourceFinder
+  }
+
   get schemaVersion() {
-    return 1
+    return '1.1.0'
   }
 
   get toolSpec() {
@@ -33,7 +39,7 @@ class NuGetExtract extends BaseHandler {
       await this._createDocument(request, manifest, request.document.registryData)
     }
     if (request.document.sourceInfo) {
-      const sourceSpec = SourceSpec.adopt(request.document.sourceInfo)
+      const sourceSpec = SourceSpec.fromObject(request.document.sourceInfo)
       this.linkAndQueue(request, 'source', sourceSpec.toEntitySpec())
     }
     return request
@@ -46,25 +52,30 @@ class NuGetExtract extends BaseHandler {
 
   async _getNuspec(location) {
     const nuspec = await promisify(fs.readFile)(location)
-    return nuspec.toString()
+    const nuspecXml = nuspec.toString()
+    return promisify(parseString)(nuspecXml, { trim: true, mergeAttrs: true, explicitArray: false })
   }
 
   async _createDocument(request, manifest, registryData) {
-    const nuspecLocation = request.document.location.nuspec
+    const originalDocument = request.document
     // setup the manifest to be the new document for the request
     request.document = { _metadata: request.document._metadata, manifest, registryData }
     // Add interesting info
     if (registryData && registryData.published)
       request.document.releaseDate = new Date(registryData.published).toISOString()
+    // Add source info
+    const nuspec = await this._getNuspec(originalDocument.location.nuspec)
+    const sourceInfo = await this._discoverSource(manifest, nuspec)
+    if (sourceInfo) request.document.sourceInfo = sourceInfo
+  }
+
+  async _discoverSource(manifest, nuspec) {
     const manifestCandidates = this._discoverCandidateSourceLocations(manifest)
-    const nuspecXml = await this._getNuspec(nuspecLocation)
-    const nuspec = await promisify(parseString)(nuspecXml, { trim: true, mergeAttrs: true, explicitArray: false })
-    const nuspecCandidates = this._discoverCandidateSourceLocations(
-      nuspec && nuspec.package ? nuspec.package.metadata : null
-    )
+    const nuspecCandidates = this._discoverCandidateSourceLocations(get(nuspec, 'package.metadata'))
     const candidates = [...manifestCandidates, ...nuspecCandidates]
-    const sourceInfo = await sourceDiscovery(manifest.version, candidates, { githubToken: this.options.githubToken })
-    if (sourceInfo) return (request.document.sourceInfo = sourceInfo)
+    return this.sourceFinder(manifest.version, candidates, {
+      githubToken: this.options.githubToken
+    })
   }
 
   _discoverCandidateSourceLocations(manifest) {
@@ -77,4 +88,4 @@ class NuGetExtract extends BaseHandler {
   }
 }
 
-module.exports = options => new NuGetExtract(options)
+module.exports = (options, sourceFinder) => new NuGetExtract(options, sourceFinder || sourceDiscovery)

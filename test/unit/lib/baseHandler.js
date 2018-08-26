@@ -10,7 +10,7 @@ const BaseHandler = require('../../../lib/baseHandler')
 const path = require('path')
 const { find } = require('lodash')
 
-var Handler
+let Handler
 
 describe('BaseHandler interesting file discovery', () => {
   beforeEach(function() {
