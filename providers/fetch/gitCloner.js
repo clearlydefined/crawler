@@ -14,11 +14,11 @@ class GitCloner extends BaseHandler {
 
   async handle(request) {
     const spec = this.toSpec(request)
-    const sourceSpec = this._toSourceSpec(spec)
+    const sourceSpec = SourceSpec.fromObject(spec)
     const options = { version: sourceSpec.revision }
     const dir = this._createTempDir(request)
 
-    const repoSize = await this._cloneRepo(sourceSpec.url, dir.name, spec.name, options.version)
+    const repoSize = await this._cloneRepo(sourceSpec.toUrl(), dir.name, spec.name, options.version)
     request.addMeta({ gitSize: repoSize })
     const releaseDate = await this._getDate(dir.name, spec.name)
 
@@ -35,11 +35,6 @@ class GitCloner extends BaseHandler {
   _createDocument(location, size, releaseDate) {
     // Create a simple document that records the location and the size of the repo that was fetched
     return { location, size, releaseDate }
-  }
-
-  _toSourceSpec(spec) {
-    const url = `https://github.com/${spec.namespace}/${spec.name}.git`
-    return new SourceSpec('git', 'github', url, spec.revision)
   }
 
   _cloneRepo(sourceUrl, dirName, specName, commit) {

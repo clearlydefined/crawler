@@ -2,15 +2,18 @@
 // SPDX-License-Identifier: MIT
 
 const BaseHandler = require('../../lib/baseHandler')
-const fs = require('fs')
-const path = require('path')
-const yaml = require('js-yaml')
 const SourceSpec = require('../../lib/sourceSpec')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
+const { get } = require('lodash')
 
 class GemExtract extends BaseHandler {
+  constructor(options, sourceFinder) {
+    super(options)
+    this.sourceFinder = sourceFinder
+  }
+
   get schemaVersion() {
-    return '1.1.0'
+    return '1.1.1'
   }
 
   get toolSpec() {
@@ -31,31 +34,30 @@ class GemExtract extends BaseHandler {
     }
     this.linkAndQueueTool(request, 'scancode')
     if (request.document.sourceInfo) {
-      const sourceSpec = SourceSpec.adopt(request.document.sourceInfo)
+      const sourceSpec = SourceSpec.fromObject(request.document.sourceInfo)
       this.linkAndQueue(request, 'source', sourceSpec.toEntitySpec())
     }
     return request
   }
 
-  async _discoverSource(registryData) {
+  async _discoverSource(version, registryData) {
+    if (!registryData) return null
     const candidates = []
-    if (!registryData) {
-      return null
-    }
-    registryData.bug_tracker_uri && candidates.push(registryData.bug_tracker_uri)
-    registryData.changelog_uri && candidates.push(registryData.changelog_uri)
-    registryData.documentation_uri && candidates.push(registryData.documentation_uri)
-    registryData.gem_uri && candidates.push(registryData.gem_uri)
-    registryData.homepage_uri && candidates.push(registryData.homepage_uri)
-    registryData.mailing_list_uri && candidates.push(registryData.mailing_list_uri)
-    registryData.source_code_uri && candidates.push(registryData.source_code_uri)
-    return sourceDiscovery(registryData.version, candidates, { githubToken: this.options.githubToken })
+    candidates.push(get(registryData, 'bug_tracker_uri'))
+    candidates.push(get(registryData, 'changelog_uri'))
+    candidates.push(get(registryData, 'documentation_uri'))
+    candidates.push(get(registryData, 'gem_uri'))
+    candidates.push(get(registryData, 'homepage_uri'))
+    candidates.push(get(registryData, 'mailing_list_uri'))
+    candidates.push(get(registryData, 'source_code_uri'))
+    const allCandidates = candidates.filter(e => e)
+    return this.sourceFinder(version, allCandidates, { githubToken: this.options.githubToken })
   }
 
   async _createDocument(request, registryData) {
-    const sourceInfo = await this._discoverSource(registryData)
+    const sourceInfo = await this._discoverSource(registryData.version, registryData)
     if (sourceInfo) request.document.sourceInfo = sourceInfo
   }
 }
 
-module.exports = options => new GemExtract(options)
+module.exports = (options, sourceFinder) => new GemExtract(options, sourceFinder || sourceDiscovery)

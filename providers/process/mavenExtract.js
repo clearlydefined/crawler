@@ -8,10 +8,16 @@ const mavenCentral = require('../../lib/mavenCentral')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
 const SourceSpec = require('../../lib/sourceSpec')
 const parseString = require('xml2js').parseString
+const { get } = require('lodash')
 
 class MavenExtract extends BaseHandler {
+  constructor(options, sourceFinder) {
+    super(options)
+    this.sourceFinder = sourceFinder
+  }
+
   get schemaVersion() {
-    return '1.1.0'
+    return '1.1.2'
   }
 
   get toolSpec() {
@@ -35,7 +41,7 @@ class MavenExtract extends BaseHandler {
       await BaseHandler.addInterestingFiles(request.document, request.document.location)
     }
     if (request.document.sourceInfo) {
-      const sourceSpec = SourceSpec.adopt(request.document.sourceInfo)
+      const sourceSpec = SourceSpec.fromObject(request.document.sourceInfo)
       this.linkAndQueue(request, 'source', sourceSpec.toEntitySpec())
     }
     return request
@@ -73,22 +79,16 @@ class MavenExtract extends BaseHandler {
       parent.version[0].trim()
     )
     const file = this._createTempFile(request)
-
     const code = await mavenCentral.fetchPom(spec, file.name)
-
-    // If something went wrong, return an empty parent.
     if (code === 404) return { summary: {}, poms: [] }
-
     return await this._getManifest(request, file.name)
   }
 
   _mergePomInto(pom, manifest) {
     // TODO probably this should be a lot smarter...
     const summary = { project: Object.assign({}, manifest.summary.project, pom.project) }
-
     const poms = manifest.poms.slice(0)
     poms.unshift(pom)
-
     return {
       summary: summary,
       poms: poms
@@ -97,13 +97,22 @@ class MavenExtract extends BaseHandler {
 
   _discoverCandidateSourceLocations(manifest) {
     const candidateUrls = []
-    if (manifest.project && manifest.project.scm) candidateUrls.push(manifest.project.scm.url)
-    return candidateUrls
+    candidateUrls.push(get(manifest, 'project.scm.url'))
+    return candidateUrls.filter(e => e)
   }
 
-  async _discoverSource(version, locations) {
+  async _discoverSource(spec, manifest, registryData) {
+    const manifestCandidates = this._discoverCandidateSourceLocations(manifest)
     // TODO lookup source discovery in a set of services that have their own configuration
-    return sourceDiscovery(version, locations, { githubToken: this.options.githubToken })
+    const githubSource = await this.sourceFinder(spec.version, manifestCandidates, {
+      githubToken: this.options.githubToken
+    })
+    if (githubSource) return githubSource
+    // didn't find any source so make up a sources url to try if the registry thinks there is source
+    if (!registryData.ec || !registryData.ec.includes(mavenCentral.sourceExtension)) return null
+    const result = SourceSpec.fromObject(spec)
+    result.type = 'sourcearchive'
+    return result
   }
 
   async _createDocument(request, spec, manifest, registryData) {
@@ -111,21 +120,10 @@ class MavenExtract extends BaseHandler {
     request.document = { _metadata: request.document._metadata, manifest, registryData }
     // Add interesting info
     if (registryData.timestamp) request.document.releaseDate = new Date(registryData.timestamp).toISOString()
-
-    const manifestCandidates = this._discoverCandidateSourceLocations(manifest)
-    const sourceInfo = await this._discoverSource(spec.revision, [...manifestCandidates])
-    if (sourceInfo) return (request.document.sourceInfo = sourceInfo)
-
-    // didn't find any source so make up a sources url to try if the registry thinks there is source
-    if (!registryData.ec.includes('-sources.jar')) return
-    const mavenSourceInfo = {
-      type: 'sourcearchive',
-      provider: 'mavencentral',
-      url: `${spec.namespace}/${spec.name}`,
-      revision: spec.revision
-    }
-    request.document.sourceInfo = mavenSourceInfo
+    // Add source info
+    const sourceInfo = await this._discoverSource(spec, manifest, registryData)
+    if (sourceInfo) request.document.sourceInfo = sourceInfo
   }
 }
 
-module.exports = options => new MavenExtract(options)
+module.exports = (options, sourceFinder) => new MavenExtract(options, sourceFinder || sourceDiscovery)
