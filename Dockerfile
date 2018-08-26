@@ -26,7 +26,7 @@ ENV CRAWLER_QUEUE_PREFIX=cdcrawlerprod
 ENV CRAWLER_QUEUE_PROVIDER=storageQueue
 ENV CRAWLER_STORE_PROVIDER=cdDispatch+cd(azblob)+webhook
 ENV CRAWLER_WEBHOOK_URL=https://api.clearlydefined.io/webhook
-ENV HARVEST_AZBLOB_CONTAINER_NAME=production
+ENV CRAWLER_AZBLOB_CONTAINER_NAME=production
 
 COPY package*.json /tmp/
 RUN cd /tmp && npm install --production
