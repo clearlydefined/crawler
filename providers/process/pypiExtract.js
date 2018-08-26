@@ -4,10 +4,16 @@
 const BaseHandler = require('../../lib/baseHandler')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
 const SourceSpec = require('../../lib/sourceSpec')
+const { get } = require('lodash')
 
 class PyPiExtract extends BaseHandler {
+  constructor(options, sourceFinder) {
+    super(options)
+    this.sourceFinder = sourceFinder
+  }
+
   get schemaVersion() {
-    return '1.1.0'
+    return '1.1.1'
   }
 
   get toolSpec() {
@@ -28,29 +34,30 @@ class PyPiExtract extends BaseHandler {
     }
     this.linkAndQueueTool(request, 'scancode')
     if (request.document.sourceInfo) {
-      const sourceSpec = SourceSpec.adopt(request.document.sourceInfo)
+      const sourceSpec = SourceSpec.fromObject(request.document.sourceInfo)
       this.linkAndQueue(request, 'source', sourceSpec.toEntitySpec())
     }
     return request
   }
 
-  async _discoverSource(spec, registryData) {
+  async _discoverSource(revision, registryData) {
     if (!registryData) return null
     const candidates = []
-    registryData.info.bugtrack_url && candidates.push(registryData.info.bugtrack_url)
-    registryData.info.docs_url && candidates.push(registryData.info.docs_url)
-    registryData.info.download_url && candidates.push(registryData.info.download_url)
-    registryData.info.home_page && candidates.push(registryData.info.home_page)
-    registryData.info.package_url && candidates.push(registryData.info.package_url)
-    registryData.info.project_url && candidates.push(registryData.info.project_url)
-    registryData.info.release_url && candidates.push(registryData.info.release_url)
-    return sourceDiscovery(spec.revision, candidates, { githubToken: this.options.githubToken })
+    candidates.push(get(registryData, 'info.bugtrack_url'))
+    candidates.push(get(registryData, 'info.docs_url'))
+    candidates.push(get(registryData, 'info.download_url'))
+    candidates.push(get(registryData, 'info.home_page'))
+    candidates.push(get(registryData, 'info.package_url'))
+    candidates.push(get(registryData, 'info.project_url'))
+    candidates.push(get(registryData, 'info.release_url'))
+    const allCandidates = candidates.filter(e => e)
+    return this.sourceFinder(revision, allCandidates, { githubToken: this.options.githubToken })
   }
 
   async _createDocument(request, spec, registryData) {
-    const sourceInfo = await this._discoverSource(spec, registryData)
+    const sourceInfo = await this._discoverSource(spec.revision, registryData)
     if (sourceInfo) request.document.sourceInfo = sourceInfo
   }
 }
 
-module.exports = options => new PyPiExtract(options)
+module.exports = (options, sourceFinder) => new PyPiExtract(options, sourceFinder || sourceDiscovery)
