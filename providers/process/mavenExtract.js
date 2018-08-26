@@ -11,7 +11,7 @@ const parseString = require('xml2js').parseString
 
 class MavenExtract extends BaseHandler {
   get schemaVersion() {
-    return '1.1.0'
+    return '1.1.1'
   }
 
   get toolSpec() {
@@ -73,22 +73,16 @@ class MavenExtract extends BaseHandler {
       parent.version[0].trim()
     )
     const file = this._createTempFile(request)
-
     const code = await mavenCentral.fetchPom(spec, file.name)
-
-    // If something went wrong, return an empty parent.
     if (code === 404) return { summary: {}, poms: [] }
-
     return await this._getManifest(request, file.name)
   }
 
   _mergePomInto(pom, manifest) {
     // TODO probably this should be a lot smarter...
     const summary = { project: Object.assign({}, manifest.summary.project, pom.project) }
-
     const poms = manifest.poms.slice(0)
     poms.unshift(pom)
-
     return {
       summary: summary,
       poms: poms
@@ -111,20 +105,14 @@ class MavenExtract extends BaseHandler {
     request.document = { _metadata: request.document._metadata, manifest, registryData }
     // Add interesting info
     if (registryData.timestamp) request.document.releaseDate = new Date(registryData.timestamp).toISOString()
-
+    // Add source info
     const manifestCandidates = this._discoverCandidateSourceLocations(manifest)
     const sourceInfo = await this._discoverSource(spec.revision, [...manifestCandidates])
     if (sourceInfo) return (request.document.sourceInfo = sourceInfo)
-
     // didn't find any source so make up a sources url to try if the registry thinks there is source
-    if (!registryData.ec.includes('-sources.jar')) return
-    const mavenSourceInfo = {
-      type: 'sourcearchive',
-      provider: 'mavencentral',
-      url: `${spec.namespace}/${spec.name}`,
-      revision: spec.revision
-    }
-    request.document.sourceInfo = mavenSourceInfo
+    if (!registryData.ec.includes(mavenCentral.sourceExtension)) return
+    const url = mavenCentral.buildMavenCentralUrl(spec, mavenCentral.sourceExtension)
+    request.document.sourceInfo = { type: 'sourcearchive', provider: 'mavencentral', url, revision: spec.revision }
   }
 }
 
