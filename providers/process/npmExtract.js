@@ -6,7 +6,7 @@ const fs = require('fs')
 const path = require('path')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
 const SourceSpec = require('../../lib/sourceSpec')
-const { get } = require('lodash')
+const { get, isArray } = require('lodash')
 
 class NpmExtract extends BaseHandler {
   constructor(options, sourceFinder) {
@@ -61,7 +61,9 @@ class NpmExtract extends BaseHandler {
     if (!manifest) return candidateUrls
     candidateUrls.push(get(manifest, 'repository.url'))
     candidateUrls.push(get(manifest, 'url'))
-    candidateUrls.push(get(manifest, 'homepage'))
+    let homepage = get(manifest, 'homepage')
+    if (homepage && isArray(homepage)) homepage = homepage[0]
+    candidateUrls.push(homepage)
     if (manifest.bugs) {
       if (typeof manifest.bugs === 'string' && manifest.bugs.startsWith('http')) candidateUrls.push(manifest.bugs)
       else candidateUrls.push(manifest.bugs.url)
