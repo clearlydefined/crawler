@@ -39,11 +39,11 @@ spec:
               secretKeyRef:
                 name: secrets
                 key: CRAWLER_WEBHOOK_URL
-          - name: HARVEST_AZBLOB_CONTAINER_NAME
+          - name: CRAWLER_AZBLOB_CONTAINER_NAME
             valueFrom:
               secretKeyRef:
                 name: secrets
-                key: HARVEST_AZBLOB_CONTAINER_NAME
+                key: CRAWLER_AZBLOB_CONTAINER_NAME
           - name: CRAWLER_GITHUB_TOKEN
             valueFrom:
               secretKeyRef:
@@ -59,11 +59,11 @@ spec:
               secretKeyRef:
                 name: secrets
                 key: CRAWLER_WEBHOOK_TOKEN
-          - name: HARVEST_AZBLOB_CONNECTION_STRING
+          - name: CRAWLER_AZBLOB_CONNECTION_STRING
             valueFrom:
               secretKeyRef:
                 name: secrets
-                key: HARVEST_AZBLOB_CONNECTION_STRING
+                key: CRAWLER_AZBLOB_CONNECTION_STRING
   selector:
     matchLabels:
       app: crawler
