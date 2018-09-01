@@ -62,27 +62,14 @@ module.exports = {
       maxSize: 50000 * 1024, // Maximum repo size in KB after which scancode would run in build and not directly in crawler
       build: {
         crawlerUrl: config.get('CRAWLER_SERVICE_URL') || 'http://localhost:5000',
-        crawlerAuthToken: config.get('CRAWLER_SERVICE_AUTH_TOKEN') || 'secret',
-        vsts: {
-          collectionUrl:
-            config.get('VSTS_BUILD_COLLECTION_URL') || 'https://clearlydefined.visualstudio.com/DefaultCollection',
-          apiToken: config.get('VSTS_API_TOKEN'),
-          project: config.get('VSTS_BUILD_PROJECT_NAME') || 'ClearlyDefined',
-          definitionName: config.get('VSTS_BUILD_DEFINITION_NAME') || 'Run scancode (master)',
-          emptyRepoUrl: config.get('VSTS_REPO') || 'https://clearlydefined.visualstudio.com/_git/ClearlyDefined',
-          azureSubscriptionEndpoint: config.get('VSTS_AZURE_SUBSCRIPTION_ENDPOINT'),
-          azureContainerRegistry: config.get('VSTS_AZURE_CONTAINER_REGISTRY')
-        }
+        crawlerAuthToken: config.get('CRAWLER_SERVICE_AUTH_TOKEN') || 'secret'
       }
     },
     fossology: {
       installDir: config.get('FOSSOLOGY_HOME')
     },
     source: {},
-    top: { githubToken },
-    vsts: {
-      apiToken: config.get('VSTS_API_TOKEN')
-    }
+    top: { githubToken }
   },
   store: {
     dispatcher: crawlerStoreProvider,
