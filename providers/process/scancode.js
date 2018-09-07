@@ -6,7 +6,6 @@ const { exec } = require('child_process')
 const fs = require('fs')
 const path = require('path')
 const { promisify } = require('util')
-const VstsBuild = require('../../lib/build/vsts')
 const du = require('du')
 
 let _toolVersion
@@ -36,21 +35,6 @@ class ScanCodeProcessor extends BaseHandler {
     const { document, spec } = super._process(request)
     const size = await this._computeSize(document)
     request.addMeta({ k: size.k, fileCount: size.count })
-    if (spec.provider === 'github' && (size.k > this.options.maxSize || size.count > this.options.maxCount)) {
-      this.logger.info(
-        `Analyzing ${request.toString()} using ScanCode in VSTS build. Files: ${size.count} Size: ${size.k} KB.`
-      )
-      try {
-        const vstsBuild = new VstsBuild(this.options.build)
-        request.context.releaseDate = document.releaseDate
-        const build = await vstsBuild.queueBuild(request, spec)
-        this.logger.info(`Queued VSTS build ${build.id}`, { url: build._links.web.href })
-      } catch (error) {
-        this.logger.error(error, `${request.toString()} - error queueing build`)
-        return request.markRequeue('VSTS', 'Error queueing build')
-      }
-      return request.markNoSave()
-    }
     this.addBasicToolLinks(request, spec)
     const file = this._createTempFile(request)
     this.logger.info(

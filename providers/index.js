@@ -29,8 +29,7 @@ module.exports = {
     scancode: require('./process/scancode'),
     fossology: require('./process/fossology'),
     source: require('./process/source'),
-    top: require('./process/top'),
-    vsts: require('./process/vsts')
+    top: require('./process/top')
   },
   store: {
     cdDispatch: require('./store/storeDispatcher'),
