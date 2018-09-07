@@ -14,11 +14,12 @@ A service that crawls projects and packages for information relevant to ClearlyD
 That results in the ClearlyDefined crawler starting up and listening for POSTs on port 5000. See the [Configuration](#configuration) section for info on how to change the port.
 
 ### ScanCode install notes
+
 Due to an issue with ScanCode's install configuration on Windows, you may need to **replace** the `bin` folder (actually a "junction") with the contents of the `Scripts` folder. That is, delete `bin` and copy `Scripts` to `bin`. See https://github.com/nexB/scancode-toolkit/issues/1129 for more details.
 
 ## Queuing work with the crawler
 
-The crawler takes _requests_ to rummage around and find relevant information about projects. For example, to crawl an NPM, or a GitHub repo, POST one of the following JSON bodies to `http://localhost:5000/requests`. Note that you can also queue an array of requests by POSTing a single (or array of) JSON request object. For example, 
+The crawler takes _requests_ to rummage around and find relevant information about projects. For example, to crawl an NPM, or a GitHub repo, POST one of the following JSON bodies to `http://localhost:5000/requests`. Note that you can also queue an array of requests by POSTing a single (or array of) JSON request object. For example,
 
 ```
 curl -d '{"type":"npm", "url":"cd:/npm/npmjs/-/redie/0.3.0"}' -H "Content-Type: application/json" -H "X-token: secret" -X POST http://localhost:5000/requests
@@ -62,14 +63,16 @@ Where the segments are:
 Given a request, the crawler does the following kinds of things (it does more or less work depending on the details found in its travels and the set of tools configured):
 
 Process the component:
-1.  Look up the component in its registry (e.g., npmjs.com) and pull out interesting bits like the project location, issue tracker, release date, and most importantly, the source code location where possible. 
-1.  Run tools like ScanCode and others if they are likely to find anything interesting given the component type 
+
+1.  Look up the component in its registry (e.g., npmjs.com) and pull out interesting bits like the project location, issue tracker, release date, and most importantly, the source code location where possible.
+1.  Run tools like ScanCode and others if they are likely to find anything interesting given the component type
 
 Process the source, if any:
+
 1.  The crawler determines the revision (e.g., Git commit) that matches the version of the package.
 1.  Given the location and revision, the crawler fetches the source and runs any configured scan tools (e.g., ScanCode)
 
-The crawler's output is stored for use by the rest of the ClearlyDefined infrastructure -- it is not intended to be used directly by humans. Note that each tool's output is stored separately and the results of processing the component and the component source are alos separated. 
+The crawler's output is stored for use by the rest of the ClearlyDefined infrastructure -- it is not intended to be used directly by humans. Note that each tool's output is stored separately and the results of processing the component and the component source are alos separated.
 
 # Configuration
 
@@ -110,7 +113,7 @@ See `local.env.list`, `dev.env.list` and `prod.env.list` tempate files.
 
 - Allowed services: Blob, Queue
 - Allowed resource types: Container, Object
-- Allowed permissions: Read, Write, Add, Process
+- Allowed permissions: Read, Write, List, Add, Process
 
 ## Build and run Docker image locally
 
