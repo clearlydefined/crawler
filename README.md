@@ -121,6 +121,84 @@ See `local.env.list`, `dev.env.list` and `prod.env.list` tempate files.
 
 `docker run --rm --env-file ../local.env.list -p 5000:5000 crawler`
 
+
+# Clouds
+
+## Google Cloud
+
+This uses GKE (Google Kubernetes Engine).  The instructions are applicable to
+normal Kubernetes as well (minus anything mentioning gcloud.)
+
+`-n dev` sets the Kubernetes namespace for an action.  For prod, use `-n prod`.
+
+
+### Environment Setup
+
+One time setup to make kubectl work:
+
+    gcloud --project <project> container clusters get-credentials <gke cluster>
+    --region <region>
+
+Setup namespaces:
+
+    kubectl create namespace prod
+    kubectl create namespace dev
+
+Configure secrets:
+
+    go run tools/env2kubesecrets.go < dev.env.list | \
+      kubectl -n dev apply -f -
+
+### Launch/Update
+
+Launch crawler and redis:
+
+    kubectl -n dev apply -f crawler.yaml
+
+### Shutdown
+
+    kubectl -n dev delete deploy/crawler deploy/redis \
+       svc/crawler svc/redis
+
+Delete secrets:
+
+    kubectl -n dev delete Secrets secrets
+
+### Debugging
+
+Shell in same cluster:
+
+    kubectl -n dev run alpine --image alpine:latest -i --tty --rm
+
+Add curl:
+
+    apk add curl
+
+Queue work:
+
+    curl -d '{"type":"npm", "url":"cd:/npm/npmjs/-/redie/0.3.0"}' \
+      -H "Content-Type: application/json" \
+      -H "X-token: secret" \
+      -X POST \
+      http://crawler:5000/requests
+
+Expose dashboard port:
+
+    kubectl -n dev expose deployment dashboard --type="LoadBalancer" --name=external-dashboard --port=80 --target-port=4000
+    kubectl -n dev get service external-dashboard
+
+It will now be availalbe on port 80 on the external IP returned by `kubectl get`.
+
+Un-expose dashboard port:
+
+    kubectl -n dev delete service external-dashboard
+
+# Dashboard
+
+The ghcrawler dashboard does **not** work properly with the current version of
+ClearlyDefined crawler.  It uses a very different configuration scheme that is
+incompatible.
+
 # ClearlyDefined, defined.
 
 ## Mission
