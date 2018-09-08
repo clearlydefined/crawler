@@ -21,25 +21,49 @@ spec:
           image: clearlydefined/crawler
           ports:
             - containerPort: 5000
-            # TODO: replace most of these with Secrets or ConfigMaps.
+            # These don't all need to be secrets, but this way lets us
+            # be consistent and keep things in one place.
           env:
             - name: CRAWLER_NAME
-              value: <configure me>
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: CRAWLER_NAME
             - name: CRAWLER_QUEUE_PREFIX
-              value: <configure me>
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: CRAWLER_QUEUE_PREFIX
             - name: CRAWLER_WEBHOOK_URL
-              value: https://dev-api.clearlydefined.io/webhook
-              # value: https://api.clearlydefined.io/webhook
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: CRAWLER_WEBHOOK_URL
             - name: CRAWLER_AZBLOB_CONTAINER_NAME
-              value: <configure me>
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: CRAWLER_AZBLOB_CONTAINER_NAME
             - name: CRAWLER_GITHUB_TOKEN
-              value: <configure me>
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: CRAWLER_GITHUB_TOKEN
             - name: CRAWLER_INSIGHTS_KEY
-              value: <configure me>
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: CRAWLER_INSIGHTS_KEY
             - name: CRAWLER_WEBHOOK_TOKEN
-              value: <configure me>
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: CRAWLER_WEBHOOK_TOKEN
             - name: CRAWLER_AZBLOB_CONNECTION_STRING
-              value: <configure me>
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: CRAWLER_AZBLOB_CONNECTION_STRING
   selector:
     matchLabels:
       app: crawler
