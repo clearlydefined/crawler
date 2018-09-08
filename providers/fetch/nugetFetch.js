@@ -91,7 +91,7 @@ class NuGetFetch extends BaseHandler {
     const { body, statusCode } = await requestRetry.get(
       `https://api.nuget.org/v3-flatcontainer/${spec.name}/${spec.revision}/${spec.name}.nuspec`
     )
-    if (statusCode !== 200) return []
+    if (statusCode !== 200) return null
     return body
   }
 

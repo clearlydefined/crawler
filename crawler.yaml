@@ -76,13 +76,12 @@ metadata:
     app: crawler
 spec:
   ports:
-  - port: 5000
-    protocol: TCP
+    - port: 5000
+      protocol: TCP
   selector:
     app: crawler
 
 ---
-
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
@@ -95,16 +94,15 @@ spec:
         app: redis
     spec:
       containers:
-      - name: redis
-        image: redis:latest
-        ports:
-        - containerPort: 6379
+        - name: redis
+          image: redis:latest
+          ports:
+            - containerPort: 6379
   selector:
     matchLabels:
       app: redis
-      
----
 
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -113,7 +111,7 @@ metadata:
     app: redis
 spec:
   ports:
-  - port: 6379
-    protocol: TCP
+    - port: 6379
+      protocol: TCP
   selector:
     app: redis
