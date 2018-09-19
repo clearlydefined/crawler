@@ -60,11 +60,9 @@ class NpmFetch extends BaseHandler {
         json: true
       })
     } catch (exception) {
-      if (exception.statusCode === 404) {
+      if (exception.statusCode !== 404)
         throw new Error(`404 npm not found - ${fullName} not found from ${baseUrl}`)
-      } else {
-        throw exception
-      }
+      throw exception
     }
     if (!registryData.versions) return null
     const version = spec.revision || this.getLatestVersion(Object.keys(registryData.versions))
