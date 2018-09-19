@@ -24,11 +24,12 @@ class NuGetFetch extends BaseHandler {
     // rewrite the request URL as it is used throughout the system to derive locations and urns etc.
     request.url = spec.toUrl()
     const registryData = await this._getRegistryData(spec)
+    const nupkg = registryData ? await this._getNupkg(registryData.packageContent) : null
     const manifest = registryData ? await this._getManifest(registryData.catalogEntry) : null
     const nuspec = await this._getNuspec(spec)
-    if (!manifest && !nuspec)
+    if (!nupkg && !manifest && !nuspec)
       throw new Error('NuGet package could not be detected probably due to non-existent revision or name.')
-    const location = await this._persistMetadata(request, manifest, nuspec)
+    const location = await this._persistMetadata(request, nupkg, manifest, nuspec)
     request.document = {
       registryData,
       location,
@@ -78,6 +79,15 @@ class NuGetFetch extends BaseHandler {
     return null
   }
 
+  async _getNupkg(packageContentUrl) {
+    const { body, statusCode } = await requestRetry.get(packageContentUrl, {
+      json: false,
+      encoding: null
+    })
+    if (statusCode !== 200 || !body) return null
+    return body
+  }
+
   async _getManifest(catalogEntryUrl) {
     const { body, statusCode } = await requestRetry.get(catalogEntryUrl)
     if (statusCode !== 200) return null
@@ -95,13 +105,20 @@ class NuGetFetch extends BaseHandler {
     return body
   }
 
-  async _persistMetadata(request, manifest, nuspec) {
+  async _persistMetadata(request, nupkg, manifest, nuspec) {
     const dir = this._createTempDir(request)
-    const location = { manifest: path.join(dir.name, 'manifest.json'), nuspec: path.join(dir.name, 'nuspec.xml') }
+    const zip = path.join(dir.name, 'nupkg.zip')
+    const location = {
+      nupkg: path.join(dir.name, 'nupkg'),
+      manifest: path.join(dir.name, 'manifest.json'),
+      nuspec: path.join(dir.name, 'nuspec.xml')
+    }
     await Promise.all([
+      promisify(fs.writeFile)(zip, nupkg),
       promisify(fs.writeFile)(location.manifest, JSON.stringify(manifest)),
       promisify(fs.writeFile)(location.nuspec, nuspec)
     ])
+    await this.decompress(zip, location.nupkg)
     return location
   }
 }
