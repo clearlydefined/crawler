@@ -5,7 +5,7 @@ const BaseHandler = require('../../lib/baseHandler')
 const nodeRequest = require('request')
 const requestPromise = require('request-promise-native')
 const fs = require('fs')
-const { clone } = require('lodash')
+const { clone, get } = require('lodash')
 
 const providerMap = {
   npmjs: 'https://registry.npmjs.com'
@@ -82,7 +82,7 @@ class NpmFetch extends BaseHandler {
   }
 
   _createDocument(dir, registryData) {
-    const releaseDate = registryData.releaseDate
+    const releaseDate = get(registryData, 'releaseDate')
     return { location: dir.name, registryData, releaseDate }
   }
 
