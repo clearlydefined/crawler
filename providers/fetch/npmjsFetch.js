@@ -60,7 +60,7 @@ class NpmFetch extends BaseHandler {
         json: true
       })
     } catch (exception) {
-      if (exception.statusCode !== 404)
+      if (exception.statusCode === 404)
         throw new Error(`404 npm not found - ${fullName} not found from ${baseUrl}`)
       throw exception
     }
