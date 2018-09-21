@@ -17,29 +17,53 @@ spec:
         app: crawler
     spec:
       containers:
-      - name: crawler
-        image: clearlydefined/crawler
-        ports:
-        - containerPort: 5000
-        # TODO: replace most of these with Secrets or ConfigMaps.
-        env:
-          - name: CRAWLER_NAME
-            value: <configure me>
-          - name: CRAWLER_QUEUE_PREFIX
-            value: <configure me>
-          - name: CRAWLER_WEBHOOK_URL
-            value: https://dev-api.clearlydefined.io/webhook
-            # value: https://api.clearlydefined.io/webhook
-          - name: HARVEST_AZBLOB_CONTAINER_NAME
-            value: <configure me>
-          - name: CRAWLER_GITHUB_TOKEN
-            value: <configure me>
-          - name: CRAWLER_INSIGHTS_KEY
-            value: <configure me>
-          - name: CRAWLER_WEBHOOK_TOKEN
-            value: <configure me>
-          - name: HARVEST_AZBLOB_CONNECTION_STRING
-            value: <configure me>
+        - name: crawler
+          image: clearlydefined/crawler
+          ports:
+            - containerPort: 5000
+            # These don't all need to be secrets, but this way lets us
+            # be consistent and keep things in one place.
+          env:
+            - name: CRAWLER_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: CRAWLER_NAME
+            - name: CRAWLER_QUEUE_PREFIX
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: CRAWLER_QUEUE_PREFIX
+            - name: CRAWLER_WEBHOOK_URL
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: CRAWLER_WEBHOOK_URL
+            - name: CRAWLER_AZBLOB_CONTAINER_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: CRAWLER_AZBLOB_CONTAINER_NAME
+            - name: CRAWLER_GITHUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: CRAWLER_GITHUB_TOKEN
+            - name: CRAWLER_INSIGHTS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: CRAWLER_INSIGHTS_KEY
+            - name: CRAWLER_WEBHOOK_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: CRAWLER_WEBHOOK_TOKEN
+            - name: CRAWLER_AZBLOB_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: CRAWLER_AZBLOB_CONNECTION_STRING
   selector:
     matchLabels:
       app: crawler
@@ -52,13 +76,12 @@ metadata:
     app: crawler
 spec:
   ports:
-  - port: 5000
-    protocol: TCP
+    - port: 5000
+      protocol: TCP
   selector:
     app: crawler
 
 ---
-
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
@@ -71,16 +94,15 @@ spec:
         app: redis
     spec:
       containers:
-      - name: redis
-        image: redis:latest
-        ports:
-        - containerPort: 6379
+        - name: redis
+          image: redis:latest
+          ports:
+            - containerPort: 6379
   selector:
     matchLabels:
       app: redis
-      
----
 
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -89,7 +111,7 @@ metadata:
     app: redis
 spec:
   ports:
-  - port: 6379
-    protocol: TCP
+    - port: 6379
+      protocol: TCP
   selector:
     app: redis
