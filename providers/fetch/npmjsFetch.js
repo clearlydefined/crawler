@@ -5,7 +5,7 @@ const BaseHandler = require('../../lib/baseHandler')
 const nodeRequest = require('request')
 const requestPromise = require('request-promise-native')
 const fs = require('fs')
-const { clone } = require('lodash')
+const { clone, get } = require('lodash')
 
 const providerMap = {
   npmjs: 'https://registry.npmjs.com'
@@ -53,11 +53,17 @@ class NpmFetch extends BaseHandler {
     const baseUrl = providerMap[spec.provider]
     if (!baseUrl) throw new Error(`Could not find definition for NPM provider: ${spec.provider}.`)
     const fullName = `${spec.namespace ? spec.namespace + '/' : ''}${spec.name}`
-    const registryData = await requestPromise({
-      url: `${baseUrl}/${encodeURIComponent(fullName).replace('%40', '@')}`, // npmjs doesn't handle the escaped version
-      json: true
-    })
-
+    let registryData
+    try {
+      registryData = await requestPromise({
+        url: `${baseUrl}/${encodeURIComponent(fullName).replace('%40', '@')}`, // npmjs doesn't handle the escaped version
+        json: true
+      })
+    } catch (exception) {
+      if (exception.statusCode === 404)
+        throw new Error(`404 npm not found - ${fullName} not found from ${baseUrl}`)
+      throw exception
+    }
     if (!registryData.versions) return null
     const version = spec.revision || this.getLatestVersion(Object.keys(registryData.versions))
     if (!registryData.versions[version]) return null
@@ -76,7 +82,7 @@ class NpmFetch extends BaseHandler {
   }
 
   _createDocument(dir, registryData) {
-    const releaseDate = registryData.releaseDate
+    const releaseDate = get(registryData, 'releaseDate')
     return { location: dir.name, registryData, releaseDate }
   }
 

@@ -24,4 +24,15 @@ describe('npmjsFetch', () => {
     const casedSpec = NpmFetch({})._getCasedSpec(spec_nonnamespace, {})
     expect(!!casedSpec).to.be.false
   })
+
+  it('should create document with releaseDate', () => {
+    const document = NpmFetch({})._createDocument({ name: 'foo' }, { releaseDate: '01/01/2018' })
+    expect(document.location).to.eq('foo')
+    expect(document.releaseDate).to.eq('01/01/2018')
+  })
+
+  it('should create document with null registryData', () => {
+    const document = NpmFetch({})._createDocument({ name: 'foo' }, null)
+    expect(document.location).to.eq('foo')
+  })
 })
