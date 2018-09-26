@@ -18,7 +18,7 @@ RUN git clone https://github.com/fossology/fossology.git
 
 WORKDIR /opt/fossology/src/nomos/agent
 RUN make -f Makefile.sa
-WORKDIR /opt/fossology/src/copyright/gent
+WORKDIR /opt/fossology/src/copyright/agent
 RUN make
 ENV FOSSOLOGY_HOME=/opt/fossology/src
 
