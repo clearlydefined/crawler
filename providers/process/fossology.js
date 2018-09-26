@@ -56,7 +56,7 @@ class FossologyProcessor extends BaseHandler {
       // TODO add correct parameters and command line here
       const parameters = ['-ld', request.document.location].join(' ')
       exec(
-        `cd ${this.options.installDir} && ./nomossa ${parameters}`,
+        `cd ${this.options.installDir}/nomos/agent && ./nomossa ${parameters}`,
         { maxBuffer: 5000 * 1024 },
         (error, stdout, stderr) => {
           if (error) {
@@ -74,6 +74,34 @@ class FossologyProcessor extends BaseHandler {
             }
           }
           resolve(nomosOutput)
+        }
+      )
+    })
+  }
+
+  async _runCopyright(request, files) {
+    const copyrightOutput = []
+    for (const file of files) {
+      const path = file
+      const copyright = await this._analyzeFile(request, file)
+      if (path && copyright) {
+        copyrightOutput.push({ path: path, copyright: JSON.parse(copyright) })
+      }
+    }
+    return copyrightOutput
+  }
+
+  async _analyzeFile(request, file) {
+    return new Promise((resolve, reject) => {
+      const parameters = ['--files', file, '-J'].join(' ')
+      exec(
+        `cd ${this.options.installDir}/copyright/agent && ./copyright ${parameters}`,
+        (error, stdout, stderr) => {
+           if (error) {
+             request.markDead('Error', error ? error.message : 'FOSSology copyright run failed')
+             return reject(error)
+           }
+        resolve(stdout)
         }
       )
     })
@@ -104,7 +132,7 @@ class FossologyProcessor extends BaseHandler {
   _detectNomosVersion() {
     if (_nomosVersion !== undefined) return _nomosVersion
     return new Promise((resolve, reject) => {
-      exec(`cd ${this.options.installDir} && ./nomossa -V`, (error, stdout, stderr) => {
+      exec(`cd ${this.options.installDir}/nomos/agent && ./nomossa -V`, (error, stdout, stderr) => {
         if (error) {
           // TODO log here
           _nomosVersion = null
@@ -118,12 +146,13 @@ class FossologyProcessor extends BaseHandler {
   }
 
   async _createDocument(request) {
-    //const files = await getFiles(request.document.location)
+    const files = await getFiles(request.document.location)
     const nomosOutput = await this._runNomos(request)
-    //const copyrightOutput = await this._runCopyright(request, files)
+    const copyrightOutput = await this._runCopyright(request, files)
     //const monkOutput = await this._runMonk(request, files)
     request.document = { _metadata: request.document._metadata }
     if (nomosOutput) request.document.nomos = nomosOutput
+    if (copyrightOutput) request.document.copyright = copyrightOutput
   }
 }
 
