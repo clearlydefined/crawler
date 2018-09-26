@@ -33,8 +33,16 @@ RUN git clone https://github.com/fossology/fossology.git
 
 WORKDIR /opt/fossology/src/nomos/agent
 RUN make -f Makefile.sa
-ENV FOSSOLOGY_HOME=/opt/fossology/src/nomos/agent
 
+WORKDIR /opt/fossology/src/copyright/agent
+RUN make
+
+WORKDIR /opt/fossology/src/monk/agent
+RUN make
+
+ENV FOSSOLOGY_HOME=/opt/fossology/src
+
+# Crawler config
 ENV CRAWLER_DEADLETTER_PROVIDER=cd(azblob)
 ENV CRAWLER_NAME=cdcrawlerprod
 ENV CRAWLER_QUEUE_PREFIX=cdcrawlerprod
