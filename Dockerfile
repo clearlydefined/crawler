@@ -7,11 +7,22 @@ ENV APPDIR=/opt/service
 #RUN apk update && apk upgrade && \
 #    apk add --no-cache bash git openssh
 
+# Ruby
+RUN apt-get update && apt-get install -y --no-install-recommends --no-install-suggests curl bzip2 build-essential libssl-dev libreadline-dev zlib1g-dev cmake && \
+  rm -rf /var/lib/apt/lists/* && \
+  curl -L https://github.com/rbenv/ruby-build/archive/v20180822.tar.gz | tar -zxvf - -C /tmp/ && \
+  cd /tmp/ruby-build-* && ./install.sh && cd / && \
+  ruby-build -v 2.5.1 /usr/local && rm -rfv /tmp/ruby-build-* && \
+  gem install bundler --no-rdoc --no-ri
+
 # Scancode
 RUN curl -sL https://github.com/nexB/scancode-toolkit/releases/download/v2.9.2/scancode-toolkit-2.9.2.tar.bz2 | tar -C /opt -jx \
   && /opt/scancode-toolkit-2.9.2/scancode --reindex-licenses \
   && /opt/scancode-toolkit-2.9.2/scancode --version
 ENV SCANCODE_HOME=/opt/scancode-toolkit-2.9.2
+
+# Licensee
+RUN gem install licensee --no-rdoc --no-ri
 
 # FOSSology
 WORKDIR /opt
