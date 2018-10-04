@@ -35,8 +35,10 @@ class NuGetExtract extends BaseHandler {
       // skip all the hard work if we are just traversing.
       const { spec } = super._process(request)
       this.addBasicToolLinks(request, spec)
-      const manifest = await this._getManifest(request.document.location.manifest)
+      const location = request.document.location
+      const manifest = await this._getManifest(location.manifest)
       await this._createDocument(request, manifest, request.document.registryData)
+      await BaseHandler.addInterestingFiles(request.document, location.nupkg)
     }
     if (request.document.sourceInfo) {
       const sourceSpec = SourceSpec.fromObject(request.document.sourceInfo)
