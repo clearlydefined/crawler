@@ -30,7 +30,7 @@ class NuGetFetch extends BaseHandler {
       throw new Error('NuGet package could not be detected probably due to non-existent revision or name.')
     const dir = this._createTempDir(request)
     const location = await this._persistMetadata(dir, manifest, nuspec)
-    location.nupkg = await this._getNupkg(dir, registryData.packageContent)
+    location.nupkg = registryData ? await this._getNupkg(dir, registryData.packageContent) : null
     request.document = {
       registryData,
       location,
@@ -84,10 +84,12 @@ class NuGetFetch extends BaseHandler {
     const zip = path.join(dir.name, 'nupkg.zip')
     const nupkg = path.join(dir.name, 'nupkg')
     return new Promise((resolve, reject) => {
-      requestRetry.get(packageContentUrl, {
-        json: false,
-        encoding: null
-      }).pipe(fs.createWriteStream(zip))
+      requestRetry
+        .get(packageContentUrl, {
+          json: false,
+          encoding: null
+        })
+        .pipe(fs.createWriteStream(zip))
         .on('finish', async () => {
           await this.decompress(zip, nupkg)
           resolve(nupkg)
