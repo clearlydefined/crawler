@@ -27,6 +27,8 @@
   "dependencies": {
     "buffer-replace": "^1.0.0",
     "decompress": "^4.2.0",
+    "decompress-targz": "^4.1.1",
+    "decompress-unzip": "github:clearlydefined/decompress-unzip#expose-opts",
     "du": "^0.1.0",
     "extend": "^3.0.1",
     "extract-zip": "^1.6.6",
