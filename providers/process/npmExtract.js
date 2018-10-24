@@ -15,7 +15,7 @@ class NpmExtract extends BaseHandler {
   }
 
   get schemaVersion() {
-    return '1.1.2'
+    return '1.1.3'
   }
 
   get toolSpec() {
@@ -39,7 +39,7 @@ class NpmExtract extends BaseHandler {
       const manifest = manifestLocation ? JSON.parse(fs.readFileSync(manifestLocation)) : null
       if (!manifest) console.log(`NPM without package.json: ${request.url}`)
       await this._createDocument(request, manifest, request.document.registryData)
-      await BaseHandler.addInterestingFiles(request.document, path.join(location, 'package'))
+      await BaseHandler.addInterestingFiles(request.document, location, 'package')
     }
     this.linkAndQueueTool(request, 'scancode')
     this.linkAndQueueTool(request, 'fossology')
