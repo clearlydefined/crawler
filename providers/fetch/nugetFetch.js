@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const { trimStart, clone } = require('lodash')
+const { trimStart, clone, get } = require('lodash')
 const BaseHandler = require('../../lib/baseHandler')
 const fs = require('fs')
 const path = require('path')
@@ -37,7 +37,7 @@ class NuGetFetch extends BaseHandler {
       releaseDate: registryData ? new Date(registryData.published).toISOString() : null
     }
     request.contentOrigin = 'origin'
-    if (manifest.id) {
+    if (get(manifest, 'id')) {
       request.casedSpec = clone(spec)
       request.casedSpec.name = manifest.id
     }
