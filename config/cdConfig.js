@@ -28,7 +28,7 @@ module.exports = {
   fetch: {
     dispatcher: 'cdDispatch',
     cdDispatch: {},
-    crate: {},
+    cratesio: {},
     git: {},
     mavenCentral: {},
     npmjs: {},
