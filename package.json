@@ -5,7 +5,7 @@
   "main": "./index.js",
   "scripts": {
     "start": "node ./run.js",
-    "test": "node node_modules/eslint/bin/eslint.js . ; ./node_modules/mocha/bin/mocha test/unit/**/*.js",
+    "test": "node node_modules/eslint/bin/eslint.js . ; ./node_modules/mocha/bin/mocha \"test/unit/**/*.js\"",
     "integration": "./node_modules/mocha/bin/mocha test/integration/**/*.js --timeout 20000"
   },
   "keywords": [
