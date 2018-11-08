@@ -15,11 +15,11 @@ let Handler
 describe('BaseHandler interesting file discovery', () => {
   beforeEach(function() {
     const resultBox = { result: null, fsresult: null }
-    const globStub = async (glob, options, callback) => callback(null, Object.keys(resultBox.result))
+    const globStub = () => Promise.resolve(Object.keys(resultBox.result))
     const fsStub = {
       readFileSync: path => (resultBox.fsresult ? resultBox.fsresult[path] : resultBox.result[path]) || 'foo'
     }
-    Handler = proxyquire('../../../lib/baseHandler', { fs: fsStub, glob: globStub, child_process: execStub() })
+    Handler = proxyquire('../../../lib/baseHandler', { fs: fsStub, 'fast-glob': globStub, child_process: execStub() })
     Handler._globResult = resultBox
   })
 
