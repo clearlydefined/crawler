@@ -12,7 +12,7 @@ class SourceProcessor extends BaseHandler {
     return { tool: 'cdsourcetraversal', toolVersion: this.schemaVersion }
   }
 
-  shouldFetch(request) {
+  shouldFetch() {
     return false
   }
 

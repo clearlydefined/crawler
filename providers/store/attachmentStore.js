@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const request = require('request-promise-native')
 const { get } = require('lodash')
 
 class AttachmentStore {
