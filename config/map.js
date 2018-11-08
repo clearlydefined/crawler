@@ -77,7 +77,7 @@ const entities = {
   self,
   neighbors,
   source,
-  _package,
+  package: _package,
   clearlydefined,
   scancode,
   fossology,
