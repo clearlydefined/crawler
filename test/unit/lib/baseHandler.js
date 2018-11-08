@@ -55,26 +55,26 @@ describe('BaseHandler interesting file discovery', () => {
 
   it('finds files in a folder', async () => {
     Handler._globResult.result = {
-      'License.md': 'package/License.md attachment',
-      'LICENSE.HTML': 'package/LICENSE.HTML attachment',
-      'license.txt': 'package/license.txt attachment',
-      'Notice.md': 'package/Notice.md attachment'
+      'License.md': 'License.md attachment',
+      'LICENSE.HTML': 'LICENSE.HTML attachment',
+      'license.txt': 'license.txt attachment',
+      'Notice.md': 'Notice.md attachment'
     }
     Handler._globResult.fsresult = {
-      'package/License.md': 'package/License.md attachment',
-      'package/LICENSE.HTML': 'package/LICENSE.HTML attachment',
-      'package/license.txt': 'package/license.txt attachment',
-      'package/Notice.md': 'package/Notice.md attachment'
+      [createPath('License.md')]: 'License.md attachment',
+      [createPath('LICENSE.HTML')]: 'LICENSE.HTML attachment',
+      [createPath('license.txt')]: 'license.txt attachment',
+      [createPath('Notice.md')]: 'Notice.md attachment'
     }
     const document = {}
     await Handler.addInterestingFiles(document, '', 'package')
     expect(document.interestingFiles.length).to.eq(4)
     expect(document._attachments.length).to.eq(4)
 
-    validateInterestingFile('package/License.md', document.interestingFiles)
-    validateInterestingFile('package/LICENSE.HTML', document._attachments, true)
-    validateInterestingFile('package/license.txt', document.interestingFiles)
-    validateInterestingFile('package/Notice.md', document._attachments, true)
+    validateInterestingFile(createPath('License.md'), document.interestingFiles)
+    validateInterestingFile(createPath('LICENSE.HTML'), document._attachments, true)
+    validateInterestingFile(createPath('license.txt'), document.interestingFiles)
+    validateInterestingFile(createPath('Notice.md'), document._attachments, true)
   })
 
   it('handles no files found', async () => {
@@ -84,6 +84,10 @@ describe('BaseHandler interesting file discovery', () => {
     expect(document.interestingFiles).to.be.undefined
   })
 })
+
+function createPath(name) {
+  return `package${path.sep}${name}`
+}
 
 describe('BaseHandler filesystem integration', () => {
   it('actually works on files', async () => {
@@ -101,7 +105,7 @@ describe('BaseHandler filesystem integration', () => {
 })
 
 function validateInterestingFile(name, list, checkContent = false) {
-  const attachment = `${name} attachment`
+  const attachment = `${path.basename(name)} attachment`
   const token = BaseHandler.computeToken(attachment)
   const entry = find(list, entry => entry.path === name)
   expect(!!entry).to.be.true
