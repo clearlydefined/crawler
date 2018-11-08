@@ -3,14 +3,11 @@
 
 const BaseHandler = require('../../lib/baseHandler')
 const { exec } = require('child_process')
-const fs = require('fs')
 const path = require('path')
 const { promisify } = require('util')
 const du = require('du')
-const dir = require('node-dir')
 const bufferReplace = require('buffer-replace')
 
-const getFiles = promisify(dir.files)
 let _toolVersion
 let _nomosVersion
 
@@ -55,27 +52,23 @@ class FossologyProcessor extends BaseHandler {
     return new Promise((resolve, reject) => {
       // TODO add correct parameters and command line here
       const parameters = ['-ld', request.document.location].join(' ')
-      exec(
-        `cd ${this.options.installDir} && ./nomossa ${parameters}`,
-        { maxBuffer: 5000 * 1024 },
-        (error, stdout, stderr) => {
-          if (error) {
-            request.markDead('Error', error ? error.message : 'FOSSology run failed')
-            return reject(error)
-          }
-          let buffer = new Buffer(stdout)
-          buffer = bufferReplace(buffer, request.document.location + '/', '')
-          const nomosOutput = {
-            version: this.nomosVersion,
-            parameters: parameters,
-            output: {
-              contentType: 'text/plain',
-              content: buffer.toString()
-            }
-          }
-          resolve(nomosOutput)
+      exec(`cd ${this.options.installDir} && ./nomossa ${parameters}`, { maxBuffer: 5000 * 1024 }, (error, stdout) => {
+        if (error) {
+          request.markDead('Error', error ? error.message : 'FOSSology run failed')
+          return reject(error)
         }
-      )
+        let buffer = new Buffer(stdout)
+        buffer = bufferReplace(buffer, request.document.location + '/', '')
+        const nomosOutput = {
+          version: this.nomosVersion,
+          parameters: parameters,
+          output: {
+            contentType: 'text/plain',
+            content: buffer.toString()
+          }
+        }
+        resolve(nomosOutput)
+      })
     })
   }
 
@@ -103,8 +96,8 @@ class FossologyProcessor extends BaseHandler {
 
   _detectNomosVersion() {
     if (_nomosVersion !== undefined) return _nomosVersion
-    return new Promise((resolve, reject) => {
-      exec(`cd ${this.options.installDir} && ./nomossa -V`, (error, stdout, stderr) => {
+    return new Promise(resolve => {
+      exec(`cd ${this.options.installDir} && ./nomossa -V`, (error, stdout) => {
         if (error) {
           // TODO log here
           _nomosVersion = null

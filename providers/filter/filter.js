@@ -9,7 +9,7 @@ class StandardFilter extends BaseHandler {
     this.processors = processors
   }
 
-  shouldFetchMissing(request, spec) {
+  shouldFetchMissing(request) {
     return request.policy.shouldFetchMissing(request)
   }
 
@@ -17,7 +17,7 @@ class StandardFilter extends BaseHandler {
     return !request.document || this.shouldProcess(request, spec)
   }
 
-  shouldProcess(request, spec) {
+  shouldProcess(request) {
     const processor = this._getProcessor(request, this.processors)
     return processor.shouldProcess(request)
   }

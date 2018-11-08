@@ -6,7 +6,6 @@ const spies = require('chai-spies')
 const Request = require('ghcrawler').request
 
 chai.use(spies)
-const should = chai.should()
 const expect = chai.expect
 
 const FetchDispatcher = require('../../../../providers/fetch/dispatcher')
@@ -18,7 +17,7 @@ describe('fetchDispatcher', () => {
   })
 
   it('should call markNoSave if processor should not fetch', async () => {
-    const processorsStub = [{ canHandle: req => true, shouldFetch: req => false }]
+    const processorsStub = [{ canHandle: () => true, shouldFetch: () => false }]
     const fetchDispatcher = FetchDispatcher({}, {}, {}, processorsStub)
     const request = {}
     chai.spy.on(request, 'markNoSave', () => {})
@@ -27,9 +26,9 @@ describe('fetchDispatcher', () => {
   })
 
   it('should markSkip request if missing from store and should not fetch missing', async () => {
-    const storeStub = { get: (type, documentKey) => null }
-    const processorsStub = [{ canHandle: req => true, shouldFetch: req => true, getUrnFor: req => 'documentkey' }]
-    const filterStub = { shouldFetchMissing: req => false }
+    const storeStub = { get: () => null }
+    const processorsStub = [{ canHandle: () => true, shouldFetch: () => true, getUrnFor: () => 'documentkey' }]
+    const filterStub = { shouldFetchMissing: () => false }
     const fetchDispatcher = FetchDispatcher({}, storeStub, {}, processorsStub, filterStub)
     const request = new Request('test', 'http://test')
     const result = await fetchDispatcher.handle(request)

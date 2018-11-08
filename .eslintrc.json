@@ -3,10 +3,11 @@
     "browser": false,
     "commonjs": true,
     "es6": true,
-    "node": true
+    "node": true,
+    "mocha": true
   },
   "parserOptions": {
-    "ecmaVersion": 8,
+    "ecmaVersion": 9,
     "sourceType": "module"
   },
   "rules": {
