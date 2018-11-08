@@ -63,7 +63,7 @@ const gem = {
   clearlydefined
 }
 
-const package = {
+const _package = {
   _type: 'package',
   npm,
   crate,
@@ -77,7 +77,7 @@ const entities = {
   self,
   neighbors,
   source,
-  package,
+  _package,
   clearlydefined,
   scancode,
   fossology,

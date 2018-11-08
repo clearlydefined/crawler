@@ -32,7 +32,7 @@ class NpmExtract extends BaseHandler {
   async handle(request) {
     if (this.isProcessing(request)) {
       // skip all the hard work if we are just traversing.
-      const { document, spec } = super._process(request)
+      const { spec } = super._process(request)
       this.addBasicToolLinks(request, spec)
       const location = request.document.location
       const manifestLocation = this._getManifestLocation(location)
