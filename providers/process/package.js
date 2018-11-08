@@ -12,7 +12,7 @@ class PackageProcessor extends BaseHandler {
     return { tool: 'cdpackagetraversal', toolVersion: this.schemaVersion }
   }
 
-  shouldFetch(request) {
+  shouldFetch() {
     return false
   }
 
@@ -22,7 +22,7 @@ class PackageProcessor extends BaseHandler {
   }
 
   handle(request) {
-    const { document, spec } = super._process(request)
+    const { spec } = super._process(request)
     this.addBasicToolLinks(request, spec)
     this.linkAndQueueTool(request, spec.type)
     request.markNoSave()

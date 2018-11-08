@@ -25,7 +25,7 @@ class TopProcessor extends BaseHandler {
   }
 
   handle(request) {
-    const { document, spec } = super._process(request)
+    const { spec } = super._process(request)
     this.addBasicToolLinks(request, spec)
     switch (spec.provider) {
       case 'npmjs':

@@ -52,7 +52,7 @@ class ScanCodeProcessor extends BaseHandler {
         file.name,
         request.document.location
       ].join(' ')
-      exec(`cd ${this.options.installDir} && .${path.sep}scancode ${parameters}`, (error, stdout, stderr) => {
+      exec(`cd ${this.options.installDir} && .${path.sep}scancode ${parameters}`, error => {
         if (this._isRealError(error) || this._hasRealErrors(file.name)) {
           request.markDead('Error', error ? error.message : 'ScanCode run failed')
           return reject(error)
@@ -106,7 +106,7 @@ class ScanCodeProcessor extends BaseHandler {
   _detectVersion() {
     if (_toolVersion) return _toolVersion
     return new Promise((resolve, reject) => {
-      exec(`cd ${this.options.installDir} && .${path.sep}scancode --version`, (error, stdout, stderr) => {
+      exec(`cd ${this.options.installDir} && .${path.sep}scancode --version`, (error, stdout) => {
         if (error) return reject(error)
         _toolVersion = stdout.replace('ScanCode version ', '').trim()
         resolve(_toolVersion)

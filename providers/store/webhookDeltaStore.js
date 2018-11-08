@@ -33,19 +33,19 @@ class WebhookDeltaStore {
     }
   }
 
-  get(type, key) {
+  get() {
     return null
   }
 
-  etag(type, key) {
+  etag() {
     return null
   }
 
-  list(type) {
+  list() {
     return null
   }
 
-  count(type) {
+  count() {
     return null
   }
 
@@ -53,7 +53,7 @@ class WebhookDeltaStore {
     return null
   }
 
-  delete(type, key) {
+  delete() {
     return null
   }
 }

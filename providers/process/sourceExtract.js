@@ -32,7 +32,7 @@ class SourceExtract extends BaseHandler {
     await BaseHandler.addInterestingFiles(request.document, location)
     const clearlyFile = path.join(location, 'clearly.yaml')
     if (!fs.existsSync(clearlyFile)) return
-    const content = await promisfy(fs.readFileSync)(clearlyFile)
+    const content = await promisify(fs.readFileSync)(clearlyFile)
     request.document.description = yaml.safeLoad(content)
   }
 }
