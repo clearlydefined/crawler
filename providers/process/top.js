@@ -20,16 +20,20 @@ class TopProcessor extends BaseHandler {
   canHandle(request) {
     const spec = this.toSpec(request)
     return (
-      request.type === 'top' && spec && ['npmjs', 'mavencentral', 'nuget', 'github', 'pypi'].includes(spec.provider)
+      request.type === 'top' &&
+      spec &&
+      ['npmjs', 'cratesio', 'mavencentral', 'nuget', 'github', 'pypi'].includes(spec.provider)
     )
   }
 
   handle(request) {
-    const { document, spec } = super._process(request)
+    const { spec } = super._process(request)
     this.addBasicToolLinks(request, spec)
     switch (spec.provider) {
       case 'npmjs':
         return this._processTopNpms(request)
+      case 'cratesio':
+        return this._processTopCrates(request)
       case 'mavencentral':
         return this._processTopMavenCentrals(request)
       case 'nuget':
@@ -77,6 +81,35 @@ class TopProcessor extends BaseHandler {
       console.log(`Queued ${requestsPage.length} NPM packages. Offset: ${offset}`)
     }
     return request.markNoSave()
+  }
+
+  /* Example:
+  {
+    "type": "top",
+    "url":"cd:/crate/cratesio/-/insert/0.2.0",
+    "payload": {
+      "body": {
+        "start": 0,
+        "end": 1000
+      }
+    }
+  }
+  */
+  async _processTopCrates(request) {
+    let { start, end } = request.document
+    if (!start || start < 0) start = 0
+    if (!end || end - start <= 0) end = start + 1000
+    for (let offset = start; offset < end; offset += 100) {
+      const page = offset / 100 + 1
+      const response = await requestRetry.get(
+        `https://crates.io/api/v1/crates?page=${page}&per_page=100&sort=downloads`
+      )
+      const requestsPage = response.crates.map(
+        x => new Request('package', `cd:/crate/cratesio/-/${x.name}/${x.max_version}`)
+      )
+      await request.queueRequests(requestsPage)
+      console.log(`Queued ${requestsPage.length} Crate packages. Offset: ${offset}`)
+    }
   }
 
   /* Example:

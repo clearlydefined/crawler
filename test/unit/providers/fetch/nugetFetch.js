@@ -3,8 +3,6 @@
 
 const chai = require('chai')
 const NuGetFetch = require('../../../../providers/fetch/nugetFetch')({})
-
-const { describe, it } = require('mocha')
 const expect = chai.expect
 
 describe('NuGet fetch', () => {
