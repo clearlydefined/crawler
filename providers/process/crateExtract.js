@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 const BaseHandler = require('../../lib/baseHandler')
-const fs = require('fs')
-const { promisify } = require('util')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
 const SourceSpec = require('../../lib/sourceSpec')
 
@@ -28,7 +26,7 @@ class CrateExtract extends BaseHandler {
 
   async handle(request) {
     if (this.isProcessing(request)) {
-      const { document, spec } = super._process(request)
+      const { spec } = super._process(request)
       this.addBasicToolLinks(request, spec)
       const location = request.document.location
       const manifest = request.document.manifest
