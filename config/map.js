@@ -29,6 +29,14 @@ const npm = {
   fossology
 }
 
+const crate = {
+  _type: 'crate',
+  source,
+  clearlydefined,
+  scancode,
+  fossology
+}
+
 const maven = {
   _type: 'maven',
   source,
@@ -55,9 +63,10 @@ const gem = {
   clearlydefined
 }
 
-const package = {
+const _package = {
   _type: 'package',
   npm,
+  crate,
   maven,
   nuget,
   pypi,
@@ -68,11 +77,12 @@ const entities = {
   self,
   neighbors,
   source,
-  package,
+  _package,
   clearlydefined,
   scancode,
   fossology,
   npm,
+  crate,
   maven,
   nuget,
   pypi,

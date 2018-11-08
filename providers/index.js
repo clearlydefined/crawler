@@ -11,6 +11,7 @@ module.exports = {
   },
   fetch: {
     cdDispatch: require('./fetch/dispatcher'),
+    cratesio: require('./fetch/crateFetch'),
     git: require('./fetch/gitCloner'),
     mavenCentral: require('./fetch/mavenFetch'),
     npmjs: require('./fetch/npmjsFetch'),
@@ -20,6 +21,7 @@ module.exports = {
   },
   process: {
     cdsource: require('./process/sourceExtract'),
+    crate: require('./process/crateExtract'),
     gem: require('./process/gemExtract'),
     maven: require('./process/mavenExtract'),
     npm: require('./process/npmExtract'),

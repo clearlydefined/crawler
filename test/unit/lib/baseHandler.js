@@ -14,9 +14,11 @@ let Handler
 
 describe('BaseHandler interesting file discovery', () => {
   beforeEach(function() {
-    const resultBox = { result: null }
+    const resultBox = { result: null, fsresult: null }
     const globStub = () => Promise.resolve(Object.keys(resultBox.result))
-    const fsStub = { readFileSync: path => resultBox.result[path] || 'foo' }
+    const fsStub = {
+      readFileSync: path => (resultBox.fsresult ? resultBox.fsresult[path] : resultBox.result[path]) || 'foo'
+    }
     Handler = proxyquire('../../../lib/baseHandler', { fs: fsStub, 'fast-glob': globStub, child_process: execStub() })
     Handler._globResult = resultBox
   })
@@ -49,6 +51,30 @@ describe('BaseHandler interesting file discovery', () => {
     validateInterestingFile('LICENSE.HTML', document._attachments, true)
     validateInterestingFile('NOtices', document.interestingFiles)
     validateInterestingFile('notice.TXT', document._attachments, true)
+  })
+
+  it('finds files in a folder', async () => {
+    Handler._globResult.result = {
+      'License.md': 'package/License.md attachment',
+      'LICENSE.HTML': 'package/LICENSE.HTML attachment',
+      'license.txt': 'package/license.txt attachment',
+      'Notice.md': 'package/Notice.md attachment'
+    }
+    Handler._globResult.fsresult = {
+      'package/License.md': 'package/License.md attachment',
+      'package/LICENSE.HTML': 'package/LICENSE.HTML attachment',
+      'package/license.txt': 'package/license.txt attachment',
+      'package/Notice.md': 'package/Notice.md attachment'
+    }
+    const document = {}
+    await Handler.addInterestingFiles(document, '', 'package')
+    expect(document.interestingFiles.length).to.eq(4)
+    expect(document._attachments.length).to.eq(4)
+
+    validateInterestingFile('package/License.md', document.interestingFiles)
+    validateInterestingFile('package/LICENSE.HTML', document._attachments, true)
+    validateInterestingFile('package/license.txt', document.interestingFiles)
+    validateInterestingFile('package/Notice.md', document._attachments, true)
   })
 
   it('handles no files found', async () => {

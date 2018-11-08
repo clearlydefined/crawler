@@ -5,8 +5,8 @@
   "main": "./index.js",
   "scripts": {
     "start": "node ./run.js",
-    "test": "node node_modules/eslint/bin/eslint.js . ; ./node_modules/mocha/bin/mocha test/unit/**/*.js",
-    "integration": "./node_modules/mocha/bin/mocha test/integration/**/*.js --timeout 20000"
+    "test": "mocha \"test/unit/**/*.js\" && eslint .",
+    "integration": "mocha \"test/integration/**/*.js\" --timeout 20000"
   },
   "keywords": [
     "license",
@@ -34,6 +34,7 @@
     "extract-zip": "^1.6.6",
     "ghcrawler": "github:microsoft/ghcrawler#jm/apicrawler",
     "ghrequestor": "^0.1.7",
+    "glob": "^7.1.3",
     "lodash": "^4.17.5",
     "moment": "^2.20.1",
     "morgan": "^1.9.0",
@@ -52,7 +53,7 @@
   "devDependencies": {
     "chai": "^4.1.2",
     "chai-spies": "^1.0.0",
-    "eslint": "^4.14.0",
+    "eslint": "^5.8.0",
     "istanbul": "^0.4.5",
     "mocha": "^4.0.1",
     "proxyquire": "^2.0.1",
