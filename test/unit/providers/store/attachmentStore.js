@@ -4,7 +4,6 @@
 const chai = require('chai')
 const expect = chai.expect
 const factory = require('../../../../providers/store/attachmentStoreFactory')
-const { describe, it } = require('mocha')
 const sinon = require('sinon')
 
 describe('AttachmentStore', () => {

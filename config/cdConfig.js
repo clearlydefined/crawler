@@ -28,6 +28,7 @@ module.exports = {
   fetch: {
     dispatcher: 'cdDispatch',
     cdDispatch: {},
+    cratesio: {},
     git: {},
     mavenCentral: {},
     npmjs: {},
@@ -37,6 +38,7 @@ module.exports = {
   },
   process: {
     cdsource: {},
+    crate: { githubToken },
     maven: { githubToken },
     pypi: { githubToken },
     gem: { githubToken },
