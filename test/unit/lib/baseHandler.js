@@ -13,15 +13,15 @@ const { find } = require('lodash')
 let Handler
 
 describe('BaseHandler interesting file discovery', () => {
-  beforeEach(function () {
+  beforeEach(function() {
     const resultBox = { result: null }
-    const globStub = async (glob, options, callback) => callback(null, Object.keys(resultBox.result))
+    const globStub = () => Promise.resolve(Object.keys(resultBox.result))
     const fsStub = { readFileSync: path => resultBox.result[path] || 'foo' }
-    Handler = proxyquire('../../../lib/baseHandler', { fs: fsStub, glob: globStub, child_process: execStub() })
+    Handler = proxyquire('../../../lib/baseHandler', { fs: fsStub, 'fast-glob': globStub, child_process: execStub() })
     Handler._globResult = resultBox
   })
 
-  afterEach(function () {
+  afterEach(function() {
     sandbox.restore()
   })
 
@@ -62,8 +62,10 @@ describe('BaseHandler interesting file discovery', () => {
 describe('BaseHandler filesystem integration', () => {
   it('actually works on files', async () => {
     const document = {}
-    await proxyquire('../../../lib/baseHandler', { child_process: execStub() })
-      .addInterestingFiles(document, path.join(__dirname, '../..', 'fixtures/package1'))
+    await proxyquire('../../../lib/baseHandler', { child_process: execStub() }).addInterestingFiles(
+      document,
+      path.join(__dirname, '../..', 'fixtures/package1')
+    )
     expect(document.interestingFiles.length).to.eq(3)
     validateInterestingFile('license', document.interestingFiles)
     validateInterestingFile('NOTICES', document._attachments, true)
@@ -84,8 +86,7 @@ function validateInterestingFile(name, list, checkContent = false) {
 function execStub() {
   return {
     exec: (cmd, callback) => {
-      if (cmd.startsWith('licensee '))
-        return callback(null, '{ "licenses": [{ "spdx_id": "MIT" }] }')
+      if (cmd.startsWith('licensee ')) return callback(null, '{ "licenses": [{ "spdx_id": "MIT" }] }')
       throw new Error('exec not stubbed')
     }
   }
