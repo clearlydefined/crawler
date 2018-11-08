@@ -12,17 +12,17 @@ class PackageProcessor extends BaseHandler {
     return { tool: 'cdpackagetraversal', toolVersion: this.schemaVersion }
   }
 
-  shouldFetch(request) {
+  shouldFetch() {
     return false
   }
 
   canHandle(request) {
     const spec = this.toSpec(request)
-    return request.type === 'package' && spec && ['npm', 'maven', 'nuget', 'gem', 'pypi'].includes(spec.type)
+    return request.type === 'package' && spec && ['npm', 'crate', 'maven', 'nuget', 'gem', 'pypi'].includes(spec.type)
   }
 
   handle(request) {
-    const { document, spec } = super._process(request)
+    const { spec } = super._process(request)
     this.addBasicToolLinks(request, spec)
     this.linkAndQueueTool(request, spec.type)
     request.markNoSave()
