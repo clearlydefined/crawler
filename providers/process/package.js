@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 const BaseHandler = require('../../lib/baseHandler')
+const supportedTypes = ['npm', 'crate', 'maven', 'nuget', 'gem', 'pypi']
 
 class PackageProcessor extends BaseHandler {
   get schemaVersion() {
@@ -18,7 +19,7 @@ class PackageProcessor extends BaseHandler {
 
   canHandle(request) {
     const spec = this.toSpec(request)
-    return request.type === 'package' && spec && ['npm', 'crate', 'maven', 'nuget', 'gem', 'pypi'].includes(spec.type)
+    return request.type === 'package' && spec && supportedTypes.includes(spec.type)
   }
 
   handle(request) {
@@ -30,4 +31,4 @@ class PackageProcessor extends BaseHandler {
   }
 }
 
-module.exports = options => new PackageProcessor(options)
+module.exports = { processor: options => new PackageProcessor(options), supportedTypes }
