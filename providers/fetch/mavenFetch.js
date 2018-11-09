@@ -15,8 +15,12 @@ class MavenFetch extends BaseHandler {
   async handle(request) {
     const spec = this.toSpec(request)
     const registryData = await this._getRegistryData(spec)
-    if (!registryData)
-      throw new Error('Maven artifact could not be detected probably due to non-existent revision or name.')
+    if (!registryData) {
+      this.options.logger.info('Maven artifact could not be detected probably due to non-existent revision or name.', {
+        url: request.url
+      })
+      return request
+    }
     spec.revision = spec.revision ? registryData.v : registryData.latestVersion
     // rewrite the request URL as it is used throughout the system to derive locations and urns etc.
     request.url = spec.toUrl()
