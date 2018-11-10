@@ -16,7 +16,7 @@ class ScanCodeProcessor extends BaseHandler {
     // TODO little questionable here. Kick off an async operation on load with the expecation that
     // by the time someone actually uses this instance, the call will have completed.
     // Need to detect the tool version before anyone tries to run this processor.
-    this._detectVersion()
+    this.versionPromise = this._detectVersion()
   }
 
   get schemaVersion() {
@@ -32,6 +32,7 @@ class ScanCodeProcessor extends BaseHandler {
   }
 
   async handle(request) {
+    await this.versionPromise
     const { document, spec } = super._process(request)
     const size = await this._computeSize(document)
     request.addMeta({ k: size.k, fileCount: size.count })
