@@ -37,7 +37,7 @@ class NpmExtract extends BaseHandler {
       const location = request.document.location
       const manifestLocation = this._getManifestLocation(location)
       const manifest = manifestLocation ? JSON.parse(fs.readFileSync(manifestLocation)) : null
-      if (!manifest) console.log(`NPM without package.json: ${request.url}`)
+      if (!manifest) this.options.logger.info('NPM without package.json', { url: request.url })
       await this._createDocument(request, manifest, request.document.registryData)
       await BaseHandler.addInterestingFiles(request.document, location, 'package')
     }

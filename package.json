@@ -25,6 +25,7 @@
     "url": "https://github.com/clearlydefined/crawler"
   },
   "dependencies": {
+    "applicationinsights": "^1.0.6",
     "buffer-replace": "^1.0.0",
     "decompress": "^4.2.0",
     "decompress-targz": "^4.1.1",
@@ -33,7 +34,7 @@
     "extend": "^3.0.1",
     "extract-zip": "^1.6.6",
     "fast-glob": "^2.2.3",
-    "ghcrawler": "github:microsoft/ghcrawler#jm/apicrawler",
+    "ghcrawler": "github:microsoft/ghcrawler#logger",
     "ghrequestor": "^0.1.7",
     "lodash": "^4.17.5",
     "moment": "^2.20.1",
@@ -48,6 +49,8 @@
     "sha.js": "^2.4.11",
     "spdx-correct": "^3.0.0",
     "tmp": "0.0.33",
+    "winston": "^2.3.0",
+    "winston-azure-application-insights": "^1.5.0",
     "xml2js": "^0.4.19"
   },
   "devDependencies": {
