@@ -51,7 +51,7 @@ class NpmFetch extends BaseHandler {
     // Per https://github.com/npm/registry/issues/45 we should retrieve the whole package and get the version we want from that.
     // The version-specific API (e.g. append /x.y.z to URL) does NOT work for scoped packages.
     const baseUrl = providerMap[spec.provider]
-    if (!baseUrl) throw new Error(`Could not find definition for NPM provider: ${spec.provider}.`)
+    if (!baseUrl) this.options.logger.info(`Could not find definition for NPM provider: ${spec.provider}.`, { spec })
     const fullName = `${spec.namespace ? spec.namespace + '/' : ''}${spec.name}`
     let registryData
     try {
@@ -61,8 +61,9 @@ class NpmFetch extends BaseHandler {
       })
     } catch (exception) {
       if (exception.statusCode === 404)
-        throw new Error(`404 npm not found - ${fullName} not found from ${baseUrl}`)
-      throw exception
+        this.options.logger.info(`404 npm not found - ${fullName} not found from ${baseUrl}`, { spec })
+      else this.options.logger.error('npmjsFetch/_getRegistryData failure', exception)
+      return null
     }
     if (!registryData.versions) return null
     const version = spec.revision || this.getLatestVersion(Object.keys(registryData.versions))
