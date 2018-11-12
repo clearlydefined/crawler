@@ -101,6 +101,15 @@ The directory where ScanCode is installed. If you don't set this, running ScanCo
 
 The crawler tries to figure out details of the packages and source being traversed using various GitHub API calls. For this it needs an API token. This can be a Personal Access Token (PAT) or the token for an OAuth App. The token does not need any special permissions, only public data is accessed. Without this key GitHub will severely rate limit the crawler (as it should) and you won't get very far.
 
+### CRAWLER_HOST
+
+Used to identify a whole group of deployments. A friendly human-readable string.
+
+### CRAWLER_ID
+
+An optional setting. If not specified, a uuid will be generated for each instance.
+If a CRAWLER_ID is specified, then each instance must have this setting globally unique.
+
 # Docker
 
 ## Run Docker image from Docker Hub
