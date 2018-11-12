@@ -6,6 +6,7 @@ const request = require('request-promise-native')
 class WebhookDeltaStore {
   constructor(options) {
     this.options = options
+    this.logger = options.logger
   }
 
   connect() {
@@ -27,9 +28,9 @@ class WebhookDeltaStore {
     try {
       const response = await request(options)
       if (response.statusCode !== 200)
-        this.options.logger.info(`Failure  Firing webhook failed: ${response.statusCode} ${response.statusMessage}`)
+        this.logger.info(`Failure  Firing webhook failed: ${response.statusCode} ${response.statusMessage}`)
     } catch (error) {
-      this.options.logger.info(`Failure  Firing webhook failed: ${error.message}`)
+      this.logger.info(`Failure  Firing webhook failed: ${error.message}`)
     }
   }
 
