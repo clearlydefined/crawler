@@ -12,15 +12,20 @@ describe('crateFetch', () => {
     expect(crateFetch.canHandle({ url: 'cd:/npm/npmjs/-/name/0.1.0' })).to.be.false
   })
 
-  it('should return when no version', async () => {
+  it('should markskip when no version', async () => {
     const crateFetch = mockCrateFetch({
       registryData: () => {
         return { manifest: null, version: null }
       }
     })
 
-    const request = await crateFetch.handle({ url: 'cd:/crate/cratesio/-/name/0.1.0' })
+    let request = {
+      url: 'cd:/crate/cratesio/-/name/0.1.0'
+    }
+    chai.spy.on(request, 'markSkip', () => request)
+    await crateFetch.handle(request)
     expect(request.url).to.eq('cd:/crate/cratesio/-/name/0.1.0')
+    expect(request.markSkip).to.be.called.once
     expect(request.document).to.be.undefined
     expect(request.casedSpec).to.be.undefined
   })
