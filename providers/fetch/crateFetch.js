@@ -16,7 +16,7 @@ class CrateFetch extends BaseHandler {
   async handle(request) {
     const spec = this.toSpec(request)
     const registryData = await this._getRegistryData(spec)
-    if (!registryData || !registryData.version) return request
+    if (!registryData || !registryData.version) return request.markSkip('Missing  ')
     spec.revision = registryData.version.num
     request.url = spec.toUrl()
     const dir = this._createTempDir(request)
@@ -43,8 +43,7 @@ class CrateFetch extends BaseHandler {
         json: true
       })
     } catch (exception) {
-      if (exception.statusCode === 404) this.options.logger.info(`404 crate not found - ${spec.name}`, { spec })
-      else this.options.logger.error('crateFetch/_getRegistryData failure', exception)
+      if (exception.statusCode !== 404) throw exception
       return null
     }
     if (!registryData.versions) return null
