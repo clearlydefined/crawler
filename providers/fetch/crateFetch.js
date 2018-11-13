@@ -15,22 +15,22 @@ class CrateFetch extends BaseHandler {
 
   async handle(request) {
     const spec = this.toSpec(request)
-    const { manifest, version } = await this._getRegistryData(spec)
-    if (!version) return request
-    spec.revision = version.num
+    const registryData = await this._getRegistryData(spec)
+    if (!registryData || !registryData.version) return request.markSkip('Missing  ')
+    spec.revision = registryData.version.num
     request.url = spec.toUrl()
     const dir = this._createTempDir(request)
-    const location = await this._getPackage(dir, version)
+    const location = await this._getPackage(dir, registryData.version)
     request.document = {
-      registryData: version,
-      releaseDate: version.created_at,
+      registryData: registryData.version,
+      releaseDate: registryData.version.created_at,
       location,
-      manifest
+      manifest: registryData.manifest
     }
     request.contentOrigin = 'origin'
-    if (version.crate) {
+    if (registryData.version.crate) {
       request.casedSpec = clone(spec)
-      request.casedSpec.name = version.crate
+      request.casedSpec.name = registryData.version.crate
     }
     return request
   }
@@ -43,8 +43,8 @@ class CrateFetch extends BaseHandler {
         json: true
       })
     } catch (exception) {
-      if (exception.statusCode === 404) throw new Error(`404 crate not found - ${spec.name}`)
-      throw exception
+      if (exception.statusCode !== 404) throw exception
+      return null
     }
     if (!registryData.versions) return null
     const version = spec.revision || this.getLatestVersion(registryData.versions.map(x => x.num))

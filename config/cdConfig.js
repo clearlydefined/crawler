@@ -38,13 +38,17 @@ module.exports = {
   },
   process: {
     cdsource: {},
+    component: {},
     crate: { githubToken },
-    maven: { githubToken },
-    pypi: { githubToken },
+    fossology: {
+      installDir: config.get('FOSSOLOGY_HOME')
+    },
     gem: { githubToken },
+    maven: { githubToken },
     npm: { githubToken },
     nuget: { githubToken },
     package: {},
+    pypi: { githubToken },
     scancode: {
       installDir: config.get('SCANCODE_HOME') || 'C:\\installs\\scancode-toolkit-2.9.2',
       options: [
@@ -66,9 +70,6 @@ module.exports = {
         crawlerUrl: config.get('CRAWLER_SERVICE_URL') || 'http://localhost:5000',
         crawlerAuthToken: config.get('CRAWLER_SERVICE_AUTH_TOKEN') || 'secret'
       }
-    },
-    fossology: {
-      installDir: config.get('FOSSOLOGY_HOME')
     },
     source: {},
     top: { githubToken }

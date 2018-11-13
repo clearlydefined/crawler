@@ -14,7 +14,7 @@
     "crawler",
     "clearlydefined"
   ],
-  "author": "Jeff Mcaffer <jmcaffer@microsoft.com>",
+  "author": "Jeff McAffer <jmcaffer@microsoft.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -25,6 +25,7 @@
     "url": "https://github.com/clearlydefined/crawler"
   },
   "dependencies": {
+    "applicationinsights": "^1.0.6",
     "buffer-replace": "^1.0.0",
     "decompress": "^4.2.0",
     "decompress-targz": "^4.1.1",
@@ -48,6 +49,8 @@
     "sha.js": "^2.4.11",
     "spdx-correct": "^3.0.0",
     "tmp": "0.0.33",
+    "winston": "^2.3.0",
+    "winston-azure-application-insights": "^1.5.0",
     "xml2js": "^0.4.19"
   },
   "devDependencies": {
