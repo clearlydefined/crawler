@@ -25,9 +25,8 @@ class NuGetFetch extends BaseHandler {
     request.url = spec.toUrl()
     const registryData = await this._getRegistryData(spec)
     const manifest = registryData ? await this._getManifest(registryData.catalogEntry) : null
-    const nuspec = await this._getNuspec(spec)
-    if (!manifest && !nuspec)
-      throw new Error('NuGet package could not be detected probably due to non-existent revision or name.')
+    const nuspec = manifest ? await this._getNuspec(spec) : null
+    if (!registryData || !nuspec || !manifest) return request.markSkip('Missing  ')
     const dir = this._createTempDir(request)
     const location = await this._persistMetadata(dir, manifest, nuspec)
     location.nupkg = registryData ? await this._getNupkg(dir, registryData.packageContent) : null

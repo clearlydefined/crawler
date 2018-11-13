@@ -21,16 +21,17 @@ module.exports = {
   },
   process: {
     cdsource: require('./process/sourceExtract'),
+    component: require('./process/component'),
     crate: require('./process/crateExtract'),
     gem: require('./process/gemExtract'),
     maven: require('./process/mavenExtract'),
     npm: require('./process/npmExtract'),
     nuget: require('./process/nugetExtract'),
     pypi: require('./process/pypiExtract'),
-    package: require('./process/package'),
+    package: require('./process/package').processor,
     scancode: require('./process/scancode'),
     fossology: require('./process/fossology'),
-    source: require('./process/source'),
+    source: require('./process/source').processor,
     top: require('./process/top')
   },
   store: {

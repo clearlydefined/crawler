@@ -73,9 +73,16 @@ const _package = {
   gem
 }
 
+const component = {
+  _type: 'component',
+  source,
+  package: _package
+}
+
 const entities = {
   self,
   neighbors,
+  component,
   source,
   package: _package,
   clearlydefined,

@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 const BaseHandler = require('../../lib/baseHandler')
-const supportedTypes = ['git', 'sourcearchive']
+const SourceProcessor = require('./source')
+const PackageProcessor = require('./package')
 
-class SourceProcessor extends BaseHandler {
+class ComponentProcessor extends BaseHandler {
   get schemaVersion() {
     return 1
   }
@@ -18,19 +19,17 @@ class SourceProcessor extends BaseHandler {
   }
 
   canHandle(request) {
-    const spec = this.toSpec(request)
-    return request.type === 'source' && spec && supportedTypes.includes(spec.type)
+    return request.type === 'component'
   }
 
   handle(request) {
     const { document, spec } = super._process(request)
     this.addBasicToolLinks(request, spec)
-    this.linkAndQueueTool(request, 'clearlydefined')
-    this.linkAndQueueTool(request, 'scancode')
-    this.linkAndQueueTool(request, 'fossology')
+    if (SourceProcessor.supportedTypes.includes(spec.type)) this.linkAndQueueTool(request, 'source')
+    else if (PackageProcessor.supportedTypes.includes(spec.type)) this.linkAndQueueTool(request, 'package')
     request.markNoSave()
     return document
   }
 }
 
-module.exports = { processor: options => new SourceProcessor(options), supportedTypes }
+module.exports = options => new ComponentProcessor(options)
