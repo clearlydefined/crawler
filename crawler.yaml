@@ -30,6 +30,11 @@ spec:
                 secretKeyRef:
                   name: secrets
                   key: CRAWLER_NAME
+            - name: CRAWLER_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: CRAWLER_HOST
             - name: CRAWLER_QUEUE_PREFIX
               valueFrom:
                 secretKeyRef:
