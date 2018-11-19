@@ -35,6 +35,10 @@ spec:
                 secretKeyRef:
                   name: secrets
                   key: CRAWLER_HOST
+            - name: CRAWLER_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
             - name: CRAWLER_QUEUE_PREFIX
               valueFrom:
                 secretKeyRef:
