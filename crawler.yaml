@@ -18,7 +18,8 @@ spec:
     spec:
       containers:
         - name: crawler
-          image: clearlydefined/crawler
+          image: clearlydefined/crawler:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 5000
             # These don't all need to be secrets, but this way lets us
@@ -29,6 +30,15 @@ spec:
                 secretKeyRef:
                   name: secrets
                   key: CRAWLER_NAME
+            - name: CRAWLER_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: CRAWLER_HOST
+            - name: CRAWLER_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
             - name: CRAWLER_QUEUE_PREFIX
               valueFrom:
                 secretKeyRef:
