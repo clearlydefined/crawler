@@ -7,12 +7,29 @@ pool:
   vmImage: 'Ubuntu 16.04'
 
 steps:
-- task: NodeTool@0
-  inputs:
-    versionSpec: '8.x'
-  displayName: 'Install Node.js'
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '8.x'
+    displayName: 'Install Node.js'
 
-- script: |
-    npm install
-    npm test
-  displayName: 'npm install and test'
+  - script: |
+      npm install
+      npm test
+    displayName: 'npm install and test'
+
+  - task: Docker@0
+    displayName: 'Build an image'
+    inputs:
+      azureSubscription: ClearlyDefined3
+      azureContainerRegistry: '{"loginServer":"clearlydefineddev2.azurecr.io", "id" : "/subscriptions/e05584a1-ed97-4676-aec9-d82ba4c36c93/resourceGroups/clearlydefined-dev/providers/Microsoft.ContainerRegistry/registries/clearlydefineddev2"}'
+      includeLatestTag: true
+    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+
+  - task: Docker@0
+    displayName: 'Push an image'
+    inputs:
+      azureSubscription: ClearlyDefined3
+      azureContainerRegistry: '{"loginServer":"clearlydefineddev2.azurecr.io", "id" : "/subscriptions/e05584a1-ed97-4676-aec9-d82ba4c36c93/resourceGroups/clearlydefined-dev/providers/Microsoft.ContainerRegistry/registries/clearlydefineddev2"}'
+      action: 'Push an image'
+      includeLatestTag: true
+    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
