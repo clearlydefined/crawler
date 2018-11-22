@@ -23,7 +23,7 @@ steps:
       azureSubscription: ClearlyDefined3
       azureContainerRegistry: '{"loginServer":"clearlydefineddev2.azurecr.io", "id" : "/subscriptions/e05584a1-ed97-4676-aec9-d82ba4c36c93/resourceGroups/clearlydefined-dev/providers/Microsoft.ContainerRegistry/registries/clearlydefineddev2"}'
       includeLatestTag: true
-    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+    condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
 
   - task: Docker@0
     displayName: 'Push an image'
@@ -32,4 +32,4 @@ steps:
       azureContainerRegistry: '{"loginServer":"clearlydefineddev2.azurecr.io", "id" : "/subscriptions/e05584a1-ed97-4676-aec9-d82ba4c36c93/resourceGroups/clearlydefined-dev/providers/Microsoft.ContainerRegistry/registries/clearlydefineddev2"}'
       action: 'Push an image'
       includeLatestTag: true
-    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+    condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
