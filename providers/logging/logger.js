@@ -8,7 +8,7 @@ const winston = require('winston')
 const insights = require('./insights')
 
 function factory(tattoos) {
-  insights.setup(tattoos, config.get('CRAWLER_INSIGHTS_KEY'))
+  insights.setup(tattoos, config.get('CRAWLER_INSIGHTS_KEY'), config.get('LOGGING_STDOUT_OFF'))
   const result = new winston.Logger()
   result.add(aiLogger, {
     insights: appInsights,
