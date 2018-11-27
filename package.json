@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node ./run.js",
     "test": "mocha \"test/unit/**/*.js\" && eslint .",
-    "integration": "mocha \"test/integration/**/*.js\" --timeout 20000"
+    "integration": "mocha \"test/integration/**/*.js\" --timeout 20000",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "keywords": [
     "license",
@@ -51,7 +53,8 @@
     "tmp": "0.0.33",
     "winston": "^2.3.0",
     "winston-azure-application-insights": "^1.5.0",
-    "xml2js": "^0.4.19"
+    "xml2js": "^0.4.19",
+    "snyk": "^1.110.2"
   },
   "devDependencies": {
     "chai": "^4.1.2",
@@ -61,5 +64,6 @@
     "mocha": "^4.0.1",
     "proxyquire": "^2.0.1",
     "sinon": "^4.2.2"
-  }
+  },
+  "snyk": true
 }
