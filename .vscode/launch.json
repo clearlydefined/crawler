@@ -10,7 +10,8 @@
       "runtimeArgs": ["--nolazy"],
       "env": {
         "NODE_ENV": "localhost",
-        "PORT": "5000"
+        "PORT": "5000",
+        "BUILD_NUMBER": "0"
       }
     },
     {
