@@ -8,7 +8,7 @@ ENV APPDIR=/opt/service
 #    apk add --no-cache bash git openssh
 
 ARG BUILD_NUMBER=0
-ENV BUILD_NUMBER=$BUILD_NUMBER
+ENV CRAWLER_BUILD_NUMBER=$BUILD_NUMBER
 
 # Ruby
 RUN apt-get update && apt-get install -y --no-install-recommends --no-install-suggests curl bzip2 build-essential libssl-dev libreadline-dev zlib1g-dev cmake && \
