@@ -4,23 +4,23 @@
 const appInsights = require('applicationinsights')
 
 class Insights {
-  constructor(tattoos, client = null, stdoutOff = false) {
+  constructor(tattoos, client = null, echo = true) {
     this.client = client
     this.tattoos = tattoos
-    this.stdoutOff = stdoutOff
+    this.echo = echo
   }
 
-  static setup(tattoos, key = 'mock', stdoutOff = false) {
+  static setup(tattoos, key = 'mock', echo = true) {
     // exit if we are already setup
     if (appInsights.defaultClient instanceof Insights) return
-    if (!key || key === 'mock') appInsights.defaultClient = new Insights(tattoos, null, stdoutOff)
+    if (!key || key === 'mock') appInsights.defaultClient = new Insights(tattoos, null, echo)
     else {
       appInsights
         .setup(key)
         .setAutoCollectPerformance(false)
         .setAutoCollectDependencies(false)
         .start()
-      appInsights.defaultClient = new Insights(tattoos, appInsights.defaultClient, stdoutOff)
+      appInsights.defaultClient = new Insights(tattoos, appInsights.defaultClient, echo)
     }
   }
 
@@ -32,7 +32,7 @@ class Insights {
       exceptionTelemetry.properties.cid = exceptionTelemetry.exception._cid
     }
     if (this.client) this.client.trackException(exceptionTelemetry)
-    if (!this.stdoutOff) {
+    if (this.echo) {
       console.log('trackException:')
       console.dir(exceptionTelemetry.exception)
     }
@@ -43,7 +43,7 @@ class Insights {
     const severities = ['V', 'I', 'W', 'E', 'C']
     const propertyString = JSON.stringify(traceTelemetry.properties)
     if (this.client) this.client.trackTrace(traceTelemetry)
-    if (!this.stdoutOff)
+    if (this.echo)
       console.log(`[${severities[traceTelemetry.severity]}] ${traceTelemetry.message} ${propertyString}`)
   }
 
