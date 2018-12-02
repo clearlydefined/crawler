@@ -156,14 +156,17 @@ class FossologyProcessor extends BaseHandler {
     })
   }
 
+  // TODO see how copyright outputs its version and format accordingly. The code appears to not have
+  // a means of getting a version. So, for now, use 0.0.0 to simulate using the same version as
+  // nomos. That will be taken as the overall version of the FOSSology support as they are
+  // built from the same tree at the same time.
   _detectCopyrightVersion() {
     return new Promise((resolve, reject) => {
-      exec(`cd ${this.options.installDir}/copyright/agent && ./copyright -V`, (error, stdout) => {
-        if (error) return reject(null)
-        // TODO see how copyright outputs its version and format accordingly.
-        // For now use a really low number so the real one will be higher
-        resolve('0.0.1')
-      })
+      resolve('0.0.0')
+      // exec(`cd ${this.options.installDir}/copyright/agent && ./copyright -V`, (error, stdout) => {
+      //   if (error) return reject(null)
+      //   resolve('0.0.0')
+      // })
     })
   }
 
