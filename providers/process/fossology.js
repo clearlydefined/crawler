@@ -9,7 +9,6 @@ const du = require('du')
 const bufferReplace = require('buffer-replace')
 
 let _toolVersion
-let _nomosVersion
 
 class FossologyProcessor extends BaseHandler {
   constructor(options) {
@@ -17,15 +16,11 @@ class FossologyProcessor extends BaseHandler {
     // TODO little questionable here. Kick off an async operation on load with the expecation that
     // by the time someone actually uses this instance, the call will have completed.
     // Need to detect the tool version before anyone tries to run this processor.
-    this._detectVersion()
+    this._versionPromise = this._detectVersion()
   }
 
   get schemaVersion() {
     return _toolVersion
-  }
-
-  get nomosVersion() {
-    return _nomosVersion
   }
 
   get toolSpec() {
@@ -37,8 +32,10 @@ class FossologyProcessor extends BaseHandler {
   }
 
   async handle(request) {
+    _toolVersion = await this._versionPromise
+    if (!_toolVersion) return request.markSkip('FOSSology tool configuration issue. See startup log.')
+
     const { document, spec } = super._process(request)
-    if (!this.nomosVersion) return request.markSkip('No nomos tool found')
     const size = await this._computeSize(document)
     request.addMeta({ k: size.k, fileCount: size.count })
     this.addBasicToolLinks(request, spec)
@@ -51,22 +48,61 @@ class FossologyProcessor extends BaseHandler {
     return new Promise((resolve, reject) => {
       // TODO add correct parameters and command line here
       const parameters = ['-ld', request.document.location].join(' ')
-      exec(`cd ${this.options.installDir} && ./nomossa ${parameters}`, { maxBuffer: 5000 * 1024 }, (error, stdout) => {
+      exec(
+        `cd ${this.options.installDir}/nomos/agent && ./nomossa ${parameters}`,
+        { maxBuffer: 5000 * 1024 },
+        (error, stdout) => {
+          if (error) {
+            request.markDead('Error', error ? error.message : 'FOSSology run failed')
+            return reject(error)
+          }
+          const buffer = bufferReplace(new Buffer(stdout), request.document.location + '/', '')
+          const nomosOutput = {
+            version: await this._nomosVersion,
+            parameters,
+            output: {
+              contentType: 'text/plain',
+              content: buffer.toString()
+            }
+          }
+          resolve(nomosOutput)
+        }
+      )
+    })
+  }
+
+  async _runCopyrights(request, files) {
+    const parameters = ['-J']
+    const copyrightOutput = []
+    for (const file of files) {
+      if (file) {
+        try {
+          const copyright = await this._runCopyright(request, path, parameters)
+          if (copyright) copyrightOutput.push({ path: file, copyright: JSON.parse(copyright) })
+        } catch (error) {
+          this.logger.error(error)
+        }
+      }
+    }
+    return {
+      version: await this._copyrightVersion,
+      parameters,
+      output: {
+        contentType: 'application/json',
+        content: copyrightOutput
+      }
+    }
+  }
+
+  _runCopyright(request, file, parameters) {
+    return new Promise((resolve, reject) => {
+      const params = ['--files', file, ...parameters].join(' ')
+      exec(`cd ${this.options.installDir}/copyright/agent && ./copyright ${params}`, (error, stdout) => {
         if (error) {
-          request.markDead('Error', error ? error.message : 'FOSSology run failed')
+          request.markDead('Error', error ? error.message : 'FOSSology copyright run failed')
           return reject(error)
         }
-        let buffer = new Buffer(stdout)
-        buffer = bufferReplace(buffer, request.document.location + '/', '')
-        const nomosOutput = {
-          version: this.nomosVersion,
-          parameters: parameters,
-          output: {
-            contentType: 'text/plain',
-            content: buffer.toString()
-          }
-        }
-        resolve(nomosOutput)
+        resolve(stdout)
       })
     })
   }
@@ -88,34 +124,57 @@ class FossologyProcessor extends BaseHandler {
     return newSpec.toUrn()
   }
 
+  // Aggregate the semver numbers from all the tools to form the FOSSology tool version
+  // This approach is ok as we expect the individual version numbers to monotonically increase
+  // and don't really care which changes, just that something changed.
   async _detectVersion() {
-    if (_toolVersion) return _toolVersion
-    return (_toolVersion = await this._detectNomosVersion())
+    if (this._versionPromise) return this._versionPromise
+    try {
+      // base is used to account for any high level changes in the way the FOSSology tools are run or configured
+      const base = '0.0.0'
+      this._nomosVersion = await this._detectNomosVersion()
+      this._copyrightVersion = await this._detectCopyrightVersion()
+      return BaseHandler._aggregateVersions(
+        [this._nomosVersion, this._copyrightVersion],
+        'FOSSology tool version misformatted',
+        base
+      )
+    } catch (error) {
+      this.logger.log(`Could not find FOSSology tool version: ${error.message}`)
+      return null
+    }
   }
 
   _detectNomosVersion() {
-    if (_nomosVersion !== undefined) return _nomosVersion
-    return new Promise(resolve => {
-      exec(`cd ${this.options.installDir} && ./nomossa -V`, (error, stdout) => {
-        if (error) {
-          // TODO log here
-          _nomosVersion = null
-          return resolve(null)
-        }
-        _nomosVersion = stdout.replace('nomos build version:', '').trim()
-        _nomosVersion = _nomosVersion.replace(/-.*/, '').trim()
-        resolve(_nomosVersion)
+    return new Promise((resolve, reject) => {
+      exec(`cd ${this.options.installDir}/nomos/agent && ./nomossa -V`, (error, stdout) => {
+        if (error) return reject(error)
+        const rawVersion = stdout.replace('nomos build version:', '').trim()
+        _toolVersion = rawVersion.replace(/-.*/, '').trim()
+        resolve(_toolVersion)
+      })
+    })
+  }
+
+  _detectCopyrightVersion() {
+    return new Promise((resolve, reject) => {
+      exec(`cd ${this.options.installDir}/copyright/agent && ./copyright -V`, (error, stdout) => {
+        if (error) return reject(null)
+        // TODO see how copyright outputs its version and format accordingly.
+        // For now use a really low number so the real one will be higher
+        resolve('0.0.1')
       })
     })
   }
 
   async _createDocument(request) {
-    //const files = await getFiles(request.document.location)
+    const files = await getFiles(request.document.location)
     const nomosOutput = await this._runNomos(request)
-    //const copyrightOutput = await this._runCopyright(request, files)
+    const copyrightOutput = await this._runCopyrights(request, files)
     //const monkOutput = await this._runMonk(request, files)
     request.document = { _metadata: request.document._metadata }
     if (nomosOutput) request.document.nomos = nomosOutput
+    if (copyrightOutput) request.document.copyright = copyrightOutput
   }
 }
 
