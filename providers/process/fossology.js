@@ -7,6 +7,7 @@ const path = require('path')
 const { promisify } = require('util')
 const du = require('du')
 const bufferReplace = require('buffer-replace')
+const getFiles = promisify(require('node-dir').files)
 
 let _toolVersion
 
@@ -45,6 +46,7 @@ class FossologyProcessor extends BaseHandler {
   }
 
   async _runNomos(request) {
+    const version = await this._nomosVersion
     return new Promise((resolve, reject) => {
       // TODO add correct parameters and command line here
       const parameters = ['-ld', request.document.location].join(' ')
@@ -56,15 +58,11 @@ class FossologyProcessor extends BaseHandler {
             request.markDead('Error', error ? error.message : 'FOSSology run failed')
             return reject(error)
           }
-          const buffer = bufferReplace(new Buffer(stdout), request.document.location + '/', '')
-          const nomosOutput = {
-            version: await this._nomosVersion,
-            parameters,
-            output: {
-              contentType: 'text/plain',
-              content: buffer.toString()
-            }
+          const output = {
+            contentType: 'text/plain',
+            content: bufferReplace(new Buffer(stdout), request.document.location + '/', '').toString()
           }
+          const nomosOutput = { version, parameters, output }
           resolve(nomosOutput)
         }
       )
@@ -161,7 +159,7 @@ class FossologyProcessor extends BaseHandler {
   // nomos. That will be taken as the overall version of the FOSSology support as they are
   // built from the same tree at the same time.
   _detectCopyrightVersion() {
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
       resolve('0.0.0')
       // exec(`cd ${this.options.installDir}/copyright/agent && ./copyright -V`, (error, stdout) => {
       //   if (error) return reject(null)
@@ -174,7 +172,6 @@ class FossologyProcessor extends BaseHandler {
     const files = await getFiles(request.document.location)
     const nomosOutput = await this._runNomos(request)
     const copyrightOutput = await this._runCopyrights(request, files)
-    //const monkOutput = await this._runMonk(request, files)
     request.document = { _metadata: request.document._metadata }
     if (nomosOutput) request.document.nomos = nomosOutput
     if (copyrightOutput) request.document.copyright = copyrightOutput
