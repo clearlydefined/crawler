@@ -10,7 +10,7 @@ const uuid = require('node-uuid')
 const logger = require('./providers/logging/logger')({
   crawlerId: config.get('CRAWLER_ID') || uuid.v4(),
   crawlerHost: config.get('CRAWLER_HOST'),
-  buildNumber: config.get('CRAWLER_BUILD_NUMBER')
+  buildNumber: config.get('CRAWLER_BUILD_NUMBER') || 'local'
 })
 
 run(defaults, logger, searchPath, maps)
