@@ -60,8 +60,9 @@ class NuGetFetch extends BaseHandler {
 
   // https://docs.microsoft.com/en-us/nuget/reference/package-versioning#normalized-version-numbers
   _normalizeVersion(version) {
-    const trimmed = version.split('.').map(part => trimStart(part, '0') || '0')
-    return (trimmed[3] === '0' ? trimmed.slice(0, 3) : trimmed).join('.')
+    const parts = version.split('-')
+    const trimmed = parts[0].split('.').map(part => trimStart(part, '0') || '0')
+    return [(trimmed[3] === '0' ? trimmed.slice(0, 3) : trimmed).join('.'), ...parts.slice(1)].filter(x => x).join('-')
   }
 
   async _getLatestVersion(name) {
