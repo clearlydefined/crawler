@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 const BaseHandler = require('../../lib/baseHandler')
-const supportedTypes = ['npm', 'crate', 'maven', 'nuget', 'gem', 'pypi']
+const supportedTypes = ['npm', 'crate', 'maven', 'nuget', 'gem', 'pod', 'pypi']
 
 class PackageProcessor extends BaseHandler {
   get schemaVersion() {
