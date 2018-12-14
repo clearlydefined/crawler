@@ -128,6 +128,7 @@ module.exports = {
       connectionString: cd_azblob.connection,
       queueName: config.get('CRAWLER_QUEUE_PREFIX') || 'cdcrawlerdev',
       visibilityTimeout: 3 * 60 * 60, // 3 hours
+      maxDequeueCount: 5,
       attenuation: {
         ttl: 3000
       }

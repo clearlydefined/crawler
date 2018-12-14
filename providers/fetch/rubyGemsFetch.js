@@ -89,6 +89,7 @@ class RubyGemsFetch extends BaseHandler {
       const file = fs.readFileSync(`${dirName}/metadata.txt`, 'utf8')
       const regexp = /date:\s\d{4}-\d{1,2}-\d{1,2}/
       const releaseDate = file.match(regexp)
+      if (!releaseDate) return null
       return releaseDate[0] ? releaseDate[0].substring(5).trim() : null
     }
   }
