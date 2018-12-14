@@ -28,6 +28,7 @@ module.exports = {
   fetch: {
     dispatcher: 'cdDispatch',
     cdDispatch: {},
+    cocoapods: {},
     cratesio: {},
     git: {},
     mavenCentral: {},
@@ -48,6 +49,7 @@ module.exports = {
     npm: { githubToken },
     nuget: { githubToken },
     package: {},
+    pod: { githubToken },
     pypi: { githubToken },
     scancode: {
       installDir: config.get('SCANCODE_HOME') || 'C:\\installs\\scancode-toolkit-2.9.2',
