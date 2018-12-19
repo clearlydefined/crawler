@@ -32,8 +32,8 @@ class TopProcessor extends BaseHandler {
     switch (spec.provider) {
       case 'npmjs':
         return this._processTopNpms(request)
-      case 'cocoapods':
-        return this._processTopCocoapods(request)
+      // case 'cocoapods':
+      //   return this._processTopCocoapods(request)
       case 'cratesio':
         return this._processTopCrates(request)
       case 'mavencentral':
