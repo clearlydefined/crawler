@@ -4,6 +4,7 @@
 const BaseHandler = require('../../lib/baseHandler')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
 const SourceSpec = require('../../lib/sourceSpec')
+const { get } = require('lodash')
 
 class PodExtract extends BaseHandler {
   constructor(options, sourceFinder) {
@@ -29,8 +30,7 @@ class PodExtract extends BaseHandler {
       const { spec } = super._process(request)
       this.addBasicToolLinks(request, spec)
       const location = request.document.location
-      const manifest = request.document.manifest
-      await this._createDocument(request, manifest, request.document.registryData)
+      await this._createDocument(request, request.document.registryData)
       await BaseHandler.addInterestingFiles(request.document, location)
     }
     this.linkAndQueueTool(request, 'scancode')
@@ -41,14 +41,31 @@ class PodExtract extends BaseHandler {
     }
   }
 
-  async _createDocument(request, manifest, registryData) {
-    request.document = { _metadata: request.document._metadata, manifest, registryData }
-    const sourceInfo = await this._discoverSource(manifest, registryData)
+  async _createDocument(request, registryData) {
+    request.document = { _metadata: request.document._metadata, registryData }
+    const sourceInfo = await this._discoverSource(registryData)
     if (sourceInfo) request.document.sourceInfo = sourceInfo
   }
 
-  _discoverSource(manifest, registryData) {
-    return this.sourceFinder(registryData.num, [manifest.repository], {
+  _discoverSource(registryData) {
+    let sources = []
+
+    // these options are mutually exclusive, sources will have a single item
+    let httpSource = get(registryData, 'source.http')
+    if (httpSource) sources.push(httpSource)
+
+    let gitSource = get(registryData, 'source.git')
+    if (gitSource) sources.push(gitSource)
+
+    let svnSource = get(registryData, 'source.svn')
+    if (svnSource) sources.push(svnSource)
+
+    let hgSource = get(registryData, 'source.hg')
+    if (hgSource) sources.push(hgSource)
+
+    // sourceFinder will detect the source only using the version,
+    // there is no way to pass the branch/tag/commit we have in the manifest
+    return this.sourceFinder(registryData.version, sources, {
       githubToken: this.options.githubToken
     })
   }
