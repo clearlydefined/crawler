@@ -7,6 +7,7 @@ const { flatten, uniqBy } = require('lodash')
 const path = require('path')
 const dir = require('node-dir')
 const { promisify } = require('util')
+const throat = require('throat')
 
 let _versionPromise
 let _toolVersion
@@ -55,8 +56,7 @@ class LicenseeProcessor extends BaseHandler {
     const paths = [root, ...(await promisify(dir.subdirs)(root))].map(path =>
       path.slice(root.length).replace(/^[\/\\]+/g, '')
     )
-    const runPromises = paths.map(path => this._runOnFolder(path, root, parameters))
-    const results = await Promise.all(runPromises)
+    const results = await Promise.all(paths.map(throat(10, path => this._runOnFolder(path, root, parameters))))
     const licenses = uniqBy(flatten(results.map(result => result.licenses)), 'spdx_id')
     const matched_files = flatten(results.map(result => result.matched_files))
     return {
