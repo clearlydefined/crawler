@@ -39,7 +39,7 @@ class NpmExtract extends BaseHandler {
       const manifest = manifestLocation ? JSON.parse(fs.readFileSync(manifestLocation)) : null
       if (!manifest) this.logger.info('NPM without package.json', { url: request.url })
       await this._createDocument(request, manifest, request.document.registryData)
-      await BaseHandler.addInterestingFiles(request.document, location, 'package')
+      await BaseHandler.attachInterestinglyNamedFiles(request.document, location, 'package')
     }
     this.linkAndQueueTool(request, 'licensee')
     this.linkAndQueueTool(request, 'fossology')

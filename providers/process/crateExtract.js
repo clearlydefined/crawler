@@ -31,7 +31,7 @@ class CrateExtract extends BaseHandler {
       const location = request.document.location
       const manifest = request.document.manifest
       await this._createDocument(request, manifest, request.document.registryData)
-      await BaseHandler.addInterestingFiles(request.document, location)
+      await BaseHandler.attachInterestinglyNamedFiles(request.document, location)
     }
     this.linkAndQueueTool(request, 'licensee')
     this.linkAndQueueTool(request, 'fossology')
