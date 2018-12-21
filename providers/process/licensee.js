@@ -3,7 +3,10 @@
 
 const BaseHandler = require('../../lib/baseHandler')
 const { exec } = require('child_process')
-const { omit } = require('lodash')
+const { flatten, uniqBy } = require('lodash')
+const path = require('path')
+const dir = require('node-dir')
+const { promisify } = require('util')
 
 let _versionPromise
 let _toolVersion
@@ -41,34 +44,54 @@ class LicenseeProcessor extends BaseHandler {
     const document = { _metadata: request.document._metadata }
     if (!record) return
     document.licensee = record
-    const toAttach = record.output.content.matched_files
-      .filter(file => file.matcher.name === 'exact' && file.matcher.confidence >= 80)
-      .map(file => file.filename)
+    const toAttach = record.output.content.matched_files.map(file => file.filename)
     BaseHandler.attachFiles(document, toAttach, location)
     request.document = document
   }
 
   async _run(request) {
+    const parameters = ['--json', '--no-readme']
+    const root = request.document.location
+    const paths = [root, ...(await promisify(dir.subdirs)(root))].map(path =>
+      path.slice(root.length).replace(/^[\/\\]+/g, '')
+    )
+    const runPromises = paths.map(path => this._runOnFolder(path, root, parameters))
+    const results = await Promise.all(runPromises)
+    const licenses = uniqBy(flatten(results.map(result => result.licenses)), 'spdx_id')
+    const matched_files = flatten(results.map(result => result.matched_files))
+    return {
+      version: this.schemaVersion,
+      parameters: parameters,
+      output: {
+        contentType: 'application/json',
+        content: { licenses, matched_files }
+      }
+    }
+  }
+
+  // Licensee appears to only run on the give folder, not recursively
+  async _runOnFolder(folder, root, parameters) {
     return new Promise((resolve, reject) => {
-      const parameters = ['--json', '--no-readme'].join(' ')
       exec(
-        `licensee detect ${parameters} ${request.document.location}`,
+        `licensee detect ${parameters.join(' ')} ${path.join(root, folder)}`,
         { maxBuffer: 5000 * 1024 },
         (error, stdout) => {
-          if (error) {
+          // Licensee fails with code = 1 if there are no license files found in the given folder.
+          // Not really an error. Just skip it.
+          // TODO unclear what code will be returned if there is a real error so be resilient in the
+          // handling of stdout
+          if (error && error.code !== 1) {
             request.markDead('Error', error ? error.message : 'Licensee run failed')
             return reject(error)
           }
-          const results = JSON.parse(stdout)
-          const record = {
-            version: this.schemaVersion,
-            parameters: parameters,
-            output: {
-              contentType: 'application/json',
-              content: results
-            }
+          try {
+            const result = JSON.parse(stdout)
+            result.matched_files.forEach(file => (file.filename = `${folder ? folder + '/' : ''}${file.filename}`))
+            resolve(result)
+          } catch (exception) {
+            request.markDead('Error', exception ? exception.message : 'Licensee output non-JSON')
+            return reject(exception)
           }
-          resolve(record)
         }
       )
     })
