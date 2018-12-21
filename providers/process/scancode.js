@@ -49,20 +49,22 @@ class ScanCodeProcessor extends BaseHandler {
         this.options.timeout.toString(),
         '-n',
         this.options.processes.toString(),
-        this.options.format,
-        file.name,
-        request.document.location
+        this.options.format
       ].join(' ')
-      exec(`cd ${this.options.installDir} && .${path.sep}scancode ${parameters}`, error => {
-        if (this._isRealError(error) || this._hasRealErrors(file.name)) {
-          request.markDead('Error', error ? error.message : 'ScanCode run failed')
-          return reject(error)
+      exec(
+        `cd ${this.options.installDir} && .${path.sep}scancode ${parameters} ${file.name} ${request.document.location}`,
+        error => {
+          if (this._isRealError(error) || this._hasRealErrors(file.name)) {
+            request.markDead('Error', error ? error.message : 'ScanCode run failed')
+            return reject(error)
+          }
+          document._metadata.contentLocation = file.name
+          document._metadata.contentType = 'application/json'
+          document._metadata.releaseDate = request.document.releaseDate
+          // TODO for each file, if we think its interesting, attach it
+          resolve(request)
         }
-        document._metadata.contentLocation = file.name
-        document._metadata.contentType = 'application/json'
-        document._metadata.releaseDate = request.document.releaseDate
-        resolve(request)
-      })
+      )
     })
   }
 

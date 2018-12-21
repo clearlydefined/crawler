@@ -24,6 +24,7 @@ module.exports = {
     component: require('./process/component'),
     crate: require('./process/crateExtract'),
     gem: require('./process/gemExtract'),
+    licensee: require('./process/licensee'),
     maven: require('./process/mavenExtract'),
     npm: require('./process/npmExtract'),
     nuget: require('./process/nugetExtract'),
