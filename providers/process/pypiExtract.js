@@ -32,6 +32,8 @@ class PyPiExtract extends BaseHandler {
       await this._createDocument(request, spec, request.document.registryData)
       await BaseHandler.addInterestingFiles(request.document, request.document.location)
     }
+    this.linkAndQueueTool(request, 'licensee')
+    this.linkAndQueueTool(request, 'fossology')
     this.linkAndQueueTool(request, 'scancode')
     if (request.document.sourceInfo) {
       const sourceSpec = SourceSpec.fromObject(request.document.sourceInfo)
