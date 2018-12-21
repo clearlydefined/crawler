@@ -38,7 +38,7 @@ class NuGetExtract extends BaseHandler {
       const location = request.document.location
       const manifest = await this._getManifest(location.manifest)
       await this._createDocument(request, manifest, request.document.registryData)
-      await BaseHandler.addInterestingFiles(request.document, location.nupkg)
+      await BaseHandler.attachInterestinglyNamedFiles(request.document, location.nupkg)
     }
     if (request.document.sourceInfo) {
       const sourceSpec = SourceSpec.fromObject(request.document.sourceInfo)
