@@ -25,7 +25,7 @@ RUN curl -sL https://github.com/nexB/scancode-toolkit/releases/download/v2.9.2/s
 ENV SCANCODE_HOME=/opt/scancode-toolkit-2.9.2
 
 # Licensee
-RUN gem install licensee --no-rdoc --no-ri
+RUN gem install licensee -v 9.10.1 --no-rdoc --no-ri
 
 # FOSSology
 WORKDIR /opt

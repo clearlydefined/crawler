@@ -11,9 +11,7 @@ let _toolVersion
 class LicenseeProcessor extends BaseHandler {
   constructor(options) {
     super(options)
-    // TODO little questionable here. Kick off an async operation on load with the expecation that
-    // by the time someone actually uses this instance, the call will have completed.
-    // Need to detect the tool version before anyone tries to run this processor.
+    // Kick off version detection but don't wait. We'll wait before processing anything
     this._detectVersion()
   }
 
@@ -30,46 +28,49 @@ class LicenseeProcessor extends BaseHandler {
   }
 
   async handle(request) {
-    const { spec } = super._process(request)
     if (!(await this._detectVersion())) return request.markSkip('Licensee not found')
+    const { spec } = super._process(request)
     this.addBasicToolLinks(request, spec)
     await this._createDocument(request)
     return request
   }
 
   async _createDocument(request) {
-    const output = await this._run(request)
+    const record = await this._run(request)
     const location = request.document.location
     const document = { _metadata: request.document._metadata }
-    if (!output) return
-    document.licensee = output
-    // Strip off the redundant (and potentially large) props and skip anything with low confidence or not exact match
-    const attachments = output.output.content
+    if (!record) return
+    document.licensee = record
+    const toAttach = record.output.content.matched_files
       .filter(file => file.matcher.name === 'exact' && file.matcher.confidence >= 80)
-      .map(file => omit(file, 'content', 'content_normalized'))
-    BaseHandler.attachFiles(document, attachments.map(file => file.filename), location)
+      .map(file => file.filename)
+    BaseHandler.attachFiles(document, toAttach, location)
     request.document = document
   }
 
   async _run(request) {
     return new Promise((resolve, reject) => {
-      const parameters = ['detect', '--json', '--no-readme', '--no-packages'].join(' ')
-      exec(`licensee ${parameters} ${request.document.location}`, { maxBuffer: 5000 * 1024 }, (error, stdout) => {
-        if (error) {
-          request.markDead('Error', error ? error.message : 'Licensee run failed')
-          return reject(error)
-        }
-        const results = JSON.parse(stdout)
-        const output = {
-          version: this.schemaVersion,
-          parameters: parameters,
-          output: {
-            contentType: 'application/json',
-            content: results.matched_files
+      const parameters = ['--json', '--no-readme'].join(' ')
+      exec(
+        `licensee detect ${parameters} ${request.document.location}`,
+        { maxBuffer: 5000 * 1024 },
+        (error, stdout) => {
+          if (error) {
+            request.markDead('Error', error ? error.message : 'Licensee run failed')
+            return reject(error)
           }
+          const results = JSON.parse(stdout)
+          const record = {
+            version: this.schemaVersion,
+            parameters: parameters,
+            output: {
+              contentType: 'application/json',
+              content: results
+            }
+          }
+          resolve(record)
         }
-        resolve(output)
-      })
+      )
     })
   }
 

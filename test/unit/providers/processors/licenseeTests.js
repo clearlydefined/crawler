@@ -17,15 +17,33 @@ describe('Licensee process', () => {
     const { request, processor } = setup('output1.json')
     await processor.handle(request)
     const { document } = request
-    expect(document.licensee.output.content.length).to.equal(5)
+    expect(document.licensee.output.content.matched_files.length).to.equal(5)
     expect(BaseHandler.attachFiles.args[0][1]).to.have.members(['LICENSE', 'folder/LICENSE.foo'])
+    expect(BaseHandler.attachFiles.args[0][2]).to.equal('/location')
+  })
+
+  it('should handle empty matched files list', async () => {
+    const { request, processor } = setup('output2.json')
+    await processor.handle(request)
+    const { document } = request
+    expect(document.licensee.version).to.equal('1.2')
+    expect(document.licensee.output.content.matched_files.length).to.equal(0)
+    expect(BaseHandler.attachFiles.args[0][1].length).to.equal(0)
+  })
+
+  it('should skip if Licensee not found', async () => {
+    const { request, processor } = setup(null, null, new Error('licensee error message here'))
+    await processor.handle(request)
+    expect(request.processControl).to.equal('skip')
   })
 
   beforeEach(function() {
-    const resultBox = { result: null, error: null, version: '1.2' }
+    const resultBox = { result: null, error: null, versionResult: '1.2', versionError: null }
     const processStub = {
       exec: (command, bufferLength, callback) =>
-        callback(resultBox.error, command.includes('version') ? resultBox.version : resultBox.result)
+        command.includes('version')
+          ? callback(resultBox.versionError, resultBox.versionResult)
+          : callback(resultBox.error, resultBox.result)
     }
     Handler = proxyquire('../../../../providers/process/licensee', { child_process: processStub })
     Handler._resultBox = resultBox
@@ -37,12 +55,13 @@ describe('Licensee process', () => {
   })
 })
 
-function setup(fixture, error) {
-  const options = { logger: sinon.stub() }
+function setup(fixture, error, versionError) {
+  const options = { logger: { log: sinon.stub() } }
   const testRequest = new request('npm', 'cd://npm/npmjs/-/test/1.1')
-  testRequest.document = { _metadata: { links: {} }, location: '/' }
+  testRequest.document = { _metadata: { links: {} }, location: '/location' }
   Handler._resultBox.error = error
   Handler._resultBox.result = fixture ? fs.readFileSync(`test/fixtures/licensee/${fixture}`, 'utf8') : null
+  Handler._resultBox.versionError = versionError
   const processor = Handler(options)
   return { request: testRequest, processor }
 }
