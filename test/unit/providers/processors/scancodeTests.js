@@ -12,32 +12,30 @@ const BaseHandler = require('../../../../lib/baseHandler')
 
 let Handler
 
-describe('Licensee process', () => {
-  it('should handle a mess of cases', async () => {
-    const { request, processor } = setup('9.10.1/folder1')
+describe('ScanCode process', () => {
+  it('should handle gems', async () => {
+    const { request, processor } = setup('2.9.8/gem.json')
     await processor.handle(request)
     const { document } = request
-    expect(document.licensee.output.content.matched_files.length).to.equal(4)
-    expect(BaseHandler.attachFiles.args[0][1]).to.have.members([
-      'LICENSE',
-      'package.json',
-      'subfolder/LICENSE.foo',
-      'subfolder/LICENSE.bar'
-    ])
-    expect(BaseHandler.attachFiles.args[0][2]).to.equal('test/fixtures/licensee/9.10.1/folder1')
+    expect(BaseHandler.attachFiles.args[0][1]).to.have.members([])
   })
 
-  it('should handle empty matched files list', async () => {
-    const { request, processor } = setup('9.10.1/folder2')
+  it('should handle simple npms', async () => {
+    const { request, processor } = setup('2.9.8/npm-basic.json')
     await processor.handle(request)
     const { document } = request
-    expect(document.licensee.version).to.equal('1.2')
-    expect(document.licensee.output.content.matched_files.length).to.equal(0)
-    expect(BaseHandler.attachFiles.args[0][1].length).to.equal(0)
+    expect(BaseHandler.attachFiles.args[0][1]).to.have.members(['package/package.json'])
   })
 
-  it('should skip if Licensee not found', async () => {
-    const { request, processor } = setup(null, null, new Error('licensee error message here'))
+  it('should handle large npms', async () => {
+    const { request, processor } = setup('2.9.8/npm-large.json')
+    await processor.handle(request)
+    const { document } = request
+    expect(BaseHandler.attachFiles.args[0][1]).to.have.members(['package/package.json'])
+  })
+
+  it('should skip if ScanCode not found', async () => {
+    const { request, processor } = setup(null, null, new Error('error message here'))
     await processor.handle(request)
     expect(request.processControl).to.equal('skip')
   })
@@ -48,10 +46,10 @@ describe('Licensee process', () => {
       exec: (command, bufferLength, callback) => {
         if (command.includes('version')) return callback(resultBox.versionError, resultBox.versionResult)
         const path = command.split(' ').slice(-1)
-        callback(resultBox.error, fs.readFileSync(`${path}/output.json`))
+        callback(resultBox.error)
       }
     }
-    Handler = proxyquire('../../../../providers/process/licensee', { child_process: processStub })
+    Handler = proxyquire('../../../../providers/process/scancode', { child_process: processStub })
     Handler._resultBox = resultBox
     BaseHandler.attachFiles = sinon.stub()
   })
@@ -62,11 +60,23 @@ describe('Licensee process', () => {
 })
 
 function setup(fixture, error, versionError) {
-  const options = { logger: { log: sinon.stub() } }
+  const options = {
+    options: [],
+    timeout: 200,
+    processes: 2,
+    format: 'json',
+    logger: { log: sinon.stub(), info: sinon.stub() }
+  }
   const testRequest = new request('npm', 'cd:/npm/npmjs/-/test/1.1')
-  testRequest.document = { _metadata: { links: {} }, location: `test/fixtures/licensee/${fixture}` }
+  testRequest.document = { _metadata: { links: {} }, location: '/test' }
   Handler._resultBox.error = error
   Handler._resultBox.versionError = versionError
   const processor = Handler(options)
+  processor._createTempFile = () => {
+    return { name: `test/fixtures/scancode/${fixture}` }
+  }
+  processor._computeSize = () => {
+    return { k: 13, count: 12 }
+  }
   return { request: testRequest, processor }
 }

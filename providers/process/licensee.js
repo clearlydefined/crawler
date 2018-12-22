@@ -9,18 +9,15 @@ const dir = require('node-dir')
 const { promisify } = require('util')
 const throat = require('throat')
 
-let _versionPromise
-let _toolVersion
-
 class LicenseeProcessor extends BaseHandler {
   constructor(options) {
     super(options)
     // Kick off version detection but don't wait. We'll wait before processing anything
-    this._detectVersion()
+    this._versionPromise = this._detectVersion()
   }
 
   get schemaVersion() {
-    return _toolVersion
+    return this._toolVersion
   }
 
   get toolSpec() {
@@ -32,7 +29,7 @@ class LicenseeProcessor extends BaseHandler {
   }
 
   async handle(request) {
-    if (!(await this._detectVersion())) return request.markSkip('Licensee not found')
+    if (!(await this._versionPromise)) return request.markSkip('Licensee not found')
     const { spec } = super._process(request)
     this.addBasicToolLinks(request, spec)
     await this._createDocument(request)
@@ -103,15 +100,15 @@ class LicenseeProcessor extends BaseHandler {
   }
 
   _detectVersion() {
-    if (_versionPromise !== undefined) return _versionPromise
-    _versionPromise = new Promise(resolve => {
+    if (this._versionPromise !== undefined) return this._versionPromise
+    this._versionPromise = new Promise(resolve => {
       exec('licensee version', 1024, (error, stdout) => {
         if (error) this.logger.log(`Could not detect version of Licensee: ${error.message}`)
-        _toolVersion = error ? null : stdout
-        resolve(_toolVersion)
+        this._toolVersion = error ? null : stdout
+        resolve(this._toolVersion)
       })
     })
-    return _versionPromise
+    return this._versionPromise
   }
 }
 
