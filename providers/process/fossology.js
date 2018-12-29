@@ -3,9 +3,6 @@
 
 const BaseHandler = require('../../lib/baseHandler')
 const { exec } = require('child_process')
-const path = require('path')
-const { promisify } = require('util')
-const du = require('du')
 const bufferReplace = require('buffer-replace')
 const getFiles = promisify(require('node-dir').files)
 
@@ -30,9 +27,7 @@ class FossologyProcessor extends BaseHandler {
 
   async handle(request) {
     if (!(await this._versionPromise)) return request.markSkip('FOSSology tools not properly configured')
-    const { document, spec } = super._process(request)
-    const size = await this._computeSize(document)
-    request.addMeta({ k: size.k, fileCount: size.count })
+    const { spec } = super._process(request)
     this.addBasicToolLinks(request, spec)
     this.logger.info(`Analyzing ${request.toString()} using FOSSology. input: ${request.document.location}`)
     await this._createDocument(request)
@@ -122,18 +117,6 @@ class FossologyProcessor extends BaseHandler {
         }
       )
     })
-  }
-
-  async _computeSize(document) {
-    let count = 0
-    const bytes = await promisify(du)(document.location, {
-      filter: file => {
-        if (path.basename(file) === '.git') return false
-        count++
-        return true
-      }
-    })
-    return { k: Math.round(bytes / 1024), count }
   }
 
   _getUrn(spec) {

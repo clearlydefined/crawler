@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler')
+const AbstractClearlyDefinedProcessor = require('./abstractClearlyDefinedProcessor')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
 const SourceSpec = require('../../lib/sourceSpec')
 
-class CrateExtract extends BaseHandler {
+class CrateExtract extends AbstractClearlyDefinedProcessor {
   constructor(options, sourceFinder) {
     super(options)
     this.sourceFinder = sourceFinder
@@ -31,7 +31,7 @@ class CrateExtract extends BaseHandler {
       const location = request.document.location
       const manifest = request.document.manifest
       await this._createDocument(request, manifest, request.document.registryData)
-      await BaseHandler.attachInterestinglyNamedFiles(request.document, location)
+      await this.attachInterestinglyNamedFiles(request.document, location)
     }
     this.linkAndQueueTool(request, 'licensee')
     this.linkAndQueueTool(request, 'fossology')

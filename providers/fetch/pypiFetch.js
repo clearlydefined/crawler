@@ -26,7 +26,8 @@ class PyPiFetch extends BaseHandler {
     await this._getPackage(spec, registryData, file.name)
     const dir = this._createTempDir(request)
     await this.decompress(file.name, dir.name)
-    request.document = await this._createDocument(dir, spec, registryData)
+    const hashes = await this.computeHashes(file.name)
+    request.document = await this._createDocument(dir, spec, registryData, hashes)
     request.contentOrigin = 'origin'
     if (registryData.info.name) {
       request.casedSpec = clone(spec)
@@ -49,10 +50,10 @@ class PyPiFetch extends BaseHandler {
     return findLastKey(registryData.releases)
   }
 
-  _createDocument(dir, spec, registryData) {
+  _createDocument(dir, spec, registryData, hashes) {
     const releaseDate = this._extractReleaseDate(spec, registryData)
     const declaredLicense = this._extractDeclaredLicense(registryData)
-    return { location: dir.name, registryData, releaseDate, declaredLicense }
+    return { location: dir.name, registryData, releaseDate, declaredLicense, hashes }
   }
 
   _extractReleaseDate(spec, registryData) {

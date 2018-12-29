@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler')
+const AbstractClearlyDefinedProcessor = require('./abstractClearlyDefinedProcessor')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
 const SourceSpec = require('../../lib/sourceSpec')
 const { get } = require('lodash')
 
-class PyPiExtract extends BaseHandler {
+class PyPiExtract extends AbstractClearlyDefinedProcessor {
   constructor(options, sourceFinder) {
     super(options)
     this.sourceFinder = sourceFinder

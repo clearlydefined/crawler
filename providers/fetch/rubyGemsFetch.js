@@ -29,7 +29,8 @@ class RubyGemsFetch extends BaseHandler {
     const dir = this._createTempDir(request)
     await this.decompress(file.name, dir.name)
     await this._extractFiles(dir.name)
-    request.document = await this._createDocument(dir, registryData)
+    const hashes = await this.computeHashes(file.name)
+    request.document = await this._createDocument(dir, registryData, hashes)
     request.contentOrigin = 'origin'
     if (registryData.name) {
       request.casedSpec = clone(spec)
@@ -62,9 +63,9 @@ class RubyGemsFetch extends BaseHandler {
     return `${providerMap.rubyGems}/downloads/${fullName}-${spec.revision}.gem`
   }
 
-  _createDocument(dir, registryData) {
+  _createDocument(dir, registryData, hashes) {
     const releaseDate = this._extractReleaseDate(dir.name)
-    return { location: dir.name + '/data', registryData, releaseDate }
+    return { location: dir.name + '/data', registryData, releaseDate, hashes }
   }
 
   async _extractFiles(dirName) {

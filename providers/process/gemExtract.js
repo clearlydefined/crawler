@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler')
+const AbstractClearlyDefinedProcessor = require('./abstractClearlyDefinedProcessor')
 const SourceSpec = require('../../lib/sourceSpec')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
 const { get } = require('lodash')
 
-class GemExtract extends BaseHandler {
+class GemExtract extends AbstractClearlyDefinedProcessor {
   constructor(options, sourceFinder) {
     super(options)
     this.sourceFinder = sourceFinder

@@ -23,7 +23,8 @@ class MavenFetch extends BaseHandler {
     const code = await this._getArtifact(spec, file.name)
     if (code === 404) return request.markSkip('Missing  ')
     const location = await this._postProcessArtifact(request, spec, file)
-    request.document = this._createDocument(location, registryData)
+    const hashes = await this.computeHashes(file.name)
+    request.document = this._createDocument(location, registryData, hashes)
     request.contentOrigin = 'origin'
     if (registryData.g || registryData.a) {
       request.casedSpec = clone(spec)
@@ -56,9 +57,9 @@ class MavenFetch extends BaseHandler {
     return packageInfo.response.docs[0]
   }
 
-  _createDocument(location, registryData) {
+  _createDocument(location, registryData, hashes) {
     const releaseDate = new Date(registryData.timestamp).toISOString()
-    return { location: location.name, registryData, releaseDate }
+    return { location: location.name, registryData, releaseDate, hashes }
   }
 }
 
