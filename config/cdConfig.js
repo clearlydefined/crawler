@@ -28,7 +28,7 @@ module.exports = {
   fetch: {
     dispatcher: 'cdDispatch',
     cdDispatch: {},
-    cocoapods: {},
+    cocoapods: { githubToken },
     cratesio: {},
     git: {},
     mavenCentral: {},
