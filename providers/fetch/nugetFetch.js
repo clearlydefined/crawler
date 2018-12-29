@@ -29,11 +29,13 @@ class NuGetFetch extends BaseHandler {
     if (!registryData || !nuspec || !manifest) return request.markSkip('Missing  ')
     const dir = this._createTempDir(request)
     const location = await this._persistMetadata(dir, manifest, nuspec)
-    location.nupkg = registryData ? await this._getNupkg(dir, registryData.packageContent) : null
+    location.nupkg = await this._getNupkg(dir, registryData.packageContent)
+    const hashes = await this.computeHashes(file.name)
     request.document = {
       registryData,
       location,
-      releaseDate: registryData ? new Date(registryData.published).toISOString() : null
+      releaseDate: registryData ? new Date(registryData.published).toISOString() : null,
+      hashes
     }
     request.contentOrigin = 'origin'
     if (get(manifest, 'id')) {

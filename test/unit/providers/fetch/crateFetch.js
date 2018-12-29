@@ -18,10 +18,7 @@ describe('crateFetch', () => {
         return { manifest: null, version: null }
       }
     })
-
-    let request = {
-      url: 'cd:/crate/cratesio/-/name/0.1.0'
-    }
+    const request = { url: 'cd:/crate/cratesio/-/name/0.1.0' }
     chai.spy.on(request, 'markSkip', () => request)
     await crateFetch.handle(request)
     expect(request.url).to.eq('cd:/crate/cratesio/-/name/0.1.0')
@@ -36,7 +33,6 @@ describe('crateFetch', () => {
         return { manifest: {}, version: { num: '0.5.0', crate: 'name' } }
       }
     })
-
     const request = await crateFetch.handle({ url: 'cd:/crate/cratesio/-/name/0.1.0' })
     expect(request.url).to.eq('cd:/crate/cratesio/-/name/0.5.0')
   })
@@ -47,7 +43,6 @@ describe('crateFetch', () => {
         return { manifest: {}, version: { num: '0.1.0', crate: 'name' } }
       }
     })
-
     const request = await crateFetch.handle({ url: 'cd:/crate/cratesio/-/naME/0.1.0' })
     expect(request.casedSpec.name).to.eq('name')
   })
@@ -55,13 +50,14 @@ describe('crateFetch', () => {
 
 function mockCrateFetch(options) {
   const crateFetch = CrateFetch({})
-
-  if (options.registryData) {
-    crateFetch._getRegistryData = options.registryData
+  if (options.registryData) crateFetch._getRegistryData = options.registryData
+  crateFetch._createTempDir = () => {
+    return { name: '/tmp' }
   }
-
-  crateFetch._createTempDir = () => '/tmp'
   crateFetch._getPackage = () => '/tmp/crate'
-
+  crateFetch.decompress = () => {}
+  crateFetch.computeHashes = () => {
+    return { sha1: '42' }
+  }
   return crateFetch
 }

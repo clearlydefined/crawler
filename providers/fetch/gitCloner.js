@@ -23,7 +23,7 @@ class GitCloner extends BaseHandler {
     const releaseDate = await this._getDate(dir.name, spec.name)
 
     request.contentOrigin = 'origin'
-    request.document = this._createDocument(dir.name + '/' + spec.name, repoSize, releaseDate)
+    request.document = this._createDocument(dir.name + '/' + spec.name, repoSize, releaseDate, options.version)
     if (spec.provider === 'github') {
       request.casedSpec = clone(spec)
       request.casedSpec.namespace = spec.namespace.toLowerCase()
@@ -32,9 +32,9 @@ class GitCloner extends BaseHandler {
     return request
   }
 
-  _createDocument(location, size, releaseDate) {
+  _createDocument(location, size, releaseDate, commit) {
     // Create a simple document that records the location and the size of the repo that was fetched
-    return { location, size, releaseDate }
+    return { location, size, releaseDate, hashes: { gitSha: commit } }
   }
 
   _cloneRepo(sourceUrl, dirName, specName, commit) {
@@ -48,9 +48,8 @@ class GitCloner extends BaseHandler {
 
   _getDate(dirName, specName) {
     return new Promise((resolve, reject) => {
-      exec(
-        `cd ${dirName}/${specName} && git show -s --format=%ci`,
-        (error, stdout) => (error ? reject(error) : resolve(new Date(stdout.trim())))
+      exec(`cd ${dirName}/${specName} && git show -s --format=%ci`, (error, stdout) =>
+        error ? reject(error) : resolve(new Date(stdout.trim()))
       )
     })
   }

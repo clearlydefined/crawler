@@ -5,8 +5,6 @@ const BaseHandler = require('../../lib/baseHandler')
 const { exec } = require('child_process')
 const fs = require('fs')
 const path = require('path')
-const { promisify } = require('util')
-const du = require('du')
 
 class ScanCodeProcessor extends BaseHandler {
   constructor(options) {
@@ -30,8 +28,6 @@ class ScanCodeProcessor extends BaseHandler {
   async handle(request) {
     if (!(await this._versionPromise)) return request.markSkip('ScanCode not found')
     const { document, spec } = super._process(request)
-    const size = await this._computeSize(document)
-    request.addMeta({ k: size.k, fileCount: size.count })
     this.addBasicToolLinks(request, spec)
     const file = this._createTempFile(request)
     await this._runScancode(request, file)
@@ -87,20 +83,6 @@ class ScanCodeProcessor extends BaseHandler {
       return result
     }, [])
     return BaseHandler.attachFiles(document, packages, root)
-  }
-
-  async _computeSize(document) {
-    let count = 0
-    const bytes = await promisify(du)(document.location, {
-      filter: file => {
-        if (path.basename(file) === '.git') {
-          return false
-        }
-        count++
-        return true
-      }
-    })
-    return { k: Math.round(bytes / 1024), count }
   }
 
   // Workaround until https://github.com/nexB/scancode-toolkit/issues/983 is resolved

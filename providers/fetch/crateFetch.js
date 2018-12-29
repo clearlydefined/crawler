@@ -17,20 +17,26 @@ class CrateFetch extends BaseHandler {
     const spec = this.toSpec(request)
     const registryData = await this._getRegistryData(spec)
     if (!registryData || !registryData.version) return request.markSkip('Missing  ')
-    spec.revision = registryData.version.num
+    const version = registryData.version
+    spec.revision = version.num
     request.url = spec.toUrl()
     const dir = this._createTempDir(request)
-    const location = await this._getPackage(dir, registryData.version)
+    const zip = path.join(dir.name, 'crate.zip')
+    await this._getPackage(zip, version)
+    const crateDir = path.join(dir.name, 'crate')
+    await this.decompress(zip, crateDir)
+    const location = path.join(crateDir, `${version.crate}-${version.num}`)
     request.document = {
-      registryData: registryData.version,
-      releaseDate: registryData.version.created_at,
+      registryData: version,
+      releaseDate: version.created_at,
       location,
+      hashes: await this.computeHashes(zip),
       manifest: registryData.manifest
     }
     request.contentOrigin = 'origin'
-    if (registryData.version.crate) {
+    if (version.crate) {
       request.casedSpec = clone(spec)
-      request.casedSpec.name = registryData.version.crate
+      request.casedSpec.name = version.crate
     }
     return request
   }
@@ -54,17 +60,12 @@ class CrateFetch extends BaseHandler {
     }
   }
 
-  async _getPackage(dir, version) {
-    const zip = path.join(dir.name, 'crate.zip')
-    const crate = path.join(dir.name, 'crate')
+  async _getPackage(zip, version) {
     return new Promise((resolve, reject) => {
       request({ url: `https://crates.io${version.dl_path}`, json: false, encoding: null }).pipe(
         fs
           .createWriteStream(zip)
-          .on('finish', async () => {
-            await this.decompress(zip, crate)
-            resolve(path.join(crate, `${version.crate}-${version.num}`))
-          })
+          .on('finish', () => resolve(null))
           .on('error', reject)
       )
     })

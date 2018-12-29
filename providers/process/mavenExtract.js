@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler')
+const AbstractClearlyDefinedProcessor = require('./abstractClearlyDefinedProcessor')
 const EntitySpec = require('../../lib/entitySpec')
 const fs = require('fs')
 const mavenCentral = require('../../lib/mavenCentral')
@@ -10,7 +10,7 @@ const SourceSpec = require('../../lib/sourceSpec')
 const parseString = require('xml2js').parseString
 const { get } = require('lodash')
 
-class MavenExtract extends BaseHandler {
+class MavenExtract extends AbstractClearlyDefinedProcessor {
   constructor(options, sourceFinder) {
     super(options)
     this.sourceFinder = sourceFinder

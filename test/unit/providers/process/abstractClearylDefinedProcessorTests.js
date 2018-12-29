@@ -2,22 +2,29 @@
 // SPDX-License-Identifier: MIT
 
 const proxyquire = require('proxyquire')
+const sinon = require('sinon')
+const sandbox = sinon.createSandbox()
 const chai = require('chai')
 const expect = chai.expect
-const BaseHandler = require('../../../lib/baseHandler')
 const path = require('path')
+const BaseHandler = require('../../../../lib/baseHandler')
 const { find } = require('lodash')
 
 let Handler
 
-describe('BaseHandler interesting file discovery', () => {
+describe('AbstractClearlyDefinedProcessor interesting file discovery', () => {
   beforeEach(function() {
     const resultBox = { result: null, fsresult: null }
     const globStub = () => Promise.resolve(Object.keys(resultBox.result))
     const fsStub = {
       readFileSync: path => (resultBox.fsresult ? resultBox.fsresult[path] : resultBox.result[path]) || 'foo'
     }
-    Handler = proxyquire('../../../lib/baseHandler', { fs: fsStub, 'fast-glob': globStub, child_process: execStub() })
+    const handlerClass = proxyquire('../../../../providers/process/abstractClearlyDefinedProcessor', {
+      fs: fsStub,
+      'fast-glob': globStub
+      // child_process: execStub()
+    })
+    Handler = new handlerClass({})
     Handler._globResult = resultBox
   })
 
@@ -41,13 +48,13 @@ describe('BaseHandler interesting file discovery', () => {
       'notices.html': 'notices.html attachment'
     }
     const document = {}
-    await Handler.attachInterestinglyNamedFiles(document, '')
-    expect(document.attachments.length).to.eq(12)
+    await Handler.addInterestingFiles(document, '')
+    expect(document.interestingFiles.length).to.eq(12)
     expect(document._attachments.length).to.eq(12)
 
-    validateInterestingFile('license', document.attachments)
+    validateInterestingFile('license', document.interestingFiles)
     validateInterestingFile('LICENSE.HTML', document._attachments, true)
-    validateInterestingFile('NOtices', document.attachments)
+    validateInterestingFile('NOtices', document.interestingFiles)
     validateInterestingFile('notice.TXT', document._attachments, true)
   })
 
@@ -65,21 +72,45 @@ describe('BaseHandler interesting file discovery', () => {
       [createPath('Notice.md')]: 'Notice.md attachment'
     }
     const document = {}
-    await Handler.attachInterestinglyNamedFiles(document, '', 'package')
-    expect(document.attachments.length).to.eq(4)
+    await Handler.addInterestingFiles(document, '', 'package')
+    expect(document.interestingFiles.length).to.eq(4)
     expect(document._attachments.length).to.eq(4)
 
-    validateInterestingFile(createPath('License.md'), document.attachments)
+    validateInterestingFile(createPath('License.md'), document.interestingFiles)
     validateInterestingFile(createPath('LICENSE.HTML'), document._attachments, true)
-    validateInterestingFile(createPath('license.txt'), document.attachments)
+    validateInterestingFile(createPath('license.txt'), document.interestingFiles)
     validateInterestingFile(createPath('Notice.md'), document._attachments, true)
   })
 
   it('handles no files found', async () => {
     Handler._globResult.result = {}
     const document = {}
-    await Handler.attachInterestinglyNamedFiles(document, '')
-    expect(document.attachments).to.be.undefined
+    await Handler.addInterestingFiles(document, '')
+    expect(document.interestingFiles).to.be.undefined
+  })
+})
+
+describe('AbstractClearlyDefinedProcessor interesting file discovery', () => {
+  beforeEach(function() {
+    const handlerClass = proxyquire('../../../../providers/process/abstractClearlyDefinedProcessor', {
+      child_process: execStub()
+    })
+    Handler = new handlerClass({})
+  })
+
+  afterEach(function() {
+    sandbox.restore()
+  })
+
+  // TODO see what of this is still necessary after the integration with full licensee use.
+  it('actually works on files', async () => {
+    const document = {}
+    await Handler.addInterestingFiles(document, path.join(__dirname, '../../..', 'fixtures/package1'))
+    expect(document.interestingFiles.length).to.eq(3)
+    validateInterestingFile('license', document.interestingFiles)
+    validateInterestingFile('NOTICES', document._attachments, true)
+    validateInterestingFile('NOTICES', document.interestingFiles)
+    validateInterestingFile('License.txt', document._attachments, true)
   })
 })
 
@@ -87,69 +118,14 @@ function createPath(name) {
   return `package${path.sep}${name}`
 }
 
-describe('BaseHandler filesystem integration', () => {
-  it('actually works on files', async () => {
-    const document = {}
-    await proxyquire('../../../lib/baseHandler', { child_process: execStub() }).attachInterestinglyNamedFiles(
-      document,
-      path.join(__dirname, '../..', 'fixtures/package1')
-    )
-    expect(document.attachments.length).to.eq(3)
-    validateInterestingFile('license', document.attachments)
-    validateInterestingFile('NOTICES', document._attachments, true)
-    validateInterestingFile('NOTICES', document.attachments)
-    validateInterestingFile('License.txt', document._attachments, true)
-  })
-})
-// describe('BaseHandler filesystem integration', () => {
-// it('actually works on files', async () => {
-//     const document = {}
-//     await proxyquire('../../../lib/baseHandler', { child_process: execStub() }).addInterestingFiles(
-//       document,
-//       path.join(__dirname, '../..', 'fixtures/package1')
-//     )
-//     expect(document.interestingFiles.length).to.eq(3)
-//     validateInterestingFile('license', document.interestingFiles)
-//     validateInterestingFile('NOTICES', document._attachments, true)
-//     validateInterestingFile('NOTICES', document.interestingFiles)
-//     validateInterestingFile('License.txt', document._attachments, true)
-//   })
-// })
-
-describe('BaseHandler util functions', () => {
-  it('version aggregation with one version', () => {
-    const result = BaseHandler._aggregateVersions(['1.2.3'], 'should not happen')
-    expect(result).to.equal('1.2.3')
-  })
-
-  it('version aggregation with multiple versions', () => {
-    const result = BaseHandler._aggregateVersions(['1.2.3', '2.3.4'], 'should not happen')
-    expect(result).to.equal('3.5.7')
-  })
-
-  it('version aggregation with base version', () => {
-    const result = BaseHandler._aggregateVersions(['1.2.3', '2.3.4'], 'should not happen', '1.1.1')
-    expect(result).to.equal('4.6.8')
-  })
-
-  it('version aggregation should fail with long versions', () => {
-    try {
-      BaseHandler._aggregateVersions(['1.2.3', '2.3.4.5'], 'should not happen')
-      expect(false).to.be.true
-    } catch (error) {
-      expect(error.message.includes('should not happen')).to.be.true
+function execStub() {
+  return {
+    exec: (cmd, callback) => {
+      if (cmd.startsWith('licensee ')) return callback(null, '{ "licenses": [{ "spdx_id": "MIT" }] }')
+      throw new Error('exec not stubbed')
     }
-  })
-
-  it('version aggregation should fail with non-numeric versions', () => {
-    try {
-      BaseHandler._aggregateVersions(['1.2.3', '2.3.b34'], 'should not happen')
-      expect(false).to.be.true
-    } catch (error) {
-      expect(error.message.includes('should not happen')).to.be.true
-    }
-  })
-})
+  }
+}
 
 function validateInterestingFile(name, list, checkContent = false) {
   const attachment = `${path.basename(name)} attachment`

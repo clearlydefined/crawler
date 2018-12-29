@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler')
+const AbstractClearlyDefinedProcessor = require('./abstractClearlyDefinedProcessor')
 const fs = require('fs')
 const path = require('path')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
 const SourceSpec = require('../../lib/sourceSpec')
 const { get, isArray } = require('lodash')
 
-class NpmExtract extends BaseHandler {
+class NpmExtract extends AbstractClearlyDefinedProcessor {
   constructor(options, sourceFinder) {
     super(options)
     this.sourceFinder = sourceFinder
@@ -39,7 +39,7 @@ class NpmExtract extends BaseHandler {
       const manifest = manifestLocation ? JSON.parse(fs.readFileSync(manifestLocation)) : null
       if (!manifest) this.logger.info('NPM without package.json', { url: request.url })
       await this._createDocument(request, manifest, request.document.registryData)
-      await BaseHandler.attachInterestinglyNamedFiles(request.document, location, 'package')
+      await this.attachInterestinglyNamedFiles(request.document, location, 'package')
     }
     this.linkAndQueueTool(request, 'licensee')
     this.linkAndQueueTool(request, 'fossology')

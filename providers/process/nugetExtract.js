@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler')
+const AbstractClearlyDefinedProcessor = require('./abstractClearlyDefinedProcessor')
 const fs = require('fs')
 const { promisify } = require('util')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
@@ -9,7 +9,7 @@ const SourceSpec = require('../../lib/sourceSpec')
 const { parseString } = require('xml2js')
 const { get } = require('lodash')
 
-class NuGetExtract extends BaseHandler {
+class NuGetExtract extends AbstractClearlyDefinedProcessor {
   constructor(options, sourceFinder) {
     super(options)
     this.sourceFinder = sourceFinder
