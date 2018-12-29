@@ -59,6 +59,9 @@ class PodFetch extends BaseHandler {
     try {
       registryData = await request({
         url: `${services.specs}/Specs/${this._masterRepoPathFragment(spec, [1, 1, 1])}/${spec.name}.podspec.json`,
+        headers: {
+          'Authorization': `token ${this.options.githubToken}`
+        },
         json: true
       })
     } catch (exception) {
