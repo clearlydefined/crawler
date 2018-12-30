@@ -6,7 +6,6 @@ const expect = chai.expect
 const proxyquire = require('proxyquire')
 const sinon = require('sinon')
 const sandbox = sinon.createSandbox()
-const fs = require('fs')
 const { request } = require('ghcrawler')
 const BaseHandler = require('../../../../lib/baseHandler')
 
@@ -16,21 +15,18 @@ describe('ScanCode process', () => {
   it('should handle gems', async () => {
     const { request, processor } = setup('2.9.8/gem.json')
     await processor.handle(request)
-    const { document } = request
     expect(BaseHandler.attachFiles.args[0][1]).to.have.members([])
   })
 
   it('should handle simple npms', async () => {
     const { request, processor } = setup('2.9.8/npm-basic.json')
     await processor.handle(request)
-    const { document } = request
     expect(BaseHandler.attachFiles.args[0][1]).to.have.members(['package/package.json'])
   })
 
   it('should handle large npms', async () => {
     const { request, processor } = setup('2.9.8/npm-large.json')
     await processor.handle(request)
-    const { document } = request
     expect(BaseHandler.attachFiles.args[0][1]).to.have.members(['package/package.json'])
   })
 
@@ -45,7 +41,6 @@ describe('ScanCode process', () => {
     const processStub = {
       exec: (command, bufferLength, callback) => {
         if (command.includes('version')) return callback(resultBox.versionError, resultBox.versionResult)
-        const path = command.split(' ').slice(-1)
         callback(resultBox.error)
       }
     }
