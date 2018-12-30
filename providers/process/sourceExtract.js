@@ -29,7 +29,7 @@ class SourceExtract extends BaseHandler {
       _metadata: document._metadata,
       releaseDate: request.document.releaseDate
     }
-    await BaseHandler.addInterestingFiles(request.document, location)
+    await BaseHandler.attachInterestinglyNamedFiles(request.document, location)
     const clearlyFile = path.join(location, 'clearly.yaml')
     if (!fs.existsSync(clearlyFile)) return
     const content = await promisify(fs.readFileSync)(clearlyFile)

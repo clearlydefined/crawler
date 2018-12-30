@@ -43,13 +43,13 @@ describe('BaseHandler interesting file discovery', () => {
       'notices.html': 'notices.html attachment'
     }
     const document = {}
-    await Handler.addInterestingFiles(document, '')
-    expect(document.interestingFiles.length).to.eq(12)
+    await Handler.attachInterestinglyNamedFiles(document, '')
+    expect(document.attachments.length).to.eq(12)
     expect(document._attachments.length).to.eq(12)
 
-    validateInterestingFile('license', document.interestingFiles)
+    validateInterestingFile('license', document.attachments)
     validateInterestingFile('LICENSE.HTML', document._attachments, true)
-    validateInterestingFile('NOtices', document.interestingFiles)
+    validateInterestingFile('NOtices', document.attachments)
     validateInterestingFile('notice.TXT', document._attachments, true)
   })
 
@@ -67,21 +67,21 @@ describe('BaseHandler interesting file discovery', () => {
       [createPath('Notice.md')]: 'Notice.md attachment'
     }
     const document = {}
-    await Handler.addInterestingFiles(document, '', 'package')
-    expect(document.interestingFiles.length).to.eq(4)
+    await Handler.attachInterestinglyNamedFiles(document, '', 'package')
+    expect(document.attachments.length).to.eq(4)
     expect(document._attachments.length).to.eq(4)
 
-    validateInterestingFile(createPath('License.md'), document.interestingFiles)
+    validateInterestingFile(createPath('License.md'), document.attachments)
     validateInterestingFile(createPath('LICENSE.HTML'), document._attachments, true)
-    validateInterestingFile(createPath('license.txt'), document.interestingFiles)
+    validateInterestingFile(createPath('license.txt'), document.attachments)
     validateInterestingFile(createPath('Notice.md'), document._attachments, true)
   })
 
   it('handles no files found', async () => {
     Handler._globResult.result = {}
     const document = {}
-    await Handler.addInterestingFiles(document, '')
-    expect(document.interestingFiles).to.be.undefined
+    await Handler.attachInterestinglyNamedFiles(document, '')
+    expect(document.attachments).to.be.undefined
   })
 })
 
@@ -92,14 +92,14 @@ function createPath(name) {
 describe('BaseHandler filesystem integration', () => {
   it('actually works on files', async () => {
     const document = {}
-    await proxyquire('../../../lib/baseHandler', { child_process: execStub() }).addInterestingFiles(
+    await proxyquire('../../../lib/baseHandler', { child_process: execStub() }).attachInterestinglyNamedFiles(
       document,
       path.join(__dirname, '../..', 'fixtures/package1')
     )
-    expect(document.interestingFiles.length).to.eq(3)
-    validateInterestingFile('license', document.interestingFiles)
+    expect(document.attachments.length).to.eq(3)
+    validateInterestingFile('license', document.attachments)
     validateInterestingFile('NOTICES', document._attachments, true)
-    validateInterestingFile('NOTICES', document.interestingFiles)
+    validateInterestingFile('NOTICES', document.attachments)
     validateInterestingFile('License.txt', document._attachments, true)
   })
 })

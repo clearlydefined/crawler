@@ -44,6 +44,7 @@ module.exports = {
       installDir: config.get('FOSSOLOGY_HOME')
     },
     gem: { githubToken },
+    licensee: {},
     maven: { githubToken },
     npm: { githubToken },
     nuget: { githubToken },

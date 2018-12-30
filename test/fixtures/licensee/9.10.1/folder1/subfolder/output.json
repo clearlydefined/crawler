@@ -1,0 +1,26 @@
+{
+  "licenses": [
+    {
+      "key": "mit",
+      "spdx_id": "MIT"
+    }
+  ],
+  "matched_files": [
+    {
+      "filename": "LICENSE.foo",
+      "content": "<Full text of license here>",
+      "content_hash": "d168f98624be864548b2bbf4f198fdbf702d6743",
+      "content_normalized": "<Some amount of the full license here",
+      "matcher": { "name": "exact", "confidence": 100 },
+      "matched_license": "MIT"
+    },
+    {
+      "filename": "LICENSE.bar",
+      "content": "<Full text of license here>",
+      "content_hash": "d168f98624be864548b2bbf4f198fdbf702d6743",
+      "content_normalized": "<Some amount of the full license here",
+      "matcher": { "name": "exact", "confidence": 60 },
+      "matched_license": "MIT"
+    }
+  ]
+}
