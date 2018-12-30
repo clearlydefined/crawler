@@ -87,13 +87,13 @@ class FossologyProcessor extends BaseHandler {
     return { output: { contentType: 'application/json', content: results } }
   }
 
-  async _runCopyrights(request, files) {
-    const result = await this._visitFiles(files, path => this._runCopyright(request, path))
+  async _runCopyright(request, files) {
+    const result = await this._visitFiles(files, path => this._runCopyrightOnFile(request, path))
     result.version = await this._copyrightVersion
     return result
   }
 
-  _runCopyright(request, file) {
+  _runCopyrightOnFile(request, file) {
     return new Promise((resolve, reject) => {
       const parameters = ['--files', file, '-J'].join(' ')
       exec(`cd ${this.options.installDir}/copyright/agent && ./copyright ${parameters}`, (error, stdout) => {
@@ -201,7 +201,7 @@ class FossologyProcessor extends BaseHandler {
   async _createDocument(request) {
     const files = await getFiles(request.document.location)
     const nomosOutput = await this._runNomos(request)
-    const copyrightOutput = await this._runCopyrights(request, files)
+    const copyrightOutput = await this._runCopyright(request, files)
     const monkOutput = await this._runMonk(request, files)
     request.document = { _metadata: request.document._metadata }
     if (nomosOutput) request.document.nomos = nomosOutput
