@@ -45,7 +45,7 @@ class FossologyProcessor extends BaseHandler {
       exec(
         `cd ${this.options.installDir}/nomos/agent && ./nomossa -ld ${request.document.location} ${parameters}`,
         { maxBuffer: 5000 * 1024 },
-        (error, stdout, stderr) => {
+        (error, stdout) => {
           if (error) {
             request.markDead('Error', error ? error.message : 'FOSSology run failed')
             return reject(error)
