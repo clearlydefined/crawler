@@ -9,24 +9,15 @@ const du = require('du')
 const bufferReplace = require('buffer-replace')
 const getFiles = promisify(require('node-dir').files)
 
-let _toolVersion
-let _nomosVersion
-
 class FossologyProcessor extends BaseHandler {
   constructor(options) {
     super(options)
-    // TODO little questionable here. Kick off an async operation on load with the expecation that
-    // by the time someone actually uses this instance, the call will have completed.
-    // Need to detect the tool version before anyone tries to run this processor.
-    this._detectVersion()
+    // Kick off version detection but don't wait. We'll wait before processing anything
+    this._versionPromise = this._detectVersion()
   }
 
   get schemaVersion() {
-    return _toolVersion
-  }
-
-  get nomosVersion() {
-    return _nomosVersion
+    return this._toolVersion
   }
 
   get toolSpec() {
@@ -38,8 +29,8 @@ class FossologyProcessor extends BaseHandler {
   }
 
   async handle(request) {
+    if (!(await this._versionPromise)) return request.markSkip('FOSSology tools not properly configured')
     const { document, spec } = super._process(request)
-    if (!this.nomosVersion) return request.markSkip('No nomos tool found')
     const size = await this._computeSize(document)
     request.addMeta({ k: size.k, fileCount: size.count })
     this.addBasicToolLinks(request, spec)
@@ -49,12 +40,10 @@ class FossologyProcessor extends BaseHandler {
   }
 
   async _runNomos(request) {
-    const version = await this._nomosVersion
     return new Promise((resolve, reject) => {
-      // TODO add correct parameters and command line here
-      const parameters = ['-ld', request.document.location].join(' ')
+      const parameters = [].join(' ')
       exec(
-        `cd ${this.options.installDir}/nomos/agent && ./nomossa ${parameters}`,
+        `cd ${this.options.installDir}/nomos/agent && ./nomossa -ld ${request.document.location} ${parameters}`,
         { maxBuffer: 5000 * 1024 },
         (error, stdout, stderr) => {
           if (error) {
@@ -65,7 +54,7 @@ class FossologyProcessor extends BaseHandler {
             contentType: 'text/plain',
             content: bufferReplace(new Buffer(stdout), request.document.location + '/', '').toString()
           }
-          const nomosOutput = { version, parameters, output }
+          const nomosOutput = { version: this._nomosVersion, parameters, output }
           resolve(nomosOutput)
         }
       )
@@ -74,56 +63,64 @@ class FossologyProcessor extends BaseHandler {
 
   async _visitFiles(files, runner) {
     const results = []
+    files = files.filter(file => file && !file.includes('/.git/'))
     for (const file of files) {
-      if (file) {
-        try {
-          const output = await runner(path)
-          if (output) results.push({ path: file, output: JSON.parse(output) })
-        } catch (error) {
-          this.logger.error(error)
-        }
+      try {
+        const output = await runner(file)
+        if (output) results.push({ path: file, output: JSON.parse(output) })
+      } catch (error) {
+        this.logger.error(error)
       }
     }
-    return { output: { contentType: 'application/json', content: results } }
+    return { contentType: 'application/json', content: results }
   }
 
   async _runCopyright(request, files) {
-    const result = await this._visitFiles(files, path => this._runCopyrightOnFile(request, path))
-    result.version = await this._copyrightVersion
-    return result
+    const parameters = ['-J']
+    const output = await this._visitFiles(files, file => this._runCopyrightOnFile(request, file, parameters))
+    const base = request.document.location + '/'
+    output.content.forEach(entry => (entry.path = entry.path.replace(base, '')))
+    return { version: this._copyrightVersion, parameters, output }
   }
 
-  _runCopyrightOnFile(request, file) {
+  _runCopyrightOnFile(request, file, parameters = []) {
     return new Promise((resolve, reject) => {
-      const parameters = ['--files', file, '-J'].join(' ')
-      exec(`cd ${this.options.installDir}/copyright/agent && ./copyright ${parameters}`, (error, stdout) => {
-        if (error) {
-          request.markDead('Error', error ? error.message : 'FOSSology copyright run failed')
-          return reject(error)
+      exec(
+        `cd ${this.options.installDir}/copyright/agent && ./copyright --files ${file} ${parameters.join(' ')}`,
+        (error, stdout) => {
+          if (error) {
+            request.markDead('Error', error ? error.message : 'FOSSology copyright run failed')
+            return reject(error)
+          }
+          resolve(stdout)
         }
-        resolve(stdout)
-      })
+      )
     })
   }
 
-  async _runMonkOnFiles(request, files) {
-    const result = await this._visitFiles(files, path => this._runMonk(request, path))
-    result.version = await this._monkVersion
-    return result
+  async _runMonk(request, files) {
+    // TODO can't actually run Monk until the license database is factored out
+    return null
+    // const parameters = ['-J']
+    // const output = await this._visitFiles(files, path => this._runMonkOnFile(request, path, parameters))
+    // TODO figure out the format of the Monk output and correctly aggregate and adjust paths etc.
+    // return { version: this._monkVersion, parameters, output }
   }
 
-  _runMonk(request, file) {
-    // TODO figure out where to get a license file. May have to be created at build time
+  _runMonkOnFile(request, file, parameters) {
+    // TODO figure out where to get a license database file. May have to be created at build time
     const licenseFile = ''
     return new Promise((resolve, reject) => {
-      const parameters = ['-k', licenseFile, '-J', file].join(' ')
-      exec(`cd ${this.options.installDir}/monk/agent && ./monk ${parameters}`, (error, stdout) => {
-        if (error) {
-          request.markDead('Error', error ? error.message : 'FOSSology monk run failed')
-          return reject(error)
+      exec(
+        `cd ${this.options.installDir}/monk/agent && ./monk -k ${licenseFile} ${parameters.join('')} ${file}`,
+        (error, stdout) => {
+          if (error) {
+            request.markDead('Error', error ? error.message : 'FOSSology monk run failed')
+            return reject(error)
+          }
+          resolve(stdout)
         }
-        resolve(stdout)
-      })
+      )
     })
   }
 
@@ -152,11 +149,12 @@ class FossologyProcessor extends BaseHandler {
       this._nomosVersion = await this._detectNomosVersion()
       this._copyrightVersion = await this._detectCopyrightVersion()
       this._monkVersion = await this._detectMonkVersion()
-      return BaseHandler._aggregateVersions(
+      this._toolVersion = BaseHandler._aggregateVersions(
         [this._nomosVersion, this._copyrightVersion, this._monkVersion],
         'FOSSology tool version misformatted',
         base
       )
+      return this._toolVersion
     } catch (error) {
       this.logger.log(`Could not find FOSSology tool version: ${error.message}`)
       return null
@@ -164,7 +162,6 @@ class FossologyProcessor extends BaseHandler {
   }
 
   _detectNomosVersion() {
-    if (_nomosVersion !== undefined) return _nomosVersion
     return new Promise((resolve, reject) => {
       exec(`cd ${this.options.installDir}/nomos/agent && ./nomossa -V`, (error, stdout) => {
         if (error) return reject(error)
@@ -175,13 +172,16 @@ class FossologyProcessor extends BaseHandler {
   }
 
   _detectMonkVersion() {
-    return new Promise((resolve, reject) => {
-      exec(`cd ${this.options.installDir}/monk/agent && ./monk -V`, (error, stdout) => {
-        if (error) return reject(error)
-        const rawVersion = stdout.replace('monk version', '').trim()
-        resolve(rawVersion.replace(/-.*/, '').trim())
-      })
-    })
+    // TODO remove this and uncomment exec once we are sure of how to get Monk to build with a version number
+    // currently it always reports "no version available"
+    return '0.0.0'
+    // return new Promise((resolve, reject) => {
+    //   exec(`cd ${this.options.installDir}/monk/agent && ./monk -V`, (error, stdout) => {
+    //     if (error) return reject(error)
+    //     const rawVersion = stdout.replace('monk version', '').trim()
+    //     resolve(rawVersion.replace(/-.*/, '').trim())
+    //   })
+    // })
   }
 
   // TODO see how copyright outputs its version and format accordingly. The code appears to not have
@@ -189,13 +189,7 @@ class FossologyProcessor extends BaseHandler {
   // nomos. That will be taken as the overall version of the FOSSology support as they are
   // built from the same tree at the same time.
   _detectCopyrightVersion() {
-    return new Promise(resolve => {
-      resolve('0.0.0')
-      // exec(`cd ${this.options.installDir}/copyright/agent && ./copyright -V`, (error, stdout) => {
-      //   if (error) return reject(null)
-      //   resolve('0.0.0')
-      // })
-    })
+    return '0.0.0'
   }
 
   async _createDocument(request) {

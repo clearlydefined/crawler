@@ -31,14 +31,21 @@ RUN gem install licensee -v 9.10.1 --no-rdoc --no-ri
 WORKDIR /opt
 RUN git clone https://github.com/fossology/fossology.git
 
+RUN apt-get update && apt-get install -y --no-install-recommends --no-install-suggests \
+  libmxml-dev curl libxml2-dev libcunit1-dev libjsoncpp-dev \
+  build-essential libtext-template-perl subversion rpm librpm-dev libmagic-dev libglib2.0 libboost-regex-dev libboost-program-options-dev
+
 WORKDIR /opt/fossology/src/nomos/agent
 RUN make -f Makefile.sa
+RUN echo $(./nomossa -V)
 
+# NOTE: must build copyright before Monk to cause libfossology to be built
 WORKDIR /opt/fossology/src/copyright/agent
 RUN make
 
 WORKDIR /opt/fossology/src/monk/agent
 RUN make
+RUN echo $(./monk -V)
 
 ENV FOSSOLOGY_HOME=/opt/fossology/src
 
