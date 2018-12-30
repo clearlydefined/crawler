@@ -29,7 +29,7 @@ class LicenseeProcessor extends BaseHandler {
   }
 
   async handle(request) {
-    if (!(await this._versionPromise)) return request.markSkip('Licensee not found')
+    if (!(await this._versionPromise)) return request.markSkip('Licensee not properly configured')
     const { spec } = super._process(request)
     this.addBasicToolLinks(request, spec)
     await this._createDocument(request)
@@ -50,9 +50,9 @@ class LicenseeProcessor extends BaseHandler {
   async _run(request) {
     const parameters = ['--json', '--no-readme']
     const root = request.document.location
-    const paths = [root, ...(await promisify(dir.subdirs)(root))].map(path =>
-      path.slice(root.length).replace(/^[\/\\]+/g, '')
-    )
+    const paths = [root, ...(await promisify(dir.subdirs)(root))]
+      .map(path => path.slice(root.length).replace(/^[\/\\]+/g, ''))
+      .filter(path => path !== '.git' && !path.includes('.git/'))
     const results = await Promise.all(paths.map(throat(10, path => this._runOnFolder(path, root, parameters))))
     const licenses = uniqBy(flatten(results.map(result => result.licenses)), 'spdx_id')
     const matched_files = flatten(results.map(result => result.matched_files))
