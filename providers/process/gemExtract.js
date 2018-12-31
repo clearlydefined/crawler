@@ -27,7 +27,7 @@ class GemExtract extends AbstractClearlyDefinedProcessor {
 
   async handle(request) {
     if (this.isProcessing(request)) {
-      super.handle(request)
+      await super.handle(request)
       await this._createDocument(request, request.document.registryData)
     }
     this.linkAndQueueTool(request, 'licensee')

@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const chai = require('chai')
-const expect = chai.expect
+const expect = require('chai').expect
 const sinon = require('sinon')
 const Request = require('ghcrawler').request
 const npmExtract = require('../../../../providers/process/npmExtract')

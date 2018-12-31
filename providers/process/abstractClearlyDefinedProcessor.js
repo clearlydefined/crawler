@@ -10,38 +10,37 @@ const du = require('du')
 const { trimParents } = require('../../lib/utils')
 
 class AbstractClearlyDefinedProcessor extends AbstractProcessor {
-  async handle(request, interestingRoot = '') {
+  async handle(request, location = request.document.location, interestingRoot = '') {
     super.handle(request)
-    await this._addSummaryInfo(request)
-    await this._addFiles(request, interestingRoot)
+    await this._addSummaryInfo(request, location)
+    await this._addFiles(request, location, interestingRoot)
   }
 
   clone(document) {
     return { ...super.clone(document), ...pick(document, ['summaryInfo', 'files']) }
   }
 
-  async _addSummaryInfo(request) {
-    const stats = await this._computeSize(request.document.location)
+  async _addSummaryInfo(request, location = request.document.location) {
+    const stats = await this._computeSize(location)
     request.addMeta(stats)
     request.document.summaryInfo = { ...stats }
     const hashes = request.document.hashes
     if (hashes) request.document.summaryInfo.hashes = hashes
   }
 
-  async _addFiles(request, interestingRoot = '') {
-    const { document } = request
-    const fileList = await this.getInterestingFiles(document.location)
+  async _addFiles(request, location = request.document.location, interestingRoot = '') {
+    const fileList = await this.getInterestingFiles(location)
     const files = await Promise.all(
       fileList.map(
         throat(10, async file => {
           if (this._isInterestinglyNamed(file, interestingRoot))
-            await this.attachFiles(document, [file], document.location)
-          const hashes = await this.computeHashes(path.join(document.location, file))
+            await this.attachFiles(request.document, [file], location)
+          const hashes = await this.computeHashes(path.join(location, file))
           return { path: file, hashes }
         })
       )
     )
-    document.files = files
+    request.document.files = files
   }
 
   _isInterestinglyNamed(file, root = '') {
