@@ -1,0 +1,17 @@
+{
+  "@id": "https://api.nuget.org/v3/registration3/xunit.core/2.4.1.json",
+  "@type": ["Package", "http://schema.nuget.org/catalog#Permalink"],
+  "catalogEntry": "https://api.nuget.org/v3/catalog0/data/2018.10.29.04.23.22/xunit.core.2.4.1.json",
+  "listed": true,
+  "packageContent": "https://api.nuget.org/v3-flatcontainer/xunit.core/2.4.1/xunit.core.2.4.1.nupkg",
+  "published": "2018-10-29T04:18:45.803+00:00",
+  "registration": "https://api.nuget.org/v3/registration3/xunit.core/index.json",
+  "@context": {
+    "@vocab": "http://schema.nuget.org/schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "catalogEntry": { "@type": "@id" },
+    "registration": { "@type": "@id" },
+    "packageContent": { "@type": "@id" },
+    "published": { "@type": "xsd:dateTime" }
+  }
+}

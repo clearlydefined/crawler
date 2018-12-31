@@ -54,6 +54,7 @@ class ScanCodeProcessor extends AbstractProcessor {
         { maxBuffer: 5000 * 1024 }
       )
     } catch (error) {
+      // TODO see if the new version of ScanCode has a better way of differentiating errors
       if (this._isRealError(error) || this._hasRealErrors(file.name)) {
         request.markDead('Error', error ? error.message : 'ScanCode run failed')
         throw error
@@ -95,22 +96,20 @@ class ScanCodeProcessor extends AbstractProcessor {
   }
 
   // Scan the results file for any errors that are not just timeouts or other known errors
+  // TODO do we need to do this anymore
   _hasRealErrors(resultFile) {
     const results = JSON.parse(fs.readFileSync(resultFile))
-    return results.files.some(file =>
-      file.scan_errors.some(error => {
-        return !(
-          error.includes('ERROR: Processing interrupted: timeout after') ||
-          error.includes('ValueError:') ||
-          error.includes('package.json')
-        )
-      })
+    return results.files.some(
+      file =>
+        file.scan_errors &&
+        file.scan_errors.some(error => {
+          return !(
+            error.includes('ERROR: Processing interrupted: timeout after') ||
+            error.includes('ValueError:') ||
+            error.includes('package.json')
+          )
+        })
     )
-  }
-
-  _getUrn(spec) {
-    const newSpec = Object.assign(Object.create(spec), spec, { tool: 'scancode', toolVersion: this.toolVersion })
-    return newSpec.toUrn()
   }
 
   _detectVersion() {

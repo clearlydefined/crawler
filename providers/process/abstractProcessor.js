@@ -95,10 +95,6 @@ class AbstractProcessor extends BaseHandler {
     return pick(document, ['_metadata'])
   }
 
-  link(request, name, spec) {
-    request.linkResource(name, spec.toUrn())
-  }
-
   addSelfLink(request, urn = null) {
     urn = urn || this.toSpec(request).toUrn()
     request.linkResource('self', urn)

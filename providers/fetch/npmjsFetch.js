@@ -66,7 +66,7 @@ class NpmFetch extends AbstractFetch {
       if (exception.statusCode !== 404) throw exception
       return null
     }
-    if (!registryData.versions) return null
+    if (!registryData || !registryData.versions) return null
     const version = spec.revision || this.getLatestVersion(Object.keys(registryData.versions))
     if (!registryData.versions[version]) return null
     const date = registryData.time[version]

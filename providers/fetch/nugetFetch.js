@@ -55,12 +55,9 @@ class NuGetFetch extends AbstractFetch {
     // Example: https://api.nuget.org/v3/registration3/moq/4.8.2.json and follow catalogEntry
     const { body, statusCode } = await requestRetry.get(
       `${baseUrl}/v3/registration3/${spec.name.toLowerCase()}/${spec.revision}.json`,
-      {
-        json: true
-      }
+      { json: true }
     )
-    if (statusCode !== 200 || !body) return null
-    return body
+    return statusCode !== 200 || !body ? null : body
   }
 
   // https://docs.microsoft.com/en-us/nuget/reference/package-versioning#normalized-version-numbers
@@ -96,6 +93,7 @@ class NuGetFetch extends AbstractFetch {
   }
 
   async _getManifest(catalogEntryUrl) {
+    // Example: https://api.nuget.org/v3/catalog0/data/2018.10.29.04.23.22/xunit.core.2.4.1.json
     const { body, statusCode } = await requestRetry.get(catalogEntryUrl)
     if (statusCode !== 200) return null
     return JSON.parse(body)

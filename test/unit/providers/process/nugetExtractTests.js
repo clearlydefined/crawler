@@ -3,8 +3,8 @@
 
 const chai = require('chai')
 const expect = chai.expect
-const extract = require('../../../../../providers/process/nugetExtract')
-const SourceSpec = require('../../../../../lib/sourceSpec')
+const extract = require('../../../../providers/process/nugetExtract')
+const SourceSpec = require('../../../../lib/sourceSpec')
 const sinon = require('sinon')
 
 describe('nugetExtract source discovery', () => {

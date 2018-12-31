@@ -4,7 +4,7 @@
 const chai = require('chai')
 const expect = chai.expect
 
-const CrateExtract = require('../../../../../providers/process/crateExtract')
+const CrateExtract = require('../../../../providers/process/crateExtract')
 
 describe('crateExtract', () => {
   it('handles only crates', () => {
