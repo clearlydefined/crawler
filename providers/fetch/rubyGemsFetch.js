@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler')
+const AbstractFetch = require('./abstractFetch')
 const nodeRequest = require('request')
 const requestRetry = require('requestretry').defaults({ maxAttempts: 3, fullResponse: true })
 const fs = require('fs')
@@ -13,7 +13,7 @@ const providerMap = {
   rubyGems: 'https://rubygems.org'
 }
 
-class RubyGemsFetch extends BaseHandler {
+class RubyGemsFetch extends AbstractFetch {
   canHandle(request) {
     const spec = this.toSpec(request)
     return spec && spec.provider === 'rubygems'
@@ -24,9 +24,10 @@ class RubyGemsFetch extends BaseHandler {
     const registryData = await this._getRegistryData(spec)
     spec.revision = spec.revision || registryData ? registryData.version : null
     request.url = spec.toUrl()
-    const file = this._createTempFile(request)
+    super.handle(request)
+    const file = this.createTempFile(request)
     await this._getPackage(spec, file.name)
-    const dir = this._createTempDir(request)
+    const dir = this.createTempDir(request)
     await this.decompress(file.name, dir.name)
     await this._extractFiles(dir.name)
     const hashes = await this.computeHashes(file.name)

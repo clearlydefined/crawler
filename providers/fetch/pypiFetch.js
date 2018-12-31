@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler')
+const AbstractFetch = require('./abstractFetch')
 const requestRetry = require('requestretry').defaults({ maxAttempts: 3, fullResponse: true })
 const nodeRequest = require('request')
 const fs = require('fs')
@@ -11,7 +11,8 @@ const { findLastKey, get, find, clone } = require('lodash')
 const providerMap = {
   pypi: 'https://pypi.python.org'
 }
-class PyPiFetch extends BaseHandler {
+
+class PyPiFetch extends AbstractFetch {
   canHandle(request) {
     const spec = this.toSpec(request)
     return spec && spec.provider === 'pypi'
@@ -22,9 +23,10 @@ class PyPiFetch extends BaseHandler {
     const registryData = await this._getRegistryData(spec)
     spec.revision = spec.revision ? spec.revision : this._getRevision(registryData)
     request.url = spec.toUrl()
-    const file = this._createTempFile(request)
+    super.handle(request)
+    const file = this.createTempFile(request)
     await this._getPackage(spec, registryData, file.name)
-    const dir = this._createTempDir(request)
+    const dir = this.createTempDir(request)
     await this.decompress(file.name, dir.name)
     const hashes = await this.computeHashes(file.name)
     request.document = await this._createDocument(dir, spec, registryData, hashes)

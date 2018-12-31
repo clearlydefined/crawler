@@ -26,12 +26,8 @@ class CrateExtract extends AbstractClearlyDefinedProcessor {
 
   async handle(request) {
     if (this.isProcessing(request)) {
-      const { spec } = super._process(request)
-      this.addBasicToolLinks(request, spec)
-      const location = request.document.location
-      const manifest = request.document.manifest
-      await this._createDocument(request, manifest, request.document.registryData)
-      await this.attachInterestinglyNamedFiles(request.document, location)
+      super.handle(request)
+      await this._createDocument(request, request.document.manifest, request.document.registryData)
     }
     this.linkAndQueueTool(request, 'licensee')
     this.linkAndQueueTool(request, 'fossology')
@@ -43,7 +39,7 @@ class CrateExtract extends AbstractClearlyDefinedProcessor {
   }
 
   async _createDocument(request, manifest, registryData) {
-    request.document = { _metadata: request.document._metadata, manifest, registryData }
+    request.document = { ...this.clone(request.document), manifest, registryData }
     const sourceInfo = await this._discoverSource(manifest, registryData)
     if (sourceInfo) request.document.sourceInfo = sourceInfo
   }

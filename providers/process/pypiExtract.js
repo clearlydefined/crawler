@@ -27,10 +27,9 @@ class PyPiExtract extends AbstractClearlyDefinedProcessor {
 
   async handle(request) {
     if (this.isProcessing(request)) {
-      const { spec } = super._process(request)
-      this.addBasicToolLinks(request, spec)
+      super.handle(request)
+      const spec = this.toSpec(request)
       await this._createDocument(request, spec, request.document.registryData)
-      await BaseHandler.attachInterestinglyNamedFiles(request.document, request.document.location)
     }
     this.linkAndQueueTool(request, 'licensee')
     this.linkAndQueueTool(request, 'fossology')
@@ -57,6 +56,7 @@ class PyPiExtract extends AbstractClearlyDefinedProcessor {
   }
 
   async _createDocument(request, spec, registryData) {
+    request.document = this.clone(request.document)
     const sourceInfo = await this._discoverSource(spec.revision, registryData)
     if (sourceInfo) request.document.sourceInfo = sourceInfo
   }

@@ -31,14 +31,12 @@ class NuGetExtract extends AbstractClearlyDefinedProcessor {
   // Coming in here we expect the request.document to have id, location and metadata properties.
   // Do interesting processing...
   async handle(request) {
+    // skip all the hard work if we are just traversing.
     if (this.isProcessing(request)) {
-      // skip all the hard work if we are just traversing.
-      const { spec } = super._process(request)
-      this.addBasicToolLinks(request, spec)
+      super.handle(request)
       const location = request.document.location
       const manifest = await this._getManifest(location.manifest)
       await this._createDocument(request, manifest, request.document.registryData)
-      await BaseHandler.attachInterestinglyNamedFiles(request.document, location.nupkg)
     }
     if (request.document.sourceInfo) {
       const sourceSpec = SourceSpec.fromObject(request.document.sourceInfo)
@@ -61,7 +59,7 @@ class NuGetExtract extends AbstractClearlyDefinedProcessor {
   async _createDocument(request, manifest, registryData) {
     const originalDocument = request.document
     // setup the manifest to be the new document for the request
-    request.document = { _metadata: request.document._metadata, manifest, registryData }
+    request.document = { ...this.clone(request.document), manifest, registryData }
     // Add interesting info
     if (registryData && registryData.published)
       request.document.releaseDate = new Date(registryData.published).toISOString()

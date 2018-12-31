@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler')
+const AbstractProcessor = require('./abstractProcessor')
 const { exec } = require('child_process')
 const { flatten, uniqBy } = require('lodash')
 const path = require('path')
@@ -9,7 +9,7 @@ const dir = require('node-dir')
 const { promisify } = require('util')
 const throat = require('throat')
 
-class LicenseeProcessor extends BaseHandler {
+class LicenseeProcessor extends AbstractProcessor {
   constructor(options) {
     super(options)
     // Kick off version detection but don't wait. We'll wait before processing anything
@@ -30,21 +30,18 @@ class LicenseeProcessor extends BaseHandler {
 
   async handle(request) {
     if (!(await this._versionPromise)) return request.markSkip('Licensee not properly configured')
-    const { spec } = super._process(request)
-    this.addBasicToolLinks(request, spec)
+    super.handle(request)
     await this._createDocument(request)
     return request
   }
 
   async _createDocument(request) {
     const record = await this._run(request)
-    const location = request.document.location
-    const document = { _metadata: request.document._metadata }
     if (!record) return
-    document.licensee = record
+    const location = request.document.location
+    request.document = { ...this.clone(request.document), licensee: record }
     const toAttach = record.output.content.matched_files.map(file => file.filename)
-    BaseHandler.attachFiles(document, toAttach, location)
-    request.document = document
+    this.attachFiles(request.document, toAttach, location)
   }
 
   async _run(request) {

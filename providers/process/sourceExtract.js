@@ -22,14 +22,9 @@ class SourceExtract extends AbstractClearlyDefinedProcessor {
   }
 
   async handle(request) {
-    const { document, spec } = super._process(request)
-    this.addBasicToolLinks(request, spec)
+    super.handle(request)
     const location = request.document.location
-    request.document = {
-      _metadata: document._metadata,
-      releaseDate: request.document.releaseDate
-    }
-    await BaseHandler.attachInterestinglyNamedFiles(request.document, location)
+    request.document = { ...this.clone(request.document), releaseDate: request.document.releaseDate }
     const clearlyFile = path.join(location, 'clearly.yaml')
     if (!fs.existsSync(clearlyFile)) return
     const content = await promisify(fs.readFileSync)(clearlyFile)
