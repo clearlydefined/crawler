@@ -27,7 +27,7 @@ class PyPiExtract extends AbstractClearlyDefinedProcessor {
 
   async handle(request) {
     if (this.isProcessing(request)) {
-      super.handle(request)
+      await super.handle(request)
       const spec = this.toSpec(request)
       await this._createDocument(request, spec, request.document.registryData)
     }

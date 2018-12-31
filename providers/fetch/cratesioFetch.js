@@ -7,7 +7,7 @@ const request = require('request-promise-native')
 const fs = require('fs')
 const path = require('path')
 
-class CrateFetch extends AbstractFetch {
+class CratesioFetch extends AbstractFetch {
   canHandle(request) {
     const spec = this.toSpec(request)
     return spec && spec.provider === 'cratesio'
@@ -42,6 +42,7 @@ class CrateFetch extends AbstractFetch {
     return request
   }
 
+  // Example: https://crates.io/api/v1/crates/bitflags
   async _getRegistryData(spec) {
     let registryData
     try {
@@ -61,6 +62,7 @@ class CrateFetch extends AbstractFetch {
     }
   }
 
+  // Example: https://crates.io/api/v1/crates/bitflags/1.0.4/download
   async _getPackage(zip, version) {
     return new Promise((resolve, reject) => {
       request({ url: `https://crates.io${version.dl_path}`, json: false, encoding: null }).pipe(
@@ -73,4 +75,4 @@ class CrateFetch extends AbstractFetch {
   }
 }
 
-module.exports = options => new CrateFetch(options)
+module.exports = options => new CratesioFetch(options)

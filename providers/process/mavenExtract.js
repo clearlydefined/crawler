@@ -34,7 +34,7 @@ class MavenExtract extends AbstractClearlyDefinedProcessor {
   async handle(request) {
     // skip all the hard work if we are just traversing.
     if (this.isProcessing(request)) {
-      super.handle(request)
+      await super.handle(request)
       const spec = this.toSpec(request)
       const manifest = await this._getManifest(request, request.document.location)
       await this._createDocument(request, spec, manifest, request.document.registryData)

@@ -33,8 +33,8 @@ class NuGetExtract extends AbstractClearlyDefinedProcessor {
   async handle(request) {
     // skip all the hard work if we are just traversing.
     if (this.isProcessing(request)) {
-      super.handle(request)
       const location = request.document.location
+      await super.handle(request, location.nupkg)
       const manifest = await this._getManifest(location.manifest)
       await this._createDocument(request, manifest, request.document.registryData)
     }

@@ -53,12 +53,10 @@ describe('', () => {
         if (url.includes('error')) throw new Error('yikes')
         if (url.includes('missing')) throw { statusCode: 404 }
       }
-      if (options && options.json) {
-        const body = JSON.parse(fs.readFileSync(`test/fixtures/nuget/${pickFile(url)}`))
-        return { body, statusCode: 200 }
-      }
+      const body = fs.readFileSync(`test/fixtures/nuget/${pickFile(url)}`)
+      if (options && options.json) return { body: JSON.parse(body), statusCode: 200 }
       const response = new PassThrough()
-      response.body = fs.readFileSync(`test/fixtures/nuget/${pickFile(url)}`)
+      response.body = body
       response.write(response.body)
       response.end()
       response.statusCode = 200

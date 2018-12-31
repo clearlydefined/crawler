@@ -32,8 +32,8 @@ class NpmExtract extends AbstractClearlyDefinedProcessor {
   async handle(request) {
     // skip all the hard work if we are just traversing.
     if (this.isProcessing(request)) {
-      await super.handle(request)
       const location = request.document.location
+      await super.handle(request, location, 'package')
       const manifestLocation = this._getManifestLocation(location)
       const manifest = manifestLocation ? JSON.parse(fs.readFileSync(manifestLocation)) : null
       if (!manifest) this.logger.info('NPM without package.json', { url: request.url })

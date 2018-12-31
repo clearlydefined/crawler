@@ -22,7 +22,7 @@ class SourceExtract extends AbstractClearlyDefinedProcessor {
   }
 
   async handle(request) {
-    super.handle(request)
+    await super.handle(request)
     const location = request.document.location
     request.document = { ...this.clone(request.document), releaseDate: request.document.releaseDate }
     const clearlyFile = path.join(location, 'clearly.yaml')

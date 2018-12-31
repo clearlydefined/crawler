@@ -26,7 +26,7 @@ class CrateExtract extends AbstractClearlyDefinedProcessor {
 
   async handle(request) {
     if (this.isProcessing(request)) {
-      super.handle(request)
+      await super.handle(request)
       await this._createDocument(request, request.document.manifest, request.document.registryData)
     }
     this.linkAndQueueTool(request, 'licensee')
@@ -45,7 +45,7 @@ class CrateExtract extends AbstractClearlyDefinedProcessor {
   }
 
   _discoverSource(manifest, registryData) {
-    return this.sourceFinder(registryData.num, [manifest.repository], {
+    return this.sourceFinder(registryData.num, [manifest.repository, manifest.homepage, manifest.documentation], {
       githubToken: this.options.githubToken
     })
   }
