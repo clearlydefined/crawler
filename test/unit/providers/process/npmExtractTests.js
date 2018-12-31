@@ -7,6 +7,7 @@ const sinon = require('sinon')
 const Request = require('ghcrawler').request
 const npmExtract = require('../../../../providers/process/npmExtract')
 const AbstractFetch = require('../../../../providers/fetch/abstractFetch')
+const SourceSpec = require('../../../../lib/sourceSpec')
 
 // SHA* hashes generated on Ubuntu using sha*sum
 const hashes = {
@@ -31,8 +32,12 @@ const hashes = {
 }
 
 describe('NPM processing', () => {
-  it('computes the hashes correctly', async () => {
+  it('processes a simple npm correctly', async () => {
     const { processor, request } = await setup()
+    processor.linkAndQueue = sinon.stub()
+    processor.sourceFinder = () => {
+      return { type: 'git', provider: 'github', namespace: 'Microsoft', name: 'redie', revision: '42' }
+    }
     await processor.handle(request)
     const files = request.document.files
     expect(request.document).to.be.not.null
@@ -40,17 +45,118 @@ describe('NPM processing', () => {
       expect(file.hashes.sha1).to.be.equal(hashes['redie-0.3.0'][file.path].sha1)
       expect(file.hashes.sha256).to.be.equal(hashes['redie-0.3.0'][file.path].sha256)
     })
+    expect(processor.linkAndQueueTool.callCount).to.be.equal(3)
+    expect(processor.linkAndQueueTool.args.map(call => call[1])).to.have.members(['licensee', 'scancode', 'fossology'])
+    expect(request.document.summaryInfo.count).to.be.equal(4)
+    expect(processor.linkAndQueue.callCount).to.be.equal(1)
+    expect(processor.linkAndQueue.args[0][1]).to.equal('source')
+    expect(processor.linkAndQueue.args[0][2].toUrl()).to.equal('cd:/git/github/Microsoft/redie/42')
   })
 })
 
 async function setup() {
-  const request = new Request('npm', 'cd:/npm/npmjs/-/redie/0.3.0')
   const processor = npmExtract({ logger: {} }, () => {})
   processor._detectLicenses = () => 'MIT'
   processor.linkAndQueueTool = sinon.stub()
+  const request = createRequest()
   const dir = processor.createTempDir(request)
-  await new AbstractFetch({}).decompress('test/fixtures/npm/redie-0.3.0/redie-0.3.0.tgz', dir.name)
-  request.document = { _metadata: { links: {} }, location: dir.name, registryData: { manifest: {} } }
-  request.processMode = 'process'
+  request.document.location = dir.name
+  await new AbstractFetch({}).decompress('test/fixtures/npm/redie-0.3.0.tgz', dir.name)
   return { processor, request }
+}
+
+function createRequest() {
+  const request = new Request('npm', 'cd:/npm/npmjs/-/redie/0.3.0')
+  request.document = { _metadata: { links: {} }, registryData: { manifest: {} } }
+  request.processMode = 'process'
+  return request
+}
+
+describe('npmExtract source discovery', () => {
+  it('discovers source candidates', async () => {
+    const processor = npmExtract({ logger: { info: () => {} } }, () => {})
+    const manifest = { repository: { url: 'one' }, url: 'two', homepage: 'three', bugs: 'http://four' }
+    const candidates = processor._discoverCandidateSourceLocations(manifest)
+    expect(candidates).to.have.members(['one', 'two', 'three', 'http://four'])
+  })
+
+  it('discovers source candidates with odd structures', async () => {
+    const processor = npmExtract({ logger: { info: () => {} } }, () => {})
+    const manifest = { repository: { url: 'one' }, url: 'two', homepage: ['three', 'four'], bugs: { url: 'five' } }
+    const candidates = processor._discoverCandidateSourceLocations(manifest)
+    expect(candidates).to.have.members(['one', 'two', 'three', 'five'])
+  })
+
+  it('handles no tags in GitHub', async () => {
+    const finder = sinon.stub().callsFake(() => null)
+    const extractor = npmExtract({}, finder)
+    const sourceLocation = await extractor._discoverSource({}, {})
+    expect(sourceLocation).to.be.null
+  })
+
+  it('handles one tag in GitHub', async () => {
+    const finder = sinon.stub().callsFake(sourceDiscovery())
+    const extractor = npmExtract({}, finder)
+    const manifest = createManifest('http://repo')
+    const sourceLocation = await extractor._discoverSource(manifest, {})
+    expect(sourceLocation.revision).to.eq('42')
+    expect(sourceLocation.name).to.eq('repo')
+  })
+
+  it('handles manifest urls in the right order', async () => {
+    const finder = sinon.stub().callsFake(sourceDiscovery())
+    const extractor = npmExtract({}, finder)
+    const manifest = createManifest(null, 'http://url', 'http://bugs')
+    const sourceLocation = await extractor._discoverSource(manifest, {})
+    expect(sourceLocation.revision).to.eq('42')
+    expect(sourceLocation.name).to.eq('url')
+  })
+
+  it('handles bugs object', async () => {
+    const finder = sinon.stub().callsFake(sourceDiscovery())
+    const extractor = npmExtract({}, finder)
+    const manifest = createManifest(null, null, null, { url: 'http://bugs' })
+    const sourceLocation = await extractor._discoverSource(manifest, {})
+    expect(sourceLocation.revision).to.eq('42')
+    expect(sourceLocation.name).to.eq('bugs')
+  })
+
+  it('handles bugs url', async () => {
+    const finder = sinon.stub().callsFake(sourceDiscovery())
+    const extractor = npmExtract({}, finder)
+    const manifest = createManifest(null, null, null, 'http://bugs')
+    const sourceLocation = await extractor._discoverSource(manifest, {})
+    expect(sourceLocation.revision).to.eq('42')
+    expect(sourceLocation.name).to.eq('bugs')
+  })
+
+  it('prioritizes manifest over registry', async () => {
+    const finder = sinon.stub().callsFake(sourceDiscovery())
+    const extractor = npmExtract({}, finder)
+    const manifest = createManifest(null, null, null, 'http://bugs')
+    const registry = createManifest('http://repo')
+    const sourceLocation = await extractor._discoverSource(manifest, registry)
+    expect(sourceLocation.revision).to.eq('42')
+    expect(sourceLocation.name).to.eq('bugs')
+  })
+})
+
+function sourceDiscovery() {
+  return (version, candidates) => {
+    return githubResults[candidates[0]]
+  }
+}
+
+const githubResults = {
+  'http://repo': createSourceSpec('repo'),
+  'http://url': createSourceSpec('url'),
+  'http://bugs': createSourceSpec('bugs')
+}
+
+function createManifest(repo, url, homepage, bugs) {
+  return { repository: { url: repo }, url, homepage, bugs }
+}
+
+function createSourceSpec(repo, revision) {
+  return new SourceSpec('git', 'github', 'testorg', repo, revision || '42')
 }

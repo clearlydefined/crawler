@@ -93,11 +93,6 @@ class LicenseeProcessor extends AbstractProcessor {
     })
   }
 
-  _getUrn(spec) {
-    const newSpec = Object.assign(Object.create(spec), spec, { tool: 'licensee', toolVersion: this.toolVersion })
-    return newSpec.toUrn()
-  }
-
   _detectVersion() {
     if (this._versionPromise !== undefined) return this._versionPromise
     this._versionPromise = new Promise(resolve => {

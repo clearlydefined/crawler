@@ -4,7 +4,7 @@
 const AbstractProcessor = require('./abstractProcessor')
 const { exec } = require('child_process')
 const bufferReplace = require('buffer-replace')
-const { normalizePaths } = require('../../lib/utils')
+const path = require('path')
 
 class FossologyProcessor extends AbstractProcessor {
   constructor(options) {
@@ -126,11 +126,6 @@ class FossologyProcessor extends AbstractProcessor {
         }
       )
     })
-  }
-
-  _getUrn(spec) {
-    const newSpec = Object.assign(Object.create(spec), spec, { tool: 'fossology', toolVersion: this.toolVersion })
-    return newSpec.toUrn()
   }
 
   async _detectVersion() {

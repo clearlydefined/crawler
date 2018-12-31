@@ -7,6 +7,7 @@ const throat = require('throat')
 const path = require('path')
 const { pick } = require('lodash')
 const du = require('du')
+const { trimParents } = require('../../lib/utils')
 
 class AbstractClearlyDefinedProcessor extends AbstractProcessor {
   async handle(request, interestingRoot = '') {
@@ -44,10 +45,7 @@ class AbstractClearlyDefinedProcessor extends AbstractProcessor {
   }
 
   _isInterestinglyNamed(file, root = '') {
-    const name = file
-      .slice(root.length)
-      .trim()
-      .toUpperCase()
+    const name = trimParents(file, root).toUpperCase()
     if (!name) return false
     const patterns = [
       'LICENSE',

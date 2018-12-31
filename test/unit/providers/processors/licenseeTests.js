@@ -35,6 +35,15 @@ describe('Licensee process', () => {
     expect(processor.attachFiles.args[0][1].length).to.equal(0)
   })
 
+  it('should exec error', async () => {
+    const { request, processor } = setup('9.10.1/folder2', new Error('test error'))
+    await processor.handle(request)
+    expect(request.message).to.equal('test error')
+    expect(request.outcome).to.equal('Error')
+    expect(request.processControl).to.equal('skip')
+    expect(request.crawler.storeDeadletter.calledOnce).to.be.true
+  })
+
   it('should skip if Licensee not found', async () => {
     const { request, processor } = setup(null, null, new Error('licensee error message here'))
     await processor.handle(request)
@@ -63,6 +72,7 @@ function setup(fixture, error, versionError) {
   const options = { logger: { log: sinon.stub() } }
   const testRequest = new request('npm', 'cd:/npm/npmjs/-/test/1.1')
   testRequest.document = { _metadata: { links: {} }, location: `test/fixtures/licensee/${fixture}` }
+  testRequest.crawler = { storeDeadletter: sinon.stub() }
   Handler._resultBox.error = error
   Handler._resultBox.versionError = versionError
   const processor = Handler(options)

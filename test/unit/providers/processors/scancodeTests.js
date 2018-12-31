@@ -10,6 +10,43 @@ const { request } = require('ghcrawler')
 
 let Handler
 
+describe('ScanCode misc', () => {
+  it('differentiates real errors', () => {
+    Handler._resultBox.result = {
+      files: [{ scan_errors: ['ValueError: this is a test'] }, { scan_errors: ['bogus package.json'] }]
+    }
+    expect(Handler._hasRealErrors()).to.be.false
+    Handler._resultBox.result = {
+      files: [{ scan_errors: ['Yikes. Tragedy has struck'] }, { scan_errors: ['Panic'] }]
+    }
+    expect(Handler._hasRealErrors()).to.be.true
+    Handler._resultBox.result = {
+      files: []
+    }
+    expect(Handler._hasRealErrors()).to.be.false
+    Handler._resultBox.result = {
+      files: [{}]
+    }
+    expect(Handler._hasRealErrors()).to.be.false
+  })
+
+  beforeEach(() => {
+    const resultBox = {}
+    const fsStub = {
+      readFileSync: () => JSON.stringify(resultBox.result)
+    }
+    const handlerFactory = proxyquire('../../../../providers/process/scancode', {
+      fs: fsStub
+    })
+    Handler = handlerFactory({ logger: { log: () => {} } })
+    Handler._resultBox = resultBox
+  })
+
+  afterEach(() => {
+    sandbox.restore()
+  })
+})
+
 describe('ScanCode process', () => {
   it('should handle gems', async () => {
     const { request, processor } = setup('2.9.8/gem.json')
@@ -33,6 +70,16 @@ describe('ScanCode process', () => {
     const { request, processor } = setup(null, null, new Error('error message here'))
     await processor.handle(request)
     expect(request.processControl).to.equal('skip')
+  })
+
+  it('handles scancode error', async () => {
+    const { request, processor } = setup(null, new Error('error message here'))
+    try {
+      await processor.handle(request)
+      expect(true).to.be.false
+    } catch (error) {
+      expect(request.processControl).to.equal('skip')
+    }
   })
 
   beforeEach(function() {
@@ -62,6 +109,7 @@ function setup(fixture, error, versionError) {
   }
   const testRequest = new request('npm', 'cd:/npm/npmjs/-/test/1.1')
   testRequest.document = { _metadata: { links: {} }, location: '/test' }
+  testRequest.crawler = { storeDeadletter: sinon.stub() }
   Handler._resultBox.error = error
   Handler._resultBox.versionError = versionError
   const processor = Handler(options)
