@@ -30,16 +30,14 @@ class NpmExtract extends AbstractClearlyDefinedProcessor {
   // Coming in here we expect the request.document to have id, location and metadata properties.
   // Do interesting processing...
   async handle(request) {
+    // skip all the hard work if we are just traversing.
     if (this.isProcessing(request)) {
-      // skip all the hard work if we are just traversing.
-      const { spec } = super._process(request)
-      this.addBasicToolLinks(request, spec)
+      await super.handle(request)
       const location = request.document.location
       const manifestLocation = this._getManifestLocation(location)
       const manifest = manifestLocation ? JSON.parse(fs.readFileSync(manifestLocation)) : null
       if (!manifest) this.logger.info('NPM without package.json', { url: request.url })
       await this._createDocument(request, manifest, request.document.registryData)
-      await this.attachInterestinglyNamedFiles(request.document, location, 'package')
     }
     this.linkAndQueueTool(request, 'licensee')
     this.linkAndQueueTool(request, 'fossology')
@@ -85,7 +83,7 @@ class NpmExtract extends AbstractClearlyDefinedProcessor {
 
   async _createDocument(request, manifest, registryData) {
     // setup the manifest to be the new document for the request
-    request.document = { _metadata: request.document._metadata, 'package.json': manifest, registryData }
+    request.document = { ...this.clone(request.document), 'package.json': manifest, registryData }
     const sourceInfo = await this._discoverSource(manifest, registryData.manifest)
     if (sourceInfo) request.document.sourceInfo = sourceInfo
   }

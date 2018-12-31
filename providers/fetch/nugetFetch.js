@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
+const AbstractFetch = require('./abstractFetch')
 const { trimStart, clone, get } = require('lodash')
-const BaseHandler = require('../../lib/baseHandler')
 const fs = require('fs')
 const path = require('path')
 const { promisify } = require('util')
@@ -12,7 +12,7 @@ const providerMap = {
   nuget: 'https://api.nuget.org'
 }
 
-class NuGetFetch extends BaseHandler {
+class NuGetFetch extends AbstractFetch {
   canHandle(request) {
     const spec = this.toSpec(request)
     return spec && spec.provider === 'nuget'
@@ -27,15 +27,18 @@ class NuGetFetch extends BaseHandler {
     const manifest = registryData ? await this._getManifest(registryData.catalogEntry) : null
     const nuspec = manifest ? await this._getNuspec(spec) : null
     if (!registryData || !nuspec || !manifest) return request.markSkip('Missing  ')
-    const dir = this._createTempDir(request)
+    super.handle(request)
+    const dir = this.createTempDir(request)
     const location = await this._persistMetadata(dir, manifest, nuspec)
-    location.nupkg = await this._getNupkg(dir, registryData.packageContent)
-    const hashes = await this.computeHashes(file.name)
+    const zip = path.join(dir.name, 'nupkg.zip')
+    await this._getPackage(zip, registryData.packageContent)
+    location.nupkg = path.join(dir.name, 'nupkg')
+    await this.decompress(zip, location.nupkg)
     request.document = {
       registryData,
       location,
       releaseDate: registryData ? new Date(registryData.published).toISOString() : null,
-      hashes
+      hashes: await this.computeHashes(zip)
     }
     request.contentOrigin = 'origin'
     if (get(manifest, 'id')) {
@@ -82,20 +85,12 @@ class NuGetFetch extends BaseHandler {
     return null
   }
 
-  async _getNupkg(dir, packageContentUrl) {
-    const zip = path.join(dir.name, 'nupkg.zip')
-    const nupkg = path.join(dir.name, 'nupkg')
+  async _getPackage(zip, packageContentUrl) {
     return new Promise((resolve, reject) => {
       requestRetry
-        .get(packageContentUrl, {
-          json: false,
-          encoding: null
-        })
+        .get(packageContentUrl, { json: false, encoding: null })
         .pipe(fs.createWriteStream(zip))
-        .on('finish', async () => {
-          await this.decompress(zip, nupkg)
-          resolve(nupkg)
-        })
+        .on('finish', () => resolve(null))
         .on('error', reject)
     })
   }

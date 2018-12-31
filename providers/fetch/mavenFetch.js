@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler')
+const AbstractFetch = require('./abstractFetch')
 const mavenCentral = require('../../lib/mavenCentral')
 const requestPromise = require('request-promise-native')
 const { clone } = require('lodash')
 
-class MavenFetch extends BaseHandler {
+class MavenFetch extends AbstractFetch {
   canHandle(request) {
     const spec = this.toSpec(request)
     return spec && spec.provider === 'mavencentral'
@@ -19,7 +19,8 @@ class MavenFetch extends BaseHandler {
     spec.revision = spec.revision ? registryData.v : registryData.latestVersion
     // rewrite the request URL as it is used throughout the system to derive locations and urns etc.
     request.url = spec.toUrl()
-    const file = this._createTempFile(request)
+    super.handle(request)
+    const file = this.createTempFile(request)
     const code = await this._getArtifact(spec, file.name)
     if (code === 404) return request.markSkip('Missing  ')
     const location = await this._postProcessArtifact(request, spec, file)
@@ -36,7 +37,7 @@ class MavenFetch extends BaseHandler {
 
   async _postProcessArtifact(request, spec, file) {
     if (spec.type !== 'sourcearchive') return file
-    const dir = this._createTempDir(request)
+    const dir = this.createTempDir(request)
     await this.decompress(file.name, dir.name) // Warning: may not clean files up on Windows due to a bug. Switch back to unzip once https://github.com/maxogden/extract-zip/issues/65 is resolved
     return dir
   }

@@ -27,10 +27,8 @@ class GemExtract extends AbstractClearlyDefinedProcessor {
 
   async handle(request) {
     if (this.isProcessing(request)) {
-      const { spec } = super._process(request)
-      this.addBasicToolLinks(request, spec)
+      super.handle(request)
       await this._createDocument(request, request.document.registryData)
-      await BaseHandler.attachInterestinglyNamedFiles(request.document, request.document.location)
     }
     this.linkAndQueueTool(request, 'licensee')
     this.linkAndQueueTool(request, 'fossology')
@@ -57,6 +55,7 @@ class GemExtract extends AbstractClearlyDefinedProcessor {
   }
 
   async _createDocument(request, registryData) {
+    request.document = this.clone(request.document)
     const sourceInfo = await this._discoverSource(registryData.version, registryData)
     if (sourceInfo) request.document.sourceInfo = sourceInfo
   }

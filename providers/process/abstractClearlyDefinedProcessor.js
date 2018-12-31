@@ -1,57 +1,22 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler')
-const { set } = require('lodash')
+const AbstractProcessor = require('./abstractProcessor')
 const { promisify } = require('util')
-const getFiles = promisify(require('node-dir').files)
 const throat = require('throat')
 const path = require('path')
-const glob = require('fast-glob')
-const fs = require('fs')
+const { pick } = require('lodash')
+const du = require('du')
 
-class AbstractClearlyDefinedProcessor extends BaseHandler {
-  async handle(request) {
+class AbstractClearlyDefinedProcessor extends AbstractProcessor {
+  async handle(request, interestingRoot = '') {
     super.handle(request)
     await this._addSummaryInfo(request)
-    await this._addFiles(request)
+    await this._addFiles(request, interestingRoot)
   }
 
-  async addInterestingFiles(document, location, folder = '') {
-    if (!location && location !== '') return null
-    const files = await glob(
-      this._buildGlob(['license', 'notice', 'notices', 'license-mit', 'license-apache', 'unlicense']),
-      {
-        cwd: path.join(location, folder),
-        nocase: true,
-        onlyFiles: true
-      }
-    )
-    if (files.length === 0) return null
-    Object.defineProperty(document, '_attachments', { value: [], enumerable: false })
-    const interestingFiles = await Promise.all(
-      files.map(async file => {
-        const fullPath = path.join(location, folder, file)
-        const relativePath = path.join(folder, file)
-        const attachment = fs.readFileSync(fullPath, 'utf8')
-        const token = BaseHandler.computeToken(attachment)
-        // const license = await this._detectLicenses(fullPath)
-        // TODO do proper intergation here
-        const license = 'NOASSERTION'
-        document._attachments.push({ path: relativePath, token, attachment, license })
-        return { path: relativePath, token, license }
-      })
-    )
-    document.interestingFiles = interestingFiles
-  }
-
-  _buildGlob(roots) {
-    const parts = []
-    roots.forEach(root => {
-      parts.push(root)
-      parts.push(`${root}.{md,txt,html}`)
-    })
-    return `+(${parts.join('|')})`
+  clone(document) {
+    return { ...super.clone(document), ...pick(document, ['summaryInfo', 'files']) }
   }
 
   async _addSummaryInfo(request) {
@@ -62,15 +27,44 @@ class AbstractClearlyDefinedProcessor extends BaseHandler {
     if (hashes) request.document.summaryInfo.hashes = hashes
   }
 
-  async _addFiles(request) {
-    const fileList = await getFiles(request.document.location)
-    const files = fileList.map(
-      throat(10, async file => {
-        const hashes = await this._computeHashes(file)
-        return { path: file, hashes }
-      })
+  async _addFiles(request, interestingRoot = '') {
+    const { document } = request
+    const fileList = await this.getInterestingFiles(document.location)
+    const files = await Promise.all(
+      fileList.map(
+        throat(10, async file => {
+          if (this._isInterestinglyNamed(file, interestingRoot))
+            await this.attachFiles(document, [file], document.location)
+          const hashes = await this.computeHashes(path.join(document.location, file))
+          return { path: file, hashes }
+        })
+      )
     )
-    set(request, 'document.files', files)
+    document.files = files
+  }
+
+  _isInterestinglyNamed(file, root = '') {
+    const name = file
+      .slice(root.length)
+      .trim()
+      .toUpperCase()
+    if (!name) return false
+    const patterns = [
+      'LICENSE',
+      'LICENSE-MIT',
+      'LICENSE-APACHE',
+      'UNLICENSE',
+      'COPYING',
+      'NOTICE',
+      'NOTICES',
+      'CONTRIBUTORS',
+      'PATENTS'
+    ]
+    const extensions = ['.MD', '.HTML', '.TXT']
+    const extension = path.extname(name)
+    if (extension && !extensions.includes(extension)) return false
+    const base = path.basename(name, extension || '')
+    return patterns.includes(base)
   }
 
   async _computeSize(location) {

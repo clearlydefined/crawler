@@ -51,7 +51,7 @@ describe('crateFetch', () => {
 function mockCrateFetch(options) {
   const crateFetch = CrateFetch({})
   if (options.registryData) crateFetch._getRegistryData = options.registryData
-  crateFetch._createTempDir = () => {
+  crateFetch.createTempDir = () => {
     return { name: '/tmp' }
   }
   crateFetch._getPackage = () => '/tmp/crate'

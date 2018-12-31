@@ -1,23 +1,23 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler')
+const AbstractFetch = require('./abstractFetch')
 const { exec } = require('child_process')
 const SourceSpec = require('../../lib/sourceSpec')
 const { clone } = require('lodash')
 
-class GitCloner extends BaseHandler {
+class GitCloner extends AbstractFetch {
   canHandle(request) {
     const spec = this.toSpec(request)
     return request.type !== 'source' && spec && spec.type === 'git'
   }
 
   async handle(request) {
+    super.handle(request)
     const spec = this.toSpec(request)
     const sourceSpec = SourceSpec.fromObject(spec)
     const options = { version: sourceSpec.revision }
-    const dir = this._createTempDir(request)
-
+    const dir = this.createTempDir(request)
     const repoSize = await this._cloneRepo(sourceSpec.toUrl(), dir.name, spec.name, options.version)
     request.addMeta({ gitSize: repoSize })
     const releaseDate = await this._getDate(dir.name, spec.name)

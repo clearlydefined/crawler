@@ -33,7 +33,6 @@
     "du": "^0.1.0",
     "extend": "^3.0.1",
     "extract-zip": "^1.6.6",
-    "fast-glob": "^2.2.3",
     "ghcrawler": "github:microsoft/ghcrawler#jm/apicrawler",
     "ghrequestor": "^0.1.7",
     "lodash": "^4.17.5",

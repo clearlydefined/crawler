@@ -1,18 +1,17 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler')
+const AbstractFetch = require('./abstractFetch')
 const nodeRequest = require('request')
 const requestPromise = require('request-promise-native')
 const fs = require('fs')
 const { clone, get } = require('lodash')
-const proxyquire = require('proxyquire')
 
 const providerMap = {
   npmjs: 'https://registry.npmjs.com'
 }
 
-class NpmFetch extends BaseHandler {
+class NpmFetch extends AbstractFetch {
   canHandle(request) {
     const spec = this.toSpec(request)
     return spec && spec.provider === 'npmjs'
@@ -25,9 +24,10 @@ class NpmFetch extends BaseHandler {
     spec.revision = registryData.manifest.version
     // rewrite the request URL as it is used throughout the system to derive locations and urns etc.
     request.url = spec.toUrl()
-    const file = this._createTempFile(request)
+    super.handle(request)
+    const file = this.createTempFile(request)
     await this._getPackage(spec, file.name)
-    const dir = this._createTempDir(request)
+    const dir = this.createTempDir(request)
     await this.decompress(file.name, dir.name)
     const hashes = await this.computeHashes(file.name)
     request.document = this._createDocument(dir, registryData, hashes)

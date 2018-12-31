@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: MIT
 
 const { clone } = require('lodash')
-const BaseHandler = require('../../lib/baseHandler')
+const AbstractFetch = require('./abstractFetch')
 const request = require('request-promise-native')
 const fs = require('fs')
 const path = require('path')
 
-class CrateFetch extends BaseHandler {
+class CrateFetch extends AbstractFetch {
   canHandle(request) {
     const spec = this.toSpec(request)
     return spec && spec.provider === 'cratesio'
@@ -20,7 +20,8 @@ class CrateFetch extends BaseHandler {
     const version = registryData.version
     spec.revision = version.num
     request.url = spec.toUrl()
-    const dir = this._createTempDir(request)
+    super.handle(request)
+    const dir = this.createTempDir(request)
     const zip = path.join(dir.name, 'crate.zip')
     await this._getPackage(zip, version)
     const crateDir = path.join(dir.name, 'crate')

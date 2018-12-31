@@ -1,12 +1,13 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler')
+const AbstractProcessor = require('./abstractProcessor')
 const { exec } = require('child_process')
 const fs = require('fs')
 const path = require('path')
+const { promisify } = require('util')
 
-class ScanCodeProcessor extends BaseHandler {
+class ScanCodeProcessor extends AbstractProcessor {
   constructor(options) {
     super(options)
     // Kick off version detection but don't wait. We'll wait before processing anything
@@ -27,14 +28,17 @@ class ScanCodeProcessor extends BaseHandler {
 
   async handle(request) {
     if (!(await this._versionPromise)) return request.markSkip('ScanCode not found')
-    const { document, spec } = super._process(request)
-    this.addBasicToolLinks(request, spec)
-    const file = this._createTempFile(request)
+    super.handle(request)
+    const file = this.createTempFile(request)
     await this._runScancode(request, file)
-    document._metadata.contentLocation = file.name
-    document._metadata.contentType = 'application/json'
-    document._metadata.releaseDate = request.document.releaseDate
-    await this._attachInterestingFiles(document, file.name, request.document.location)
+    const location = request.document.location
+    const releaseDate = request.document.releaseDate
+    request.document = this.clone(request.document)
+    const metadata = request.document._metadata
+    metadata.contentLocation = file.name
+    metadata.contentType = 'application/json'
+    metadata.releaseDate = releaseDate
+    await this._attachInterestingFiles(request.document, file.name, location)
     return request
   }
 
@@ -82,7 +86,7 @@ class ScanCodeProcessor extends BaseHandler {
       })
       return result
     }, [])
-    return BaseHandler.attachFiles(document, packages, root)
+    return this.attachFiles(document, packages, root)
   }
 
   // Workaround until https://github.com/nexB/scancode-toolkit/issues/983 is resolved

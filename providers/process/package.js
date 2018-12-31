@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler')
+const AbstractProcessor = require('./abstractProcessor')
 const supportedTypes = ['npm', 'crate', 'maven', 'nuget', 'gem', 'pypi']
 
-class PackageProcessor extends BaseHandler {
+class PackageProcessor extends AbstractProcessor {
   get schemaVersion() {
     return 1
   }
@@ -23,8 +23,8 @@ class PackageProcessor extends BaseHandler {
   }
 
   handle(request) {
-    const { spec } = super._process(request)
-    this.addBasicToolLinks(request, spec)
+    super.handle(request)
+    const spec = this.toSpec(request)
     this.linkAndQueueTool(request, spec.type)
     request.markNoSave()
     return request
