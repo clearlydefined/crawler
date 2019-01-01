@@ -4,7 +4,7 @@
 const AbstractClearlyDefinedProcessor = require('./abstractClearlyDefinedProcessor')
 const EntitySpec = require('../../lib/entitySpec')
 const fs = require('fs')
-const mavenCentral = require('../../lib/mavenCentral')
+const mavencentralFetch = require('../fetch/mavencentralFetch')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
 const SourceSpec = require('../../lib/sourceSpec')
 const parseString = require('xml2js').parseString
@@ -36,7 +36,7 @@ class MavenExtract extends AbstractClearlyDefinedProcessor {
     if (this.isProcessing(request)) {
       await super.handle(request)
       const spec = this.toSpec(request)
-      const manifest = await this._getManifest(request, request.document.location)
+      const manifest = { summary: this._mergePoms(request.document.poms), poms: request.document.poms }
       await this._createDocument(request, spec, manifest, request.document.registryData)
     }
     if (request.document.sourceInfo) {
@@ -46,52 +46,11 @@ class MavenExtract extends AbstractClearlyDefinedProcessor {
     return request
   }
 
-  async _getManifest(request, location) {
-    const pomContent = fs
-      .readFileSync(location)
-      .toString()
-      .trim()
-    const pom = await new Promise((resolve, reject) =>
-      parseString(pomContent, (error, result) => (error ? reject(error) : resolve(result)))
-    )
-
-    // clean up some stuff we don't actually look at.
-    delete pom.project.build
-    delete pom.project.dependencies
-    delete pom.project.dependencyManagement
-    delete pom.project.modules
-    delete pom.project.profiles
-
-    if (pom && pom.project && pom.project.parent) {
-      const parentManifest = await this._fetchParentPomManifest(request, pom)
-      return this._mergePomInto(pom, parentManifest)
-    } else return { summary: pom, poms: [pom] }
-  }
-
-  async _fetchParentPomManifest(request, pom) {
-    const parent = pom.project.parent[0]
-    const spec = new EntitySpec(
-      'maven',
-      'mavencentral',
-      parent.groupId[0].trim(),
-      parent.artifactId[0].trim(),
-      parent.version[0].trim()
-    )
-    const file = this.createTempFile(request)
-    const code = await mavenCentral.fetchPom(spec, file.name)
-    if (code === 404) return { summary: {}, poms: [] }
-    return await this._getManifest(request, file.name)
-  }
-
-  _mergePomInto(pom, manifest) {
-    // TODO probably this should be a lot smarter...
-    const summary = { project: Object.assign({}, manifest.summary.project, pom.project) }
-    const poms = manifest.poms.slice(0)
-    poms.unshift(pom)
-    return {
-      summary: summary,
-      poms: poms
-    }
+  _mergePoms(poms) {
+    if (!poms) return null
+    return [...poms].reverse().reduce((result, pom) => {
+      return { ...result, ...pom.project }
+    }, {})
   }
 
   _discoverCandidateSourceLocations(manifest) {
@@ -107,8 +66,10 @@ class MavenExtract extends AbstractClearlyDefinedProcessor {
       githubToken: this.options.githubToken
     })
     if (githubSource) return githubSource
-    // didn't find any source so make up a sources url to try if the registry thinks there is source
-    if (!registryData.ec || !registryData.ec.includes(mavenCentral.sourceExtension)) return null
+    // didn't find any source in GitHub so make up a sources url to try if the registry thinks there is source
+    // TODO could check `registryData.ec.includes('-sources.jar')` but there seemed to be examples where
+    // the registry did not think it had the sources jar but it did. So Just make it up here and we'll try.
+    // Need to confirm the expectations here.
     const result = SourceSpec.fromObject(spec)
     result.type = 'sourcearchive'
     return result
