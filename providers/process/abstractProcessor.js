@@ -63,7 +63,7 @@ class AbstractProcessor extends BaseHandler {
     const exclusions = ['.git']
     const filteredList = fullList.filter(file => {
       if (!file) return false
-      const segments = file.split(/[\\\/]/g)
+      const segments = file.split(/[\\/]/g)
       return !intersection(segments, exclusions).length
     })
     return trimAllParents(filteredList, location)

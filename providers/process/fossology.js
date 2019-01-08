@@ -104,7 +104,7 @@ class FossologyProcessor extends AbstractProcessor {
 
   async _runMonk(request, files, root) {
     // TODO can't actually run Monk until the license database is factored out
-    return null
+    return { request, files, root }
     // const parameters = ['-J']
     // const output = await this._visitFiles(files, path => this._runMonkOnFile(request, path, parameters))
     // TODO figure out the format of the Monk output and correctly aggregate and adjust paths etc.

@@ -48,7 +48,7 @@ class LicenseeProcessor extends AbstractProcessor {
     const parameters = ['--json', '--no-readme']
     const root = request.document.location
     const paths = [root, ...(await promisify(dir.subdirs)(root))]
-      .map(path => path.slice(root.length).replace(/^[\/\\]+/g, ''))
+      .map(path => path.slice(root.length).replace(/^[/\\]+/g, ''))
       .filter(path => path !== '.git' && !path.includes('.git/'))
     try {
       const results = await Promise.all(paths.map(throat(10, path => this._runOnFolder(path, root, parameters))))
