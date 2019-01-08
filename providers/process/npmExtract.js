@@ -35,9 +35,10 @@ class NpmExtract extends AbstractClearlyDefinedProcessor {
       const location = request.document.location
       await super.handle(request, location, 'package')
       const manifestLocation = this._getManifestLocation(location)
-      const manifest = manifestLocation ? JSON.parse(fs.readFileSync(manifestLocation)) : null
-      if (!manifest) this.logger.info('NPM without package.json', { url: request.url })
+      const manifest = manifestLocation ? JSON.parse(fs.readFileSync(path.join(location, manifestLocation))) : null
       await this._createDocument(request, manifest, request.document.registryData)
+      if (manifest) this.attachFiles(request.document, [manifestLocation], location)
+      else this.logger.info('NPM without package.json', { url: request.url })
     }
     this.linkAndQueueTool(request, 'licensee')
     this.linkAndQueueTool(request, 'fossology')
@@ -50,8 +51,8 @@ class NpmExtract extends AbstractClearlyDefinedProcessor {
   }
 
   _getManifestLocation(dir) {
-    if (fs.existsSync(path.join(dir, 'package/package.json'))) return path.join(dir, 'package/package.json')
-    if (fs.existsSync(path.join(dir, 'package.json'))) return path.join(dir, 'package.json')
+    if (fs.existsSync(path.join(dir, 'package/package.json'))) return 'package/package.json'
+    if (fs.existsSync(path.join(dir, 'package.json'))) return 'package.json'
     return null
   }
 
