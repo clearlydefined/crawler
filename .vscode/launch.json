@@ -5,7 +5,7 @@
       "type": "node",
       "request": "launch",
       "name": "ClearlyDefined",
-      "program": "${workspaceRoot}/run.js",
+      "program": "${workspaceRoot}/index.js",
       "cwd": "${workspaceRoot}",
       "runtimeArgs": ["--nolazy"],
       "env": {
@@ -50,7 +50,7 @@
       "request": "launch",
       "name": "Launch in WSL",
       "useWSL": true,
-      "program": "${workspaceFolder}/run.js"
+      "program": "${workspaceFolder}/index.js"
     }
   ]
 }

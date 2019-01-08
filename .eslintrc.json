@@ -1,23 +1,19 @@
 {
   "env": {
     "browser": false,
-    "commonjs": true,
     "es6": true,
     "node": true,
     "mocha": true
   },
+  "extends": "eslint:recommended",
   "parserOptions": {
     "ecmaVersion": 9,
     "sourceType": "module"
   },
   "rules": {
-    "no-const-assign": "warn",
-    "no-this-before-super": "warn",
-    "no-undef": "warn",
-    "no-unreachable": "warn",
-    "no-unused-vars": "warn",
-    "constructor-super": "warn",
-    "valid-typeof": "warn",
-    "quotes": ["warn", "single"]
+    "indent": ["error", 2, { "SwitchCase": 1 }],
+    "quotes": ["error", "single"],
+    "semi": ["error", "never"],
+    "no-console": 0
   }
 }
