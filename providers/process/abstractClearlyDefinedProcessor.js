@@ -29,7 +29,7 @@ class AbstractClearlyDefinedProcessor extends AbstractProcessor {
   }
 
   async _addFiles(request, location = request.document.location, interestingRoot = '') {
-    const fileList = await this.getInterestingFiles(location)
+    const fileList = await this.filterFiles(location)
     const files = await Promise.all(
       fileList.map(
         throat(10, async file => {

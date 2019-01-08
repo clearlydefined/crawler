@@ -101,7 +101,7 @@ describe('AbstractProcessor get interesting files', () => {
   it('filters out uninteresting files', async () => {
     const processor = new AbstractProcessor({})
     processor.getFiles = () => ['/test/.git/license', '']
-    const files = await processor.getInterestingFiles('/test')
+    const files = await processor.filterFiles('/test')
     expect(files.length).to.be.equal(0)
   })
 })
