@@ -29,14 +29,15 @@ class NuGetFetch extends AbstractFetch {
     if (!registryData || !nuspec || !manifest) return request.markSkip('Missing  ')
     super.handle(request)
     const dir = this.createTempDir(request)
-    const location = await this._persistMetadata(dir, manifest, nuspec)
+    const metadataLocation = await this._persistMetadata(dir, manifest, nuspec)
     const zip = path.join(dir.name, 'nupkg.zip')
     await this._getPackage(zip, registryData.packageContent)
-    location.nupkg = path.join(dir.name, 'nupkg')
-    await this.decompress(zip, location.nupkg)
+    const location = path.join(dir.name, 'nupkg')
+    await this.decompress(zip, location)
     request.document = {
       registryData,
       location,
+      metadataLocation,
       releaseDate: registryData ? new Date(registryData.published).toISOString() : null,
       hashes: await this.computeHashes(zip)
     }

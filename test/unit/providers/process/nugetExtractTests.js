@@ -64,7 +64,7 @@ describe('NuGet processing', () => {
       expect(file.hashes.sha1).to.be.equal(hashes['xunit.core.2.4.1'][file.path].sha1)
       expect(file.hashes.sha256).to.be.equal(hashes['xunit.core.2.4.1'][file.path].sha256)
     })
-    expect(processor.linkAndQueueTool.callCount).to.be.equal(0)
+    expect(processor.linkAndQueueTool.callCount).to.be.equal(1)
     expect(request.document.summaryInfo.count).to.be.equal(9)
     expect(processor.linkAndQueue.callCount).to.be.equal(1)
     expect(processor.linkAndQueue.args[0][1]).to.equal('source')
@@ -74,15 +74,14 @@ describe('NuGet processing', () => {
 
 async function setup() {
   const processor = extract({ logger: {} }, () => {})
-  processor._detectLicenses = () => 'MIT'
   processor.linkAndQueueTool = sinon.stub()
   const request = createRequest()
   const dir = processor.createTempDir(request)
-  request.document.location = {
+  request.document.metadataLocation = {
     manifest: 'test/fixtures/nuget/xunit.core.2.4.1.catalog.json',
-    nuspec: 'test/fixtures/nuget/xunit.core.2.4.1.nuspec',
-    nupkg: `${dir.name}/nupkg`
+    nuspec: 'test/fixtures/nuget/xunit.core.2.4.1.nuspec'
   }
+  request.document.location = `${dir.name}/nupkg`
   await new AbstractFetch({}).decompress('test/fixtures/nuget/xunit.core.2.4.1.nupkg', `${dir.name}/nupkg`)
   return { processor, request }
 }
