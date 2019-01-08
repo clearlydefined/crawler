@@ -5,6 +5,7 @@ const BaseHandler = require('../../lib/baseHandler')
 const { exec } = require('child_process')
 const SourceSpec = require('../../lib/sourceSpec')
 const { clone } = require('lodash')
+const rimraf = require('rimraf')
 
 class GitCloner extends BaseHandler {
   canHandle(request) {
@@ -21,7 +22,7 @@ class GitCloner extends BaseHandler {
     const repoSize = await this._cloneRepo(sourceSpec.toUrl(), dir.name, spec.name, options.version)
     request.addMeta({ gitSize: repoSize })
     const releaseDate = await this._getDate(dir.name, spec.name)
-
+    await this._deleteGitDatabase(dir.name, spec.name)
     request.contentOrigin = 'origin'
     request.document = this._createDocument(dir.name + '/' + spec.name, repoSize, releaseDate)
     if (spec.provider === 'github') {
@@ -48,9 +49,8 @@ class GitCloner extends BaseHandler {
 
   _getDate(dirName, specName) {
     return new Promise((resolve, reject) => {
-      exec(
-        `cd ${dirName}/${specName} && git show -s --format=%ci`,
-        (error, stdout) => (error ? reject(error) : resolve(new Date(stdout.trim())))
+      exec(`cd ${dirName}/${specName} && git show -s --format=%ci`, (error, stdout) =>
+        error ? reject(error) : resolve(new Date(stdout.trim()))
       )
     })
   }
@@ -58,6 +58,14 @@ class GitCloner extends BaseHandler {
   _getRepoSize(gitCountObjectsResult = '') {
     // ...\nsize-pack: 3\n... (in KB)
     return Number(gitCountObjectsResult.match('size-pack: (.*)\n')[1])
+  }
+
+  _deleteGitDatabase(dirName, specName) {
+    return new Promise((resolve, reject) => {
+      rimraf(`${dirName}/${specName}/.git`, error => {
+        error ? reject(error) : resolve()
+      })
+    })
   }
 }
 
