@@ -31,6 +31,8 @@ RUN gem install licensee -v 9.10.1 --no-rdoc --no-ri
 WORKDIR /opt
 RUN git clone https://github.com/fossology/fossology.git
 
+# See https://github.com/fossology/fossology/blob/faaaeedb9d08f00def00f9b8a68a5cffc5eaa657/utils/fo-installdeps#L103-L105
+# Additional libjsoncpp-dev https://github.com/fossology/fossology/blob/261d1a3e663b5fd20652a05b2d6360f4b31a17cb/src/copyright/mod_deps#L79-L80
 RUN apt-get update && apt-get install -y --no-install-recommends --no-install-suggests \
   libmxml-dev curl libxml2-dev libcunit1-dev libjsoncpp-dev \
   build-essential libtext-template-perl subversion rpm librpm-dev libmagic-dev libglib2.0 libboost-regex-dev libboost-program-options-dev
