@@ -6,7 +6,7 @@ const supportedTypes = ['git', 'sourcearchive']
 
 class SourceProcessor extends AbstractProcessor {
   get schemaVersion() {
-    return 1
+    return '0.0.0'
   }
 
   get toolSpec() {

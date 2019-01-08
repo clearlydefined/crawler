@@ -117,7 +117,10 @@ class ScanCodeProcessor extends AbstractProcessor {
     this._versionPromise = new Promise(resolve => {
       exec(`cd ${this.options.installDir} && .${path.sep}scancode --version`, 1024, (error, stdout) => {
         if (error) this.logger.log(`Could not detect version of ScanCode: ${error.message}`)
-        this._toolVersion = error ? null : stdout.replace('ScanCode version ', '').trim()
+        const version = stdout.replace('ScanCode version ', '').trim()
+        this._toolVersion = error
+          ? null
+          : this.aggregateVersions([this._toolVersion, version], 'Invalid ScanCode version')
         resolve(this._toolVersion)
       })
     })
