@@ -98,7 +98,9 @@ class LicenseeProcessor extends AbstractProcessor {
     this._versionPromise = new Promise(resolve => {
       exec('licensee version', 1024, (error, stdout) => {
         if (error) this.logger.log(`Could not detect version of Licensee: ${error.message}`)
-        this._toolVersion = error ? null : stdout
+        this._toolVersion = error
+          ? null
+          : this.aggregateVersions([this._toolVersion, stdout.trim()], 'Invalid Licensee version')
         resolve(this._toolVersion)
       })
     })

@@ -136,10 +136,11 @@ class FossologyProcessor extends AbstractProcessor {
       this._nomosVersion = await this._detectNomosVersion()
       this._copyrightVersion = await this._detectCopyrightVersion()
       this._monkVersion = await this._detectMonkVersion()
+      // Aggregate all the discovered versions including that of the superclass chain (pre-computed `_toolVersion`) and
+      // a base version for the FOSSology support itself
       this._toolVersion = this.aggregateVersions(
-        [this._nomosVersion, this._copyrightVersion, this._monkVersion],
-        'FOSSology tool version misformatted',
-        base
+        [base, this._toolVersion, this._nomosVersion, this._copyrightVersion, this._monkVersion],
+        'FOSSology tool version misformatted'
       )
       return this._toolVersion
     } catch (error) {

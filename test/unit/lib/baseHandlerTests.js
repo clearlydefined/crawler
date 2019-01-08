@@ -16,11 +16,6 @@ describe('BaseHandler util functions', () => {
     expect(result).to.equal('3.5.7')
   })
 
-  it('version aggregation with base version', () => {
-    const result = new BaseHandler({}).aggregateVersions(['1.2.3', '2.3.4'], 'should not happen', '1.1.1')
-    expect(result).to.equal('4.6.8')
-  })
-
   it('version aggregation should fail with long versions', () => {
     try {
       new BaseHandler({}).aggregateVersions(['1.2.3', '2.3.4.5'], 'should not happen')
@@ -37,6 +32,21 @@ describe('BaseHandler util functions', () => {
     } catch (error) {
       expect(error.message.includes('should not happen')).to.be.true
     }
+  })
+
+  it('version collection includes all superclasses', () => {
+    const foo = class Foo extends BaseHandler {
+      get schemaVersion() {
+        return '1.2.3'
+      }
+    }
+    const bar = class Bar extends foo {
+      get schemaVersion() {
+        return '2.3.4'
+      }
+    }
+    const handler = new bar({})
+    expect(handler._toolVersion).to.equal('3.5.7')
   })
 
   it('gets latest version', () => {

@@ -10,7 +10,7 @@ const requestRetry = require('requestretry').defaults({ json: true, maxAttempts:
 
 class TopProcessor extends AbstractProcessor {
   get schemaVersion() {
-    return 1
+    return '0.0.0'
   }
 
   get toolSpec() {

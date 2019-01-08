@@ -12,6 +12,10 @@ const nodeDir = promisify(require('node-dir').files)
 const { trimAllParents } = require('../../lib/utils')
 
 class AbstractProcessor extends BaseHandler {
+  get schemaVersion() {
+    return '0.0.0'
+  }
+
   _computeToken(content) {
     return shajs('sha256')
       .update(content)
