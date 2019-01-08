@@ -96,7 +96,10 @@ class AbstractProcessor extends BaseHandler {
   }
 
   clone(document) {
-    return pick(document, ['_metadata'])
+    const newDocument = pick(document, ['_metadata', 'attachments'])
+    if (document._attachments)
+      Object.defineProperty(newDocument, '_attachments', { value: document._attachments, enumerable: false })
+    return newDocument
   }
 
   addSelfLink(request, urn = null) {

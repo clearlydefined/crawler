@@ -5,7 +5,7 @@ const AbstractProcessor = require('./abstractProcessor')
 const { promisify } = require('util')
 const throat = require('throat')
 const path = require('path')
-const { pick } = require('lodash')
+const { pick, merge } = require('lodash')
 const du = require('du')
 const { trimParents } = require('../../lib/utils')
 
@@ -21,7 +21,7 @@ class AbstractClearlyDefinedProcessor extends AbstractProcessor {
   }
 
   clone(document) {
-    return { ...super.clone(document), ...pick(document, ['summaryInfo', 'files']) }
+    return merge(super.clone(document), pick(document, ['summaryInfo', 'files']))
   }
 
   async _addSummaryInfo(request, location = request.document.location) {

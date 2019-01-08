@@ -11,7 +11,9 @@
       "env": {
         "NODE_ENV": "localhost",
         "PORT": "5000"
-      }
+      },
+      "skipFiles": ["<node_internals>/**/*.js"],
+      "showAsyncStacks": true
     },
     {
       "type": "node",
