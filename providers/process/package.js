@@ -6,7 +6,7 @@ const supportedTypes = ['npm', 'crate', 'maven', 'nuget', 'gem', 'pypi']
 
 class PackageProcessor extends AbstractProcessor {
   get schemaVersion() {
-    return 1
+    return '0.0.0'
   }
 
   get toolSpec() {
