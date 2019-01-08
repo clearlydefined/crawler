@@ -33,11 +33,12 @@ class NuGetExtract extends AbstractClearlyDefinedProcessor {
   async handle(request) {
     // skip all the hard work if we are just traversing.
     if (this.isProcessing(request)) {
-      const location = request.document.location
-      await super.handle(request, location.nupkg)
-      const manifest = await this._getManifest(location.manifest)
+      const { location, metadataLocation } = request.document
+      await super.handle(request, location)
+      const manifest = await this._getManifest(metadataLocation.manifest)
       await this._createDocument(request, manifest, request.document.registryData)
     }
+    this.linkAndQueueTool(request, 'licensee')
     if (request.document.sourceInfo) {
       const sourceSpec = SourceSpec.fromObject(request.document.sourceInfo)
       this.linkAndQueue(request, 'source', sourceSpec.toEntitySpec())
@@ -64,7 +65,7 @@ class NuGetExtract extends AbstractClearlyDefinedProcessor {
     if (registryData && registryData.published)
       request.document.releaseDate = new Date(registryData.published).toISOString()
     // Add source info
-    const nuspec = await this._getNuspec(originalDocument.location.nuspec)
+    const nuspec = await this._getNuspec(originalDocument.metadataLocation.nuspec)
     const sourceInfo = await this._discoverSource(manifest, nuspec)
     if (sourceInfo) request.document.sourceInfo = sourceInfo
   }
