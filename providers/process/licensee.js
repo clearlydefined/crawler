@@ -29,7 +29,7 @@ class LicenseeProcessor extends BaseHandler {
   }
 
   async handle(request) {
-    if (!(await this._versionPromise)) return request.markSkip('Licensee not found')
+    if (!(await this._versionPromise)) return request.markSkip('Licensee not properly configured')
     const { spec } = super._process(request)
     this.addBasicToolLinks(request, spec)
     await this._createDocument(request)
@@ -50,19 +50,23 @@ class LicenseeProcessor extends BaseHandler {
   async _run(request) {
     const parameters = ['--json', '--no-readme']
     const root = request.document.location
-    const paths = [root, ...(await promisify(dir.subdirs)(root))].map(path =>
-      path.slice(root.length).replace(/^[\/\\]+/g, '')
-    )
-    const results = await Promise.all(paths.map(throat(10, path => this._runOnFolder(path, root, parameters))))
-    const licenses = uniqBy(flatten(results.map(result => result.licenses)), 'spdx_id')
-    const matched_files = flatten(results.map(result => result.matched_files))
-    return {
-      version: this.schemaVersion,
-      parameters: parameters,
-      output: {
-        contentType: 'application/json',
-        content: { licenses, matched_files }
+    const paths = [root, ...(await promisify(dir.subdirs)(root))]
+      .map(path => path.slice(root.length).replace(/^[\/\\]+/g, ''))
+      .filter(path => path !== '.git' && !path.includes('.git/'))
+    try {
+      const results = await Promise.all(paths.map(throat(10, path => this._runOnFolder(path, root, parameters))))
+      const licenses = uniqBy(flatten(results.map(result => result.licenses)), 'spdx_id')
+      const matched_files = flatten(results.map(result => result.matched_files))
+      return {
+        version: this.schemaVersion,
+        parameters: parameters,
+        output: {
+          contentType: 'application/json',
+          content: { licenses, matched_files }
+        }
       }
+    } catch (exception) {
+      request.markDead('Error', exception ? exception.message : 'Licensee run failed')
     }
   }
 
@@ -78,7 +82,6 @@ class LicenseeProcessor extends BaseHandler {
           // TODO unclear what code will be returned if there is a real error so be resilient in the
           // handling of stdout
           if (error && error.code !== 1) {
-            request.markDead('Error', error ? error.message : 'Licensee run failed')
             return reject(error)
           }
           try {
@@ -86,7 +89,6 @@ class LicenseeProcessor extends BaseHandler {
             result.matched_files.forEach(file => (file.filename = `${folder ? folder + '/' : ''}${file.filename}`))
             resolve(result)
           } catch (exception) {
-            request.markDead('Error', exception ? exception.message : 'Licensee output non-JSON')
             return reject(exception)
           }
         }
