@@ -6,7 +6,7 @@ const fs = require('fs')
 const path = require('path')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
 const SourceSpec = require('../../lib/sourceSpec')
-const { get, isArray } = require('lodash')
+const { get, isArray, merge } = require('lodash')
 
 class NpmExtract extends AbstractClearlyDefinedProcessor {
   constructor(options, sourceFinder) {
@@ -84,7 +84,7 @@ class NpmExtract extends AbstractClearlyDefinedProcessor {
 
   async _createDocument(request, manifest, registryData) {
     // setup the manifest to be the new document for the request
-    request.document = { ...this.clone(request.document), 'package.json': manifest, registryData }
+    request.document = merge(this.clone(request.document), { 'package.json': manifest, registryData })
     const sourceInfo = await this._discoverSource(manifest, registryData.manifest)
     if (sourceInfo) request.document.sourceInfo = sourceInfo
   }
