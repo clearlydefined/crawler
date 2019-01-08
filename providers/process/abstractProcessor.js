@@ -54,7 +54,7 @@ class AbstractProcessor extends BaseHandler {
    * @returns {String[]} - location-relative paths of interesting files found. Note that all paths
    * are normalized to use '/' as the separator
    */
-  async getInterestingFiles(location) {
+  async filterFiles(location) {
     const fullList = await this.getFiles(location)
     const exclusions = ['.git']
     const filteredList = fullList.filter(file => {

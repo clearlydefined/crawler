@@ -35,7 +35,7 @@ class FossologyProcessor extends AbstractProcessor {
 
   async _createDocument(request) {
     const nomosOutput = await this._runNomos(request)
-    const files = await this.getInterestingFiles(request.document.location)
+    const files = await this.filterFiles(request.document.location)
     const copyrightOutput = await this._runCopyright(request, files, request.document.location)
     const monkOutput = await this._runMonk(request, files, request.document.location)
     request.document = this.clone(request.document)
