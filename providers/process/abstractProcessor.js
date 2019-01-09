@@ -13,7 +13,7 @@ const { trimAllParents } = require('../../lib/utils')
 
 class AbstractProcessor extends BaseHandler {
   get schemaVersion() {
-    return '0.0.0'
+    return '0.1.0'
   }
 
   _computeToken(content) {
