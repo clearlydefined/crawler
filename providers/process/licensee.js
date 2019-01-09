@@ -3,7 +3,7 @@
 
 const AbstractProcessor = require('./abstractProcessor')
 const { exec } = require('child_process')
-const { flatten, uniqBy } = require('lodash')
+const { flatten, merge, uniqBy } = require('lodash')
 const path = require('path')
 const dir = require('node-dir')
 const { promisify } = require('util')
@@ -39,7 +39,7 @@ class LicenseeProcessor extends AbstractProcessor {
     const record = await this._run(request)
     if (!record) return
     const location = request.document.location
-    request.document = { ...this.clone(request.document), licensee: record }
+    request.document = merge(this.clone(request.document), { licensee: record })
     const toAttach = record.output.content.matched_files.map(file => file.filename)
     this.attachFiles(request.document, toAttach, location)
   }
