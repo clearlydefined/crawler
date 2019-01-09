@@ -6,6 +6,7 @@ const { promisify } = require('util')
 const fs = require('fs')
 const path = require('path')
 const yaml = require('js-yaml')
+const { merge } = require('lodash')
 
 class SourceExtract extends AbstractClearlyDefinedProcessor {
   get schemaVersion() {
@@ -24,7 +25,7 @@ class SourceExtract extends AbstractClearlyDefinedProcessor {
   async handle(request) {
     await super.handle(request)
     const location = request.document.location
-    request.document = { ...this.clone(request.document), releaseDate: request.document.releaseDate }
+    request.document = merge(this.clone(request.document), { releaseDate: request.document.releaseDate })
     const clearlyFile = path.join(location, 'clearly.yaml')
     if (!fs.existsSync(clearlyFile)) return
     const content = await promisify(fs.readFileSync)(clearlyFile)
