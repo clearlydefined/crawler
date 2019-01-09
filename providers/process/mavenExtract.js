@@ -8,7 +8,7 @@ const mavenCentral = require('../../lib/mavenCentral')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
 const SourceSpec = require('../../lib/sourceSpec')
 const parseString = require('xml2js').parseString
-const { get } = require('lodash')
+const { get, merge } = require('lodash')
 
 class MavenExtract extends AbstractClearlyDefinedProcessor {
   constructor(options, sourceFinder) {
@@ -116,7 +116,7 @@ class MavenExtract extends AbstractClearlyDefinedProcessor {
 
   async _createDocument(request, spec, manifest, registryData) {
     // setup the manifest to be the new document for the request
-    request.document = { ...this.clone(request.document), manifest, registryData }
+    request.document = merge(this.clone(request.document), { manifest, registryData })
     // Add interesting info
     if (registryData.timestamp) request.document.releaseDate = new Date(registryData.timestamp).toISOString()
     // Add source info

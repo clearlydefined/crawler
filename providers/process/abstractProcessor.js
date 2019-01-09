@@ -49,6 +49,7 @@ class AbstractProcessor extends BaseHandler {
    * @returns {String[]} - full file system paths of all files found
    */
   getFiles(location) {
+    if (!fs.statSync(location).isDirectory()) return []
     return nodeDir(location)
   }
 
