@@ -102,9 +102,10 @@ class FossologyProcessor extends AbstractProcessor {
     })
   }
 
+  // eslint-disable-next-line no-unused-vars
   async _runMonk(request, files, root) {
     // TODO can't actually run Monk until the license database is factored out
-    return { request, files, root }
+    return null
     // const parameters = ['-J']
     // const output = await this._visitFiles(files, path => this._runMonkOnFile(request, path, parameters))
     // TODO figure out the format of the Monk output and correctly aggregate and adjust paths etc.
@@ -136,7 +137,7 @@ class FossologyProcessor extends AbstractProcessor {
       this._monkVersion = await this._detectMonkVersion()
       // Treat the NOMOS version as the global FOSSology tool version
       this._toolVersion = this._nomosVersion
-      this._schemaVersion = this.aggregateVersions(this._schemaVersion, this.toolVersion, this.configVersion)
+      this._schemaVersion = this.aggregateVersions([this._schemaVersion, this.toolVersion, this.configVersion])
       return this._schemaVersion
     } catch (error) {
       this.logger.log(`Could not find FOSSology tool version: ${error.message}`)
