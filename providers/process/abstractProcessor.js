@@ -12,8 +12,66 @@ const nodeDir = promisify(require('node-dir').files)
 const { trimAllParents } = require('../../lib/utils')
 
 class AbstractProcessor extends BaseHandler {
-  get schemaVersion() {
+  constructor(options) {
+    super(options)
+    this._schemaVersion = this.aggregateVersions(
+      this._collectClasses().map(entry => entry.schemaVersion || entry.toolVersion)
+    )
+  }
+
+  /**
+   * The version of this tool. Override and set or detect as appropriate.
+   * Override is required if this tool produces output.
+   */
+  get toolVersion() {
     return '0.1.0'
+  }
+
+  /**
+   * The version of the configuration of this tool relative to the version of the tool
+   * For example. Increment when parameters change
+   * Reset when tool version increments.
+   */
+  get configVersion() {
+    return '0.0.0'
+  }
+
+  /**
+   * The name of this tool. Used to construct the urn for the output.
+   * Override is required if this tool produces output.
+   */
+  get toolName() {
+    return ''
+  }
+
+  // Collect and return the classes related to this object. The returned array is in hierarchical order starting
+  // with the deepest subclass and not including Object
+  _collectClasses() {
+    const result = []
+    let current = Object.getPrototypeOf(this)
+    while (current.constructor.name !== 'Object') {
+      result.push(current)
+      current = Object.getPrototypeOf(current)
+    }
+    return result
+  }
+
+  // Helper to take merge multiple semvers into one. This is useful where one handler is made up of
+  // multiple tools. The handler's version can be the sum of its composite tools versions
+  aggregateVersions(versions, errorRoot) {
+    return versions
+      .reduce(
+        (result, version) => {
+          if (!version) return result
+          if (typeof version !== 'string') throw new Error(`Invalid processor version ${version}`)
+          const parts = version.split('.')
+          if (parts.length !== 3 || parts.some(part => isNaN(+part))) throw new Error(`${errorRoot}: ${version}`)
+          for (let i = 0; i < 3; i++) result[i] += +parts[i]
+          return result
+        },
+        [0, 0, 0]
+      )
+      .join('.')
   }
 
   _computeToken(content) {
@@ -80,7 +138,7 @@ class AbstractProcessor extends BaseHandler {
   }
 
   shouldProcess(request) {
-    return request.policy.shouldProcess(request, this.schemaVersion)
+    return request.policy.shouldProcess(request, this._schemaVersion)
   }
 
   shouldTraverse(request) {
@@ -92,7 +150,8 @@ class AbstractProcessor extends BaseHandler {
   }
 
   handle(request) {
-    set(request, 'document._metadata.version', this.schemaVersion || 1)
+    set(request, 'document._metadata.schemaVersion', this._schemaVersion || '1.0.0')
+    set(request, 'document._metadata.toolVersion', this.toolVersion || '1.0.0')
     const spec = this.toSpec(request)
     this.addBasicToolLinks(request, spec)
   }
@@ -113,14 +172,14 @@ class AbstractProcessor extends BaseHandler {
     request.linkResource('self', this.getUrnFor(request, spec))
     // create a new URN for the tool siblings. This should not have a version but should have the tool name
     const newSpec = new EntitySpec(spec.type, spec.provider, spec.namespace, spec.name, spec.revision, spec.tool)
-    newSpec.tool = newSpec.tool || this.toolSpec.tool
+    newSpec.tool = newSpec.tool || this.toolName
     delete newSpec.toolVersion
     request.linkSiblings(newSpec.toUrn())
   }
 
   getUrnFor(request, spec = null) {
     spec = spec || this.toSpec(request)
-    const newSpec = Object.assign(Object.create(spec), spec, this.toolSpec)
+    const newSpec = EntitySpec.fromObject({ ...spec, tool: this.toolName, toolVersion: this._schemaVersion })
     return newSpec.toUrn()
   }
 

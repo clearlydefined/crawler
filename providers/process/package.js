@@ -5,14 +5,6 @@ const AbstractProcessor = require('./abstractProcessor')
 const supportedTypes = ['npm', 'crate', 'maven', 'nuget', 'gem', 'pypi']
 
 class PackageProcessor extends AbstractProcessor {
-  get schemaVersion() {
-    return '0.0.0'
-  }
-
-  get toolSpec() {
-    return { tool: 'cdpackagetraversal', toolVersion: this.schemaVersion }
-  }
-
   shouldFetch() {
     return false
   }

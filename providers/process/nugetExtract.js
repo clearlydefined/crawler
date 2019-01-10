@@ -15,12 +15,8 @@ class NuGetExtract extends AbstractClearlyDefinedProcessor {
     this.sourceFinder = sourceFinder
   }
 
-  get schemaVersion() {
+  get toolVersion() {
     return '1.2.0'
-  }
-
-  get toolSpec() {
-    return { tool: 'clearlydefined', toolVersion: this.schemaVersion }
   }
 
   canHandle(request) {

@@ -9,14 +9,6 @@ const Request = require('ghcrawler').request
 const requestRetry = require('requestretry').defaults({ json: true, maxAttempts: 3, fullResponse: false })
 
 class TopProcessor extends AbstractProcessor {
-  get schemaVersion() {
-    return '0.0.0'
-  }
-
-  get toolSpec() {
-    return { tool: 'toploader', toolVersion: this.schemaVersion }
-  }
-
   canHandle(request) {
     const spec = this.toSpec(request)
     return (

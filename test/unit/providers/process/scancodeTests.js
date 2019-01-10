@@ -51,7 +51,7 @@ describe('ScanCode process', () => {
   it('should handle gems', async () => {
     const { request, processor } = setup('2.9.8/gem.json')
     await processor.handle(request)
-    expect(request.document._metadata.version).to.equal('1.2.0')
+    expect(request.document._metadata.toolVersion).to.equal('1.2.0')
     expect(processor.attachFiles.args[0][1]).to.have.members([])
   })
 
