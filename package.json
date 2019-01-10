@@ -4,6 +4,7 @@
   "description": "A crawler that walks projects and packages looking for data of interest to the ClearlyDefined project.",
   "main": "./index.js",
   "scripts": {
+    "start": "node ./index.js",
     "test": "nyc mocha \"test/unit/**/*.js\" && eslint .",
     "integration": "mocha \"test/integration/**/*.js\" --timeout 20000"
   },
