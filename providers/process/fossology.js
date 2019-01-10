@@ -1,27 +1,24 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler')
+const AbstractProcessor = require('./abstractProcessor')
 const { exec } = require('child_process')
-const path = require('path')
-const { promisify } = require('util')
-const du = require('du')
 const bufferReplace = require('buffer-replace')
-const getFiles = promisify(require('node-dir').files)
+const path = require('path')
 
-class FossologyProcessor extends BaseHandler {
+class FossologyProcessor extends AbstractProcessor {
   constructor(options) {
     super(options)
     // Kick off version detection but don't wait. We'll wait before processing anything
     this._versionPromise = this._detectVersion()
   }
 
-  get schemaVersion() {
+  get toolVersion() {
     return this._toolVersion
   }
 
-  get toolSpec() {
-    return { tool: 'fossology', toolVersion: this.schemaVersion }
+  get toolName() {
+    return 'fossology'
   }
 
   canHandle(request) {
@@ -30,13 +27,21 @@ class FossologyProcessor extends BaseHandler {
 
   async handle(request) {
     if (!(await this._versionPromise)) return request.markSkip('FOSSology tools not properly configured')
-    const { document, spec } = super._process(request)
-    const size = await this._computeSize(document)
-    request.addMeta({ k: size.k, fileCount: size.count })
-    this.addBasicToolLinks(request, spec)
+    super.handle(request)
     this.logger.info(`Analyzing ${request.toString()} using FOSSology. input: ${request.document.location}`)
     await this._createDocument(request)
     return request
+  }
+
+  async _createDocument(request) {
+    const nomosOutput = await this._runNomos(request)
+    const files = await this.filterFiles(request.document.location)
+    const copyrightOutput = await this._runCopyright(request, files, request.document.location)
+    const monkOutput = await this._runMonk(request, files, request.document.location)
+    request.document = this.clone(request.document)
+    if (nomosOutput) request.document.nomos = nomosOutput
+    if (copyrightOutput) request.document.copyright = copyrightOutput
+    if (monkOutput) request.document.monk = monkOutput
   }
 
   async _runNomos(request) {
@@ -63,7 +68,6 @@ class FossologyProcessor extends BaseHandler {
 
   async _visitFiles(files, runner) {
     const results = []
-    files = files.filter(file => file && !file.includes('/.git/'))
     for (const file of files) {
       try {
         const output = await runner(file)
@@ -75,11 +79,11 @@ class FossologyProcessor extends BaseHandler {
     return { contentType: 'application/json', content: results }
   }
 
-  async _runCopyright(request, files) {
+  async _runCopyright(request, files, root) {
     const parameters = ['-J']
-    const output = await this._visitFiles(files, file => this._runCopyrightOnFile(request, file, parameters))
-    const base = request.document.location + '/'
-    output.content.forEach(entry => (entry.path = entry.path.replace(base, '')))
+    const output = await this._visitFiles(files, file =>
+      this._runCopyrightOnFile(request, path.join(root, file), parameters)
+    )
     return { version: this._copyrightVersion, parameters, output }
   }
 
@@ -98,9 +102,9 @@ class FossologyProcessor extends BaseHandler {
     })
   }
 
-  async _runMonk(request, files) {
+  async _runMonk(request, files, root) {
     // TODO can't actually run Monk until the license database is factored out
-    return null
+    return { request, files, root }
     // const parameters = ['-J']
     // const output = await this._visitFiles(files, path => this._runMonkOnFile(request, path, parameters))
     // TODO figure out the format of the Monk output and correctly aggregate and adjust paths etc.
@@ -124,37 +128,16 @@ class FossologyProcessor extends BaseHandler {
     })
   }
 
-  async _computeSize(document) {
-    let count = 0
-    const bytes = await promisify(du)(document.location, {
-      filter: file => {
-        if (path.basename(file) === '.git') return false
-        count++
-        return true
-      }
-    })
-    return { k: Math.round(bytes / 1024), count }
-  }
-
-  _getUrn(spec) {
-    const newSpec = Object.assign(Object.create(spec), spec, { tool: 'fossology', toolVersion: this.toolVersion })
-    return newSpec.toUrn()
-  }
-
   async _detectVersion() {
     if (this._versionPromise) return this._versionPromise
     try {
-      // base is used to account for any high level changes in the way the FOSSology tools are run or configured
-      const base = '0.0.0'
       this._nomosVersion = await this._detectNomosVersion()
       this._copyrightVersion = await this._detectCopyrightVersion()
       this._monkVersion = await this._detectMonkVersion()
-      this._toolVersion = BaseHandler._aggregateVersions(
-        [this._nomosVersion, this._copyrightVersion, this._monkVersion],
-        'FOSSology tool version misformatted',
-        base
-      )
-      return this._toolVersion
+      // Treat the NOMOS version as the global FOSSology tool version
+      this._toolVersion = this._nomosVersion
+      this._schemaVersion = this.aggregateVersions(this._schemaVersion, this.toolVersion, this.configVersion)
+      return this._schemaVersion
     } catch (error) {
       this.logger.log(`Could not find FOSSology tool version: ${error.message}`)
       return null
@@ -190,17 +173,6 @@ class FossologyProcessor extends BaseHandler {
   // built from the same tree at the same time.
   _detectCopyrightVersion() {
     return '0.0.0'
-  }
-
-  async _createDocument(request) {
-    const files = await getFiles(request.document.location)
-    const nomosOutput = await this._runNomos(request)
-    const copyrightOutput = await this._runCopyright(request, files)
-    const monkOutput = await this._runMonk(request, files)
-    request.document = { _metadata: request.document._metadata }
-    if (nomosOutput) request.document.nomos = nomosOutput
-    if (copyrightOutput) request.document.copyright = copyrightOutput
-    if (monkOutput) request.document.monk = monkOutput
   }
 }
 

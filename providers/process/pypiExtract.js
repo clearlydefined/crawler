@@ -1,23 +1,19 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler')
+const AbstractClearlyDefinedProcessor = require('./abstractClearlyDefinedProcessor')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
 const SourceSpec = require('../../lib/sourceSpec')
-const { get } = require('lodash')
+const { get, merge } = require('lodash')
 
-class PyPiExtract extends BaseHandler {
+class PyPiExtract extends AbstractClearlyDefinedProcessor {
   constructor(options, sourceFinder) {
     super(options)
     this.sourceFinder = sourceFinder
   }
 
-  get schemaVersion() {
+  get toolVersion() {
     return '1.1.1'
-  }
-
-  get toolSpec() {
-    return { tool: 'clearlydefined', toolVersion: this.schemaVersion }
   }
 
   canHandle(request) {
@@ -27,10 +23,9 @@ class PyPiExtract extends BaseHandler {
 
   async handle(request) {
     if (this.isProcessing(request)) {
-      const { spec } = super._process(request)
-      this.addBasicToolLinks(request, spec)
+      await super.handle(request)
+      const spec = this.toSpec(request)
       await this._createDocument(request, spec, request.document.registryData)
-      await BaseHandler.attachInterestinglyNamedFiles(request.document, request.document.location)
     }
     this.linkAndQueueTool(request, 'licensee')
     this.linkAndQueueTool(request, 'fossology')
@@ -57,6 +52,10 @@ class PyPiExtract extends BaseHandler {
   }
 
   async _createDocument(request, spec, registryData) {
+    request.document = merge(this.clone(request.document), {
+      registryData,
+      declaredLicense: request.document.declaredLicense
+    })
     const sourceInfo = await this._discoverSource(spec.revision, registryData)
     if (sourceInfo) request.document.sourceInfo = sourceInfo
   }

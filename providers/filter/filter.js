@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler')
+const AbstractProcessor = require('../process/abstractProcessor')
 
-class StandardFilter extends BaseHandler {
+class StandardFilter extends AbstractProcessor {
   constructor(options, processors) {
     super(options)
     this.processors = processors

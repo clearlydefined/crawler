@@ -1,30 +1,30 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler')
+const AbstractFetch = require('./abstractFetch')
 const { exec } = require('child_process')
 const SourceSpec = require('../../lib/sourceSpec')
 const { clone } = require('lodash')
 const rimraf = require('rimraf')
 
-class GitCloner extends BaseHandler {
+class GitCloner extends AbstractFetch {
   canHandle(request) {
     const spec = this.toSpec(request)
     return request.type !== 'source' && spec && spec.type === 'git'
   }
 
   async handle(request) {
+    super.handle(request)
     const spec = this.toSpec(request)
     const sourceSpec = SourceSpec.fromObject(spec)
     const options = { version: sourceSpec.revision }
-    const dir = this._createTempDir(request)
-
+    const dir = this.createTempDir(request)
     const repoSize = await this._cloneRepo(sourceSpec.toUrl(), dir.name, spec.name, options.version)
     request.addMeta({ gitSize: repoSize })
     const releaseDate = await this._getDate(dir.name, spec.name)
     await this._deleteGitDatabase(dir.name, spec.name)
     request.contentOrigin = 'origin'
-    request.document = this._createDocument(dir.name + '/' + spec.name, repoSize, releaseDate)
+    request.document = this._createDocument(dir.name + '/' + spec.name, repoSize, releaseDate, options.version)
     if (spec.provider === 'github') {
       request.casedSpec = clone(spec)
       request.casedSpec.namespace = spec.namespace.toLowerCase()
@@ -33,9 +33,9 @@ class GitCloner extends BaseHandler {
     return request
   }
 
-  _createDocument(location, size, releaseDate) {
+  _createDocument(location, size, releaseDate, commit) {
     // Create a simple document that records the location and the size of the repo that was fetched
-    return { location, size, releaseDate }
+    return { location, size, releaseDate, hashes: { gitSha: commit } }
   }
 
   _cloneRepo(sourceUrl, dirName, specName, commit) {

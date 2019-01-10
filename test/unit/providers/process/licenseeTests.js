@@ -8,7 +8,6 @@ const sinon = require('sinon')
 const sandbox = sinon.createSandbox()
 const fs = require('fs')
 const { request } = require('ghcrawler')
-const BaseHandler = require('../../../../lib/baseHandler')
 
 let Handler
 
@@ -18,22 +17,31 @@ describe('Licensee process', () => {
     await processor.handle(request)
     const { document } = request
     expect(document.licensee.output.content.matched_files.length).to.equal(4)
-    expect(BaseHandler.attachFiles.args[0][1]).to.have.members([
+    expect(processor.attachFiles.args[0][1]).to.have.members([
       'LICENSE',
       'package.json',
       'subfolder/LICENSE.foo',
       'subfolder/LICENSE.bar'
     ])
-    expect(BaseHandler.attachFiles.args[0][2]).to.equal('test/fixtures/licensee/9.10.1/folder1')
+    expect(processor.attachFiles.args[0][2]).to.equal('test/fixtures/licensee/9.10.1/folder1')
   })
 
   it('should handle empty matched files list', async () => {
     const { request, processor } = setup('9.10.1/folder2')
     await processor.handle(request)
     const { document } = request
-    expect(document.licensee.version).to.equal('1.2')
+    expect(document.licensee.version).to.equal('1.2.0')
     expect(document.licensee.output.content.matched_files.length).to.equal(0)
-    expect(BaseHandler.attachFiles.args[0][1].length).to.equal(0)
+    expect(processor.attachFiles.args[0][1].length).to.equal(0)
+  })
+
+  it('should exec error', async () => {
+    const { request, processor } = setup('9.10.1/folder2', new Error('test error'))
+    await processor.handle(request)
+    expect(request.message).to.equal('test error')
+    expect(request.outcome).to.equal('Error')
+    expect(request.processControl).to.equal('skip')
+    expect(request.crawler.storeDeadletter.calledOnce).to.be.true
   })
 
   it('should skip if Licensee not found', async () => {
@@ -43,7 +51,7 @@ describe('Licensee process', () => {
   })
 
   beforeEach(function() {
-    const resultBox = { error: null, versionResult: '1.2', versionError: null }
+    const resultBox = { error: null, versionResult: '1.2.0', versionError: null }
     const processStub = {
       exec: (command, bufferLength, callback) => {
         if (command.includes('version')) return callback(resultBox.versionError, resultBox.versionResult)
@@ -53,7 +61,6 @@ describe('Licensee process', () => {
     }
     Handler = proxyquire('../../../../providers/process/licensee', { child_process: processStub })
     Handler._resultBox = resultBox
-    BaseHandler.attachFiles = sinon.stub()
   })
 
   afterEach(function() {
@@ -65,8 +72,10 @@ function setup(fixture, error, versionError) {
   const options = { logger: { log: sinon.stub() } }
   const testRequest = new request('npm', 'cd:/npm/npmjs/-/test/1.1')
   testRequest.document = { _metadata: { links: {} }, location: `test/fixtures/licensee/${fixture}` }
+  testRequest.crawler = { storeDeadletter: sinon.stub() }
   Handler._resultBox.error = error
   Handler._resultBox.versionError = versionError
   const processor = Handler(options)
+  processor.attachFiles = sinon.stub()
   return { request: testRequest, processor }
 }

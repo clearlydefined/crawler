@@ -1,26 +1,25 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler')
+const AbstractProcessor = require('./abstractProcessor')
 const { exec } = require('child_process')
 const fs = require('fs')
 const path = require('path')
 const { promisify } = require('util')
-const du = require('du')
 
-class ScanCodeProcessor extends BaseHandler {
+class ScanCodeProcessor extends AbstractProcessor {
   constructor(options) {
     super(options)
     // Kick off version detection but don't wait. We'll wait before processing anything
     this._versionPromise = this._detectVersion()
   }
 
-  get schemaVersion() {
+  get toolVersion() {
     return this._toolVersion
   }
 
-  get toolSpec() {
-    return { tool: 'scancode', toolVersion: this.schemaVersion }
+  get toolName() {
+    return 'scancode'
   }
 
   canHandle(request) {
@@ -29,16 +28,17 @@ class ScanCodeProcessor extends BaseHandler {
 
   async handle(request) {
     if (!(await this._versionPromise)) return request.markSkip('ScanCode not found')
-    const { document, spec } = super._process(request)
-    const size = await this._computeSize(document)
-    request.addMeta({ k: size.k, fileCount: size.count })
-    this.addBasicToolLinks(request, spec)
-    const file = this._createTempFile(request)
+    super.handle(request)
+    const file = this.createTempFile(request)
     await this._runScancode(request, file)
-    document._metadata.contentLocation = file.name
-    document._metadata.contentType = 'application/json'
-    document._metadata.releaseDate = request.document.releaseDate
-    await this._attachInterestingFiles(document, file.name, request.document.location)
+    const location = request.document.location
+    const releaseDate = request.document.releaseDate
+    request.document = this.clone(request.document)
+    const metadata = request.document._metadata
+    metadata.contentLocation = file.name
+    metadata.contentType = 'application/json'
+    metadata.releaseDate = releaseDate
+    await this._attachInterestingFiles(request.document, file.name, location)
     return request
   }
 
@@ -54,6 +54,7 @@ class ScanCodeProcessor extends BaseHandler {
         { maxBuffer: 5000 * 1024 }
       )
     } catch (error) {
+      // TODO see if the new version of ScanCode has a better way of differentiating errors
       if (this._isRealError(error) || this._hasRealErrors(file.name)) {
         request.markDead('Error', error ? error.message : 'ScanCode run failed')
         throw error
@@ -86,21 +87,7 @@ class ScanCodeProcessor extends BaseHandler {
       })
       return result
     }, [])
-    return BaseHandler.attachFiles(document, packages, root)
-  }
-
-  async _computeSize(document) {
-    let count = 0
-    const bytes = await promisify(du)(document.location, {
-      filter: file => {
-        if (path.basename(file) === '.git') {
-          return false
-        }
-        count++
-        return true
-      }
-    })
-    return { k: Math.round(bytes / 1024), count }
+    return this.attachFiles(document, packages, root)
   }
 
   // Workaround until https://github.com/nexB/scancode-toolkit/issues/983 is resolved
@@ -109,22 +96,20 @@ class ScanCodeProcessor extends BaseHandler {
   }
 
   // Scan the results file for any errors that are not just timeouts or other known errors
+  // TODO do we need to do this anymore
   _hasRealErrors(resultFile) {
     const results = JSON.parse(fs.readFileSync(resultFile))
-    return results.files.some(file =>
-      file.scan_errors.some(error => {
-        return !(
-          error.includes('ERROR: Processing interrupted: timeout after') ||
-          error.includes('ValueError:') ||
-          error.includes('package.json')
-        )
-      })
+    return results.files.some(
+      file =>
+        file.scan_errors &&
+        file.scan_errors.some(error => {
+          return !(
+            error.includes('ERROR: Processing interrupted: timeout after') ||
+            error.includes('ValueError:') ||
+            error.includes('package.json')
+          )
+        })
     )
-  }
-
-  _getUrn(spec) {
-    const newSpec = Object.assign(Object.create(spec), spec, { tool: 'scancode', toolVersion: this.toolVersion })
-    return newSpec.toUrn()
   }
 
   _detectVersion() {
@@ -132,8 +117,14 @@ class ScanCodeProcessor extends BaseHandler {
     this._versionPromise = new Promise(resolve => {
       exec(`cd ${this.options.installDir} && .${path.sep}scancode --version`, 1024, (error, stdout) => {
         if (error) this.logger.log(`Could not detect version of ScanCode: ${error.message}`)
-        this._toolVersion = error ? null : stdout.replace('ScanCode version ', '').trim()
-        resolve(this._toolVersion)
+        this._toolVersion = stdout.replace('ScanCode version ', '').trim()
+        this._schemaVersion = error
+          ? null
+          : this.aggregateVersions(
+              [this._schemaVersion, this.toolVersion, this.configVersion],
+              'Invalid ScanCode version'
+            )
+        resolve(this._schemaVersion)
       })
     })
     return this._versionPromise

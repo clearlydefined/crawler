@@ -1,27 +1,23 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler')
+const AbstractClearlyDefinedProcessor = require('./abstractClearlyDefinedProcessor')
 const EntitySpec = require('../../lib/entitySpec')
 const fs = require('fs')
 const mavenCentral = require('../../lib/mavenCentral')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
 const SourceSpec = require('../../lib/sourceSpec')
 const parseString = require('xml2js').parseString
-const { get } = require('lodash')
+const { get, merge } = require('lodash')
 
-class MavenExtract extends BaseHandler {
+class MavenExtract extends AbstractClearlyDefinedProcessor {
   constructor(options, sourceFinder) {
     super(options)
     this.sourceFinder = sourceFinder
   }
 
-  get schemaVersion() {
+  get toolVersion() {
     return '1.1.2'
-  }
-
-  get toolSpec() {
-    return { tool: 'clearlydefined', toolVersion: this.schemaVersion }
   }
 
   canHandle(request) {
@@ -32,13 +28,12 @@ class MavenExtract extends BaseHandler {
   // Coming in here we expect the request.document to have id, location and metadata properties.
   // Do interesting processing...
   async handle(request) {
+    // skip all the hard work if we are just traversing.
     if (this.isProcessing(request)) {
-      // skip all the hard work if we are just traversing.
-      const { spec } = super._process(request)
-      this.addBasicToolLinks(request, spec)
+      await super.handle(request)
+      const spec = this.toSpec(request)
       const manifest = await this._getManifest(request, request.document.location)
       await this._createDocument(request, spec, manifest, request.document.registryData)
-      await BaseHandler.attachInterestinglyNamedFiles(request.document, request.document.location)
     }
     if (request.document.sourceInfo) {
       const sourceSpec = SourceSpec.fromObject(request.document.sourceInfo)
@@ -78,7 +73,7 @@ class MavenExtract extends BaseHandler {
       parent.artifactId[0].trim(),
       parent.version[0].trim()
     )
-    const file = this._createTempFile(request)
+    const file = this.createTempFile(request)
     const code = await mavenCentral.fetchPom(spec, file.name)
     if (code === 404) return { summary: {}, poms: [] }
     return await this._getManifest(request, file.name)
@@ -117,7 +112,7 @@ class MavenExtract extends BaseHandler {
 
   async _createDocument(request, spec, manifest, registryData) {
     // setup the manifest to be the new document for the request
-    request.document = { _metadata: request.document._metadata, manifest, registryData }
+    request.document = merge(this.clone(request.document), { manifest, registryData })
     // Add interesting info
     if (registryData.timestamp) request.document.releaseDate = new Date(registryData.timestamp).toISOString()
     // Add source info

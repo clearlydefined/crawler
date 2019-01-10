@@ -3,11 +3,11 @@
 
 const chai = require('chai')
 const expect = chai.expect
-const extract = require('../../../../../providers/process/pypiExtract')
-const SourceSpec = require('../../../../../lib/sourceSpec')
+const extract = require('../../../../providers/process/gemExtract')
+const SourceSpec = require('../../../../lib/sourceSpec')
 const sinon = require('sinon')
 
-describe('pypiExtract source discovery', () => {
+describe('gemExtract source discovery', () => {
   it('handles no tags in GitHub', async () => {
     const finder = sinon.stub().callsFake(() => null)
     const extractor = extract({}, finder)
@@ -27,10 +27,10 @@ describe('pypiExtract source discovery', () => {
   it('handles manifest urls in the right order', async () => {
     const finder = sinon.stub().callsFake(sourceDiscovery())
     const extractor = extract({}, finder)
-    const manifest = createManifest(null, 'http://download', 'http://package')
+    const manifest = createManifest(null, 'http://change', 'http://doc')
     const sourceLocation = await extractor._discoverSource('13', manifest)
     expect(sourceLocation.revision).to.eq('42')
-    expect(sourceLocation.name).to.eq('download')
+    expect(sourceLocation.name).to.eq('change')
   })
 })
 
@@ -42,16 +42,24 @@ function sourceDiscovery() {
 
 const githubResults = {
   'http://bug': createSourceSpec('bug'),
+  'http://change': createSourceSpec('change'),
   'http://doc': createSourceSpec('doc'),
-  'http://download': createSourceSpec('download'),
+  'http://gem': createSourceSpec('gem'),
   'http://home': createSourceSpec('home'),
-  'http://package': createSourceSpec('package'),
-  'http://project': createSourceSpec('project'),
-  'http://release': createSourceSpec('release')
+  'http://mail': createSourceSpec('mail'),
+  'http://source': createSourceSpec('source')
 }
 
-function createManifest(bugtrack_url, docs_url, download_url, home_page, package_url, project_url, release_url) {
-  return { info: { bugtrack_url, docs_url, download_url, home_page, package_url, project_url, release_url } }
+function createManifest(
+  bug_tracker_uri,
+  changelog_uri,
+  documentation_uri,
+  gem_uri,
+  homepage_uri,
+  mailing_list_uri,
+  source_code_uri
+) {
+  return { bug_tracker_uri, changelog_uri, documentation_uri, gem_uri, homepage_uri, mailing_list_uri, source_code_uri }
 }
 
 function createSourceSpec(repo, revision) {
