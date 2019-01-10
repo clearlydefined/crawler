@@ -13,12 +13,12 @@ class FossologyProcessor extends AbstractProcessor {
     this._versionPromise = this._detectVersion()
   }
 
-  get schemaVersion() {
+  get toolVersion() {
     return this._toolVersion
   }
 
-  get toolSpec() {
-    return { tool: 'fossology', toolVersion: this.schemaVersion }
+  get toolName() {
+    return 'fossology'
   }
 
   canHandle(request) {
@@ -131,18 +131,13 @@ class FossologyProcessor extends AbstractProcessor {
   async _detectVersion() {
     if (this._versionPromise) return this._versionPromise
     try {
-      // base is used to account for any high level changes in the way the FOSSology tools are run or configured
-      const base = '0.0.0'
       this._nomosVersion = await this._detectNomosVersion()
       this._copyrightVersion = await this._detectCopyrightVersion()
       this._monkVersion = await this._detectMonkVersion()
-      // Aggregate all the discovered versions including that of the superclass chain (pre-computed `_toolVersion`) and
-      // a base version for the FOSSology support itself
-      this._toolVersion = this.aggregateVersions(
-        [base, this._toolVersion, this._nomosVersion, this._copyrightVersion, this._monkVersion],
-        'FOSSology tool version misformatted'
-      )
-      return this._toolVersion
+      // Treat the NOMOS version as the global FOSSology tool version
+      this._toolVersion = this._nomosVersion
+      this._schemaVersion = this.aggregateVersions(this._schemaVersion, this.toolVersion, this.configVersion)
+      return this._schemaVersion
     } catch (error) {
       this.logger.log(`Could not find FOSSology tool version: ${error.message}`)
       return null

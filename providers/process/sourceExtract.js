@@ -9,12 +9,8 @@ const yaml = require('js-yaml')
 const { merge } = require('lodash')
 
 class SourceExtract extends AbstractClearlyDefinedProcessor {
-  get schemaVersion() {
+  get toolVersion() {
     return '1.1.0'
-  }
-
-  get toolSpec() {
-    return { tool: 'clearlydefined', toolVersion: this.schemaVersion }
   }
 
   canHandle(request) {

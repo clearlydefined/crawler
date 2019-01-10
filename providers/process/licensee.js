@@ -16,12 +16,12 @@ class LicenseeProcessor extends AbstractProcessor {
     this._versionPromise = this._detectVersion()
   }
 
-  get schemaVersion() {
+  get toolVersion() {
     return this._toolVersion
   }
 
-  get toolSpec() {
-    return { tool: 'licensee', toolVersion: this.schemaVersion }
+  get toolName() {
+    return 'licensee'
   }
 
   canHandle(request) {
@@ -55,7 +55,7 @@ class LicenseeProcessor extends AbstractProcessor {
       const licenses = uniqBy(flatten(results.map(result => result.licenses)), 'spdx_id')
       const matched_files = flatten(results.map(result => result.matched_files))
       return {
-        version: this.schemaVersion,
+        version: this.toolVersion,
         parameters: parameters,
         output: {
           contentType: 'application/json',
@@ -98,10 +98,14 @@ class LicenseeProcessor extends AbstractProcessor {
     this._versionPromise = new Promise(resolve => {
       exec('licensee version', 1024, (error, stdout) => {
         if (error) this.logger.log(`Could not detect version of Licensee: ${error.message}`)
-        this._toolVersion = error
+        this._toolVersion = stdout.trim()
+        this._schemaVersion = error
           ? null
-          : this.aggregateVersions([this._toolVersion, stdout.trim()], 'Invalid Licensee version')
-        resolve(this._toolVersion)
+          : this.aggregateVersions(
+              [this._schemaVersion, this.toolVersion, this.configVersion],
+              'Invalid Licensee version'
+            )
+        resolve(this._schemaVersion)
       })
     })
     return this._versionPromise

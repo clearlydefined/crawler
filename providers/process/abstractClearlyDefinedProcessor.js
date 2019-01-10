@@ -10,8 +10,12 @@ const du = require('du')
 const { trimParents } = require('../../lib/utils')
 
 class AbstractClearlyDefinedProcessor extends AbstractProcessor {
-  get schemaVersion() {
+  get toolVersion() {
     return '0.0.0'
+  }
+
+  get toolName() {
+    return 'clearlydefined'
   }
 
   async handle(request, location = request.document.location, interestingRoot = '') {

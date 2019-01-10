@@ -14,6 +14,52 @@ const map = require('../../../../config/map')
 
 let Handler
 
+describe('AbstractProcessor aggregateVersions', () => {
+  it('version aggregation with one version', () => {
+    const result = new AbstractProcessor({}).aggregateVersions(['1.2.3'], 'should not happen')
+    expect(result).to.equal('1.2.3')
+  })
+
+  it('version aggregation with multiple versions', () => {
+    const result = new AbstractProcessor({}).aggregateVersions(['1.2.3', '2.3.4'], 'should not happen')
+    expect(result).to.equal('3.5.7')
+  })
+
+  it('version aggregation should fail with long versions', () => {
+    try {
+      new AbstractProcessor({}).aggregateVersions(['1.2.3', '2.3.4.5'], 'should not happen')
+      expect(false).to.be.true
+    } catch (error) {
+      expect(error.message.includes('should not happen')).to.be.true
+    }
+  })
+
+  it('version aggregation should fail with non-numeric versions', () => {
+    try {
+      new AbstractProcessor({}).aggregateVersions(['1.2.3', '2.3.b34'], 'should not happen')
+      expect(false).to.be.true
+    } catch (error) {
+      expect(error.message.includes('should not happen')).to.be.true
+    }
+  })
+
+  it('version collection includes all superclasses', () => {
+    const foo = class Foo extends AbstractProcessor {
+      get toolVersion() {
+        return '1.2.3'
+      }
+    }
+    const bar = class Bar extends foo {
+      get toolVersion() {
+        return '2.3.4'
+      }
+    }
+    const handler = new bar({})
+
+    expect(handler._schemaVersion).to.equal('3.6.7') // AbstractProcessor is at '0.1.0' now ;)
+  })
+})
+
 describe('AbstractProcessor attach files', () => {
   it('links and queues tools', () => {
     const request = new Request('npm', 'cd:/npm/npmjs/-/redie/0.3.0')
