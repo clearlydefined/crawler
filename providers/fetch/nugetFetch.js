@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
+const AbstractFetch = require('./abstractFetch')
 const { trimStart, clone, get } = require('lodash')
-const BaseHandler = require('../../lib/baseHandler')
 const fs = require('fs')
 const path = require('path')
 const { promisify } = require('util')
@@ -12,7 +12,7 @@ const providerMap = {
   nuget: 'https://api.nuget.org'
 }
 
-class NuGetFetch extends BaseHandler {
+class NuGetFetch extends AbstractFetch {
   canHandle(request) {
     const spec = this.toSpec(request)
     return spec && spec.provider === 'nuget'
@@ -27,13 +27,19 @@ class NuGetFetch extends BaseHandler {
     const manifest = registryData ? await this._getManifest(registryData.catalogEntry) : null
     const nuspec = manifest ? await this._getNuspec(spec) : null
     if (!registryData || !nuspec || !manifest) return request.markSkip('Missing  ')
-    const dir = this._createTempDir(request)
-    const location = await this._persistMetadata(dir, manifest, nuspec)
-    location.nupkg = registryData ? await this._getNupkg(dir, registryData.packageContent) : null
+    super.handle(request)
+    const dir = this.createTempDir(request)
+    const metadataLocation = await this._persistMetadata(dir, manifest, nuspec)
+    const zip = path.join(dir.name, 'nupkg.zip')
+    await this._getPackage(zip, registryData.packageContent)
+    const location = path.join(dir.name, 'nupkg')
+    await this.decompress(zip, location)
     request.document = {
       registryData,
       location,
-      releaseDate: registryData ? new Date(registryData.published).toISOString() : null
+      metadataLocation,
+      releaseDate: registryData ? new Date(registryData.published).toISOString() : null,
+      hashes: await this.computeHashes(zip)
     }
     request.contentOrigin = 'origin'
     if (get(manifest, 'id')) {
@@ -50,12 +56,9 @@ class NuGetFetch extends BaseHandler {
     // Example: https://api.nuget.org/v3/registration3/moq/4.8.2.json and follow catalogEntry
     const { body, statusCode } = await requestRetry.get(
       `${baseUrl}/v3/registration3/${spec.name.toLowerCase()}/${spec.revision}.json`,
-      {
-        json: true
-      }
+      { json: true }
     )
-    if (statusCode !== 200 || !body) return null
-    return body
+    return statusCode !== 200 || !body ? null : body
   }
 
   // https://docs.microsoft.com/en-us/nuget/reference/package-versioning#normalized-version-numbers
@@ -80,25 +83,18 @@ class NuGetFetch extends BaseHandler {
     return null
   }
 
-  async _getNupkg(dir, packageContentUrl) {
-    const zip = path.join(dir.name, 'nupkg.zip')
-    const nupkg = path.join(dir.name, 'nupkg')
+  async _getPackage(zip, packageContentUrl) {
     return new Promise((resolve, reject) => {
       requestRetry
-        .get(packageContentUrl, {
-          json: false,
-          encoding: null
-        })
+        .get(packageContentUrl, { json: false, encoding: null })
         .pipe(fs.createWriteStream(zip))
-        .on('finish', async () => {
-          await this.decompress(zip, nupkg)
-          resolve(nupkg)
-        })
+        .on('finish', () => resolve(null))
         .on('error', reject)
     })
   }
 
   async _getManifest(catalogEntryUrl) {
+    // Example: https://api.nuget.org/v3/catalog0/data/2018.10.29.04.23.22/xunit.core.2.4.1.json
     const { body, statusCode } = await requestRetry.get(catalogEntryUrl)
     if (statusCode !== 200) return null
     return JSON.parse(body)

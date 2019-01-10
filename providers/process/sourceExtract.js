@@ -1,19 +1,16 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler')
+const AbstractClearlyDefinedProcessor = require('./abstractClearlyDefinedProcessor')
 const { promisify } = require('util')
 const fs = require('fs')
 const path = require('path')
 const yaml = require('js-yaml')
+const { merge } = require('lodash')
 
-class SourceExtract extends BaseHandler {
-  get schemaVersion() {
+class SourceExtract extends AbstractClearlyDefinedProcessor {
+  get toolVersion() {
     return '1.1.0'
-  }
-
-  get toolSpec() {
-    return { tool: 'clearlydefined', toolVersion: this.schemaVersion }
   }
 
   canHandle(request) {
@@ -22,14 +19,9 @@ class SourceExtract extends BaseHandler {
   }
 
   async handle(request) {
-    const { document, spec } = super._process(request)
-    this.addBasicToolLinks(request, spec)
+    await super.handle(request)
     const location = request.document.location
-    request.document = {
-      _metadata: document._metadata,
-      releaseDate: request.document.releaseDate
-    }
-    await BaseHandler.attachInterestinglyNamedFiles(request.document, location)
+    request.document = merge(this.clone(request.document), { releaseDate: request.document.releaseDate })
     const clearlyFile = path.join(location, 'clearly.yaml')
     if (!fs.existsSync(clearlyFile)) return
     const content = await promisify(fs.readFileSync)(clearlyFile)

@@ -1,26 +1,22 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler')
+const AbstractClearlyDefinedProcessor = require('./abstractClearlyDefinedProcessor')
 const fs = require('fs')
 const { promisify } = require('util')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
 const SourceSpec = require('../../lib/sourceSpec')
 const { parseString } = require('xml2js')
-const { get } = require('lodash')
+const { get, merge } = require('lodash')
 
-class NuGetExtract extends BaseHandler {
+class NuGetExtract extends AbstractClearlyDefinedProcessor {
   constructor(options, sourceFinder) {
     super(options)
     this.sourceFinder = sourceFinder
   }
 
-  get schemaVersion() {
+  get toolVersion() {
     return '1.2.0'
-  }
-
-  get toolSpec() {
-    return { tool: 'clearlydefined', toolVersion: this.schemaVersion }
   }
 
   canHandle(request) {
@@ -31,15 +27,14 @@ class NuGetExtract extends BaseHandler {
   // Coming in here we expect the request.document to have id, location and metadata properties.
   // Do interesting processing...
   async handle(request) {
+    // skip all the hard work if we are just traversing.
     if (this.isProcessing(request)) {
-      // skip all the hard work if we are just traversing.
-      const { spec } = super._process(request)
-      this.addBasicToolLinks(request, spec)
-      const location = request.document.location
-      const manifest = await this._getManifest(location.manifest)
+      const { location, metadataLocation } = request.document
+      await super.handle(request, location)
+      const manifest = await this._getManifest(metadataLocation.manifest)
       await this._createDocument(request, manifest, request.document.registryData)
-      await BaseHandler.attachInterestinglyNamedFiles(request.document, location.nupkg)
     }
+    this.linkAndQueueTool(request, 'licensee')
     if (request.document.sourceInfo) {
       const sourceSpec = SourceSpec.fromObject(request.document.sourceInfo)
       this.linkAndQueue(request, 'source', sourceSpec.toEntitySpec())
@@ -61,12 +56,12 @@ class NuGetExtract extends BaseHandler {
   async _createDocument(request, manifest, registryData) {
     const originalDocument = request.document
     // setup the manifest to be the new document for the request
-    request.document = { _metadata: request.document._metadata, manifest, registryData }
+    request.document = merge(this.clone(request.document), { manifest, registryData })
     // Add interesting info
     if (registryData && registryData.published)
       request.document.releaseDate = new Date(registryData.published).toISOString()
     // Add source info
-    const nuspec = await this._getNuspec(originalDocument.location.nuspec)
+    const nuspec = await this._getNuspec(originalDocument.metadataLocation.nuspec)
     const sourceInfo = await this._discoverSource(manifest, nuspec)
     if (sourceInfo) request.document.sourceInfo = sourceInfo
   }

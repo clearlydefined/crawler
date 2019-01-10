@@ -4,8 +4,7 @@
   "description": "A crawler that walks projects and packages looking for data of interest to the ClearlyDefined project.",
   "main": "./index.js",
   "scripts": {
-    "start": "node ./run.js",
-    "test": "mocha \"test/unit/**/*.js\" && eslint .",
+    "test": "nyc mocha \"test/unit/**/*.js\" && eslint .",
     "integration": "mocha \"test/integration/**/*.js\" --timeout 20000"
   },
   "keywords": [
@@ -33,7 +32,6 @@
     "du": "^0.1.0",
     "extend": "^3.0.1",
     "extract-zip": "^1.6.6",
-    "fast-glob": "^2.2.3",
     "ghcrawler": "github:microsoft/ghcrawler#jm/apicrawler",
     "ghrequestor": "^0.1.7",
     "lodash": "^4.17.5",
@@ -61,6 +59,7 @@
     "eslint": "^5.8.0",
     "istanbul": "^0.4.5",
     "mocha": "^5.0.3",
+    "nyc": "^13.1.0",
     "proxyquire": "^2.0.1",
     "sinon": "^4.5.0"
   }

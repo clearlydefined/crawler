@@ -1,27 +1,27 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler')
+const AbstractProcessor = require('./abstractProcessor')
 const { exec } = require('child_process')
-const { flatten, uniqBy } = require('lodash')
+const { flatten, merge, uniqBy } = require('lodash')
 const path = require('path')
 const dir = require('node-dir')
 const { promisify } = require('util')
 const throat = require('throat')
 
-class LicenseeProcessor extends BaseHandler {
+class LicenseeProcessor extends AbstractProcessor {
   constructor(options) {
     super(options)
     // Kick off version detection but don't wait. We'll wait before processing anything
     this._versionPromise = this._detectVersion()
   }
 
-  get schemaVersion() {
+  get toolVersion() {
     return this._toolVersion
   }
 
-  get toolSpec() {
-    return { tool: 'licensee', toolVersion: this.schemaVersion }
+  get toolName() {
+    return 'licensee'
   }
 
   canHandle(request) {
@@ -30,35 +30,32 @@ class LicenseeProcessor extends BaseHandler {
 
   async handle(request) {
     if (!(await this._versionPromise)) return request.markSkip('Licensee not properly configured')
-    const { spec } = super._process(request)
-    this.addBasicToolLinks(request, spec)
+    super.handle(request)
     await this._createDocument(request)
     return request
   }
 
   async _createDocument(request) {
     const record = await this._run(request)
-    const location = request.document.location
-    const document = { _metadata: request.document._metadata }
     if (!record) return
-    document.licensee = record
+    const location = request.document.location
+    request.document = merge(this.clone(request.document), { licensee: record })
     const toAttach = record.output.content.matched_files.map(file => file.filename)
-    BaseHandler.attachFiles(document, toAttach, location)
-    request.document = document
+    this.attachFiles(request.document, toAttach, location)
   }
 
   async _run(request) {
     const parameters = ['--json', '--no-readme']
     const root = request.document.location
     const paths = [root, ...(await promisify(dir.subdirs)(root))]
-      .map(path => path.slice(root.length).replace(/^[\/\\]+/g, ''))
+      .map(path => path.slice(root.length).replace(/^[/\\]+/g, ''))
       .filter(path => path !== '.git' && !path.includes('.git/'))
     try {
       const results = await Promise.all(paths.map(throat(10, path => this._runOnFolder(path, root, parameters))))
       const licenses = uniqBy(flatten(results.map(result => result.licenses)), 'spdx_id')
       const matched_files = flatten(results.map(result => result.matched_files))
       return {
-        version: this.schemaVersion,
+        version: this.toolVersion,
         parameters: parameters,
         output: {
           contentType: 'application/json',
@@ -96,18 +93,19 @@ class LicenseeProcessor extends BaseHandler {
     })
   }
 
-  _getUrn(spec) {
-    const newSpec = Object.assign(Object.create(spec), spec, { tool: 'licensee', toolVersion: this.toolVersion })
-    return newSpec.toUrn()
-  }
-
   _detectVersion() {
     if (this._versionPromise !== undefined) return this._versionPromise
     this._versionPromise = new Promise(resolve => {
       exec('licensee version', 1024, (error, stdout) => {
         if (error) this.logger.log(`Could not detect version of Licensee: ${error.message}`)
-        this._toolVersion = error ? null : stdout
-        resolve(this._toolVersion)
+        this._toolVersion = stdout.trim()
+        this._schemaVersion = error
+          ? null
+          : this.aggregateVersions(
+              [this._schemaVersion, this.toolVersion, this.configVersion],
+              'Invalid Licensee version'
+            )
+        resolve(this._schemaVersion)
       })
     })
     return this._versionPromise
