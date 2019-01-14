@@ -9,7 +9,8 @@ module.exports = {
     github: {}
   },
   process: {
-    scancode: {}
+    scancode: {},
+    licensee: {}
   },
   store: {
     provider: 'memory'

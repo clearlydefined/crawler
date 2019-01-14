@@ -10,6 +10,7 @@ function neighbors() {
 
 const scancode = self
 const fossology = self
+const licensee = self
 
 // default ClearlyDefined tool
 const clearlydefined = self
@@ -17,6 +18,7 @@ const clearlydefined = self
 const source = {
   _type: 'source',
   clearlydefined,
+  licensee,
   scancode,
   fossology
 }
@@ -25,6 +27,7 @@ const npm = {
   _type: 'npm',
   source,
   clearlydefined,
+  licensee,
   scancode,
   fossology
 }
@@ -33,6 +36,7 @@ const crate = {
   _type: 'crate',
   source,
   clearlydefined,
+  licensee,
   scancode,
   fossology
 }
@@ -40,13 +44,15 @@ const crate = {
 const maven = {
   _type: 'maven',
   source,
-  clearlydefined
+  clearlydefined,
+  licensee
 }
 
 const nuget = {
   _type: 'nuget',
   source,
-  clearlydefined
+  clearlydefined,
+  licensee
 }
 
 const pod = {
@@ -60,15 +66,19 @@ const pod = {
 const pypi = {
   _type: 'pypi',
   source,
+  clearlydefined,
+  licensee,
   scancode,
-  clearlydefined
+  fossology
 }
 
 const gem = {
   _type: 'gem',
   source,
+  clearlydefined,
+  licensee,
   scancode,
-  clearlydefined
+  fossology
 }
 
 const _package = {
@@ -97,6 +107,7 @@ const entities = {
   clearlydefined,
   scancode,
   fossology,
+  licensee,
   npm,
   crate,
   maven,

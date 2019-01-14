@@ -1,19 +1,19 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler')
+const AbstractFetch = require('./abstractFetch')
 const nodeRequest = require('request')
 const requestRetry = require('requestretry').defaults({ maxAttempts: 3, fullResponse: true })
 const fs = require('fs')
 const zlib = require('zlib')
 const path = require('path')
-const { clone } = require('lodash')
+const { clone, get } = require('lodash')
 
 const providerMap = {
   rubyGems: 'https://rubygems.org'
 }
 
-class RubyGemsFetch extends BaseHandler {
+class RubyGemsFetch extends AbstractFetch {
   canHandle(request) {
     const spec = this.toSpec(request)
     return spec && spec.provider === 'rubygems'
@@ -22,16 +22,19 @@ class RubyGemsFetch extends BaseHandler {
   async handle(request) {
     const spec = this.toSpec(request)
     const registryData = await this._getRegistryData(spec)
-    spec.revision = spec.revision || registryData ? registryData.version : null
+    spec.revision = spec.revision || (registryData ? registryData.version : null)
+    if (!spec.revision) return request.markSkip('Missing  ')
     request.url = spec.toUrl()
-    const file = this._createTempFile(request)
+    super.handle(request)
+    const file = this.createTempFile(request)
     await this._getPackage(spec, file.name)
-    const dir = this._createTempDir(request)
+    const dir = this.createTempDir(request)
     await this.decompress(file.name, dir.name)
     await this._extractFiles(dir.name)
-    request.document = await this._createDocument(dir, registryData)
+    const hashes = await this.computeHashes(file.name)
+    request.document = await this._createDocument(dir, registryData, hashes)
     request.contentOrigin = 'origin'
-    if (registryData.name) {
+    if (get(registryData, 'name')) {
       request.casedSpec = clone(spec)
       request.casedSpec.name = registryData.name
     }
@@ -62,9 +65,9 @@ class RubyGemsFetch extends BaseHandler {
     return `${providerMap.rubyGems}/downloads/${fullName}-${spec.revision}.gem`
   }
 
-  _createDocument(dir, registryData) {
+  _createDocument(dir, registryData, hashes) {
     const releaseDate = this._extractReleaseDate(dir.name)
-    return { location: dir.name + '/data', registryData, releaseDate }
+    return { location: dir.name + '/data', registryData, releaseDate, hashes }
   }
 
   async _extractFiles(dirName) {
