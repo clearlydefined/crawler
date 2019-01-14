@@ -1,0 +1,134 @@
+{
+  "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.29.04.23.22/xunit.core.2.4.1.json",
+  "@type": ["PackageDetails", "catalog:Permalink"],
+  "authors": "James Newkirk,Brad Wilson",
+  "catalog:commitId": "2c512c02-b486-4d57-96f1-f87477f6c28c",
+  "catalog:commitTimeStamp": "2018-10-29T04:23:22.9860867Z",
+  "created": "2018-10-29T04:18:45.803Z",
+  "description": "Includes the libraries for writing unit tests with xUnit.net.",
+  "iconUrl": "https://raw.githubusercontent.com/xunit/media/master/logo-512-transparent.png",
+  "id": "xunit.core",
+  "isPrerelease": false,
+  "language": "en-US",
+  "lastEdited": "2018-10-29T04:23:00.693Z",
+  "licenseUrl": "https://raw.githubusercontent.com/xunit/xunit/master/license.txt",
+  "listed": true,
+  "minClientVersion": "2.12",
+  "packageHash": "8taMlAQy9qQ7Tbiqr2TAwGkU+X0sckQ+96j7R9OX/Ut1gmHEa4QYIrI8c15j3iKTj3XzyQMVohkTMWa80BRf6w==",
+  "packageHashAlgorithm": "SHA512",
+  "packageSize": 22659,
+  "projectUrl": "https://github.com/xunit/xunit",
+  "published": "2018-10-29T04:18:45.803Z",
+  "requireLicenseAcceptance": false,
+  "summary": "Includes the libraries for writing unit tests with xUnit.net.",
+  "title": "xUnit.net [Core Unit Testing Framework]",
+  "verbatimVersion": "2.4.1",
+  "version": "2.4.1",
+  "dependencyGroups": [
+    {
+      "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.29.04.23.22/xunit.core.2.4.1.json#dependencygroup",
+      "@type": "PackageDependencyGroup",
+      "dependencies": [
+        {
+          "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.29.04.23.22/xunit.core.2.4.1.json#dependencygroup/xunit.extensibility.core",
+          "@type": "PackageDependency",
+          "id": "xunit.extensibility.core",
+          "range": "[2.4.1, 2.4.1]"
+        },
+        {
+          "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.29.04.23.22/xunit.core.2.4.1.json#dependencygroup/xunit.extensibility.execution",
+          "@type": "PackageDependency",
+          "id": "xunit.extensibility.execution",
+          "range": "[2.4.1, 2.4.1]"
+        }
+      ]
+    }
+  ],
+  "packageEntries": [
+    {
+      "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.29.04.23.22/xunit.core.2.4.1.json#xunit.core.nuspec",
+      "@type": "PackageEntry",
+      "compressedLength": 505,
+      "fullName": "xunit.core.nuspec",
+      "length": 1116,
+      "name": "xunit.core.nuspec"
+    },
+    {
+      "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.29.04.23.22/xunit.core.2.4.1.json#build/xunit.core.props",
+      "@type": "PackageEntry",
+      "compressedLength": 294,
+      "fullName": "build/xunit.core.props",
+      "length": 488,
+      "name": "xunit.core.props"
+    },
+    {
+      "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.29.04.23.22/xunit.core.2.4.1.json#build/xunit.core.targets",
+      "@type": "PackageEntry",
+      "compressedLength": 473,
+      "fullName": "build/xunit.core.targets",
+      "length": 1117,
+      "name": "xunit.core.targets"
+    },
+    {
+      "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.29.04.23.22/xunit.core.2.4.1.json#buildMultiTargeting/xunit.core.props",
+      "@type": "PackageEntry",
+      "compressedLength": 294,
+      "fullName": "buildMultiTargeting/xunit.core.props",
+      "length": 488,
+      "name": "xunit.core.props"
+    },
+    {
+      "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.29.04.23.22/xunit.core.2.4.1.json#buildMultiTargeting/xunit.core.targets",
+      "@type": "PackageEntry",
+      "compressedLength": 473,
+      "fullName": "buildMultiTargeting/xunit.core.targets",
+      "length": 1117,
+      "name": "xunit.core.targets"
+    },
+    {
+      "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.29.04.23.22/xunit.core.2.4.1.json#.signature.p7s",
+      "@type": "PackageEntry",
+      "compressedLength": 18483,
+      "fullName": ".signature.p7s",
+      "length": 18483,
+      "name": ".signature.p7s"
+    }
+  ],
+  "@context": {
+    "@vocab": "http://schema.nuget.org/schema#",
+    "catalog": "http://schema.nuget.org/catalog#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "dependencies": {
+      "@id": "dependency",
+      "@container": "@set"
+    },
+    "dependencyGroups": {
+      "@id": "dependencyGroup",
+      "@container": "@set"
+    },
+    "packageEntries": {
+      "@id": "packageEntry",
+      "@container": "@set"
+    },
+    "supportedFrameworks": {
+      "@id": "supportedFramework",
+      "@container": "@set"
+    },
+    "tags": {
+      "@id": "tag",
+      "@container": "@set"
+    },
+    "published": {
+      "@type": "xsd:dateTime"
+    },
+    "created": {
+      "@type": "xsd:dateTime"
+    },
+    "lastEdited": {
+      "@type": "xsd:dateTime"
+    },
+    "catalog:commitTimeStamp": {
+      "@type": "xsd:dateTime"
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "licenses": [
+    {
+      "key": "isc",
+      "spdx_id": "ISC"
+    }
+  ],
+  "matched_files": [
+    {
+      "filename": "LICENSE",
+      "content": "<Full text of license here>",
+      "content_hash": "d168f98624be864548b2bbf4f198fdbf702d6743",
+      "content_normalized": "<Some amount of the full license here",
+      "matcher": { "name": "exact", "confidence": 100 },
+      "matched_license": "ISC"
+    },
+    {
+      "filename": "package.json",
+      "content": "<Whoa! parts of the package manifest here>",
+      "content_hash": null,
+      "content_normalized": null,
+      "matcher": { "name": "npmbower", "confidence": 90 },
+      "matched_license": "ISC"
+    }
+  ]
+}

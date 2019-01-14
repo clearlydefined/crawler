@@ -1,23 +1,19 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler')
+const AbstractClearlyDefinedProcessor = require('./abstractClearlyDefinedProcessor')
 const SourceSpec = require('../../lib/sourceSpec')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
-const { get } = require('lodash')
+const { get, merge } = require('lodash')
 
-class GemExtract extends BaseHandler {
+class GemExtract extends AbstractClearlyDefinedProcessor {
   constructor(options, sourceFinder) {
     super(options)
     this.sourceFinder = sourceFinder
   }
 
-  get schemaVersion() {
+  get toolVersion() {
     return '1.1.2'
-  }
-
-  get toolSpec() {
-    return { tool: 'clearlydefined', toolVersion: this.schemaVersion }
   }
 
   canHandle(request) {
@@ -27,11 +23,11 @@ class GemExtract extends BaseHandler {
 
   async handle(request) {
     if (this.isProcessing(request)) {
-      const { spec } = super._process(request)
-      this.addBasicToolLinks(request, spec)
+      await super.handle(request)
       await this._createDocument(request, request.document.registryData)
-      await BaseHandler.addInterestingFiles(request.document, request.document.location)
     }
+    this.linkAndQueueTool(request, 'licensee')
+    this.linkAndQueueTool(request, 'fossology')
     this.linkAndQueueTool(request, 'scancode')
     if (request.document.sourceInfo) {
       const sourceSpec = SourceSpec.fromObject(request.document.sourceInfo)
@@ -55,6 +51,7 @@ class GemExtract extends BaseHandler {
   }
 
   async _createDocument(request, registryData) {
+    request.document = merge(this.clone(request.document), { registryData })
     const sourceInfo = await this._discoverSource(registryData.version, registryData)
     if (sourceInfo) request.document.sourceInfo = sourceInfo
   }
