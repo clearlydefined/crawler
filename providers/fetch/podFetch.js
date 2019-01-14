@@ -124,7 +124,7 @@ class PodFetch extends AbstractFetch {
     ]
 
     return new Promise((resolve, reject) => {
-      exec(cloneCommands.join(' && '), (error, stdout) => (error ? reject(error) : resolve(output)))
+      exec(cloneCommands.join(' && '), error => (error ? reject(error) : resolve(output)))
     })
   }
 
