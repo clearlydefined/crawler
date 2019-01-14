@@ -59,6 +59,7 @@ const pod = {
   _type: 'pod',
   source,
   clearlydefined,
+  licensee,
   scancode,
   fossology
 }

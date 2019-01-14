@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler')
+const AbstractClearlyDefinedProcessor = require('./abstractClearlyDefinedProcessor')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
 const SourceSpec = require('../../lib/sourceSpec')
-const { get } = require('lodash')
+const { get, merge } = require('lodash')
 
-class PodExtract extends BaseHandler {
+class PodExtract extends AbstractClearlyDefinedProcessor {
   constructor(options, sourceFinder) {
     super(options)
     this.sourceFinder = sourceFinder
@@ -16,10 +16,6 @@ class PodExtract extends BaseHandler {
     return '1.0.0'
   }
 
-  get toolSpec() {
-    return { tool: 'clearlydefined', toolVersion: this.schemaVersion }
-  }
-
   canHandle(request) {
     const spec = this.toSpec(request)
     return request.type === 'pod' && spec && spec.type === 'pod'
@@ -27,22 +23,22 @@ class PodExtract extends BaseHandler {
 
   async handle(request) {
     if (this.isProcessing(request)) {
-      const { spec } = super._process(request)
-      this.addBasicToolLinks(request, spec)
       const location = request.document.location
+      await super.handle(request, location)
       await this._createDocument(request, request.document.registryData)
-      await BaseHandler.addInterestingFiles(request.document, location)
     }
+    this.linkAndQueueTool(request, 'licensee')
     this.linkAndQueueTool(request, 'scancode')
     this.linkAndQueueTool(request, 'fossology')
     if (request.document.sourceInfo) {
       const sourceSpec = SourceSpec.fromObject(request.document.sourceInfo)
       this.linkAndQueue(request, 'source', sourceSpec.toEntitySpec())
     }
+    return request
   }
 
   async _createDocument(request, registryData) {
-    request.document = { _metadata: request.document._metadata, registryData }
+    request.document = merge(this.clone(request.document), { registryData })
     const sourceInfo = await this._discoverSource(registryData)
     if (sourceInfo) request.document.sourceInfo = sourceInfo
   }
