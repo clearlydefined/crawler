@@ -3,11 +3,11 @@
 
 const chai = require('chai')
 const expect = chai.expect
-const extract = require('../../../../../providers/process/mavenExtract')
-const SourceSpec = require('../../../../../lib/sourceSpec')
-const EntitySpec = require('../../../../../lib/entitySpec')
+const extract = require('../../../../providers/process/mavenExtract')
+const SourceSpec = require('../../../../lib/sourceSpec')
+const EntitySpec = require('../../../../lib/entitySpec')
 const sinon = require('sinon')
-const mavenCentral = require('../../../../../lib/mavenCentral')
+const mavenCentral = require('../../../../lib/mavenCentral')
 
 describe('mavenExtract source discovery', () => {
   it('handles no tags in GitHub', async () => {

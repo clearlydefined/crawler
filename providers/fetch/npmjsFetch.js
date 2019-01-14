@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler')
+const AbstractFetch = require('./abstractFetch')
 const nodeRequest = require('request')
 const requestPromise = require('request-promise-native')
 const fs = require('fs')
@@ -11,7 +11,7 @@ const providerMap = {
   npmjs: 'https://registry.npmjs.com'
 }
 
-class NpmFetch extends BaseHandler {
+class NpmFetch extends AbstractFetch {
   canHandle(request) {
     const spec = this.toSpec(request)
     return spec && spec.provider === 'npmjs'
@@ -24,11 +24,13 @@ class NpmFetch extends BaseHandler {
     spec.revision = registryData.manifest.version
     // rewrite the request URL as it is used throughout the system to derive locations and urns etc.
     request.url = spec.toUrl()
-    const file = this._createTempFile(request)
+    super.handle(request)
+    const file = this.createTempFile(request)
     await this._getPackage(spec, file.name)
-    const dir = this._createTempDir(request)
+    const dir = this.createTempDir(request)
     await this.decompress(file.name, dir.name)
-    request.document = this._createDocument(dir, registryData)
+    const hashes = await this.computeHashes(file.name)
+    request.document = this._createDocument(dir, registryData, hashes)
     request.contentOrigin = 'origin'
     const casedSpec = this._getCasedSpec(spec, registryData)
     if (casedSpec) request.casedSpec = casedSpec
@@ -64,7 +66,7 @@ class NpmFetch extends BaseHandler {
       if (exception.statusCode !== 404) throw exception
       return null
     }
-    if (!registryData.versions) return null
+    if (!registryData || !registryData.versions) return null
     const version = spec.revision || this.getLatestVersion(Object.keys(registryData.versions))
     if (!registryData.versions[version]) return null
     const date = registryData.time[version]
@@ -81,9 +83,9 @@ class NpmFetch extends BaseHandler {
     return `${providerMap[spec.provider]}/${fullName}/-/${spec.name}-${spec.revision}.tgz`
   }
 
-  _createDocument(dir, registryData) {
+  _createDocument(dir, registryData, hashes) {
     const releaseDate = get(registryData, 'releaseDate')
-    return { location: dir.name, registryData, releaseDate }
+    return { location: dir.name, registryData, releaseDate, hashes }
   }
 
   _getCasedSpec(spec, registryData) {

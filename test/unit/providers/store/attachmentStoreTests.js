@@ -33,7 +33,7 @@ describe('AttachmentStore', () => {
     var attachment = storedDoc.attachment
     expect(attachment).to.be.eq('42 attachment')
 
-    var storedDoc = baseStore.upsert.getCall(2).args[0]
+    storedDoc = baseStore.upsert.getCall(2).args[0]
     metadata = storedDoc._metadata
     expect(metadata.type).to.be.eq('attachment')
     expect(metadata.fetchedAt).to.be.eq('now')
