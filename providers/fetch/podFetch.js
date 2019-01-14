@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 const { clone, get } = require('lodash')
-const BaseHandler = require('../../lib/baseHandler')
+const AbstractFetch = require('./abstractFetch')
 const request = require('request-promise-native')
 const fs = require('fs')
 const path = require('path')
@@ -15,7 +15,7 @@ const services = {
   specs: 'https://raw.githubusercontent.com/CocoaPods/Specs/master'
 }
 
-class PodFetch extends BaseHandler {
+class PodFetch extends AbstractFetch {
   canHandle(request) {
     const spec = this.toSpec(request)
     return spec && spec.provider === 'cocoapods'
@@ -34,7 +34,7 @@ class PodFetch extends BaseHandler {
     if (!registryData) return request.markSkip('Missing  ')
 
     // Download the package/source
-    const dir = this._createTempDir(request)
+    const dir = this.createTempDir(request)
     const location = await this._getPackage(dir, registryData)
     if (!location) return request.markSkip('Missing  ')
 
@@ -60,7 +60,7 @@ class PodFetch extends BaseHandler {
       registryData = await request({
         url: `${services.specs}/Specs/${this._masterRepoPathFragment(spec, [1, 1, 1])}/${spec.name}.podspec.json`,
         headers: {
-          'Authorization': `token ${this.options.githubToken}`
+          Authorization: this.options.githubToken ? `token ${this.options.githubToken}` : ''
         },
         json: true
       })
@@ -94,8 +94,8 @@ class PodFetch extends BaseHandler {
         fs
           .createWriteStream(archive)
           .on('finish', async () => {
-             await this.decompress(archive, output)
-             resolve(output)
+            await this.decompress(archive, output)
+            resolve(output)
           })
           .on('error', reject)
       )
@@ -106,26 +106,25 @@ class PodFetch extends BaseHandler {
     const rev = get(podspec, 'source.commit') || get(podspec, 'source.tag')
 
     if (!rev) {
-        // CocoaPods support source.branch too
-        return null
+      // CocoaPods support source.branch too
+      return null
     }
 
     let cloneOptions = ['--quiet']
     if (get(podspec, 'source.submodules', false)) {
-        cloneOptions.push('--recursive')
+      cloneOptions.push('--recursive')
     }
 
     const outputDirName = `${podspec.name}-${podspec.version}`
     const output = path.join(dir.name, outputDirName)
 
-    const cloneCommands = [`git -C "${dir.name}" clone ${cloneOptions.join(' ')} ${repo} "${outputDirName}"`,
-                           `git -C "${output}" reset --quiet --hard ${rev}`]
+    const cloneCommands = [
+      `git -C "${dir.name}" clone ${cloneOptions.join(' ')} ${repo} "${outputDirName}"`,
+      `git -C "${output}" reset --quiet --hard ${rev}`
+    ]
 
     return new Promise((resolve, reject) => {
-      exec(
-        cloneCommands.join(' && '),
-        (error, stdout) => (error ? reject(error) : resolve(output))
-      )
+      exec(cloneCommands.join(' && '), (error, stdout) => (error ? reject(error) : resolve(output)))
     })
   }
 
@@ -152,8 +151,11 @@ class PodFetch extends BaseHandler {
     // Ported from: https://www.rubydoc.info/gems/cocoapods-core/Pod%2FSource%2FMetadata:path_fragment
     let prefixes
     if (prefixLengths.length > 0) {
-      let hashedName = crypto.createHash('md5').update(spec.name).digest('hex')
-      prefixes = prefixLengths.map(function (length) {
+      let hashedName = crypto
+        .createHash('md5')
+        .update(spec.name)
+        .digest('hex')
+      prefixes = prefixLengths.map(function(length) {
         const prefix = hashedName.slice(0, length)
         hashedName = hashedName.substring(length)
         return prefix
