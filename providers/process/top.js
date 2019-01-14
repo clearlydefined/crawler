@@ -1,22 +1,14 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler')
+const AbstractProcessor = require('./abstractProcessor')
 const fs = require('fs')
 const ghrequestor = require('ghrequestor')
 const path = require('path')
 const Request = require('ghcrawler').request
 const requestRetry = require('requestretry').defaults({ json: true, maxAttempts: 3, fullResponse: false })
 
-class TopProcessor extends BaseHandler {
-  get schemaVersion() {
-    return 1
-  }
-
-  get toolSpec() {
-    return { tool: 'toploader', toolVersion: this.schemaVersion }
-  }
-
+class TopProcessor extends AbstractProcessor {
   canHandle(request) {
     const spec = this.toSpec(request)
     return (
@@ -27,8 +19,8 @@ class TopProcessor extends BaseHandler {
   }
 
   handle(request) {
-    const { spec } = super._process(request)
-    this.addBasicToolLinks(request, spec)
+    super.handle(request)
+    const spec = this.toSpec(request)
     switch (spec.provider) {
       case 'npmjs':
         return this._processTopNpms(request)

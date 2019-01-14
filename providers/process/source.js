@@ -1,18 +1,10 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler')
+const AbstractProcessor = require('./abstractProcessor')
 const supportedTypes = ['git', 'sourcearchive']
 
-class SourceProcessor extends BaseHandler {
-  get schemaVersion() {
-    return 1
-  }
-
-  get toolSpec() {
-    return { tool: 'cdsourcetraversal', toolVersion: this.schemaVersion }
-  }
-
+class SourceProcessor extends AbstractProcessor {
   shouldFetch() {
     return false
   }
@@ -23,13 +15,13 @@ class SourceProcessor extends BaseHandler {
   }
 
   handle(request) {
-    const { document, spec } = super._process(request)
-    this.addBasicToolLinks(request, spec)
+    super.handle(request)
     this.linkAndQueueTool(request, 'clearlydefined')
-    this.linkAndQueueTool(request, 'scancode')
+    this.linkAndQueueTool(request, 'licensee')
     this.linkAndQueueTool(request, 'fossology')
+    this.linkAndQueueTool(request, 'scancode')
     request.markNoSave()
-    return document
+    return request
   }
 }
 

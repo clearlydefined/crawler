@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const BaseHandler = require('../../lib/baseHandler')
+const AbstractFetch = require('./abstractFetch')
 
-class FetchDispatcher extends BaseHandler {
+class FetchDispatcher extends AbstractFetch {
   constructor(options, store, fetchers, processors, filter) {
     super(options)
     this.store = store
