@@ -35,7 +35,6 @@ class MavenFetch extends AbstractFetch {
     const code = await this._getArtifact(spec, artifact.name)
     if (code === 404) return this.markSkip(request)
     const dir = this.createTempDir(request)
-    // Warning: may not clean files up on Windows due to a bug. Switch back to unzip once https://github.com/maxogden/extract-zip/issues/65 is resolved
     await this.decompress(artifact.name, dir.name)
     const hashes = await this.computeHashes(artifact.name)
     request.document = this._createDocument(dir, registryData, hashes, poms)
