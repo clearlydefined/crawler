@@ -24,16 +24,16 @@ class MavenFetch extends AbstractFetch {
   async handle(request) {
     const spec = this.toSpec(request)
     const registryData = get(await this._getRegistryData(spec), 'response.docs[0]')
-    if (!registryData) return request.markSkip('Missing  ')
+    if (!registryData) return this.markSkip(request)
     spec.revision = spec.revision ? registryData.v : registryData.latestVersion
     // rewrite the request URL as it is used throughout the system to derive locations and urns etc.
     request.url = spec.toUrl()
     super.handle(request)
     const poms = await this._getPoms(spec)
-    if (!poms.length) return request.markSkip('Missing  ')
+    if (!poms.length) return this.markSkip(request)
     const artifact = this.createTempFile(request)
     const code = await this._getArtifact(spec, artifact.name)
-    if (code === 404) return request.markSkip('Missing  ')
+    if (code === 404) return this.markSkip(request)
     const dir = this.createTempDir(request)
     // Warning: may not clean files up on Windows due to a bug. Switch back to unzip once https://github.com/maxogden/extract-zip/issues/65 is resolved
     await this.decompress(artifact.name, dir.name)
