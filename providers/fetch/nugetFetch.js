@@ -26,7 +26,7 @@ class NuGetFetch extends AbstractFetch {
     const registryData = await this._getRegistryData(spec)
     const manifest = registryData ? await this._getManifest(registryData.catalogEntry) : null
     const nuspec = manifest ? await this._getNuspec(spec) : null
-    if (!registryData || !nuspec || !manifest) return request.markSkip('Missing  ')
+    if (!registryData || !nuspec || !manifest) return this.markSkip(request)
     super.handle(request)
     const dir = this.createTempDir(request)
     const location = await this._persistMetadata(dir, manifest, nuspec)
