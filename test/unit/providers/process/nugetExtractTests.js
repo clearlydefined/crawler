@@ -75,15 +75,14 @@ describe('NuGet processing', () => {
 
 async function setup() {
   const processor = extract({ logger: {} }, () => {})
-  processor._detectLicenses = () => 'MIT'
   processor.linkAndQueueTool = sinon.stub()
   const request = createRequest()
   const dir = processor.createTempDir(request)
-  request.document.location = {
+  request.document.metadataLocation = {
     manifest: 'test/fixtures/nuget/xunit.core.2.4.1.catalog.json',
-    nuspec: 'test/fixtures/nuget/xunit.core.2.4.1.nuspec',
-    nupkg: `${dir.name}/nupkg`
+    nuspec: 'test/fixtures/nuget/xunit.core.2.4.1.nuspec'
   }
+  request.document.location = `${dir.name}/nupkg`
   await new AbstractFetch({}).decompress('test/fixtures/nuget/xunit.core.2.4.1.nupkg', `${dir.name}/nupkg`)
   return { processor, request }
 }

@@ -46,6 +46,8 @@ describe('NPM processing', () => {
     })
     expect(processor.linkAndQueueTool.callCount).to.be.equal(3)
     expect(processor.linkAndQueueTool.args.map(call => call[1])).to.have.members(['licensee', 'scancode', 'fossology'])
+    expect(request.document.attachments.length).to.eq(2)
+    expect(request.document._attachments.length).to.eq(2)
     expect(request.document.summaryInfo.count).to.be.equal(4)
     expect(processor.linkAndQueue.callCount).to.be.equal(1)
     expect(processor.linkAndQueue.args[0][1]).to.equal('source')

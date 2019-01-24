@@ -7,7 +7,7 @@ const requestRetry = require('requestretry').defaults({ maxAttempts: 3, fullResp
 const fs = require('fs')
 const zlib = require('zlib')
 const path = require('path')
-const { clone } = require('lodash')
+const { clone, get } = require('lodash')
 
 const providerMap = {
   rubyGems: 'https://rubygems.org'
@@ -22,7 +22,8 @@ class RubyGemsFetch extends AbstractFetch {
   async handle(request) {
     const spec = this.toSpec(request)
     const registryData = await this._getRegistryData(spec)
-    spec.revision = spec.revision || registryData ? registryData.version : null
+    spec.revision = spec.revision || (registryData ? registryData.version : null)
+    if (!spec.revision) return request.markSkip('Missing  ')
     request.url = spec.toUrl()
     super.handle(request)
     const file = this.createTempFile(request)
@@ -33,7 +34,7 @@ class RubyGemsFetch extends AbstractFetch {
     const hashes = await this.computeHashes(file.name)
     request.document = await this._createDocument(dir, registryData, hashes)
     request.contentOrigin = 'origin'
-    if (registryData.name) {
+    if (get(registryData, 'name')) {
       request.casedSpec = clone(spec)
       request.casedSpec.name = registryData.name
     }

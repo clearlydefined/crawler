@@ -80,7 +80,8 @@ describe('', () => {
     expect(request.document.hashes.sha1).to.be.equal(hashes['xunit.core.2.4.1.nupkg']['sha1'])
     expect(request.document.hashes.sha256).to.be.equal(hashes['xunit.core.2.4.1.nupkg']['sha256'])
     expect(request.document.releaseDate).to.equal('2018-10-29T04:18:45.803Z')
-    expect(request.document.location).to.have.keys(['manifest', 'nupkg', 'nuspec'])
+    expect(request.document.metadataLocation).to.have.keys(['manifest', 'nuspec'])
+    expect(request.document.location).to.not.be.undefined
   })
 
   it('succeeds for latest version for download, decompress and hash', async () => {
@@ -89,7 +90,8 @@ describe('', () => {
     expect(request.document.hashes.sha1).to.be.equal(hashes['xunit.core.2.4.1.nupkg']['sha1'])
     expect(request.document.hashes.sha256).to.be.equal(hashes['xunit.core.2.4.1.nupkg']['sha256'])
     expect(request.document.releaseDate).to.equal('2018-10-29T04:18:45.803Z')
-    expect(request.document.location).to.have.keys(['manifest', 'nupkg', 'nuspec'])
+    expect(request.document.metadataLocation).to.have.keys(['manifest', 'nuspec'])
+    expect(request.document.location).to.not.be.undefined
   })
 
   it('handles missing registry data', async () => {

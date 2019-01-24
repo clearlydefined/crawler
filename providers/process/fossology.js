@@ -13,12 +13,12 @@ class FossologyProcessor extends AbstractProcessor {
     this._versionPromise = this._detectVersion()
   }
 
-  get schemaVersion() {
+  get toolVersion() {
     return this._toolVersion
   }
 
-  get toolSpec() {
-    return { tool: 'fossology', toolVersion: this.schemaVersion }
+  get toolName() {
+    return 'fossology'
   }
 
   canHandle(request) {
@@ -35,7 +35,7 @@ class FossologyProcessor extends AbstractProcessor {
 
   async _createDocument(request) {
     const nomosOutput = await this._runNomos(request)
-    const files = await this.getInterestingFiles(request.document.location)
+    const files = await this.filterFiles(request.document.location)
     const copyrightOutput = await this._runCopyright(request, files, request.document.location)
     const monkOutput = await this._runMonk(request, files, request.document.location)
     request.document = this.clone(request.document)
@@ -102,6 +102,7 @@ class FossologyProcessor extends AbstractProcessor {
     })
   }
 
+  // eslint-disable-next-line no-unused-vars
   async _runMonk(request, files, root) {
     // TODO can't actually run Monk until the license database is factored out
     return null
@@ -131,17 +132,13 @@ class FossologyProcessor extends AbstractProcessor {
   async _detectVersion() {
     if (this._versionPromise) return this._versionPromise
     try {
-      // base is used to account for any high level changes in the way the FOSSology tools are run or configured
-      const base = '0.0.0'
       this._nomosVersion = await this._detectNomosVersion()
       this._copyrightVersion = await this._detectCopyrightVersion()
       this._monkVersion = await this._detectMonkVersion()
-      this._toolVersion = this.aggregateVersions(
-        [this._nomosVersion, this._copyrightVersion, this._monkVersion],
-        'FOSSology tool version misformatted',
-        base
-      )
-      return this._toolVersion
+      // Treat the NOMOS version as the global FOSSology tool version
+      this._toolVersion = this._nomosVersion
+      this._schemaVersion = this.aggregateVersions([this._schemaVersion, this.toolVersion, this.configVersion])
+      return this._schemaVersion
     } catch (error) {
       this.logger.log(`Could not find FOSSology tool version: ${error.message}`)
       return null

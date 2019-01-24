@@ -14,12 +14,12 @@ class ScanCodeProcessor extends AbstractProcessor {
     this._versionPromise = this._detectVersion()
   }
 
-  get schemaVersion() {
+  get toolVersion() {
     return this._toolVersion
   }
 
-  get toolSpec() {
-    return { tool: 'scancode', toolVersion: this.schemaVersion }
+  get toolName() {
+    return 'scancode'
   }
 
   canHandle(request) {
@@ -117,8 +117,14 @@ class ScanCodeProcessor extends AbstractProcessor {
     this._versionPromise = new Promise(resolve => {
       exec(`cd ${this.options.installDir} && .${path.sep}scancode --version`, 1024, (error, stdout) => {
         if (error) this.logger.log(`Could not detect version of ScanCode: ${error.message}`)
-        this._toolVersion = error ? null : stdout.replace('ScanCode version ', '').trim()
-        resolve(this._toolVersion)
+        this._toolVersion = stdout.replace('ScanCode version ', '').trim()
+        this._schemaVersion = error
+          ? null
+          : this.aggregateVersions(
+              [this._schemaVersion, this.toolVersion, this.configVersion],
+              'Invalid ScanCode version'
+            )
+        resolve(this._schemaVersion)
       })
     })
     return this._versionPromise

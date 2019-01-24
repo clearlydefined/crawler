@@ -4,7 +4,7 @@
 const AbstractClearlyDefinedProcessor = require('./abstractClearlyDefinedProcessor')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
 const SourceSpec = require('../../lib/sourceSpec')
-const { get } = require('lodash')
+const { get, merge } = require('lodash')
 
 class MavenExtract extends AbstractClearlyDefinedProcessor {
   constructor(options, sourceFinder) {
@@ -12,12 +12,8 @@ class MavenExtract extends AbstractClearlyDefinedProcessor {
     this.sourceFinder = sourceFinder
   }
 
-  get schemaVersion() {
+  get toolVersion() {
     return '1.2.0'
-  }
-
-  get toolSpec() {
-    return { tool: 'clearlydefined', toolVersion: this.schemaVersion }
   }
 
   canHandle(request) {
@@ -63,8 +59,7 @@ class MavenExtract extends AbstractClearlyDefinedProcessor {
   }
 
   async _createDocument(request, spec, manifest, releaseDate) {
-    // setup the manifest to be the new document for the request
-    request.document = { ...this.clone(request.document), manifest, releaseDate }
+    request.document = merge(this.clone(request.document), { manifest, releaseDate })
     // Add source info
     const sourceInfo = await this._discoverSource(spec, manifest)
     if (sourceInfo) request.document.sourceInfo = sourceInfo

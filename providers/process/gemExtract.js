@@ -4,7 +4,7 @@
 const AbstractClearlyDefinedProcessor = require('./abstractClearlyDefinedProcessor')
 const SourceSpec = require('../../lib/sourceSpec')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
-const { get } = require('lodash')
+const { get, merge } = require('lodash')
 
 class GemExtract extends AbstractClearlyDefinedProcessor {
   constructor(options, sourceFinder) {
@@ -12,12 +12,8 @@ class GemExtract extends AbstractClearlyDefinedProcessor {
     this.sourceFinder = sourceFinder
   }
 
-  get schemaVersion() {
+  get toolVersion() {
     return '1.1.2'
-  }
-
-  get toolSpec() {
-    return { tool: 'clearlydefined', toolVersion: this.schemaVersion }
   }
 
   canHandle(request) {
@@ -55,7 +51,7 @@ class GemExtract extends AbstractClearlyDefinedProcessor {
   }
 
   async _createDocument(request, registryData) {
-    request.document = this.clone(request.document)
+    request.document = merge(this.clone(request.document), { registryData })
     const sourceInfo = await this._discoverSource(registryData.version, registryData)
     if (sourceInfo) request.document.sourceInfo = sourceInfo
   }

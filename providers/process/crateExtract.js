@@ -4,6 +4,7 @@
 const AbstractClearlyDefinedProcessor = require('./abstractClearlyDefinedProcessor')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
 const SourceSpec = require('../../lib/sourceSpec')
+const { merge } = require('lodash')
 
 class CrateExtract extends AbstractClearlyDefinedProcessor {
   constructor(options, sourceFinder) {
@@ -11,12 +12,8 @@ class CrateExtract extends AbstractClearlyDefinedProcessor {
     this.sourceFinder = sourceFinder
   }
 
-  get schemaVersion() {
+  get toolVersion() {
     return '1.0.0'
-  }
-
-  get toolSpec() {
-    return { tool: 'clearlydefined', toolVersion: this.schemaVersion }
   }
 
   canHandle(request) {
@@ -39,7 +36,7 @@ class CrateExtract extends AbstractClearlyDefinedProcessor {
   }
 
   async _createDocument(request, manifest, registryData) {
-    request.document = { ...this.clone(request.document), manifest, registryData }
+    request.document = merge(this.clone(request.document), { manifest, registryData })
     const sourceInfo = await this._discoverSource(manifest, registryData)
     if (sourceInfo) request.document.sourceInfo = sourceInfo
   }

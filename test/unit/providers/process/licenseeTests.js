@@ -30,7 +30,7 @@ describe('Licensee process', () => {
     const { request, processor } = setup('9.10.1/folder2')
     await processor.handle(request)
     const { document } = request
-    expect(document.licensee.version).to.equal('1.2')
+    expect(document.licensee.version).to.equal('1.2.0')
     expect(document.licensee.output.content.matched_files.length).to.equal(0)
     expect(processor.attachFiles.args[0][1].length).to.equal(0)
   })
@@ -51,7 +51,7 @@ describe('Licensee process', () => {
   })
 
   beforeEach(function() {
-    const resultBox = { error: null, versionResult: '1.2', versionError: null }
+    const resultBox = { error: null, versionResult: '1.2.0', versionError: null }
     const processStub = {
       exec: (command, bufferLength, callback) => {
         if (command.includes('version')) return callback(resultBox.versionError, resultBox.versionResult)

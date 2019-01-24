@@ -6,7 +6,7 @@ const fs = require('fs')
 const path = require('path')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
 const SourceSpec = require('../../lib/sourceSpec')
-const { get, isArray } = require('lodash')
+const { get, isArray, merge } = require('lodash')
 
 class NpmExtract extends AbstractClearlyDefinedProcessor {
   constructor(options, sourceFinder) {
@@ -14,12 +14,8 @@ class NpmExtract extends AbstractClearlyDefinedProcessor {
     this.sourceFinder = sourceFinder
   }
 
-  get schemaVersion() {
+  get toolVersion() {
     return '1.1.3'
-  }
-
-  get toolSpec() {
-    return { tool: 'clearlydefined', toolVersion: this.schemaVersion }
   }
 
   canHandle(request) {
@@ -35,9 +31,10 @@ class NpmExtract extends AbstractClearlyDefinedProcessor {
       const location = request.document.location
       await super.handle(request, location, 'package')
       const manifestLocation = this._getManifestLocation(location)
-      const manifest = manifestLocation ? JSON.parse(fs.readFileSync(manifestLocation)) : null
-      if (!manifest) this.logger.info('NPM without package.json', { url: request.url })
+      const manifest = manifestLocation ? JSON.parse(fs.readFileSync(path.join(location, manifestLocation))) : null
       await this._createDocument(request, manifest, request.document.registryData)
+      if (manifest) this.attachFiles(request.document, [manifestLocation], location)
+      else this.logger.info('NPM without package.json', { url: request.url })
     }
     this.linkAndQueueTool(request, 'licensee')
     this.linkAndQueueTool(request, 'fossology')
@@ -50,8 +47,8 @@ class NpmExtract extends AbstractClearlyDefinedProcessor {
   }
 
   _getManifestLocation(dir) {
-    if (fs.existsSync(path.join(dir, 'package/package.json'))) return path.join(dir, 'package/package.json')
-    if (fs.existsSync(path.join(dir, 'package.json'))) return path.join(dir, 'package.json')
+    if (fs.existsSync(path.join(dir, 'package/package.json'))) return 'package/package.json'
+    if (fs.existsSync(path.join(dir, 'package.json'))) return 'package.json'
     return null
   }
 
@@ -83,7 +80,7 @@ class NpmExtract extends AbstractClearlyDefinedProcessor {
 
   async _createDocument(request, manifest, registryData) {
     // setup the manifest to be the new document for the request
-    request.document = { ...this.clone(request.document), 'package.json': manifest, registryData }
+    request.document = merge(this.clone(request.document), { 'package.json': manifest, registryData })
     const sourceInfo = await this._discoverSource(manifest, registryData.manifest)
     if (sourceInfo) request.document.sourceInfo = sourceInfo
   }

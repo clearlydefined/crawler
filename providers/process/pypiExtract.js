@@ -4,7 +4,7 @@
 const AbstractClearlyDefinedProcessor = require('./abstractClearlyDefinedProcessor')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
 const SourceSpec = require('../../lib/sourceSpec')
-const { get } = require('lodash')
+const { get, merge } = require('lodash')
 
 class PyPiExtract extends AbstractClearlyDefinedProcessor {
   constructor(options, sourceFinder) {
@@ -12,12 +12,8 @@ class PyPiExtract extends AbstractClearlyDefinedProcessor {
     this.sourceFinder = sourceFinder
   }
 
-  get schemaVersion() {
+  get toolVersion() {
     return '1.1.1'
-  }
-
-  get toolSpec() {
-    return { tool: 'clearlydefined', toolVersion: this.schemaVersion }
   }
 
   canHandle(request) {
@@ -56,7 +52,10 @@ class PyPiExtract extends AbstractClearlyDefinedProcessor {
   }
 
   async _createDocument(request, spec, registryData) {
-    request.document = this.clone(request.document)
+    request.document = merge(this.clone(request.document), {
+      registryData,
+      declaredLicense: request.document.declaredLicense
+    })
     const sourceInfo = await this._discoverSource(spec.revision, registryData)
     if (sourceInfo) request.document.sourceInfo = sourceInfo
   }
