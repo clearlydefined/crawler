@@ -15,6 +15,22 @@ const map = require('../../../../config/map')
 let Handler
 
 describe('AbstractProcessor attach files', () => {
+  beforeEach(() => {
+    const fsStub = {
+      readFileSync: path => {
+        path = path.replace(/\\/g, '/')
+        return `${path.startsWith('/test') ? path.slice(6) : path} attachment`
+      }
+    }
+    const handlerClass = proxyquire('../../../../providers/process/abstractProcessor', {
+      fs: fsStub
+    })
+    Handler = new handlerClass({})
+  })
+
+  afterEach(() => {
+    sandbox.restore()
+  })
   it('links and queues tools', () => {
     const request = new Request('npm', 'cd:/npm/npmjs/-/redie/0.3.0')
     request.document = { _metadata: { links: {} } }
@@ -55,25 +71,6 @@ describe('AbstractProcessor attach files', () => {
     expect(request.document._metadata.links.self.href).to.be.equal('urn:npm:npmjs:-:redie:revision:0.3.0')
     expect(request.document._metadata.links.self.type).to.be.equal('resource')
     expect(request.crawler.queue.callCount).to.equal(0)
-  })
-})
-
-describe('AbstractProcessor attach files', () => {
-  beforeEach(() => {
-    const fsStub = {
-      readFileSync: path => {
-        path = path.replace(/\\/g, '/')
-        return `${path.startsWith('/test') ? path.slice(6) : path} attachment`
-      }
-    }
-    const handlerClass = proxyquire('../../../../providers/process/abstractProcessor', {
-      fs: fsStub
-    })
-    Handler = new handlerClass({})
-  })
-
-  afterEach(() => {
-    sandbox.restore()
   })
 
   it('attaches multiple files', async () => {

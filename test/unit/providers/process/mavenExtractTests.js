@@ -5,7 +5,6 @@ const expect = require('chai').expect
 const extract = require('../../../../providers/process/mavenExtract')
 const SourceSpec = require('../../../../lib/sourceSpec')
 const EntitySpec = require('../../../../lib/entitySpec')
-const sinon = require('sinon')
 
 describe('mavenExtract source discovery', () => {
   it('handles no tags in GitHub and falls back to made up sourcearchive', async () => {
