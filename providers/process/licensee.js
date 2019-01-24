@@ -3,7 +3,7 @@
 
 const AbstractProcessor = require('./abstractProcessor')
 const { exec } = require('child_process')
-const { flatten, uniqBy } = require('lodash')
+const { flatten, merge, uniqBy } = require('lodash')
 const path = require('path')
 const dir = require('node-dir')
 const { promisify } = require('util')
@@ -16,12 +16,12 @@ class LicenseeProcessor extends AbstractProcessor {
     this._versionPromise = this._detectVersion()
   }
 
-  get schemaVersion() {
+  get toolVersion() {
     return this._toolVersion
   }
 
-  get toolSpec() {
-    return { tool: 'licensee', toolVersion: this.schemaVersion }
+  get toolName() {
+    return 'licensee'
   }
 
   canHandle(request) {
@@ -39,7 +39,7 @@ class LicenseeProcessor extends AbstractProcessor {
     const record = await this._run(request)
     if (!record) return
     const location = request.document.location
-    request.document = { ...this.clone(request.document), licensee: record }
+    request.document = merge(this.clone(request.document), { licensee: record })
     const toAttach = record.output.content.matched_files.map(file => file.filename)
     this.attachFiles(request.document, toAttach, location)
   }
@@ -48,14 +48,14 @@ class LicenseeProcessor extends AbstractProcessor {
     const parameters = ['--json', '--no-readme']
     const root = request.document.location
     const paths = [root, ...(await promisify(dir.subdirs)(root))]
-      .map(path => path.slice(root.length).replace(/^[\/\\]+/g, ''))
+      .map(path => path.slice(root.length).replace(/^[/\\]+/g, ''))
       .filter(path => path !== '.git' && !path.includes('.git/'))
     try {
       const results = await Promise.all(paths.map(throat(10, path => this._runOnFolder(path, root, parameters))))
       const licenses = uniqBy(flatten(results.map(result => result.licenses)), 'spdx_id')
       const matched_files = flatten(results.map(result => result.matched_files))
       return {
-        version: this.schemaVersion,
+        version: this.toolVersion,
         parameters: parameters,
         output: {
           contentType: 'application/json',
@@ -98,8 +98,14 @@ class LicenseeProcessor extends AbstractProcessor {
     this._versionPromise = new Promise(resolve => {
       exec('licensee version', 1024, (error, stdout) => {
         if (error) this.logger.log(`Could not detect version of Licensee: ${error.message}`)
-        this._toolVersion = error ? null : stdout
-        resolve(this._toolVersion)
+        this._toolVersion = stdout.trim()
+        this._schemaVersion = error
+          ? null
+          : this.aggregateVersions(
+              [this._schemaVersion, this.toolVersion, this.configVersion],
+              'Invalid Licensee version'
+            )
+        resolve(this._schemaVersion)
       })
     })
     return this._versionPromise

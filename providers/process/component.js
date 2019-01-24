@@ -6,14 +6,6 @@ const SourceProcessor = require('./source')
 const PackageProcessor = require('./package')
 
 class ComponentProcessor extends AbstractProcessor {
-  get schemaVersion() {
-    return 1
-  }
-
-  get toolSpec() {
-    return { tool: 'cdsourcetraversal', toolVersion: this.schemaVersion }
-  }
-
   shouldFetch() {
     return false
   }

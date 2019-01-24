@@ -9,20 +9,12 @@ const Request = require('ghcrawler').request
 const requestRetry = require('requestretry').defaults({ json: true, maxAttempts: 3, fullResponse: false })
 
 class TopProcessor extends AbstractProcessor {
-  get schemaVersion() {
-    return 1
-  }
-
-  get toolSpec() {
-    return { tool: 'toploader', toolVersion: this.schemaVersion }
-  }
-
   canHandle(request) {
     const spec = this.toSpec(request)
     return (
       request.type === 'top' &&
       spec &&
-      ['npmjs', 'cratesio', 'mavencentral', 'nuget', 'github', 'pypi'].includes(spec.provider)
+      ['npmjs', 'cocoapods', 'cratesio', 'mavencentral', 'nuget', 'github', 'pypi'].includes(spec.provider)
     )
   }
 
@@ -32,6 +24,8 @@ class TopProcessor extends AbstractProcessor {
     switch (spec.provider) {
       case 'npmjs':
         return this._processTopNpms(request)
+      // case 'cocoapods':
+      //   return this._processTopCocoapods(request)
       case 'cratesio':
         return this._processTopCrates(request)
       case 'mavencentral':
@@ -81,6 +75,35 @@ class TopProcessor extends AbstractProcessor {
       console.log(`Queued ${requestsPage.length} NPM packages. Offset: ${offset}`)
     }
     return request.markNoSave()
+  }
+
+  /* Example:
+  {
+    "type": "top",
+    "url":"cd:/pod/cocoapods/-/name/0.2.0",
+    "payload": {
+      "body": {
+        "start": 0,
+        "end": 1000
+      }
+    }
+  }
+  */
+  async _processTopCocoapods(request) {
+    let { start, end } = request.document
+    if (!start || start < 0) start = 0
+    if (!end || end - start <= 0) end = start + 1000
+    for (let offset = start; offset < end; offset += 100) {
+      // const page = offset / 100 + 1
+      // const response = await requestRetry.get(
+      //   // `https://crates.io/api/v1/crates?page=${page}&per_page=100&sort=downloads`
+      // )
+      // const requestsPage = response.crates.map(
+      //   x => new Request('package', `cd:/crate/cratesio/-/${x.name}/${x.max_version}`)
+      // )
+      // await request.queueRequests(requestsPage)
+      // console.log(`Queued ${requestsPage.length} Crate packages. Offset: ${offset}`)
+    }
   }
 
   /* Example:

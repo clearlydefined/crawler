@@ -7,7 +7,7 @@ const { promisify } = require('util')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
 const SourceSpec = require('../../lib/sourceSpec')
 const { parseString } = require('xml2js')
-const { get } = require('lodash')
+const { get, merge } = require('lodash')
 
 class NuGetExtract extends AbstractClearlyDefinedProcessor {
   constructor(options, sourceFinder) {
@@ -15,12 +15,8 @@ class NuGetExtract extends AbstractClearlyDefinedProcessor {
     this.sourceFinder = sourceFinder
   }
 
-  get schemaVersion() {
+  get toolVersion() {
     return '1.2.0'
-  }
-
-  get toolSpec() {
-    return { tool: 'clearlydefined', toolVersion: this.schemaVersion }
   }
 
   canHandle(request) {
@@ -33,9 +29,9 @@ class NuGetExtract extends AbstractClearlyDefinedProcessor {
   async handle(request) {
     // skip all the hard work if we are just traversing.
     if (this.isProcessing(request)) {
-      const location = request.document.location
-      await super.handle(request, location.nupkg)
-      const manifest = await this._getManifest(location.manifest)
+      const { location, metadataLocation } = request.document
+      await super.handle(request, location)
+      const manifest = await this._getManifest(metadataLocation.manifest)
       await this._createDocument(request, manifest, request.document.registryData)
     }
     this.linkAndQueueTool(request, 'licensee')
@@ -60,12 +56,12 @@ class NuGetExtract extends AbstractClearlyDefinedProcessor {
   async _createDocument(request, manifest, registryData) {
     const originalDocument = request.document
     // setup the manifest to be the new document for the request
-    request.document = { ...this.clone(request.document), manifest, registryData }
+    request.document = merge(this.clone(request.document), { manifest, registryData })
     // Add interesting info
     if (registryData && registryData.published)
       request.document.releaseDate = new Date(registryData.published).toISOString()
     // Add source info
-    const nuspec = await this._getNuspec(originalDocument.location.nuspec)
+    const nuspec = await this._getNuspec(originalDocument.metadataLocation.nuspec)
     const sourceInfo = await this._discoverSource(manifest, nuspec)
     if (sourceInfo) request.document.sourceInfo = sourceInfo
   }

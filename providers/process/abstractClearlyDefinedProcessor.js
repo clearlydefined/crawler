@@ -5,11 +5,19 @@ const AbstractProcessor = require('./abstractProcessor')
 const { promisify } = require('util')
 const throat = require('throat')
 const path = require('path')
-const { pick } = require('lodash')
+const { pick, merge } = require('lodash')
 const du = require('du')
 const { trimParents } = require('../../lib/utils')
 
 class AbstractClearlyDefinedProcessor extends AbstractProcessor {
+  get toolVersion() {
+    return '0.0.0'
+  }
+
+  get toolName() {
+    return 'clearlydefined'
+  }
+
   async handle(request, location = request.document.location, interestingRoot = '') {
     super.handle(request)
     await this._addSummaryInfo(request, location)
@@ -17,7 +25,7 @@ class AbstractClearlyDefinedProcessor extends AbstractProcessor {
   }
 
   clone(document) {
-    return { ...super.clone(document), ...pick(document, ['summaryInfo', 'files']) }
+    return merge(super.clone(document), pick(document, ['summaryInfo', 'files']))
   }
 
   async _addSummaryInfo(request, location = request.document.location) {
@@ -29,7 +37,7 @@ class AbstractClearlyDefinedProcessor extends AbstractProcessor {
   }
 
   async _addFiles(request, location = request.document.location, interestingRoot = '') {
-    const fileList = await this.getInterestingFiles(location)
+    const fileList = await this.filterFiles(location)
     const files = await Promise.all(
       fileList.map(
         throat(10, async file => {

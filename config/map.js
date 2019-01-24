@@ -55,6 +55,15 @@ const nuget = {
   licensee
 }
 
+const pod = {
+  _type: 'pod',
+  source,
+  clearlydefined,
+  licensee,
+  scancode,
+  fossology
+}
+
 const pypi = {
   _type: 'pypi',
   source,
@@ -79,6 +88,7 @@ const _package = {
   crate,
   maven,
   nuget,
+  pod,
   pypi,
   gem
 }
@@ -103,6 +113,7 @@ const entities = {
   crate,
   maven,
   nuget,
+  pod,
   pypi,
   gem
 }
