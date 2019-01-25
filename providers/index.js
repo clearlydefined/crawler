@@ -14,7 +14,7 @@ module.exports = {
     cocoapods: require('./fetch/podFetch'),
     cratesio: require('./fetch/cratesioFetch'),
     git: require('./fetch/gitCloner'),
-    mavenCentral: require('./fetch/mavenFetch'),
+    mavenCentral: require('./fetch/mavencentralFetch'),
     npmjs: require('./fetch/npmjsFetch'),
     nuget: require('./fetch/nugetFetch'),
     pypi: require('./fetch/pypiFetch'),

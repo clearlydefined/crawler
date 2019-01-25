@@ -20,7 +20,7 @@ class NpmFetch extends AbstractFetch {
   async handle(request) {
     const spec = this.toSpec(request)
     const registryData = await this._getRegistryData(spec)
-    if (!registryData) return request.markSkip('Missing  ')
+    if (!registryData) return this.markSkip(request)
     spec.revision = registryData.manifest.version
     // rewrite the request URL as it is used throughout the system to derive locations and urns etc.
     request.url = spec.toUrl()
