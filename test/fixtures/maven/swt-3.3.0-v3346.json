@@ -1,0 +1,30 @@
+{
+  "responseHeader": {
+    "status": 0,
+    "QTime": 1,
+    "params": {
+      "q": "g:\"org.eclipse\" AND a:\"swt\" AND v:\"3.3.0-v3346\"",
+      "indent": "off",
+      "fl": "id,g,a,v,p,ec,timestamp,tags",
+      "sort": "score desc,timestamp desc,g asc,a asc,v desc",
+      "rows": "1",
+      "wt": "json",
+      "version": "2.2"
+    }
+  },
+  "response": {
+    "numFound": 1,
+    "start": 0,
+    "docs": [
+      {
+        "id": "org.eclipse:swt:3.3.0-v3346",
+        "g": "org.eclipse",
+        "a": "swt",
+        "v": "3.3.0-v3346",
+        "p": "jar",
+        "timestamp": 1196147710000,
+        "ec": [".jar", ".pom"]
+      }
+    ]
+  }
+}
