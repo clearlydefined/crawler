@@ -16,7 +16,7 @@ class CratesioFetch extends AbstractFetch {
   async handle(request) {
     const spec = this.toSpec(request)
     const registryData = await this._getRegistryData(spec)
-    if (!registryData || !registryData.version) return request.markSkip('Missing  ')
+    if (!registryData || !registryData.version) return this.markSkip(request)
     const version = registryData.version
     spec.revision = version.num
     request.url = spec.toUrl()
