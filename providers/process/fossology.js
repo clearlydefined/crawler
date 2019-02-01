@@ -3,7 +3,7 @@
 
 const AbstractProcessor = require('./abstractProcessor')
 const { exec } = require('child_process')
-const bufferReplace = require('buffer-replace')
+const fs = require('fs')
 const path = require('path')
 
 class FossologyProcessor extends AbstractProcessor {
@@ -47,17 +47,22 @@ class FossologyProcessor extends AbstractProcessor {
   async _runNomos(request) {
     return new Promise((resolve, reject) => {
       const parameters = [].join(' ')
+      const file = this.createTempFile(request)
       exec(
-        `cd ${this.options.installDir}/nomos/agent && ./nomossa -ld ${request.document.location} ${parameters}`,
-        { maxBuffer: 5000 * 1024 },
-        (error, stdout) => {
+        `cd ${this.options.installDir}/nomos/agent && ./nomossa -ld ${request.document.location} ${parameters} > ${
+          file.name
+        }`,
+        error => {
           if (error) {
             request.markDead('Error', error ? error.message : 'FOSSology run failed')
             return reject(error)
           }
           const output = {
             contentType: 'text/plain',
-            content: bufferReplace(new Buffer(stdout), request.document.location + '/', '').toString()
+            content: fs
+              .readFileSync(file.name)
+              .toString()
+              .replace(new RegExp(`${request.document.location}/`, 'g'), '')
           }
           const nomosOutput = { version: this._nomosVersion, parameters, output }
           resolve(nomosOutput)
