@@ -150,7 +150,7 @@ class FossologyProcessor extends AbstractProcessor {
       exec(`cd ${this.options.installDir}/nomos/agent && ./nomossa -V`, (error, stdout) => {
         if (error) return reject(error)
         const rawVersion = stdout.replace('nomos build version:', '').trim()
-        resolve(rawVersion.replace(/-.*/, '').trim())
+        resolve(rawVersion.replace(/[-\s].*/, '').trim())
       })
     })
   }
