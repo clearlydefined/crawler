@@ -26,7 +26,6 @@
   },
   "dependencies": {
     "applicationinsights": "^1.0.6",
-    "buffer-replace": "^1.0.0",
     "decompress": "^4.2.0",
     "decompress-targz": "^4.1.1",
     "decompress-unzip": "github:clearlydefined/decompress-unzip#expose-opts",
