@@ -19,10 +19,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends --no-install-su
   gem install bundler --no-rdoc --no-ri
 
 # Scancode
-RUN curl -sL https://github.com/nexB/scancode-toolkit/archive/v2.9.8.tar.gz | tar -C /opt -zx \
-  && /opt/scancode-toolkit-2.9.8/scancode --reindex-licenses \
-  && /opt/scancode-toolkit-2.9.8/scancode --version
-ENV SCANCODE_HOME=/opt/scancode-toolkit-2.9.8
+RUN curl -sL https://github.com/nexB/scancode-toolkit/releases/download/v3.0.0/scancode-toolkit-3.0.0.tar.bz2 | tar -C /opt -jx \
+  && /opt/scancode-toolkit-3.0.0/scancode --reindex-licenses \
+  && /opt/scancode-toolkit-3.0.0/scancode --version
+ENV SCANCODE_HOME=/opt/scancode-toolkit-3.0.0
 
 # Licensee
 RUN gem install licensee -v 9.10.1 --no-rdoc --no-ri
