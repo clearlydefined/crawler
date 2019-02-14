@@ -58,6 +58,8 @@ module.exports = {
         '--copyright',
         '--license',
         '--info',
+        '--license-text',
+        '--is-license-text',
         '--package',
         '--license-diag',
         '--only-findings',
