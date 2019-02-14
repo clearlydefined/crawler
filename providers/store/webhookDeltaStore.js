@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 const request = require('request-promise-native')
+const { pick } = require('lodash')
 
 class WebhookDeltaStore {
   constructor(options) {
@@ -19,7 +20,7 @@ class WebhookDeltaStore {
       method: 'POST',
       uri,
       json: true,
-      body: document,
+      body: pick(document, '_metadata'),
       headers: {
         'x-crawler': this.options.token || 'secret'
       },
