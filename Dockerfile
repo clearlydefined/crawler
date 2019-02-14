@@ -30,6 +30,7 @@ RUN gem install licensee -v 9.10.1 --no-rdoc --no-ri
 # FOSSology
 WORKDIR /opt
 RUN git clone https://github.com/fossology/fossology.git
+RUN cd fossology && git checkout -b clearlydefined tags/3.4.0
 
 # See https://github.com/fossology/fossology/blob/faaaeedb9d08f00def00f9b8a68a5cffc5eaa657/utils/fo-installdeps#L103-L105
 # Additional libjsoncpp-dev https://github.com/fossology/fossology/blob/261d1a3e663b5fd20652a05b2d6360f4b31a17cb/src/copyright/mod_deps#L79-L80
