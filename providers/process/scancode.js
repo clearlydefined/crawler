@@ -68,26 +68,22 @@ class ScanCodeProcessor extends AbstractProcessor {
     const output = JSON.parse(fs.readFileSync(outputFile))
     // Pick files that are potentially whole licenses. We can be reasonably agressive here
     // and the summarizers etc will further refine what makes it into the final definitions
-    // TODO add other criteria here.
-    // TODO commenting out for now as `is_license_text` casts too broad a net (even iwth the scoring filter.
-    // Need a better predicate. In the end it's ok in general as we use Licensee as well. Problem is that only
-    // finds files with a single license. Was hoping that ScanCode could file a gap there.
-    // const files = output.files
-    //   .filter(file => file.licenses.some(license => license.score >= 50 && license.matched_rule.is_license_text))
-    //   .map(file => file.path)
+    const licenses = output.files.filter(file => file.is_license_text).map(file => file.path)
+    this.attachFiles(document, licenses, root)
 
     // Pick files that represent whole packages. We can be reasonably agressive here
     // and the summarizers etc will further refine what makes it into the final definitions
-    // TODO confirm with @pobmredanne that we need to reverse engineer this and that this is the correct way.
-    // Seems to work for NPM but need more examples.
     const packages = output.files.reduce((result, file) => {
       file.packages.forEach(entry => {
+        // in this case the manifest_path contains a subpath pointing to the corresponding file
         if (file.type === 'directory' && entry.manifest_path)
           result.push(`${file.path ? file.path + '/' : ''}${entry.manifest_path}`)
+        else
+          result.push(file.path)
       })
       return result
     }, [])
-    return this.attachFiles(document, packages, root)
+    this.attachFiles(document, packages, root)
   }
 
   // Workaround until https://github.com/nexB/scancode-toolkit/issues/983 is resolved
