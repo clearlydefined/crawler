@@ -20,7 +20,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends --no-install-su
 
 # Scancode
 RUN curl -sL https://github.com/nexB/scancode-toolkit/releases/download/v3.0.2/scancode-toolkit-3.0.2.tar.bz2 | tar -C /opt -jx \
-  && /opt/scancode-toolkit-3.0.3/scancode --reindex-licenses \
+  && /opt/scancode-toolkit-3.0.2/scancode --reindex-licenses \
   && /opt/scancode-toolkit-3.0.2/scancode --version
 ENV SCANCODE_HOME=/opt/scancode-toolkit-3.0.2
 
