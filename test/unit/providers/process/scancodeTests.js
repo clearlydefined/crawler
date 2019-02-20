@@ -7,6 +7,7 @@ const proxyquire = require('proxyquire')
 const sinon = require('sinon')
 const sandbox = sinon.createSandbox()
 const { request } = require('ghcrawler')
+const { flatten } = require('lodash')
 
 let Handler
 
@@ -52,19 +53,19 @@ describe('ScanCode process', () => {
     const { request, processor } = setup('2.9.8/gem.json')
     await processor.handle(request)
     expect(request.document._metadata.toolVersion).to.equal('1.2.0')
-    expect(processor.attachFiles.args[0][1]).to.have.members([])
+    expect(flatten(processor.attachFiles.args.map(x => x[1]))).to.have.members([])
   })
 
   it('should handle simple npms', async () => {
     const { request, processor } = setup('2.9.8/npm-basic.json')
     await processor.handle(request)
-    expect(processor.attachFiles.args[0][1]).to.have.members(['package/package.json'])
+    expect(flatten(processor.attachFiles.args.map(x => x[1]))).to.have.members(['package/package.json'])
   })
 
   it('should handle large npms', async () => {
     const { request, processor } = setup('2.9.8/npm-large.json')
     await processor.handle(request)
-    expect(processor.attachFiles.args[0][1]).to.have.members(['package/package.json'])
+    expect(flatten(processor.attachFiles.args.map(x => x[1]))).to.have.members(['package/package.json'])
   })
 
   it('should skip if ScanCode not found', async () => {
