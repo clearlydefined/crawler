@@ -62,13 +62,14 @@ module.exports = {
         '--is-license-text',
         '--package',
         '--license-diag',
+        ' --strip-root',
         '--email',
         '--url',
         '--license-clarity-score',
         '--classify',
         '--generated',
         '--summary',
-        '--summary-key-files',
+        '--summary-key-files'
         // '--quiet'
       ],
       timeout: 1000,
