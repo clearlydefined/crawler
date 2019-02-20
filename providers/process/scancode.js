@@ -61,10 +61,8 @@ class ScanCodeProcessor extends AbstractProcessor {
       }
     }
   }
+
   _attachInterestingFiles(document, outputFile, root) {
-    // TODO for each file, if we think its interesting, attach it. The interesting files of interest are things like
-    // package metadata or files found to BE full license texts. Need ScanCode to have a better way of detecting
-    // the latter.
     const output = JSON.parse(fs.readFileSync(outputFile))
     // Pick files that are potentially whole licenses. We can be reasonably agressive here
     // and the summarizers etc will further refine what makes it into the final definitions
@@ -78,8 +76,7 @@ class ScanCodeProcessor extends AbstractProcessor {
         // in this case the manifest_path contains a subpath pointing to the corresponding file
         if (file.type === 'directory' && entry.manifest_path)
           result.push(`${file.path ? file.path + '/' : ''}${entry.manifest_path}`)
-        else
-          result.push(file.path)
+        else result.push(file.path)
       })
       return result
     }, [])
