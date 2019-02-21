@@ -53,15 +53,23 @@ module.exports = {
     pod: { githubToken },
     pypi: { githubToken },
     scancode: {
-      installDir: config.get('SCANCODE_HOME') || 'C:\\installs\\scancode-toolkit-2.9.2',
+      installDir: config.get('SCANCODE_HOME') || 'C:\\installs\\scancode-toolkit-3.0.2',
       options: [
         '--copyright',
         '--license',
         '--info',
+        '--license-text',
+        '--is-license-text',
         '--package',
         '--license-diag',
-        '--only-findings',
-        ' --strip-root'
+        ' --strip-root',
+        '--email',
+        '--url',
+        '--license-clarity-score',
+        '--classify',
+        '--generated',
+        '--summary',
+        '--summary-key-files'
         // '--quiet'
       ],
       timeout: 1000,
