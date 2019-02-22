@@ -24,7 +24,7 @@ class AbstractProcessor extends BaseHandler {
    * Override is required if this tool produces output.
    */
   get toolVersion() {
-    return '0.1.0'
+    return '0.2.0'
   }
 
   /**
