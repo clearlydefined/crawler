@@ -59,7 +59,6 @@ echo
 echo 'Fossology initialisation complete; Starting up...'
 echo
 if [[ $# -eq 0 ]]; then
-  echo 'here'
   /etc/init.d/fossology start
   /usr/local/share/fossology/scheduler/agent/fo_scheduler \
     --log /dev/stdout \
@@ -70,15 +69,12 @@ if [[ $# -eq 0 ]]; then
   # Build the knowledgebase file so we can pick it up in the next stage of the build
   /usr/local/share/fossology/monk/agent/monk -s /tmp/monk_knowledgebase
 elif [[ $# -eq 1 && "$1" == "scheduler" ]]; then
-  echo 'here1'
   exec /usr/local/share/fossology/scheduler/agent/fo_scheduler \
     --log /dev/stdout \
     --verbose=3 \
     --reset
 elif [[ $# -eq 1 && "$1" == "web" ]]; then
-  echo 'here3'
   exec /usr/sbin/apache2ctl -e info -D FOREGROUND
 else
-  echo 'here4'
   exec "$@"
 fi
