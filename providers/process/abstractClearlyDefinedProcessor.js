@@ -8,6 +8,30 @@ const path = require('path')
 const { pick, merge } = require('lodash')
 const du = require('du')
 const { trimParents } = require('../../lib/utils')
+const interestingFileNames = new Set([
+  'AGREEMENT',
+  'CONTRIBUTORS',
+  'COPYING',
+  'COPYLEFT',
+  'COPYRIGHT',
+  'COPYRIGHTS',
+  'EULA',
+  'LEGAL',
+  'LICENCE',
+  'LICENCES',
+  'LICENCING',
+  'LICENSE-APACHE',
+  'LICENSE-MIT',
+  'LICENSE',
+  'LICENSES',
+  'LICENSING',
+  'NOTICE',
+  'NOTICES',
+  'NOTICES',
+  'PATENT',
+  'PATENTS',
+  'UNLICENSE'
+])
 
 class AbstractClearlyDefinedProcessor extends AbstractProcessor {
   get toolVersion() {
@@ -54,22 +78,8 @@ class AbstractClearlyDefinedProcessor extends AbstractProcessor {
   _isInterestinglyNamed(file, root = '') {
     const name = trimParents(file, root).toUpperCase()
     if (!name) return false
-    const patterns = [
-      'LICENSE',
-      'LICENSE-MIT',
-      'LICENSE-APACHE',
-      'UNLICENSE',
-      'COPYING',
-      'NOTICE',
-      'NOTICES',
-      'CONTRIBUTORS',
-      'PATENTS'
-    ]
-    const extensions = ['.MD', '.HTML', '.TXT']
-    const extension = path.extname(name)
-    if (extension && !extensions.includes(extension)) return false
-    const base = path.basename(name, extension || '')
-    return patterns.includes(base)
+    const justFileName = path.basename(name, path.extname(name))
+    return interestingFileNames.has(justFileName)
   }
 
   async _computeSize(location) {

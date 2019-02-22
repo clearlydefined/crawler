@@ -8,13 +8,13 @@ const expect = chai.expect
 
 describe('AbstractClearlyDefinedProcessor interesting file identification', () => {
   it('finds files it should', () => {
-    const files = ['license', 'License.md', 'LICENSE.HTML', 'LICENSE.txt']
+    const files = ['license', 'License.md', 'LICENSE.HTML', 'LICENSE.txt', 'LICENSE.rst']
     const processor = new AbstractCDProcessor({})
     files.forEach(file => expect(processor._isInterestinglyNamed(file)).to.be.true)
   })
 
   it('does not fine files it should not', () => {
-    const files = ['licenser', 'Licenset.md', 'test.HTML', 'LICENSE.doc']
+    const files = ['licenser', 'Licenset.md', 'test.HTML']
     const processor = new AbstractCDProcessor({})
     files.forEach(file => expect(processor._isInterestinglyNamed(file)).to.be.false)
   })
