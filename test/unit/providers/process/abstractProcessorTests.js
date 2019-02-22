@@ -56,7 +56,7 @@ describe('AbstractProcessor aggregateVersions', () => {
     }
     const handler = new bar({})
 
-    expect(handler._schemaVersion).to.equal('3.6.7') // AbstractProcessor is at '0.1.0' now ;)
+    expect(handler._schemaVersion).to.equal('3.7.7') // AbstractProcessor is at '0.2.0' now ;)
   })
 })
 

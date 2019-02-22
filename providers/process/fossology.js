@@ -109,32 +109,40 @@ class FossologyProcessor extends AbstractProcessor {
     })
   }
 
-  _runMonk(request, files, root) {
-    return new Promise(resolve => {
-      const parameters = ['-k', 'monk_knowledgebase'] // 'monk_knowledgebase' created at build time
-      const fileArguments = files.map(file => path.join(root, file))
+  async _runMonk(request, files, root) {
+    const parameters = ['-k', 'monk_knowledgebase'] // 'monk_knowledgebase' created at build time
+    const chunkSize = 500
+    const output = {
+      contentType: 'text/plain',
+      content: ''
+    }
+    for (let i = 0; i < files.length; i += chunkSize) {
       const outputFile = this.createTempFile(request)
-      exec(
-        `cd ${this.options.installDir}/monk/agent && ./monk ${parameters.join(' ')} ${fileArguments.join(' ')} > ${
-          outputFile.name
-        }`,
-        error => {
-          if (error) {
-            this.logger.error(error)
-            return resolve(null)
+      const fileArguments = files.slice(i, i + chunkSize).map(file => path.join(root, file))
+      const data = await new Promise(resolve => {
+        exec(
+          `cd ${this.options.installDir}/monk/agent && ./monk ${parameters.join(' ')} ${fileArguments.join(' ')} > ${
+            outputFile.name
+          }`,
+          error => {
+            if (error) {
+              this.logger.error(error)
+              return resolve(null)
+            }
+            resolve(
+              fs
+                .readFileSync(outputFile.name)
+                .toString()
+                .replace(new RegExp(`${request.document.location}/`, 'g'), '')
+            )
           }
-          const output = {
-            contentType: 'text/plain',
-            content: fs
-              .readFileSync(outputFile.name)
-              .toString()
-              .replace(new RegExp(`${request.document.location}/`, 'g'), '')
-          }
-          const monkOutput = { version: this._monkVersion, parameters, output }
-          resolve(monkOutput)
-        }
-      )
-    })
+        )
+      })
+      output.content += data
+    }
+
+    if (output.content) return { version: this._monkVersion, parameters, output }
+    return null
   }
 
   async _detectVersion() {
