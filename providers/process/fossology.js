@@ -39,6 +39,8 @@ class FossologyProcessor extends AbstractProcessor {
     const copyrightOutput = await this._runCopyright(request, files, request.document.location)
     const monkOutput = await this._runMonk(request, files, request.document.location)
     request.document = this.clone(request.document)
+    if (!nomosOutput && !copyrightOutput && !monkOutput)
+      request.markDead('Error', 'FOSSology run failed with no results')
     if (nomosOutput) request.document.nomos = nomosOutput
     if (copyrightOutput) request.document.copyright = copyrightOutput
     if (monkOutput) request.document.monk = monkOutput
@@ -98,7 +100,8 @@ class FossologyProcessor extends AbstractProcessor {
         `cd ${this.options.installDir}/copyright/agent && ./copyright --files ${file} ${parameters.join(' ')}`,
         (error, stdout) => {
           if (error) {
-            request.markDead('Error', error ? error.message : 'FOSSology copyright run failed')
+            // when copyright flakes out - we don't want to ruin the whole run
+            //request.markDead('Error', error ? error.message : 'FOSSology copyright run failed')
             return reject(error)
           }
           resolve(stdout)
@@ -107,22 +110,19 @@ class FossologyProcessor extends AbstractProcessor {
     })
   }
 
-  // eslint-disable-next-line no-unused-vars
   async _runMonk(request, files, root) {
-    // TODO can't actually run Monk until the license database is factored out
-    return null
-    // const parameters = ['-J']
-    // const output = await this._visitFiles(files, path => this._runMonkOnFile(request, path, parameters))
-    // TODO figure out the format of the Monk output and correctly aggregate and adjust paths etc.
-    // return { version: this._monkVersion, parameters, output }
+    const parameters = ['-J']
+    const output = await this._visitFiles(files, file =>
+      this._runMonkOnFile(request, path.join(root, file), parameters)
+    )
+    return { version: this._monkVersion, parameters, output }
   }
 
   _runMonkOnFile(request, file, parameters) {
-    // TODO figure out where to get a license database file. May have to be created at build time
-    const licenseFile = ''
+    const licenseFile = 'monk_knowledgebase' // created at build time
     return new Promise((resolve, reject) => {
       exec(
-        `cd ${this.options.installDir}/monk/agent && ./monk -k ${licenseFile} ${parameters.join('')} ${file}`,
+        `cd ${this.options.installDir}/monk/agent && ./monk -k ${licenseFile} ${parameters.join(' ')} ${file}`,
         (error, stdout) => {
           if (error) {
             request.markDead('Error', error ? error.message : 'FOSSology monk run failed')
