@@ -47,7 +47,7 @@ class FossologyProcessor extends AbstractProcessor {
   }
 
   async _runNomos(request) {
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
       const parameters = [].join(' ')
       const file = this.createTempFile(request)
       exec(
@@ -56,8 +56,8 @@ class FossologyProcessor extends AbstractProcessor {
         }`,
         error => {
           if (error) {
-            request.markDead('Error', error ? error.message : 'FOSSology run failed')
-            return reject(error)
+            this.logger.error(error)
+            return resolve(null)
           }
           const output = {
             contentType: 'text/plain',
@@ -95,14 +95,13 @@ class FossologyProcessor extends AbstractProcessor {
   }
 
   _runCopyrightOnFile(request, file, parameters = []) {
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
       exec(
         `cd ${this.options.installDir}/copyright/agent && ./copyright --files ${file} ${parameters.join(' ')}`,
         (error, stdout) => {
           if (error) {
-            // when copyright flakes out - we don't want to ruin the whole run
-            //request.markDead('Error', error ? error.message : 'FOSSology copyright run failed')
-            return reject(error)
+            this.logger.error(error)
+            return resolve(null)
           }
           resolve(stdout)
         }
@@ -110,25 +109,29 @@ class FossologyProcessor extends AbstractProcessor {
     })
   }
 
-  async _runMonk(request, files, root) {
-    const parameters = ['-J']
-    const output = await this._visitFiles(files, file =>
-      this._runMonkOnFile(request, path.join(root, file), parameters)
-    )
-    return { version: this._monkVersion, parameters, output }
-  }
-
-  _runMonkOnFile(request, file, parameters) {
-    const licenseFile = 'monk_knowledgebase' // created at build time
-    return new Promise((resolve, reject) => {
+  _runMonk(request, files, root) {
+    return new Promise(resolve => {
+      const parameters = ['-k', 'monk_knowledgebase'] // 'monk_knowledgebase' created at build time
+      const fileArguments = files.map(file => path.join(root, file))
+      const outputFile = this.createTempFile(request)
       exec(
-        `cd ${this.options.installDir}/monk/agent && ./monk -k ${licenseFile} ${parameters.join(' ')} ${file}`,
-        (error, stdout) => {
+        `cd ${this.options.installDir}/monk/agent && ./monk ${parameters.join(' ')} ${fileArguments.join(' ')} > ${
+          outputFile.name
+        }`,
+        error => {
           if (error) {
-            request.markDead('Error', error ? error.message : 'FOSSology monk run failed')
-            return reject(error)
+            this.logger.error(error)
+            return resolve(null)
           }
-          resolve(stdout)
+          const output = {
+            contentType: 'text/plain',
+            content: fs
+              .readFileSync(outputFile.name)
+              .toString()
+              .replace(new RegExp(`${request.document.location}/`, 'g'), '')
+          }
+          const monkOutput = { version: this._monkVersion, parameters, output }
+          resolve(monkOutput)
         }
       )
     })
