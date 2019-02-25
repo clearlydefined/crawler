@@ -1,7 +1,10 @@
 # Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 # SPDX-License-Identifier: MIT
 
-#FROM node:8-alpine # switch back to node:8-alpine after removing Scancode
+FROM fossology/fossology:3.4.0 as fossology
+COPY fossology_init.sh fossology_init.sh
+RUN ./fossology_init.sh
+
 FROM node:8
 ENV APPDIR=/opt/service
 #RUN apk update && apk upgrade && \
@@ -49,6 +52,7 @@ RUN make
 WORKDIR /opt/fossology/src/monk/agent
 RUN make
 RUN echo $(./monk -V)
+COPY --from=fossology /tmp/monk_knowledgebase .
 
 ENV FOSSOLOGY_HOME=/opt/fossology/src
 

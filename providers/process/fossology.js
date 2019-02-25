@@ -39,13 +39,15 @@ class FossologyProcessor extends AbstractProcessor {
     const copyrightOutput = await this._runCopyright(request, files, request.document.location)
     const monkOutput = await this._runMonk(request, files, request.document.location)
     request.document = this.clone(request.document)
+    if (!nomosOutput && !copyrightOutput && !monkOutput)
+      request.markDead('Error', 'FOSSology run failed with no results')
     if (nomosOutput) request.document.nomos = nomosOutput
     if (copyrightOutput) request.document.copyright = copyrightOutput
     if (monkOutput) request.document.monk = monkOutput
   }
 
   async _runNomos(request) {
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
       const parameters = [].join(' ')
       const file = this.createTempFile(request)
       exec(
@@ -54,8 +56,8 @@ class FossologyProcessor extends AbstractProcessor {
         }`,
         error => {
           if (error) {
-            request.markDead('Error', error ? error.message : 'FOSSology run failed')
-            return reject(error)
+            this.logger.error(error)
+            return resolve(null)
           }
           const output = {
             contentType: 'text/plain',
@@ -93,13 +95,13 @@ class FossologyProcessor extends AbstractProcessor {
   }
 
   _runCopyrightOnFile(request, file, parameters = []) {
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
       exec(
         `cd ${this.options.installDir}/copyright/agent && ./copyright --files ${file} ${parameters.join(' ')}`,
         (error, stdout) => {
           if (error) {
-            request.markDead('Error', error ? error.message : 'FOSSology copyright run failed')
-            return reject(error)
+            this.logger.error(error)
+            return resolve(null)
           }
           resolve(stdout)
         }
@@ -107,31 +109,40 @@ class FossologyProcessor extends AbstractProcessor {
     })
   }
 
-  // eslint-disable-next-line no-unused-vars
   async _runMonk(request, files, root) {
-    // TODO can't actually run Monk until the license database is factored out
-    return null
-    // const parameters = ['-J']
-    // const output = await this._visitFiles(files, path => this._runMonkOnFile(request, path, parameters))
-    // TODO figure out the format of the Monk output and correctly aggregate and adjust paths etc.
-    // return { version: this._monkVersion, parameters, output }
-  }
-
-  _runMonkOnFile(request, file, parameters) {
-    // TODO figure out where to get a license database file. May have to be created at build time
-    const licenseFile = ''
-    return new Promise((resolve, reject) => {
-      exec(
-        `cd ${this.options.installDir}/monk/agent && ./monk -k ${licenseFile} ${parameters.join('')} ${file}`,
-        (error, stdout) => {
-          if (error) {
-            request.markDead('Error', error ? error.message : 'FOSSology monk run failed')
-            return reject(error)
+    const parameters = ['-k', 'monk_knowledgebase'] // 'monk_knowledgebase' created at build time
+    const chunkSize = 500
+    const output = {
+      contentType: 'text/plain',
+      content: ''
+    }
+    for (let i = 0; i < files.length; i += chunkSize) {
+      const outputFile = this.createTempFile(request)
+      const fileArguments = files.slice(i, i + chunkSize).map(file => path.join(root, file))
+      const data = await new Promise(resolve => {
+        exec(
+          `cd ${this.options.installDir}/monk/agent && ./monk ${parameters.join(' ')} ${fileArguments.join(' ')} > ${
+            outputFile.name
+          }`,
+          error => {
+            if (error) {
+              this.logger.error(error)
+              return resolve(null)
+            }
+            resolve(
+              fs
+                .readFileSync(outputFile.name)
+                .toString()
+                .replace(new RegExp(`${request.document.location}/`, 'g'), '')
+            )
           }
-          resolve(stdout)
-        }
-      )
-    })
+        )
+      })
+      output.content += data
+    }
+
+    if (output.content) return { version: this._monkVersion, parameters, output }
+    return null
   }
 
   async _detectVersion() {
