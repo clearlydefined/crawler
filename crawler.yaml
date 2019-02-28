@@ -74,6 +74,11 @@ spec:
                 secretKeyRef:
                   name: secrets
                   key: CRAWLER_AZBLOB_CONNECTION_STRING
+          resources:
+            requests:
+              cpu: .75
+            limits:
+              cpu: 1
   selector:
     matchLabels:
       app: crawler
