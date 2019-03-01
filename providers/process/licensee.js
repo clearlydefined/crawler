@@ -4,9 +4,8 @@
 const AbstractProcessor = require('./abstractProcessor')
 const { exec } = require('child_process')
 const { flatten, merge, uniqBy } = require('lodash')
+const { trimAllParents } = require('../../lib/utils')
 const path = require('path')
-const dir = require('node-dir')
-const { promisify } = require('util')
 const throat = require('throat')
 
 class LicenseeProcessor extends AbstractProcessor {
@@ -47,9 +46,8 @@ class LicenseeProcessor extends AbstractProcessor {
   async _run(request) {
     const parameters = ['--json', '--no-readme']
     const root = request.document.location
-    const paths = [root, ...(await promisify(dir.subdirs)(root))]
-      .map(path => path.slice(root.length).replace(/^[/\\]+/g, ''))
-      .filter(path => path !== '.git' && !path.includes('.git/'))
+    const subfolders = await this.getFolders(root, ['.git/'])
+    const paths = ['', ...trimAllParents(subfolders, root)]
     try {
       const results = await Promise.all(paths.map(throat(10, path => this._runOnFolder(path, root, parameters))))
       const licenses = uniqBy(flatten(results.map(result => result.licenses)), 'spdx_id')

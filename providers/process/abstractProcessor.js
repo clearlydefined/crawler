@@ -6,9 +6,10 @@ const EntitySpec = require('../../lib/entitySpec')
 const fs = require('fs')
 const path = require('path')
 const shajs = require('sha.js')
-const { intersection, pick, set } = require('lodash')
+const { flatten, intersection, pick, set } = require('lodash')
 const { promisify } = require('util')
-const nodeDir = promisify(require('node-dir').files)
+const readdir = promisify(fs.readdir)
+const lstat = promisify(fs.lstat)
 const { trimAllParents } = require('../../lib/utils')
 
 class AbstractProcessor extends BaseHandler {
@@ -103,13 +104,44 @@ class AbstractProcessor extends BaseHandler {
 
   /**
    * Get the list of all files in the filesytem under the given location
+   * ignores symlinks
    * @param {String} location - file system location to search
    * @returns {String[]} - full file system paths of all files found
    */
-  getFiles(location) {
-    // TODO: remove this line once location is always a directory (maven)
-    if (!fs.statSync(location).isDirectory()) return []
-    return nodeDir(location)
+  async getFiles(location) {
+    const locationStat = await lstat(location)
+    if (locationStat.isSymbolicLink()) return []
+    if (!locationStat.isDirectory()) return [location]
+    const subdirs = await readdir(location)
+    const files = await Promise.all(
+      subdirs.map(subdir => {
+        const entry = path.resolve(location, subdir)
+        return this.getFiles(entry)
+      })
+    )
+    return flatten(files).filter(x => x)
+  }
+
+  /**
+   * Get the list of all folders in the filesytem under the given location
+   * ignores symlinks
+   * @param {String} location - file system location to search
+   * @param {string[]} ignorePaths - folder paths to ignore (e.g. ['.git/'])
+   * @returns {String[]} - full file system paths of all folders found
+   */
+  async getFolders(location, ignorePaths = []) {
+    const subdirs = await readdir(location)
+    const folders = await Promise.all(
+      subdirs.map(async subdir => {
+        const entry = path.resolve(location, subdir)
+        const entryStat = await lstat(entry)
+        if (entryStat.isSymbolicLink() || !entryStat.isDirectory()) return []
+        return [entry, ...(await this.getFolders(entry))]
+      })
+    )
+    return flatten(folders).filter(
+      folder => folder && !ignorePaths.some(ignorePath => folder.indexOf(ignorePath) !== -1)
+    )
   }
 
   /**
@@ -126,7 +158,7 @@ class AbstractProcessor extends BaseHandler {
       const segments = file.split(/[\\/]/g)
       return !intersection(segments, exclusions).length
     })
-    return trimAllParents(filteredList, location)
+    return trimAllParents(filteredList, location).filter(x => x)
   }
 
   shouldFetch() {
