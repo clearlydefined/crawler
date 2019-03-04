@@ -46,7 +46,7 @@ class LicenseeProcessor extends AbstractProcessor {
   async _run(request) {
     const parameters = ['--json', '--no-readme']
     const root = request.document.location
-    const subfolders = await this.getFolders(root, ['.git/'])
+    const subfolders = await this.getFolders(root, ['/.git'])
     const paths = ['', ...trimAllParents(subfolders, root)]
     try {
       const results = await Promise.all(paths.map(throat(10, path => this._runOnFolder(path, root, parameters))))

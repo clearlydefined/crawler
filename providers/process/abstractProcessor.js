@@ -139,9 +139,7 @@ class AbstractProcessor extends BaseHandler {
         return [entry, ...(await this.getFolders(entry))]
       })
     )
-    return flatten(folders).filter(
-      folder => folder && !ignorePaths.some(ignorePath => folder.indexOf(ignorePath) !== -1)
-    )
+    return flatten(folders).filter(folder => folder && !ignorePaths.some(ignorePath => folder.includes(ignorePath)))
   }
 
   /**

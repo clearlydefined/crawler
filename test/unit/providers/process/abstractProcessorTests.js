@@ -173,6 +173,13 @@ describe('AbstractProcessor get interesting files', () => {
     const files = await processor.getFolders(root)
     expect(files).to.deep.equal([path.join(root, 'a'), path.join(root, 'a/b')])
   })
+
+  it('finds folders and ignores', async () => {
+    const processor = new AbstractProcessor({})
+    const root = path.resolve(__dirname, '../../../fixtures/recursivedir')
+    const files = await processor.getFolders(root, ['/b'])
+    expect(files).to.deep.equal([path.join(root, 'a')])
+  })
 })
 
 function validateAttachedFile(name, list, checkContent = false) {
