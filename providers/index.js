@@ -33,6 +33,7 @@ module.exports = {
     package: require('./process/package').processor,
     pod: require('./process/podExtract'),
     scancode: require('./process/scancode'),
+    fossa: require('./process/fossa'),
     fossology: require('./process/fossology'),
     source: require('./process/source').processor,
     top: require('./process/top')

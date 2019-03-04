@@ -41,6 +41,9 @@ module.exports = {
     cdsource: {},
     component: {},
     crate: { githubToken },
+    fossa: {
+      installDir: config.get('FOSSA_HOME') || '/mnt/c/git/fo/fossa/'
+    },
     fossology: {
       installDir: config.get('FOSSOLOGY_HOME') || '/mnt/c/git/fo/fossology/src/'
     },

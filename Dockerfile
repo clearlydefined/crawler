@@ -27,6 +27,12 @@ ENV SCANCODE_HOME=/opt/scancode-toolkit-3.0.2
 # Licensee
 RUN gem install licensee -v 9.10.1 --no-rdoc --no-ri
 
+# fossa
+RUN mkdir "/opt/fossa"
+RUN curl -sL https://github.com/fossas/fossa-cli/releases/download/v0.7.22/fossa-cli_0.7.22_linux_amd64.tar.gz | tar -C /opt/fossa -xz \
+  && /opt/fossa/fossa --version
+ENV FOSSA_HOME=/opt/fossa
+
 # FOSSology
 WORKDIR /opt
 RUN git clone https://github.com/fossology/fossology.git
