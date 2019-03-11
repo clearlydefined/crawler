@@ -164,6 +164,29 @@ Launch crawler and redis:
 
     kubectl -n dev apply -f crawler.yaml
 
+To trigger a reload of a new image with the same labels (but without changing
+any other configs.)
+
+    kubectl patch -n dev deployment crawler -p \
+        "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"`date +'%s'`\"}}}}}"
+
+(This is a hack to force a restart, and the `ImagePullPolicy: always` is what
+will trigger fetching the new image.)
+
+### Scaling
+
+Create a HorizontalPodAutoscaler with:
+
+```
+kubectl autoscale -n prod deploy crawler --cpu-percent=80 --min=1 --max=10
+```
+
+Edit on the fly with
+
+```
+kubectl -n prod edit hpa crawler
+```
+
 ### Shutdown
 
     kubectl -n dev delete deploy/crawler deploy/redis \
@@ -196,7 +219,7 @@ Expose dashboard port:
     kubectl -n dev expose deployment dashboard --type="LoadBalancer" --name=external-dashboard --port=80 --target-port=4000
     kubectl -n dev get service external-dashboard
 
-It will now be availalbe on port 80 on the external IP returned by `kubectl get`.
+It will now be available on port 80 on the external IP returned by `kubectl get`.
 
 Un-expose dashboard port:
 

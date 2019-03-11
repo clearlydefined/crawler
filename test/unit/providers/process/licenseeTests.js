@@ -7,6 +7,7 @@ const proxyquire = require('proxyquire')
 const sinon = require('sinon')
 const sandbox = sinon.createSandbox()
 const fs = require('fs')
+const path = require('path')
 const { request } = require('ghcrawler')
 
 let Handler
@@ -23,7 +24,7 @@ describe('Licensee process', () => {
       'subfolder/LICENSE.foo',
       'subfolder/LICENSE.bar'
     ])
-    expect(processor.attachFiles.args[0][2]).to.equal('test/fixtures/licensee/9.10.1/folder1')
+    expect(processor.attachFiles.args[0][2]).to.equal(path.resolve('test/fixtures/licensee/9.10.1/folder1'))
   })
 
   it('should handle empty matched files list', async () => {
@@ -71,7 +72,7 @@ describe('Licensee process', () => {
 function setup(fixture, error, versionError) {
   const options = { logger: { log: sinon.stub() } }
   const testRequest = new request('npm', 'cd:/npm/npmjs/-/test/1.1')
-  testRequest.document = { _metadata: { links: {} }, location: `test/fixtures/licensee/${fixture}` }
+  testRequest.document = { _metadata: { links: {} }, location: path.resolve(`test/fixtures/licensee/${fixture}`) }
   testRequest.crawler = { storeDeadletter: sinon.stub() }
   Handler._resultBox.error = error
   Handler._resultBox.versionError = versionError
