@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 const proxyquire = require('proxyquire')
+const path = require('path')
 const sinon = require('sinon')
 const sandbox = sinon.createSandbox()
 const chai = require('chai')
@@ -138,6 +139,12 @@ describe('AbstractProcessor attach files', () => {
     await Handler.attachFiles(document, [])
     expect(document.attachments).to.be.undefined
   })
+
+  it('handles attaching no files', async () => {
+    const document = {}
+    await Handler.attachFiles(document, [])
+    expect(document.attachments).to.be.undefined
+  })
 })
 
 describe('AbstractProcessor get interesting files', () => {
@@ -146,6 +153,32 @@ describe('AbstractProcessor get interesting files', () => {
     processor.getFiles = () => ['/test/.git/license', '']
     const files = await processor.filterFiles('/test')
     expect(files.length).to.be.equal(0)
+  })
+
+  it('filter finds files recursively', async () => {
+    const processor = new AbstractProcessor({})
+    const files = await processor.filterFiles(path.resolve(__dirname, '../../../fixtures/recursivedir'))
+    expect(files).to.deep.equal(['a/b/fileb', 'a/filea', 'file1'])
+  })
+
+  it('filter finds no files give a file', async () => {
+    const processor = new AbstractProcessor({})
+    const files = await processor.filterFiles(path.resolve(__dirname, '../../../fixtures/recursivedir/file1'))
+    expect(files).to.deep.equal([])
+  })
+
+  it('finds folders recursively', async () => {
+    const processor = new AbstractProcessor({})
+    const root = path.resolve(__dirname, '../../../fixtures/recursivedir')
+    const files = await processor.getFolders(root)
+    expect(files).to.deep.equal([path.join(root, 'a'), path.join(root, 'a/b')])
+  })
+
+  it('finds folders and ignores', async () => {
+    const processor = new AbstractProcessor({})
+    const root = path.resolve(__dirname, '../../../fixtures/recursivedir')
+    const files = await processor.getFolders(root, ['/b'])
+    expect(files).to.deep.equal([path.join(root, 'a')])
   })
 })
 
