@@ -120,14 +120,14 @@ describe('nugetExtract source discovery', () => {
     expect(sourceLocation.name).to.eq('project')
   })
 
-  it('prioritizes manifest over nuspec', async () => {
+  it('prioritizes nuspec over manifest', async () => {
     const finder = sinon.stub().callsFake(sourceDiscovery())
     const extractor = extract({}, finder)
     const manifest = createManifest(null, null, 'http://license')
     const registry = createNuspec('http://repo')
     const sourceLocation = await extractor._discoverSource(manifest, registry)
     expect(sourceLocation.revision).to.eq('42')
-    expect(sourceLocation.name).to.eq('license')
+    expect(sourceLocation.name).to.eq('repo')
   })
 })
 
