@@ -25,6 +25,9 @@ describe('Maven Central utility functions', () => {
     expect(fetch._buildUrl(spec('maven', 'g1', 'a1', '1.2.3'), 'maven', { packaging: ['aar'] })).to.equal(
       stub + 'g1/a1/1.2.3/a1-1.2.3.aar'
     )
+    expect(fetch._buildUrl(spec('maven', 'g1', 'a1', '1.2.3'), 'maven', { packaging: ['bundle'] })).to.equal(
+      stub + 'g1/a1/1.2.3/a1-1.2.3.jar'
+    )
   })
 
   it('merges poms', () => {
