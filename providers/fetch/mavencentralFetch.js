@@ -5,16 +5,24 @@ const AbstractFetch = require('./abstractFetch')
 const requestPromise = require('request-promise-native')
 const nodeRequest = require('request')
 const { clone, get } = require('lodash')
-const fs = require('fs')
-const path = require('path')
 const { promisify } = require('util')
+const fs = require('fs')
+const exists = promisify(fs.exists)
+const path = require('path')
 const parseString = promisify(require('xml2js').parseString)
 const EntitySpec = require('../../lib/entitySpec')
 
 const providerMap = {
   mavencentral: 'https://search.maven.org/remotecontent?filepath='
 }
-const extensionMap = { sourcearchive: '-sources.jar', pom: '.pom', aar: '.aar', jar: '.jar', maven: '.jar' }
+const extensionMap = {
+  sourcearchive: '-sources.jar',
+  pom: '.pom',
+  aar: '.aar',
+  bundle: '.jar',
+  jar: '.jar',
+  maven: '.jar'
+}
 
 class MavenFetch extends AbstractFetch {
   canHandle(request) {
@@ -64,7 +72,7 @@ class MavenFetch extends AbstractFetch {
   _buildUrl(spec, type, summary) {
     const packaging = get(summary, 'packaging[0]')
     const extension = packaging ? extensionMap[packaging] : extensionMap[type || spec.type]
-    if (!extension) throw new Error(`Invalid spec: ${spec.toString()}`)
+    if (!extension) throw new Error(`Unable to build URL. Packaging: ${packaging}; Type: ${type || spec.type}  `)
     const fullName = `${spec.namespace}/${spec.name}`.replace(/\./g, '/')
     return `${providerMap[spec.provider]}${fullName}/${spec.revision}/${spec.name}-${spec.revision}${extension}`
   }
@@ -130,7 +138,7 @@ class MavenFetch extends AbstractFetch {
 
   async _getReleaseDate(dirName, spec) {
     const location = path.join(dirName, `META-INF/${spec.type}/${spec.namespace}/${spec.name}/pom.properties`)
-    if (await promisify(fs.exists)(location)) {
+    if (await exists(location)) {
       const pomProperties = (await promisify(fs.readFile)(location)).toString().split('\n')
       for (const line of pomProperties) {
         const releaseDate = new Date(line.slice(1))
