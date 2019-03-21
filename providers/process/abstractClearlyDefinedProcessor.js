@@ -8,6 +8,7 @@ const path = require('path')
 const { pick, merge } = require('lodash')
 const du = require('du')
 const { trimParents } = require('../../lib/utils')
+const EntitySpec = require('../../lib/entitySpec')
 
 class AbstractClearlyDefinedProcessor extends AbstractProcessor {
   get toolVersion() {
@@ -26,6 +27,11 @@ class AbstractClearlyDefinedProcessor extends AbstractProcessor {
 
   clone(document) {
     return merge(super.clone(document), pick(document, ['summaryInfo', 'files']))
+  }
+
+  addEmbeddedComponent(document, spec) {
+    if (!document.embedded) document.embedded = []
+    document.embedded.push(spec)
   }
 
   async _addSummaryInfo(request, location = request.document.location) {
@@ -73,6 +79,7 @@ class AbstractClearlyDefinedProcessor extends AbstractProcessor {
   }
 
   async _computeSize(location) {
+    if (!location) return {}
     let count = 0
     const bytes = await promisify(du)(location, {
       filter: file => {

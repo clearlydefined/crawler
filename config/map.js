@@ -32,6 +32,11 @@ const npm = {
   fossology
 }
 
+const apk = {
+  _type: 'apk',
+  clearlydefined
+}
+
 const crate = {
   _type: 'crate',
   source,
@@ -39,6 +44,16 @@ const crate = {
   licensee,
   scancode,
   fossology
+}
+
+const docker = {
+  _type: 'docker',
+  clearlydefined
+}
+
+const dpkg = {
+  _type: 'dpkg',
+  clearlydefined
 }
 
 const maven = {
@@ -110,7 +125,10 @@ const entities = {
   fossology,
   licensee,
   npm,
+  apk,
   crate,
+  docker,
+  dpkg,
   maven,
   nuget,
   pod,

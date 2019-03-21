@@ -18,6 +18,52 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "ClearlyContained",
+      "program": "${workspaceRoot}/index.js",
+      "cwd": "${workspaceRoot}",
+      "runtimeArgs": ["--nolazy"],
+      "env": {
+        "CRAWLER_OPTIONS": "./config/containedConfig",
+        "NODE_ENV": "localhost",
+        "PORT": "5000"
+      },
+      "skipFiles": ["<node_internals>/**/*.js"],
+      "showAsyncStacks": true
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "ClearlyApk",
+      "program": "${workspaceRoot}/index.js",
+      "cwd": "${workspaceRoot}",
+      "runtimeArgs": ["--nolazy"],
+      "env": {
+        "CRAWLER_OPTIONS": "./config/apkConfig",
+        "NODE_ENV": "localhost",
+        "PORT": "5000"
+      },
+      "skipFiles": ["<node_internals>/**/*.js"],
+      "showAsyncStacks": true
+    },
+
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "ClearlyDpkg",
+      "program": "${workspaceRoot}/index.js",
+      "cwd": "${workspaceRoot}",
+      "runtimeArgs": ["--nolazy"],
+      "env": {
+        "CRAWLER_OPTIONS": "./config/dpkgConfig",
+        "NODE_ENV": "localhost",
+        "PORT": "5000"
+      },
+      "skipFiles": ["<node_internals>/**/*.js"],
+      "showAsyncStacks": true
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "Mocha",
       "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
       "stopOnEntry": false,

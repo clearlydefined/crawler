@@ -3,6 +3,7 @@
 
 const BaseHandler = require('../../lib/baseHandler')
 const EntitySpec = require('../../lib/entitySpec')
+const Request = require('ghcrawler').request
 const fs = require('fs')
 const path = require('path')
 const shajs = require('sha.js')
@@ -226,6 +227,13 @@ class AbstractProcessor extends BaseHandler {
     const urn = spec.toUrn()
     request.linkCollection(name, urn)
     request.queue(tool, url, request.getNextPolicy(name))
+  }
+
+  async queueSpecific(spec) {
+    const service = { dpkg: require('../../').dpkgService, apk: require('../../').apkService }[spec.type]
+    if (!service) return
+    await service.ensureInitialized()
+    service.queue(new Request(spec.type, spec.toUrl()))
   }
 }
 

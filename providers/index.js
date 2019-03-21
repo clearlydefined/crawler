@@ -10,9 +10,12 @@ module.exports = {
     filter: require('./filter/filter')
   },
   fetch: {
+    apk: require('./fetch/apkFetch'),
     cdDispatch: require('./fetch/dispatcher'),
     cocoapods: require('./fetch/podFetch'),
     cratesio: require('./fetch/cratesioFetch'),
+    docker: require('./fetch/dockerFetch'),
+    dpkg: require('./fetch/dpkgFetch'),
     git: require('./fetch/gitCloner'),
     mavenCentral: require('./fetch/mavencentralFetch'),
     npmjs: require('./fetch/npmjsFetch'),
@@ -21,9 +24,12 @@ module.exports = {
     rubygems: require('./fetch/rubyGemsFetch')
   },
   process: {
+    apk: require('./process/apkExtract'),
     cdsource: require('./process/sourceExtract'),
     component: require('./process/component'),
     crate: require('./process/crateExtract'),
+    docker: require('./process/dockerExtract'),
+    dpkg: require('./process/dpkgExtract'),
     gem: require('./process/gemExtract'),
     licensee: require('./process/licensee'),
     maven: require('./process/mavenExtract'),
