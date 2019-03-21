@@ -8,7 +8,6 @@ const path = require('path')
 const { pick, merge } = require('lodash')
 const du = require('du')
 const { trimParents } = require('../../lib/utils')
-const EntitySpec = require('../../lib/entitySpec')
 
 class AbstractClearlyDefinedProcessor extends AbstractProcessor {
   get toolVersion() {

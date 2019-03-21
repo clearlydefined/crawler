@@ -1,0 +1,14 @@
+[Unit]
+Description=ClearlyContained Service
+After=network.target
+
+[Service]
+WorkingDirectory=/home/clearlycontained/app
+Type=simple
+ExecStart=/usr/bin/npm start
+Restart=on-failure
+User=clearlycontained
+Environment=PORT=5000
+
+[Install]
+WantedBy=multi-user.target
