@@ -13,7 +13,7 @@ class GemExtract extends AbstractClearlyDefinedProcessor {
   }
 
   get toolVersion() {
-    return '1.1.2'
+    return '1.1.3'
   }
 
   canHandle(request) {
@@ -52,7 +52,7 @@ class GemExtract extends AbstractClearlyDefinedProcessor {
 
   async _createDocument(request, registryData) {
     request.document = merge(this.clone(request.document), { registryData })
-    const sourceInfo = await this._discoverSource(registryData.version, registryData)
+    const sourceInfo = await this._discoverSource(this.toSpec(request).revision, registryData)
     if (sourceInfo) request.document.sourceInfo = sourceInfo
   }
 }
