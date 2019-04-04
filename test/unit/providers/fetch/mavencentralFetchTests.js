@@ -13,21 +13,16 @@ const stub = 'https://search.maven.org/remotecontent?filepath='
 describe('Maven Central utility functions', () => {
   it('builds URLs', () => {
     const fetch = MavenFetch({})
-    expect(fetch._buildUrl(spec('maven', 'g1', 'a1', '1.2.3'), 'pom')).to.equal(stub + 'g1/a1/1.2.3/a1-1.2.3.pom')
+    expect(fetch._buildUrl(spec('maven', 'g1', 'a1', '1.2.3'), '.pom')).to.equal(stub + 'g1/a1/1.2.3/a1-1.2.3.pom')
     expect(fetch._buildUrl(spec('maven', 'g1', 'a1', '1.2.3'))).to.equal(stub + 'g1/a1/1.2.3/a1-1.2.3.jar')
-    expect(fetch._buildUrl(spec('sourcearchive', 'g1', 'a1', '1.2.3'))).to.equal(
+    expect(fetch._buildUrl(spec('sourcearchive', 'g1', 'a1', '1.2.3'), '-sources.jar')).to.equal(
       stub + 'g1/a1/1.2.3/a1-1.2.3-sources.jar'
     )
     expect(fetch._buildUrl(spec('maven', 'com.g1', 'a1.foo', '1.2.3'))).to.equal(
       stub + 'com/g1/a1/foo/1.2.3/a1.foo-1.2.3.jar'
     )
-    expect(fetch._buildUrl(spec('maven', 'g1', 'a1', '1.2.3'), 'maven')).to.equal(stub + 'g1/a1/1.2.3/a1-1.2.3.jar')
-    expect(fetch._buildUrl(spec('maven', 'g1', 'a1', '1.2.3'), 'maven', { packaging: ['aar'] })).to.equal(
-      stub + 'g1/a1/1.2.3/a1-1.2.3.aar'
-    )
-    expect(fetch._buildUrl(spec('maven', 'g1', 'a1', '1.2.3'), 'maven', { packaging: ['bundle'] })).to.equal(
-      stub + 'g1/a1/1.2.3/a1-1.2.3.jar'
-    )
+    expect(fetch._buildUrl(spec('maven', 'g1', 'a1', '1.2.3'), '.jar')).to.equal(stub + 'g1/a1/1.2.3/a1-1.2.3.jar')
+    expect(fetch._buildUrl(spec('maven', 'g1', 'a1', '1.2.3'), '.aar')).to.equal(stub + 'g1/a1/1.2.3/a1-1.2.3.aar')
   })
 
   it('merges poms', () => {
@@ -130,10 +125,10 @@ describe('MavenCentral fetching', () => {
     }
     handler._getArtifact = () => {}
     try {
-      await handler.handle(new Request('test', 'cd:/maven/mavencentral/org.eclipse/error/3.3.0-v3344'))
-      expect(false).to.be.true
+      const result = await handler.handle(new Request('test', 'cd:/maven/mavencentral/org.eclipse/error/3.3.0-v3344'))
+      expect(result.outcome).to.eq('Missing  ')
     } catch (error) {
-      expect(error.message).to.be.equal('yikes')
+      expect(true).to.be.equal(false)
     }
   })
 
