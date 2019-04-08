@@ -68,7 +68,7 @@ class MavenFetch extends AbstractFetch {
   }
 
   _buildUrl(spec, extension = extensionMap.jar) {
-    const fullName = `${spec.namespace}/${spec.name}`.replace(/\./g, '/')
+    const fullName = `${spec.namespace.replace(/\./g, '/')}/${spec.name}`
     return `${providerMap[spec.provider]}${fullName}/${spec.revision}/${spec.name}-${spec.revision}${extension}`
   }
 
