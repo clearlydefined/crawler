@@ -19,7 +19,7 @@ describe('Maven Central utility functions', () => {
       stub + 'g1/a1/1.2.3/a1-1.2.3-sources.jar'
     )
     expect(fetch._buildUrl(spec('maven', 'com.g1', 'a1.foo', '1.2.3'))).to.equal(
-      stub + 'com/g1/a1/foo/1.2.3/a1.foo-1.2.3.jar'
+      stub + 'com/g1/a1.foo/1.2.3/a1.foo-1.2.3.jar'
     )
     expect(fetch._buildUrl(spec('maven', 'g1', 'a1', '1.2.3'), '.jar')).to.equal(stub + 'g1/a1/1.2.3/a1-1.2.3.jar')
     expect(fetch._buildUrl(spec('maven', 'g1', 'a1', '1.2.3'), '.aar')).to.equal(stub + 'g1/a1/1.2.3/a1-1.2.3.aar')
