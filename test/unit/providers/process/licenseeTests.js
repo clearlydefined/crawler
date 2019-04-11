@@ -54,10 +54,11 @@ describe('Licensee process', () => {
   beforeEach(function() {
     const resultBox = { error: null, versionResult: '1.2.0', versionError: null }
     const processStub = {
-      exec: (command, bufferLength, callback) => {
-        if (command.includes('version')) return callback(resultBox.versionError, resultBox.versionResult)
-        const path = command.split(' ').slice(-1)
-        callback(resultBox.error, fs.readFileSync(`${path}/output.json`))
+      execFile: (command, parameters, callbackOrOptions, callback) => {
+        if (parameters.includes('version'))
+          return callbackOrOptions(resultBox.versionError, { stdout: resultBox.versionResult })
+        const path = parameters.slice(-1)[0]
+        callback(resultBox.error, { stdout: fs.readFileSync(`${path}/output.json`).toString() })
       }
     }
     Handler = proxyquire('../../../../providers/process/licensee', { child_process: processStub })
