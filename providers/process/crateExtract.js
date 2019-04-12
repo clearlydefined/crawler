@@ -43,7 +43,8 @@ class CrateExtract extends AbstractClearlyDefinedProcessor {
 
   _discoverSource(manifest, registryData) {
     return this.sourceFinder(registryData.num, [manifest.repository, manifest.homepage, manifest.documentation], {
-      githubToken: this.options.githubToken
+      githubToken: this.options.githubToken,
+      logger: this.logger
     })
   }
 }

@@ -48,7 +48,7 @@ class PyPiExtract extends AbstractClearlyDefinedProcessor {
     candidates.push(get(registryData, 'info.project_url'))
     candidates.push(get(registryData, 'info.release_url'))
     const allCandidates = candidates.filter(e => e)
-    return this.sourceFinder(revision, allCandidates, { githubToken: this.options.githubToken })
+    return this.sourceFinder(revision, allCandidates, { githubToken: this.options.githubToken, logger: this.logger })
   }
 
   async _createDocument(request, spec, registryData) {
