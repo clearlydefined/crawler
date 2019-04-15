@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractProcessor = require('./abstractProcessor')
-const { exec } = require('child_process')
 const fs = require('fs')
-const path = require('path')
 const { promisify } = require('util')
+const child_process = require('child_process')
+const execFile = promisify(child_process.execFile)
 
 class ScanCodeProcessor extends AbstractProcessor {
   constructor(options) {
@@ -47,12 +47,11 @@ class ScanCodeProcessor extends AbstractProcessor {
       `Analyzing ${request.toString()} using ScanCode. input: ${request.document.location} output: ${file.name}`
     )
     const { options, timeout, processes, format } = this.options
-    const parameters = [...options, '--timeout', timeout.toString(), '-n', processes.toString(), format].join(' ')
+    const parameters = [...options, '--timeout', timeout.toString(), '-n', processes.toString(), format]
     try {
-      await promisify(exec)(
-        `cd ${this.options.installDir} && .${path.sep}scancode ${parameters} ${file.name} ${request.document.location}`,
-        { maxBuffer: 5000 * 1024 }
-      )
+      await execFile(`${this.options.installDir}/scancode`, [...parameters, file.name, request.document.location], {
+        cwd: this.options.installDir
+      })
     } catch (error) {
       // TODO see if the new version of ScanCode has a better way of differentiating errors
       if (this._isRealError(error) || this._hasRealErrors(file.name)) {
@@ -107,19 +106,18 @@ class ScanCodeProcessor extends AbstractProcessor {
 
   _detectVersion() {
     if (this._versionPromise) return this._versionPromise
-    this._versionPromise = new Promise(resolve => {
-      exec(`cd ${this.options.installDir} && .${path.sep}scancode --version`, 1024, (error, stdout) => {
-        if (error) this.logger.log(`Could not detect version of ScanCode: ${error.message}`)
-        this._toolVersion = stdout.replace('ScanCode version ', '').trim()
-        this._schemaVersion = error
-          ? null
-          : this.aggregateVersions(
-              [this._schemaVersion, this.toolVersion, this.configVersion],
-              'Invalid ScanCode version'
-            )
-        resolve(this._schemaVersion)
+    this._versionPromise = execFile(`${this.options.installDir}/scancode`, ['--version'])
+      .then(result => {
+        this._toolVersion = result.stdout.replace('ScanCode version ', '').trim()
+        this._schemaVersion = this.aggregateVersions(
+          [this._schemaVersion, this.toolVersion, this.configVersion],
+          'Invalid ScanCode version'
+        )
+        return this._schemaVersion
       })
-    })
+      .catch(error => {
+        this.logger.log(`Could not detect version of ScanCode: ${error.message}`)
+      })
     return this._versionPromise
   }
 }
