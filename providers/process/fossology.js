@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractProcessor = require('./abstractProcessor')
-const { exec } = require('child_process')
-const fs = require('fs')
+const { promisify } = require('util')
+const child_process = require('child_process')
+const execFile = promisify(child_process.execFile)
+const spawn = child_process.spawn
 const path = require('path')
 
 class FossologyProcessor extends AbstractProcessor {
@@ -47,30 +49,32 @@ class FossologyProcessor extends AbstractProcessor {
   }
 
   async _runNomos(request) {
-    return new Promise(resolve => {
-      const parameters = [].join(' ')
-      const file = this.createTempFile(request)
-      exec(
-        `cd ${this.options.installDir}/nomos/agent && ./nomossa -ld ${request.document.location} ${parameters} > ${
-          file.name
-        }`,
-        error => {
-          if (error) {
-            this.logger.error(error)
-            return resolve(null)
-          }
-          const output = {
-            contentType: 'text/plain',
-            content: fs
-              .readFileSync(file.name)
-              .toString()
-              .replace(new RegExp(`${request.document.location}/`, 'g'), '')
-          }
-          const nomosOutput = { version: this._nomosVersion, parameters, output }
-          resolve(nomosOutput)
-        }
-      )
+    const parameters = []
+    const result = await new Promise(resolve => {
+      let data = ''
+      const nomos = spawn(`${this.options.installDir}/nomos/agent/nomossa`, [
+        '-ld',
+        request.document.location,
+        ...parameters
+      ])
+      nomos.stdout.on('data', chunk => {
+        if (data) data += chunk
+        else data = chunk
+      })
+      nomos
+        .on('error', error => {
+          this.logger.error(error)
+          resolve(null)
+        })
+        .on('close', () => {
+          resolve(data.toString().replace(new RegExp(`${request.document.location}/`, 'g'), ''))
+        })
     })
+    const output = {
+      contentType: 'text/plain',
+      content: result.replace(new RegExp(`${request.document.location}/`, 'g'), '')
+    }
+    return { version: this._nomosVersion, parameters: parameters.join(' '), output }
   }
 
   async _visitFiles(files, runner) {
@@ -94,19 +98,20 @@ class FossologyProcessor extends AbstractProcessor {
     return { version: this._copyrightVersion, parameters, output }
   }
 
-  _runCopyrightOnFile(request, file, parameters = []) {
-    return new Promise(resolve => {
-      exec(
-        `cd ${this.options.installDir}/copyright/agent && ./copyright --files ${file} ${parameters.join(' ')}`,
-        (error, stdout) => {
-          if (error) {
-            this.logger.error(error)
-            return resolve(null)
-          }
-          resolve(stdout)
-        }
+  async _runCopyrightOnFile(request, file, parameters = []) {
+    try {
+      const { stdout } = await execFile(
+        `${this.options.installDir}/copyright/agent/copyright`,
+        ['--files', file, ...parameters],
+        { cwd: `${this.options.installDir}/copyright/agent` }
       )
-    })
+      return stdout
+    } catch (error) {
+      if (error) {
+        this.logger.error(error)
+        return null
+      }
+    }
   }
 
   async _runMonk(request, files, root) {
@@ -117,28 +122,26 @@ class FossologyProcessor extends AbstractProcessor {
       content: ''
     }
     for (let i = 0; i < files.length; i += chunkSize) {
-      const outputFile = this.createTempFile(request)
       const fileArguments = files.slice(i, i + chunkSize).map(file => path.join(root, file))
-      const data = await new Promise(resolve => {
-        exec(
-          `cd ${this.options.installDir}/monk/agent && ./monk ${parameters.join(' ')} ${fileArguments.join(' ')} > ${
-            outputFile.name
-          }`,
-          error => {
-            if (error) {
-              this.logger.error(error)
-              return resolve(null)
-            }
-            resolve(
-              fs
-                .readFileSync(outputFile.name)
-                .toString()
-                .replace(new RegExp(`${request.document.location}/`, 'g'), '')
-            )
-          }
-        )
+      const result = await new Promise(resolve => {
+        let data = ''
+        const monk = spawn(`${this.options.installDir}/monk/agent/monk`, [...parameters, ...fileArguments], {
+          cwd: `${this.options.installDir}/monk/agent`
+        })
+        monk.stdout.on('data', chunk => {
+          if (data) data += chunk
+          else data = chunk
+        })
+        monk
+          .on('error', error => {
+            this.logger.error(error)
+            resolve(null)
+          })
+          .on('close', () => {
+            resolve(data.toString())
+          })
       })
-      output.content += data
+      output.content += result.replace(new RegExp(`${request.document.location}/`, 'g'), '')
     }
 
     if (output.content) return { version: this._monkVersion, parameters, output }
@@ -161,14 +164,10 @@ class FossologyProcessor extends AbstractProcessor {
     }
   }
 
-  _detectNomosVersion() {
-    return new Promise((resolve, reject) => {
-      exec(`cd ${this.options.installDir}/nomos/agent && ./nomossa -V`, (error, stdout) => {
-        if (error) return reject(error)
-        const rawVersion = stdout.replace('nomos build version:', '').trim()
-        resolve(rawVersion.replace(/[-\s].*/, '').trim())
-      })
-    })
+  async _detectNomosVersion() {
+    const { stdout } = await execFile(`${this.options.installDir}/nomos/agent/nomossa`, ['-V'])
+    const rawVersion = stdout.replace('nomos build version:', '').trim()
+    return rawVersion.replace(/[-\s].*/, '').trim()
   }
 
   _detectMonkVersion() {

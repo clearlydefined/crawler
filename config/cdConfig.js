@@ -62,7 +62,7 @@ module.exports = {
         '--is-license-text',
         '--package',
         '--license-diag',
-        ' --strip-root',
+        '--strip-root',
         '--email',
         '--url',
         '--license-clarity-score',
