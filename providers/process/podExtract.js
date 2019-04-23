@@ -62,7 +62,8 @@ class PodExtract extends AbstractClearlyDefinedProcessor {
     // sourceFinder will detect the source only using the version,
     // there is no way to pass the branch/tag/commit we have in the manifest
     return this.sourceFinder(registryData.version, sources, {
-      githubToken: this.options.githubToken
+      githubToken: this.options.githubToken,
+      logger: this.logger
     })
   }
 }

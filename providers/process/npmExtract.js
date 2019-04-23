@@ -74,7 +74,8 @@ class NpmExtract extends AbstractClearlyDefinedProcessor {
     const candidates = [...manifestCandidates, ...registryCandidates]
     // TODO lookup source discovery in a set of services that have their own configuration
     return this.sourceFinder(registryManifest.version, candidates, {
-      githubToken: this.options.githubToken
+      githubToken: this.options.githubToken,
+      logger: this.logger
     })
   }
 
