@@ -60,7 +60,9 @@ const maven = {
   _type: 'maven',
   source,
   clearlydefined,
-  licensee
+  licensee,
+  scancode,
+  fossology
 }
 
 const nuget = {

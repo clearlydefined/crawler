@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractProcessor = require('./abstractProcessor')
-const { exec } = require('child_process')
+const { promisify } = require('util')
+const execFile = promisify(require('child_process').execFile)
 const { flatten, merge, uniqBy } = require('lodash')
 const { trimAllParents } = require('../../lib/utils')
 const path = require('path')
@@ -49,7 +50,9 @@ class LicenseeProcessor extends AbstractProcessor {
     const subfolders = await this.getFolders(root, ['/.git'])
     const paths = ['', ...trimAllParents(subfolders, root)]
     try {
-      const results = await Promise.all(paths.map(throat(10, path => this._runOnFolder(path, root, parameters))))
+      const results = (await Promise.all(
+        paths.map(throat(10, path => this._runOnFolder(path, root, parameters)))
+      )).filter(x => x)
       const licenses = uniqBy(flatten(results.map(result => result.licenses)), 'spdx_id')
       const matched_files = flatten(results.map(result => result.matched_files))
       return {
@@ -67,45 +70,37 @@ class LicenseeProcessor extends AbstractProcessor {
 
   // Licensee appears to only run on the give folder, not recursively
   async _runOnFolder(folder, root, parameters) {
-    return new Promise((resolve, reject) => {
-      exec(
-        `licensee detect ${parameters.join(' ')} ${path.join(root, folder)}`,
-        { maxBuffer: 5000 * 1024 },
-        (error, stdout) => {
-          // Licensee fails with code = 1 if there are no license files found in the given folder.
-          // Not really an error. Just skip it.
-          // TODO unclear what code will be returned if there is a real error so be resilient in the
-          // handling of stdout
-          if (error && error.code !== 1) {
-            return reject(error)
-          }
-          try {
-            const result = JSON.parse(stdout)
-            result.matched_files.forEach(file => (file.filename = `${folder ? folder + '/' : ''}${file.filename}`))
-            resolve(result)
-          } catch (exception) {
-            return reject(exception)
-          }
-        }
-      )
-    })
+    try {
+      const { stdout } = await execFile('licensee', ['detect', ...parameters, path.join(root, folder)], {
+        maxBuffer: 5000 * 1024
+      })
+      if (!stdout.trim()) return
+      const result = JSON.parse(stdout)
+      result.matched_files.forEach(file => (file.filename = `${folder ? folder + '/' : ''}${file.filename}`))
+      return result
+    } catch (error) {
+      // Licensee fails with code = 1 if there are no license files found in the given folder.
+      // Not really an error. Just skip it.
+      // TODO unclear what code will be returned if there is a real error so be resilient in the
+      // handling of stdout
+      if (error && error.code !== 1) throw error
+    }
   }
 
   _detectVersion() {
     if (this._versionPromise !== undefined) return this._versionPromise
-    this._versionPromise = new Promise(resolve => {
-      exec('licensee version', 1024, (error, stdout) => {
-        if (error) this.logger.log(`Could not detect version of Licensee: ${error.message}`)
-        this._toolVersion = stdout.trim()
-        this._schemaVersion = error
-          ? null
-          : this.aggregateVersions(
-              [this._schemaVersion, this.toolVersion, this.configVersion],
-              'Invalid Licensee version'
-            )
-        resolve(this._schemaVersion)
+    this._versionPromise = execFile('licensee', ['version'])
+      .then(result => {
+        this._toolVersion = result.stdout.trim()
+        this._schemaVersion = this.aggregateVersions(
+          [this._schemaVersion, this.toolVersion, this.configVersion],
+          'Invalid Licensee version'
+        )
+        return this._schemaVersion
       })
-    })
+      .catch(error => {
+        if (error) this.logger.log(`Could not detect version of Licensee: ${error.message}`)
+      })
     return this._versionPromise
   }
 }

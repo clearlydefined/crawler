@@ -13,7 +13,7 @@ class MavenExtract extends AbstractClearlyDefinedProcessor {
   }
 
   get toolVersion() {
-    return '1.2.0'
+    return '1.3.0'
   }
 
   canHandle(request) {
@@ -31,6 +31,9 @@ class MavenExtract extends AbstractClearlyDefinedProcessor {
       const manifest = { summary: request.document.summary, poms: request.document.poms }
       await this._createDocument(request, spec, manifest, request.document.releaseDate)
     }
+    this.linkAndQueueTool(request, 'licensee')
+    this.linkAndQueueTool(request, 'fossology')
+    this.linkAndQueueTool(request, 'scancode')
     if (request.document.sourceInfo) {
       const sourceSpec = SourceSpec.fromObject(request.document.sourceInfo)
       this.linkAndQueue(request, 'source', sourceSpec.toEntitySpec())
@@ -48,7 +51,8 @@ class MavenExtract extends AbstractClearlyDefinedProcessor {
     const manifestCandidates = this._discoverCandidateSourceLocations(manifest)
     // TODO lookup source discovery in a set of services that have their own configuration
     const githubSource = await this.sourceFinder(spec.version, manifestCandidates, {
-      githubToken: this.options.githubToken
+      githubToken: this.options.githubToken,
+      logger: this.logger
     })
     if (githubSource) return githubSource
     // didn't find any source in GitHub so make up a sources url to try if the registry thinks there is source

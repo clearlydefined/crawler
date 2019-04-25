@@ -69,9 +69,10 @@ class NuGetExtract extends AbstractClearlyDefinedProcessor {
   async _discoverSource(manifest, nuspec) {
     const manifestCandidates = this._discoverCandidateSourceLocations(manifest)
     const nuspecCandidates = this._discoverCandidateSourceLocations(get(nuspec, 'package.metadata'))
-    const candidates = [...manifestCandidates, ...nuspecCandidates]
+    const candidates = [...nuspecCandidates, ...manifestCandidates]
     return this.sourceFinder(manifest.version, candidates, {
-      githubToken: this.options.githubToken
+      githubToken: this.options.githubToken,
+      logger: this.logger
     })
   }
 
