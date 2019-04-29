@@ -17,7 +17,8 @@ class ComponentProcessor extends AbstractProcessor {
   handle(request) {
     super.handle(request)
     const spec = this.toSpec(request)
-    if (SourceProcessor.supportedTypes.includes(spec.type)) this.linkAndQueueTool(request, 'source')
+    if (spec.type === 'docker') this.linkAndQueueTool(request, 'docker')
+    else if (SourceProcessor.supportedTypes.includes(spec.type)) this.linkAndQueueTool(request, 'source')
     else if (PackageProcessor.supportedTypes.includes(spec.type)) this.linkAndQueueTool(request, 'package')
     request.markNoSave()
     return request

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 const BaseHandler = require('../../lib/baseHandler')
+const Request = require('ghcrawler').request
 const extract = require('extract-zip')
 const decompress = require('decompress')
 const decompressTar = require('decompress-tar')
@@ -34,6 +35,22 @@ class AbstractFetch extends BaseHandler {
       filter: file => !file.path.endsWith('/'),
       plugins: [decompressTar(), decompressTargz(), decompressUnzip({ validateEntrySizes: false })]
     })
+  }
+
+  /*
+   * This is used to jump detween queue sets when the current crawler does not support the type requested
+   */
+  async queueSpecific(request, spec) {
+    const containedTypes = new Set(['docker', 'apk'])
+    const defaultTypes = new Set(['dpkg'])
+    let service
+    if (containedTypes.has(spec.type)) service = require('../../').containedService
+    else if (defaultTypes.has(spec.type)) service = require('../../').defaultService
+    else throw new Error(`Nowhere to queue type ${spec.type}`)
+    if (!service) return
+    await service.ensureInitialized()
+    service.queue(new Request(spec.type, spec.toUrl()))
+    return request.markSkip('Transferred  ')
   }
 }
 

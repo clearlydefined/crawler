@@ -9,7 +9,9 @@ class ApkFetch extends AbstractFetch {
     return spec && spec.provider === 'apk'
   }
 
-  async handle() {
+  async handle(request) {
+    const spec = this.toSpec(request)
+    if (this.options.disabled) return this.queueSpecific(request, spec)
     throw new Error('ApkFetch is not implemented')
   }
 }

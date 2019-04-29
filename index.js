@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 const config = require('painless-config')
-const defaults = require(config.get('CRAWLER_OPTIONS') || './config/cdConfig')
-const dpkgConfig = require('./config/dpkgConfig')
-const apkConfig = require('./config/apkConfig')
+const current = require(config.get('CRAWLER_OPTIONS') || './config/cdConfig')
+const defaultConfig = require('./config/cdConfig')
+const containedConfig = require('./config/containedConfig')
 const run = require('ghcrawler').run
 const crawlerFactory = require('ghcrawler').crawlerFactory
 const searchPath = [require('./providers')]
@@ -16,9 +16,9 @@ const logger = require('./providers/logging/logger')({
   buildNumber: config.get('CRAWLER_BUILD_NUMBER') || 'local'
 })
 
-const dpkgService = crawlerFactory.createService(dpkgConfig, logger)
-const apkService = crawlerFactory.createService(apkConfig, logger)
+const defaultService = crawlerFactory.createService(defaultConfig, logger)
+const containedService = crawlerFactory.createService(containedConfig, logger)
 
-run(defaults, logger, searchPath, maps)
+run(current, logger, searchPath, maps)
 
-module.exports = { apkService, dpkgService }
+module.exports = { containedService, defaultService }

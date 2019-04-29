@@ -5,9 +5,7 @@
   "main": "./index.js",
   "scripts": {
     "start": "node ./index.js",
-    "start-apk": "CRAWLER_OPTIONS=./config/apkConfig && node ./index.js",
     "start-contained": "CRAWLER_OPTIONS=./config/containedConfig && node ./index.js",
-    "start-dpkg": "CRAWLER_OPTIONS=./config/dpkgConfig && node ./index.js",
     "test": "nyc mocha \"test/unit/**/*.js\" && eslint .",
     "integration": "mocha \"test/integration/**/*.js\" --timeout 20000"
   },

@@ -9,7 +9,9 @@ class DpkgFetch extends AbstractFetch {
     return spec && spec.provider === 'dpkg'
   }
 
-  async handle() {
+  async handle(request) {
+    const spec = this.toSpec(request)
+    if (this.options.disabled) return this.queueSpecific(request, spec)
     throw new Error('DpkgFetch is not implemented')
   }
 }

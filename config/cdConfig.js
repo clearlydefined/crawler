@@ -26,10 +26,13 @@ module.exports = {
     filter: {}
   },
   fetch: {
-    dispatcher: 'cdDispatch',
+    apk: { disabled: true },
     cdDispatch: {},
     cocoapods: { githubToken },
     cratesio: {},
+    dispatcher: 'cdDispatch',
+    docker: { disabled: true },
+    dpkg: {},
     git: {},
     mavenCentral: {},
     npmjs: {},
@@ -38,9 +41,12 @@ module.exports = {
     rubygems: {}
   },
   process: {
+    apk: {},
     cdsource: {},
     component: {},
     crate: { githubToken },
+    docker: {},
+    dpkg: {},
     fossology: {
       installDir: config.get('FOSSOLOGY_HOME') || '/mnt/c/git/fo/fossology/src/'
     },

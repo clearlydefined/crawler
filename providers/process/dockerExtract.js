@@ -40,7 +40,7 @@ class DockerExtract extends AbstractClearlyDefinedProcessor {
         revision
       })
       this.addEmbeddedComponent(request.document, spec)
-      this.queueSpecific(spec)
+      this.linkAndQueue(request, 'dpkg', spec)
     }
   }
 
@@ -58,7 +58,7 @@ class DockerExtract extends AbstractClearlyDefinedProcessor {
         revision
       })
       this.addEmbeddedComponent(request.document, spec)
-      this.queueSpecific(spec)
+      this.linkAndQueue(request, 'apk', spec)
     }
   }
 }

@@ -26,10 +26,14 @@ module.exports = {
   fetch: {
     dispatcher: 'cdDispatch',
     cdDispatch: {},
-    docker: {}
+    apk: {},
+    docker: {},
+    dpkg: { disabled: true }
   },
   process: {
-    docker: {}
+    apk: {},
+    docker: {},
+    dpkg: {}
   },
   store: {
     dispatcher: crawlerStoreProvider,

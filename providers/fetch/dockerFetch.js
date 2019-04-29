@@ -12,6 +12,7 @@ class DockerFetch extends AbstractFetch {
 
   async handle(request) {
     const spec = this.toSpec(request)
+    if (this.options.disabled) return this.queueSpecific(request, spec)
     spec.revision = await this._getRevision(spec)
     request.url = spec.toUrl()
     const location = await this._getLocation(spec)

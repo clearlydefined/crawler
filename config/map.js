@@ -46,14 +46,16 @@ const crate = {
   fossology
 }
 
-const docker = {
-  _type: 'docker',
-  clearlydefined
-}
-
 const dpkg = {
   _type: 'dpkg',
   clearlydefined
+}
+
+const docker = {
+  _type: 'docker',
+  clearlydefined,
+  apk,
+  dpkg
 }
 
 const maven = {
@@ -112,6 +114,7 @@ const _package = {
 
 const component = {
   _type: 'component',
+  docker,
   source,
   package: _package
 }
