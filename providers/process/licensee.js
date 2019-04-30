@@ -29,6 +29,7 @@ class LicenseeProcessor extends AbstractProcessor {
   }
 
   async handle(request) {
+    if (this.options.disabled) return request.markSkip('Disabled  ')
     if (!(await this._versionPromise)) return request.markSkip('Licensee not properly configured')
     super.handle(request)
     await this._createDocument(request)
