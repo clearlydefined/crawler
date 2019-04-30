@@ -28,6 +28,7 @@ class FossologyProcessor extends AbstractProcessor {
   }
 
   async handle(request) {
+    if (this.options.disabled) return request.markSkip('Disabled  ')
     if (!(await this._versionPromise)) return request.markSkip('FOSSology tools not properly configured')
     super.handle(request)
     this.logger.info(`Analyzing ${request.toString()} using FOSSology. input: ${request.document.location}`)
