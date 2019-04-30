@@ -26,9 +26,11 @@
     "url": "https://github.com/clearlydefined/crawler"
   },
   "dependencies": {
+    "acorn": "^6.1.1",
     "applicationinsights": "^1.0.6",
     "decompress": "^4.2.0",
     "decompress-targz": "^4.1.1",
+    "decompress-tarxz": "^2.1.1",
     "decompress-unzip": "github:clearlydefined/decompress-unzip#expose-opts",
     "du": "^0.1.0",
     "extend": "^3.0.1",

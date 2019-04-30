@@ -48,7 +48,10 @@ const crate = {
 
 const dpkg = {
   _type: 'dpkg',
-  clearlydefined
+  clearlydefined,
+  licensee,
+  scancode,
+  fossology
 }
 
 const docker = {
