@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractFetch = require('./abstractFetch')
-const { exec } = require('child_process')
+const { promisify } = require('util')
+const execFile = promisify(require('child_process').execFile)
 
 class DockerFetch extends AbstractFetch {
   canHandle(request) {
@@ -27,18 +28,10 @@ class DockerFetch extends AbstractFetch {
   async _getRevision(spec) {
     // TODO: handle bad tags/names etc -> return null and then markSkip
     const imageName = this._getTagImageName(spec)
-    await new Promise((resolve, reject) => {
-      exec(`docker pull ${imageName}`, error => {
-        if (error) return reject(error)
-        resolve()
-      })
-    })
-    return new Promise((resolve, reject) => {
-      exec(`docker inspect --format='{{.RepoDigests}}' ${imageName}`, (error, stdout) => {
-        if (error) return reject(error)
-        resolve(stdout.match(/.*@sha256:([a-z0-9]+)\]/)[1])
-      })
-    })
+    await execFile('docker', ['pull', imageName])
+    // eslint-disable-next-line quotes
+    const { stdout } = await execFile('docker', ['inspect', "--format='{{.RepoDigests}}'", imageName])
+    return stdout.match(/.*@sha256:([a-z0-9]+)\]/)[1]
   }
 
   async _getApk(spec) {
@@ -46,44 +39,16 @@ class DockerFetch extends AbstractFetch {
     // but the names and the versions can also have hyphens
     // dump the names and then dump name-versions so we can detect
     const imageName = this._getHashImageName(spec)
-    const names = await new Promise((resolve, reject) => {
-      exec(`docker run --entrypoint "apk" ${imageName} info`, (error, stdout) => {
-        if (error) {
-          // TODO: setup to handle this error
-          if (error === 'SPECIFIC KNOWN ERROR') return resolve(null)
-          //return reject(error)
-          return resolve(null)
-        }
-        resolve(stdout.trim())
-      })
-    })
+    const names = await this._runDockerCommand(imageName, 'apk', ['info'])
     if (!names) return null
-    const namesAndVersions = await new Promise((resolve, reject) => {
-      exec(`docker run --entrypoint "apk" ${imageName} info -v`, (error, stdout) => {
-        if (error) return reject(error)
-        resolve(stdout.trim())
-      })
-    })
-    return { names, namesAndVersions }
+    const namesAndVersions = await this._runDockerCommand(imageName, 'apk', ['info', '-v'])
+    const alpineVersion = await this._runDockerCommand(imageName, 'cat', ['/etc/alpine-release'])
+    return { names, namesAndVersions, version: `v${alpineVersion}` }
   }
 
   _getDpkg(spec) {
-    return new Promise((resolve, reject) => {
-      exec(
-        `docker run --entrypoint "dpkg" ${spec.namespace ? `${spec.namespace}/${spec.name}` : spec.name}@sha256:${
-          spec.revision
-        } --list | awk 'NR>5 {print $2 "___" $3}'`,
-        (error, stdout) => {
-          if (error) {
-            // TODO: setup to handle this error
-            if (error === 'SPECIFIC KNOWN ERROR') return resolve(null)
-            //return reject(error)
-            return resolve(null)
-          }
-          resolve(stdout.trim())
-        }
-      )
-    })
+    const imageName = this._getHashImageName(spec)
+    return this._runDockerCommand(imageName, 'dpkg', ['--list', '|', 'awk \'NR>5 {print $2 "___" $3}\''])
   }
 
   _getLocation() {
@@ -91,6 +56,16 @@ class DockerFetch extends AbstractFetch {
       // TODO: mount the image to a directory so we can hash and harvest files etc
       resolve('')
     })
+  }
+
+  async _runDockerCommand(imageName, command, commandArgs) {
+    try {
+      const { stdout } = await execFile('docker', ['run', '--entrypoint', command, imageName, ...commandArgs])
+      return stdout.trim()
+    } catch (error) {
+      if (error.stderr.indexOf('executable file not found') > -1) return null
+      throw error
+    }
   }
 
   _getTagImageName(spec) {

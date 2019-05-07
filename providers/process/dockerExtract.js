@@ -53,7 +53,7 @@ class DockerExtract extends AbstractClearlyDefinedProcessor {
       let revision = apkNameAndVersionList[i].replace(`${name}-`, '')
       const spec = EntitySpec.fromObject({
         type: 'apk',
-        provider: 'apk',
+        provider: request.document.apk.version,
         name,
         revision
       })
