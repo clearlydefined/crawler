@@ -41,12 +41,9 @@ module.exports = {
     cdsource: {},
     component: {},
     crate: { githubToken },
-    fossology: {
-      disabled: true,
-      installDir: config.get('FOSSOLOGY_HOME') || '/mnt/c/git/fo/fossology/src/'
-    },
+    fossology: { installDir: config.get('FOSSOLOGY_HOME') || '/mnt/c/git/fo/fossology/src/' },
     gem: { githubToken },
-    licensee: { disabled: true },
+    licensee: {},
     maven: { githubToken },
     npm: { githubToken },
     nuget: { githubToken },
