@@ -5,7 +5,7 @@ FROM fossology/fossology:3.4.0 as fossology
 COPY fossology_init.sh fossology_init.sh
 RUN ./fossology_init.sh
 
-FROM node:8
+FROM node:10
 ENV APPDIR=/opt/service
 #RUN apk update && apk upgrade && \
 #    apk add --no-cache bash git openssh
@@ -28,7 +28,7 @@ RUN curl -sL https://github.com/nexB/scancode-toolkit/releases/download/v3.0.2/s
 ENV SCANCODE_HOME=/opt/scancode-toolkit-3.0.2
 
 # Licensee
-RUN gem install licensee -v 9.10.1 --no-rdoc --no-ri
+RUN gem install licensee -v 9.11.0 --no-rdoc --no-ri
 
 # FOSSology
 WORKDIR /opt
