@@ -46,7 +46,7 @@ module.exports = {
       installDir: config.get('FOSSOLOGY_HOME') || '/mnt/c/git/fo/fossology/src/'
     },
     gem: { githubToken },
-    licensee: { disabled: true },
+    licensee: {},
     maven: { githubToken },
     npm: { githubToken },
     nuget: { githubToken },
