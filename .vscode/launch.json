@@ -5,6 +5,7 @@
       "type": "node",
       "request": "attach",
       "name": "Attach to Docker",
+      "remoteRoot": "/opt/service",
       "port": 9229
     },
     {

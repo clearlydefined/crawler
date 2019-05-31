@@ -93,6 +93,10 @@ module.exports = {
       url: config.get('CRAWLER_WEBHOOK_URL') || 'http://localhost:4000/webhook',
       token: config.get('CRAWLER_WEBHOOK_TOKEN')
     },
+    azqueue: {
+      connectionString: cd_azblob.connection,
+      queueName: config.get('CRAWLER_HARVESTS_QUEUE_NAME') || 'harvests'
+    },
     'cd(azblob)': cd_azblob,
     'cd(file)': cd_file
   },
