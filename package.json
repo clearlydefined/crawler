@@ -7,7 +7,9 @@
     "start": "node ./index.js",
     "test": "nyc mocha \"test/unit/**/*.js\" && eslint .",
     "local": "node --inspect-brk=0.0.0.0:9229 ./index.js",
-    "integration": "mocha \"test/integration/**/*.js\" --timeout 20000"
+    "integration": "mocha \"test/integration/**/*.js\" --timeout 20000",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "keywords": [
     "license",
@@ -54,7 +56,8 @@
     "tmp": "0.0.33",
     "winston": "^2.3.0",
     "winston-azure-application-insights": "^1.5.0",
-    "xml2js": "^0.4.19"
+    "xml2js": "^0.4.19",
+    "snyk": "^1.170.0"
   },
   "devDependencies": {
     "chai": "^4.1.2",
@@ -65,5 +68,6 @@
     "nyc": "^13.2.0",
     "proxyquire": "^2.0.1",
     "sinon": "^4.5.0"
-  }
+  },
+  "snyk": true
 }
