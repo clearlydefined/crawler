@@ -3,6 +3,13 @@
   "configurations": [
     {
       "type": "node",
+      "request": "attach",
+      "name": "Attach to Docker",
+      "remoteRoot": "/opt/service",
+      "port": 9229
+    },
+    {
+      "type": "node",
       "request": "launch",
       "name": "ClearlyDefined",
       "program": "${workspaceRoot}/index.js",

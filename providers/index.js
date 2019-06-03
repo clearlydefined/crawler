@@ -40,6 +40,7 @@ module.exports = {
   store: {
     cdDispatch: require('./store/storeDispatcher'),
     webhook: require('./store/webhookDeltaStore'),
+    azqueue: require('./store/azureQueueStore'),
     'cd(azblob)': AttachmentStoreFactory(providers.store.azblob),
     'cd(file)': AttachmentStoreFactory(providers.store.file)
   }
