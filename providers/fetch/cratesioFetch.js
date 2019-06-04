@@ -48,7 +48,8 @@ class CratesioFetch extends AbstractFetch {
     try {
       registryData = await request({
         url: `https://crates.io/api/v1/crates/${spec.name}`,
-        json: true
+        json: true,
+        headers: { 'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)' }
       })
     } catch (exception) {
       if (exception.statusCode !== 404) throw exception
@@ -65,7 +66,12 @@ class CratesioFetch extends AbstractFetch {
   // Example: https://crates.io/api/v1/crates/bitflags/1.0.4/download
   async _getPackage(zip, version) {
     return new Promise((resolve, reject) => {
-      request({ url: `https://crates.io${version.dl_path}`, json: false, encoding: null }).pipe(
+      request({
+        url: `https://crates.io${version.dl_path}`,
+        json: false,
+        encoding: null,
+        headers: { 'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)' }
+      }).pipe(
         fs
           .createWriteStream(zip)
           .on('finish', () => resolve(null))
