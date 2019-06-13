@@ -28,7 +28,6 @@
   "dependencies": {
     "applicationinsights": "^1.0.6",
     "azure-storage": "^2.10.3",
-    "base-64": "^0.1.0",
     "decompress": "^4.2.0",
     "decompress-targz": "^4.1.1",
     "decompress-unzip": "github:clearlydefined/decompress-unzip#expose-opts",
@@ -38,6 +37,7 @@
     "geit": "0.0.7",
     "ghcrawler": "github:microsoft/ghcrawler#jm/apicrawler",
     "ghrequestor": "^0.1.7",
+    "js-yaml": "^3.13.1",
     "lodash": "^4.17.5",
     "moment": "^2.20.1",
     "morgan": "^1.9.0",
@@ -57,7 +57,7 @@
     "xml2js": "^0.4.19"
   },
   "devDependencies": {
-    "chai": "^4.1.2",
+    "chai": "^4.2.0",
     "chai-spies": "^1.0.0",
     "eslint": "^5.8.0",
     "istanbul": "^0.4.5",
