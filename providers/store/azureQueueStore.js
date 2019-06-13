@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 const azure = require('azure-storage')
-const base64 = require('base-64')
 const { promisify } = require('util')
 
 class AzureStorageQueue {
@@ -19,7 +18,8 @@ class AzureStorageQueue {
   }
 
   async upsert(document) {
-    const message = base64.encode(JSON.stringify(document))
+    const message = Buffer.from(JSON.stringify(document)).toString('base64')
+
     await promisify(this.queueService.createMessage).bind(this.queueService)(this.options.queueName, message)
   }
 
