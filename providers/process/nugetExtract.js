@@ -16,7 +16,7 @@ class NuGetExtract extends AbstractClearlyDefinedProcessor {
   }
 
   get toolVersion() {
-    return '1.2.0'
+    return '1.2.1'
   }
 
   canHandle(request) {
@@ -35,6 +35,7 @@ class NuGetExtract extends AbstractClearlyDefinedProcessor {
       await this._createDocument(request, manifest, request.document.registryData)
     }
     this.linkAndQueueTool(request, 'licensee')
+    this.linkAndQueueTool(request, 'scancode')
     if (request.document.sourceInfo) {
       const sourceSpec = SourceSpec.fromObject(request.document.sourceInfo)
       this.linkAndQueue(request, 'source', sourceSpec.toEntitySpec())
