@@ -18,8 +18,7 @@ class AzureStorageQueue {
   }
 
   async upsert(document) {
-    const message = Buffer.from(JSON.stringify(document)).toString('base64')
-
+    const message = Buffer.from(JSON.stringify({ _metadata: document._metadata })).toString('base64')
     await promisify(this.queueService.createMessage).bind(this.queueService)(this.options.queueName, message)
   }
 
