@@ -54,7 +54,8 @@ const nuget = {
   _type: 'nuget',
   source,
   clearlydefined,
-  licensee
+  licensee,
+  scancode
 }
 
 const pod = {
