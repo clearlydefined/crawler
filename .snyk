@@ -1,0 +1,38 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.13.5
+ignore: {}
+# patches apply the minimum changes required to fix a vulnerability
+patch:
+  SNYK-JS-LODASH-450202:
+    - request-promise-native > request-promise-core > lodash:
+        patched: '2019-07-04T03:26:41.387Z'
+    - lodash:
+        patched: '2019-07-04T03:26:41.387Z'
+    - requestretry > lodash:
+        patched: '2019-07-04T03:26:41.387Z'
+    - ghcrawler > node-amqp10 > lodash:
+        patched: '2019-07-04T03:26:41.387Z'
+    - ghcrawler > async > lodash:
+        patched: '2019-07-04T03:26:41.387Z'
+    - ghrequestor > requestretry > lodash:
+        patched: '2019-07-04T03:26:41.387Z'
+    - eslint > table > lodash:
+        patched: '2019-07-04T03:26:41.387Z'
+    - eslint > inquirer > lodash:
+        patched: '2019-07-04T03:26:41.387Z'
+    - eslint > lodash:
+        patched: '2019-07-04T03:26:41.387Z'
+    - ghcrawler > ghrequestor > requestretry > lodash:
+        patched: '2019-07-04T03:26:41.387Z'
+    - nyc > istanbul-lib-instrument > @babel/types > lodash:
+        patched: '2019-07-04T03:26:41.387Z'
+    - nyc > istanbul-lib-instrument > @babel/traverse > @babel/types > lodash:
+        patched: '2019-07-04T03:26:41.387Z'
+    - nyc > istanbul-reports > handlebars > async > lodash:
+        patched: '2019-07-04T03:26:41.387Z'
+    - sinon > nise > @sinonjs/formatio > @sinonjs/samsam > lodash:
+        patched: '2019-07-04T03:26:41.387Z'
+    - nyc > istanbul-lib-instrument > @babel/traverse > @babel/generator > @babel/types > lodash:
+        patched: '2019-07-04T03:26:41.387Z'
+    - nyc > istanbul-lib-instrument > @babel/traverse > @babel/helper-function-name > @babel/template > @babel/types > lodash:
+        patched: '2019-07-04T03:26:41.387Z'
