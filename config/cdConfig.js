@@ -30,6 +30,7 @@ module.exports = {
     cdDispatch: {},
     cocoapods: { githubToken },
     cratesio: {},
+    debian: {},
     git: {},
     mavenCentral: {},
     npmjs: {},
@@ -41,6 +42,7 @@ module.exports = {
     cdsource: {},
     component: {},
     crate: { githubToken },
+    deb: {},
     fossology: {
       disabled: true,
       installDir: config.get('FOSSOLOGY_HOME') || '/mnt/c/git/fo/fossology/src/'
