@@ -54,11 +54,12 @@ class NuGetFetch extends AbstractFetch {
     const baseUrl = providerMap.nuget
     // https://docs.microsoft.com/en-us/nuget/api/registration-base-url-resource
     // Example: https://api.nuget.org/v3/registration3/moq/4.8.2.json and follow catalogEntry
+    // https://api.nuget.org/v3/registration3-gz-semver2/microsoft.powershell.native/7.0.0-preview.1.json
     const { body, statusCode } = await requestRetry.get(
-      `${baseUrl}/v3/registration3/${spec.name.toLowerCase()}/${spec.revision}.json`,
-      { json: true }
+      `${baseUrl}/v3/registration3-gz-semver2/${spec.name.toLowerCase()}/${spec.revision}.json`,
+      { gzip: true }
     )
-    return statusCode !== 200 || !body ? null : body
+    return statusCode !== 200 || !body ? null : JSON.parse(body)
   }
 
   // https://docs.microsoft.com/en-us/nuget/reference/package-versioning#normalized-version-numbers
