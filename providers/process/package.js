@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractProcessor = require('./abstractProcessor')
-const supportedTypes = ['npm', 'crate', 'maven', 'nuget', 'gem', 'pod', 'pypi']
+const supportedTypes = ['npm', 'crate', 'deb', 'maven', 'nuget', 'gem', 'pod', 'pypi']
 
 class PackageProcessor extends AbstractProcessor {
   shouldFetch() {

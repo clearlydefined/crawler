@@ -41,6 +41,15 @@ const crate = {
   fossology
 }
 
+const deb = {
+  _type: 'deb',
+  source,
+  clearlydefined,
+  licensee,
+  scancode,
+  fossology
+}
+
 const maven = {
   _type: 'maven',
   source,
@@ -89,6 +98,7 @@ const _package = {
   _type: 'package',
   npm,
   crate,
+  deb,
   maven,
   nuget,
   pod,
@@ -114,6 +124,7 @@ const entities = {
   licensee,
   npm,
   crate,
+  deb,
   maven,
   nuget,
   pod,
