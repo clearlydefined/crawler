@@ -50,7 +50,8 @@ class ScanCodeProcessor extends AbstractProcessor {
     const parameters = [...options, '--timeout', timeout.toString(), '-n', processes.toString(), format]
     try {
       await execFile(`${this.options.installDir}/scancode`, [...parameters, file.name, request.document.location], {
-        cwd: this.options.installDir
+        cwd: this.options.installDir,
+        maxBuffer: 5 * 1024 * 1024
       })
     } catch (error) {
       // TODO see if the new version of ScanCode has a better way of differentiating errors

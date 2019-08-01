@@ -26,10 +26,17 @@ class NuGetFetch extends AbstractFetch {
     const registryData = await this._getRegistryData(spec)
     const manifest = registryData ? await this._getManifest(registryData.catalogEntry) : null
     const nuspec = manifest ? await this._getNuspec(spec) : null
+    let latestNuspec = null
     if (!registryData || !nuspec || !manifest) return this.markSkip(request)
+    // Improve source location lookup by checking the latest version:
+    if (nuspec && !nuspec.includes('<repository type=')) {
+      const latestSpec = clone(spec)
+      latestSpec.revision = await this._getLatestVersion(spec.name)
+      latestNuspec = await this._getNuspec(latestSpec)
+    }
     super.handle(request)
     const dir = this.createTempDir(request)
-    const metadataLocation = await this._persistMetadata(dir, manifest, nuspec)
+    const metadataLocation = await this._persistMetadata(dir, manifest, nuspec, latestNuspec)
     const zip = path.join(dir.name, 'nupkg.zip')
     await this._getPackage(zip, registryData.packageContent)
     const location = path.join(dir.name, 'nupkg')
@@ -112,15 +119,19 @@ class NuGetFetch extends AbstractFetch {
     return body
   }
 
-  async _persistMetadata(dir, manifest, nuspec) {
+  async _persistMetadata(dir, manifest, nuspec, latestNuspec) {
     const location = {
       manifest: path.join(dir.name, 'manifest.json'),
-      nuspec: path.join(dir.name, 'nuspec.xml')
+      nuspec: path.join(dir.name, 'nuspec.xml'),
+      latestNuspec: latestNuspec ? path.join(dir.name, 'latestNuspec.xml') : null
     }
     await Promise.all([
       promisify(fs.writeFile)(location.manifest, JSON.stringify(manifest)),
       promisify(fs.writeFile)(location.nuspec, nuspec)
     ])
+    if (latestNuspec) {
+      await promisify(fs.writeFile)(location.latestNuspec, latestNuspec)
+    }
     return location
   }
 }
