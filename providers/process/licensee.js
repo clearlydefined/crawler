@@ -73,7 +73,7 @@ class LicenseeProcessor extends AbstractProcessor {
   async _runOnFolder(folder, root, parameters) {
     try {
       const { stdout } = await execFile('licensee', ['detect', ...parameters, path.join(root, folder)], {
-        maxBuffer: 5000 * 1024
+        maxBuffer: 5 * 1024 * 1024
       })
       if (!stdout.trim()) return
       const result = JSON.parse(stdout)
