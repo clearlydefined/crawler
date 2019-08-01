@@ -63,14 +63,20 @@ class NuGetExtract extends AbstractClearlyDefinedProcessor {
       request.document.releaseDate = new Date(registryData.published).toISOString()
     // Add source info
     const nuspec = await this._getNuspec(originalDocument.metadataLocation.nuspec)
-    const sourceInfo = await this._discoverSource(manifest, nuspec)
+    // Improve source location lookup by checking the latest version:
+    let latestNuspec = null
+    if (originalDocument.metadataLocation.latestNuspec) {
+      latestNuspec = await this._getNuspec(originalDocument.metadataLocation.latestNuspec)
+    }
+    const sourceInfo = await this._discoverSource(manifest, nuspec, latestNuspec)
     if (sourceInfo) request.document.sourceInfo = sourceInfo
   }
 
-  async _discoverSource(manifest, nuspec) {
+  async _discoverSource(manifest, nuspec, latestNuspec) {
     const manifestCandidates = this._discoverCandidateSourceLocations(manifest)
     const nuspecCandidates = this._discoverCandidateSourceLocations(get(nuspec, 'package.metadata'))
-    const candidates = [...nuspecCandidates, ...manifestCandidates]
+    const latestNuspecCandidates = this._discoverCandidateSourceLocations(get(latestNuspec, 'package.metadata'))
+    const candidates = [...nuspecCandidates, ...manifestCandidates, ...latestNuspecCandidates]
     return this.sourceFinder(manifest.version, candidates, {
       githubToken: this.options.githubToken,
       logger: this.logger
