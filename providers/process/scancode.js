@@ -99,7 +99,8 @@ class ScanCodeProcessor extends AbstractProcessor {
           return !(
             error.includes('ERROR: Processing interrupted: timeout after') ||
             error.includes('ValueError:') ||
-            error.includes('package.json')
+            error.includes('package.json') ||
+            error.includes('UnicodeDecodeError')
           )
         })
     )
