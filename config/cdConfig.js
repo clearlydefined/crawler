@@ -75,13 +75,7 @@ module.exports = {
       ],
       timeout: 1000,
       processes: 2,
-      format: '--json-pp',
-      maxCount: 1000000, // Maximum file count in repo for local processing. Above this scanning is done as a build
-      maxSize: 50000 * 1024, // Maximum repo size in KB after which scancode would run in build and not directly in crawler
-      build: {
-        crawlerUrl: config.get('CRAWLER_SERVICE_URL') || 'http://localhost:5000',
-        crawlerAuthToken: config.get('CRAWLER_SERVICE_AUTH_TOKEN') || 'secret'
-      }
+      format: '--json-pp'
     },
     source: {},
     top: { githubToken }
@@ -143,7 +137,7 @@ module.exports = {
       weights: { immediate: 3, soon: 2, normal: 3, later: 2 },
       connectionString: cd_azblob.connection,
       queueName: config.get('CRAWLER_QUEUE_PREFIX') || 'cdcrawlerdev',
-      visibilityTimeout: 3 * 60 * 60, // 3 hours
+      visibilityTimeout: 6 * 60 * 60, // 6 hours
       maxDequeueCount: 5,
       attenuation: {
         ttl: 3000
