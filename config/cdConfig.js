@@ -137,7 +137,7 @@ module.exports = {
       weights: { immediate: 3, soon: 2, normal: 3, later: 2 },
       connectionString: cd_azblob.connection,
       queueName: config.get('CRAWLER_QUEUE_PREFIX') || 'cdcrawlerdev',
-      visibilityTimeout: 6 * 60 * 60, // 6 hours
+      visibilityTimeout: 8 * 60 * 60, // 8 hours
       maxDequeueCount: 5,
       attenuation: {
         ttl: 3000
