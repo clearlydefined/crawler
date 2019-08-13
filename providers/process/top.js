@@ -14,7 +14,7 @@ class TopProcessor extends AbstractProcessor {
     return (
       request.type === 'top' &&
       spec &&
-      ['npmjs', 'cocoapods', 'cratesio', 'mavencentral', 'nuget', 'github', 'pypi'].includes(spec.provider)
+      ['npmjs', 'cocoapods', 'cratesio', 'mavencentral', 'nuget', 'github', 'pypi', 'composer'].includes(spec.provider)
     )
   }
 
@@ -36,6 +36,8 @@ class TopProcessor extends AbstractProcessor {
         return this._processAllGitHubOrgRepos(request)
       // case 'pypi':
       //   return this._processTopPyPis(request)
+      // case 'composer':
+      //   return this._processTopPackagists(request)
       default:
         throw new Error(`Unknown provider type for 'top' request: ${spec.provider}`)
     }
@@ -254,6 +256,8 @@ class TopProcessor extends AbstractProcessor {
     await request.queueRequests(requests)
     return request.markNoSave()
   }
+
+  // TO DO: Implement _processTopPackagists
 }
 
 module.exports = options => new TopProcessor(options)
