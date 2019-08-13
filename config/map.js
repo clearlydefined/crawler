@@ -76,6 +76,15 @@ const pypi = {
   fossology
 }
 
+const composer = {
+  _type: 'composer',
+  source,
+  clearlydefined,
+  licensee,
+  scancode,
+  fossology
+}
+
 const gem = {
   _type: 'gem',
   source,
@@ -93,6 +102,7 @@ const _package = {
   nuget,
   pod,
   pypi,
+  composer,
   gem
 }
 
@@ -116,6 +126,7 @@ const entities = {
   crate,
   maven,
   nuget,
+  composer,
   pod,
   pypi,
   gem
