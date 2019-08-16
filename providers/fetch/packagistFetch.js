@@ -4,7 +4,6 @@
 const AbstractFetch = require('./abstractFetch')
 const requestRetry = require('requestretry').defaults({ maxAttempts: 3, fullResponse: true })
 const fs = require('fs')
-const get = require('lodash')
 const request = require('request')
 // const requestPromise = require('request-promise-native')
 const providerMap = {
@@ -22,14 +21,12 @@ class PackagistFetch extends AbstractFetch {
     const registryData = await this._getRegistryData(spec)
     if (!registryData) return this.markSkip(request)
     super.handle(request)
-    console.log(registryData)
     const file = this.createTempFile(request)
     await this._getPackage(spec, registryData, file.name)
     const dir = this.createTempDir(request)
     await this.decompress(file.name, dir.name)
     const hashes = await this.computeHashes(file.name)
     request.document = this._createDocument(dir, registryData, hashes)
-    console.log(request)
     request.contentOrigin = 'origin'
     return request
   }
@@ -67,7 +64,7 @@ class PackagistFetch extends AbstractFetch {
   }
 
   _createDocument(dir, registryData, hashes) {
-    const releaseDate = get(registryData, 'releaseDate')
+    const releaseDate = registryData.releaseDate
     return { location: dir.name, registryData, releaseDate, hashes }
   }
 }
