@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractClearlyDefinedProcessor = require('./abstractClearlyDefinedProcessor')
-const fs = require('fs')
-const path = require('path')
+// const fs = require('fs')
+// const path = require('path')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
-const SourceSpec = require('../../lib/sourceSpec')
-const { get, isArray, merge } = require('lodash')
+// const SourceSpec = require('../../lib/sourceSpec')
+// const { get, isArray, merge } = require('lodash')
 
-class PackagistExtract extends AbstractClearlyDefinedProcessor {
+class ComposerExtract extends AbstractClearlyDefinedProcessor {
   constructor(options, sourceFinder) {
     super(options)
     this.sourceFinder = sourceFinder
@@ -23,3 +23,5 @@ class PackagistExtract extends AbstractClearlyDefinedProcessor {
     return request.type === 'composer' && spec && spec.type === 'composer'
   }
 }
+
+module.exports = (options, sourceFinder) => new ComposerExtract(options, sourceFinder || sourceDiscovery)
