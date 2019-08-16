@@ -3,9 +3,10 @@
 
 const AbstractFetch = require('./abstractFetch')
 const requestRetry = require('requestretry').defaults({ maxAttempts: 3, fullResponse: true })
-// const fs = require('fs')
-// const { findLastKey, get, find } = require('lodash')
-
+const fs = require('fs')
+const get = require('lodash')
+const request = require('request')
+// const requestPromise = require('request-promise-native')
 const providerMap = {
   packagist: 'https://repo.packagist.org/'
 }
@@ -19,8 +20,18 @@ class PackagistFetch extends AbstractFetch {
   async handle(request) {
     const spec = this.toSpec(request)
     const registryData = await this._getRegistryData(spec)
-
+    if (!registryData) return this.markSkip(request)
+    super.handle(request)
     console.log(registryData)
+    const file = this.createTempFile(request)
+    await this._getPackage(spec, registryData, file.name)
+    const dir = this.createTempDir(request)
+    await this.decompress(file.name, dir.name)
+    const hashes = await this.computeHashes(file.name)
+    request.document = this._createDocument(dir, registryData, hashes)
+    console.log(request)
+    request.contentOrigin = 'origin'
+    return request
   }
 
   async _getRegistryData(spec) {
@@ -35,6 +46,29 @@ class PackagistFetch extends AbstractFetch {
     registryData.releaseDate = registryData.manifest['time']
     delete registryData['packages']
     return registryData
+  }
+
+  async _getPackage(spec, registryData, destination) {
+    return new Promise((resolve, reject) => {
+      var options = {
+        url: registryData.manifest.dist.url,
+        headers: {
+          'User-Agent': 'ClearlyDefined'
+        }
+      }
+
+      request
+        .get(options, (error, response) => {
+          if (error) return reject(error)
+          if (response.statusCode !== 200) reject(new Error(`${response.statusCode} ${response.statusMessage}`))
+        })
+        .pipe(fs.createWriteStream(destination).on('finish', () => resolve(null)))
+    })
+  }
+
+  _createDocument(dir, registryData, hashes) {
+    const releaseDate = get(registryData, 'releaseDate')
+    return { location: dir.name, registryData, releaseDate, hashes }
   }
 }
 
