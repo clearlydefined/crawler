@@ -39,7 +39,15 @@ class PackagistFetch extends AbstractFetch {
     })
     if (statusCode !== 200 || !body) return null
     registryData = body
-    registryData.manifest = registryData['packages'][`${spec.namespace}/${spec.name}`][`v${spec.revision}`]
+    registryData.manifest = null
+
+    // Some PHP package versions begin with a 'v' for example v1.0.0 so check for that case
+    if (registryData['packages'][`${spec.namespace}/${spec.name}`][`v${spec.revision}`] != null) {
+      registryData.manifest = registryData['packages'][`${spec.namespace}/${spec.name}`][`v${spec.revision}`]
+    } else {
+      registryData.manifest = registryData['packages'][`${spec.namespace}/${spec.name}`][`${spec.revision}`]
+    }
+
     registryData.releaseDate = registryData.manifest['time']
     delete registryData['packages']
     return registryData
