@@ -12,7 +12,7 @@ module.exports = {
   fetch: {
     cdDispatch: require('./fetch/dispatcher'),
     cocoapods: require('./fetch/podFetch'),
-    composer: require('./fetch/packagistFetch'),
+    packagist: require('./fetch/packagistFetch'),
     cratesio: require('./fetch/cratesioFetch'),
     git: require('./fetch/gitCloner'),
     mavenCentral: require('./fetch/mavencentralFetch'),
