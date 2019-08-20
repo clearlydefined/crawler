@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractClearlyDefinedProcessor = require('./abstractClearlyDefinedProcessor')
+const { merge } = require('lodash')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
+const SourceSpec = require('../../lib/sourceSpec')
 
 class DebExtract extends AbstractClearlyDefinedProcessor {
   constructor(options, sourceFinder) {
@@ -22,12 +24,25 @@ class DebExtract extends AbstractClearlyDefinedProcessor {
   // Coming in here we expect the request.document to have id, location and metadata properties.
   // Do interesting processing...
   async handle(request) {
-    // skip all the hard work if we are just traversing.
     if (this.isProcessing(request)) {
-      // TODO
+      await super.handle(request)
+      await this._createDocument(request, request.document.registryData)
     }
-    // TODO
+    this.linkAndQueueTool(request, 'licensee')
+    this.linkAndQueueTool(request, 'fossology')
+    this.linkAndQueueTool(request, 'scancode')
+    if (request.document.sourceInfo) {
+      const sourceSpec = SourceSpec.fromObject(request.document.sourceInfo)
+      this.linkAndQueue(request, 'source', sourceSpec.toEntitySpec())
+    }
     return request
+  }
+
+  async _createDocument(request, registryData) {
+    request.document = merge(this.clone(request.document), { registryData })
+    // ???
+    // const sourceInfo = await this._discoverSource(this.toSpec(request).revision, registryData)
+    // if (sourceInfo) request.document.sourceInfo = sourceInfo
   }
 }
 

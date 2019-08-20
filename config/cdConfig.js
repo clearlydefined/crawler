@@ -30,7 +30,7 @@ module.exports = {
     cdDispatch: {},
     cocoapods: { githubToken },
     cratesio: {},
-    debian: {},
+    debian: { cdFileLocation: cd_file.location },
     git: {},
     mavenCentral: {},
     npmjs: {},
