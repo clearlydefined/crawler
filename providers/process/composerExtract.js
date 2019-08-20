@@ -15,7 +15,7 @@ class ComposerExtract extends AbstractClearlyDefinedProcessor {
   }
 
   get toolVersion() {
-    return '1.1.4'
+    return '1.0.0'
   }
 
   canHandle(request) {
