@@ -2,16 +2,32 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractFetch = require('./abstractFetch')
-const fs = require('fs')
-const nodeRequest = require('request')
-const requestPromise = require('request-promise-native')
+const bz2 = require('unbzip2-stream')
 const { clone } = require('lodash')
+const domain = require('domain')
+const fs = require('fs')
+const linebyline = require('linebyline')
+const memCache = require('memory-cache')
+const nodeRequest = require('request')
+const path = require('path')
+const requestPromise = require('request-promise-native')
 
 const providerMap = {
-  debian: 'http://ftp/debian.org/debian/'
+  debian: 'http://ftp.debian.org/debian/'
+}
+
+const packageFileMap = {
+  url: 'http://ftp.debian.org/debian/indices/package-file.map.bz2',
+  cacheKey: 'packageFileMap',
+  cacheDuration: 8 * 60 * 60 * 1000 // 8 hours
 }
 
 class DebianFetch extends AbstractFetch {
+  constructor(options) {
+    super(options)
+    this.packageMapFileLocation = this.options.cdFileLocation + '-package-file.map'
+  }
+
   canHandle(request) {
     const spec = this.toSpec(request)
     return spec && spec.provider === 'debian'
@@ -21,17 +37,15 @@ class DebianFetch extends AbstractFetch {
     const spec = this.toSpec(request)
     if (!spec.revision) spec.revision = await this._getLatestVersion(spec)
     if (!spec.revision) return request.markSkip('Missing  ')
+    const registryData = await this._getRegistryData(spec)
+    if (registryData.length === 0) return this.markSkip(request)
+    const isArchPresent = this._ensureArchitecturePresenceForBinary(spec, registryData)
+    if (!isArchPresent) return request.markSkip('Missing architecture  ')
     request.url = spec.toUrl()
     super.handle(request)
-    const registryData = await this._getRegistryData(spec)
-    const file = this.createTempFile(request)
-    await this._getPackage(spec, registryData, file.name) // TODO
-    const dir = this.createTempDir(request)
-    await this.decompress(file.name, dir.name)
-    // the decompressed folder should contain control.tar.xz, data.tar.xz, debian-binary. The package is in data.tar.xz
-    const hashes = await this.computeHashes(file.name)
-    let releaseDate = null // TODO: get file date!
-    request.document = await this._createDocument(dir, registryData, releaseDate, hashes) // TODO
+    const { binary, source, patches } = this._getDownloadUrls(spec, registryData)
+    const { dir, releaseDate, hashes } = await this._getPackage(request, binary, source, patches)
+    request.document = await this._createDocument(dir, registryData, releaseDate, hashes)
     request.contentOrigin = 'origin'
     request.casedSpec = clone(spec)
     return request
@@ -50,28 +64,142 @@ class DebianFetch extends AbstractFetch {
   }
 
   async _getRegistryData(spec) {
-    // TODO: get and parse cached/uncached indices
-    // The function should return package and source data location incl. patches
+    await this._getPackageMapFile()
+    return this._getDataFromPackageMapFile(spec)
   }
 
-  async _getPackage(spec, registryData, destination) {
-    const isSrc = spec.type === 'debsrc'
-    // TODO
-    return new Promise((resolve, reject) => {
-      nodeRequest
-        .get(this._buildUrl(spec, registryData), (error, response) => {
-          if (error) return reject(error)
-          if (response.statusCode !== 200) reject(new Error(`${response.statusCode} ${response.statusMessage}`))
+  // The assumption is that package/source/patch locations may change under http://ftp.debian.org/debian/pool/
+  // That's why the package file with updated locations is downloaded, uncompressed, and stored locally for a few hours.
+  async _getPackageMapFile() {
+    if (!memCache.get(packageFileMap.cacheKey)) {
+      memCache.put(packageFileMap.cacheKey, true, packageFileMap.cacheDuration)
+      return new Promise((resolve, reject) => {
+        const dom = domain.create()
+        dom.on('error', error => {
+          memCache.del(packageFileMap.cacheKey)
+          return reject(error)
         })
-        .pipe(fs.createWriteStream(destination).on('finish', () => resolve(null)))
+        dom.run(() => {
+          nodeRequest
+            .get(packageFileMap.url)
+            .pipe(bz2())
+            .pipe(fs.createWriteStream(this.packageMapFileLocation))
+            .on('finish', () => {
+              this.logger.info(`Retrieved ${packageFileMap.url}. Stored map file at ${this.packageMapFileLocation}`)
+              return resolve()
+            })
+        })
+      })
+    }
+  }
+
+  // Return only the relevant entries from 160+ MB file
+  // Sample: /test/fixtures/debian/package-file.map
+  async _getDataFromPackageMapFile(spec) {
+    return new Promise((resolve, reject) => {
+      const { name, revision } = this._fromSpec(spec)
+      const relevantEntries = []
+      let entry = {}
+      const lineReader = linebyline(this.packageMapFileLocation)
+      lineReader
+        .on('line', line => {
+          if (line === '') {
+            if (
+              [entry['Source'], entry['Binary']].includes(name) &&
+              [entry['Source-Version'], entry['Binary-Version']].includes(revision)
+            ) {
+              relevantEntries.push(entry)
+              entry = {}
+            }
+          } else {
+            const [key, value] = line.split(': ')
+            entry[key] = value
+          }
+        })
+        .on('end', () => {
+          this.logger.info(`Got ${relevantEntries.length} entries for ${spec.toUrl()}`)
+          return resolve(relevantEntries)
+        })
+        .on('error', error => reject(error))
     })
   }
 
-  // TODO
-  _buildUrl(spec, { binaryPath }) {
-    // TODO: find location
-    const packagePath = 'pool/main/2/2048-qt/2048-qt_0.1.6-2_arm64.deb'
-    return `${providerMap.debian}/${packagePath}`
+  _fromSpec(spec) {
+    const { name } = spec
+    const [revision, architecture] = spec.revision.split('_')
+    return { name, revision, architecture }
+  }
+
+  _ensureArchitecturePresenceForBinary(spec, registryData) {
+    const { architecture } = this._fromSpec(spec)
+    if (spec.type === 'deb' && !architecture) {
+      const randomBinaryArchitecture = (registryData.find(entry => entry.Architecture) || {}).Architecture
+      if (!randomBinaryArchitecture) return false
+      spec.revision += '_' + randomBinaryArchitecture
+    }
+    return true
+  }
+
+  _getDownloadUrls(spec, registryData) {
+    const isSrc = spec.type === 'debsrc'
+    const { architecture } = this._fromSpec(spec)
+    if (isSrc) {
+      const sourceAndPatches = registryData.filter(entry => !entry.Architecture && !entry.Path.endsWith('.dsc'))
+      const source = new URL(
+        providerMap.debian + sourceAndPatches.find(entry => entry.Path.includes('.orig.tar.')).Path
+      ).href
+      const patches = new URL(
+        providerMap.debian + sourceAndPatches.find(entry => !entry.Path.includes('.orig.tar.')).Path
+      ).href
+      return { source, patches }
+    }
+    const binary = new URL(
+      providerMap.debian + registryData.find(entry => entry.Architecture && entry.Architecture === architecture).Path
+    ).href
+    return { binary }
+  }
+
+  async _getPackage(request, binary, source, patches) {
+    const file = this.createTempFile(request)
+    await this._download(binary || source, file.name)
+    const dir = this.createTempDir(request)
+    // !!!!
+    await this.decompress(file.name, dir.name) // it doesn't work with .deb file, which is arch. Try streams instead? Before that test src.
+    const hashes = await this.computeHashes(file.name)
+    if (binary) {
+      // The decompressed folder should contain control.tar.xz, data.tar.xz, debian-binary. The package is in data.tar.xz
+      if (fs.existsSync(path.join(dir.name, 'data.tar.xz')))
+        await this.decompress(`${dir.name}/data.tar.xz`, `${dir.name}/data`)
+    }
+    // TODO releaseDate
+    if (source && patches) {
+      // TODO assumption: only one patches URL
+      // download and decompress patches
+      // Apply patches in correct order: (new function)
+      // cat ../debian/patches/series
+      // FixDesktop.diff
+      // FixPathBinary.diff
+      // patch -p01 -i ../debian/patches/FixDesktop.diff
+      // patch -p01 -i ../debian/patches/FixPathBinary.diff
+    }
+    return { dir, releaseDate, hashes }
+  }
+
+  async _download(downloadUrl, destination) {
+    return new Promise((resolve, reject) => {
+      const dom = domain.create()
+      dom.on('error', error => reject(error))
+      dom.run(() => {
+        nodeRequest
+          .get(downloadUrl, (error, response) => {
+            if (error) return reject(error)
+            if (response.statusCode !== 200)
+              return reject(new Error(`${response.statusCode} ${response.statusMessage}`))
+          })
+          .pipe(fs.createWriteStream(destination))
+          .on('finish', () => resolve())
+      })
+    })
   }
 }
 
