@@ -5,7 +5,6 @@ const AbstractFetch = require('./abstractFetch')
 const requestRetry = require('requestretry').defaults({ maxAttempts: 3, fullResponse: true })
 const fs = require('fs')
 const request = require('request')
-// const requestPromise = require('request-promise-native')
 const providerMap = {
   packagist: 'https://repo.packagist.org/'
 }
@@ -55,7 +54,7 @@ class PackagistFetch extends AbstractFetch {
 
   async _getPackage(spec, registryData, destination) {
     return new Promise((resolve, reject) => {
-      var options = {
+      const options = {
         url: registryData.manifest.dist.url,
         headers: {
           'User-Agent': 'ClearlyDefined'
