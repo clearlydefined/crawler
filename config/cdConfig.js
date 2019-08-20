@@ -52,7 +52,7 @@ module.exports = {
     npm: { githubToken },
     nuget: { githubToken },
     package: {},
-    packagist: { githubToken },
+    composer: { githubToken },
     pod: { githubToken },
     pypi: { githubToken },
     scancode: {
