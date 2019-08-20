@@ -9,11 +9,6 @@ const proxyquire = require('proxyquire')
 const Request = require('ghcrawler').request
 const fs = require('fs')
 
-it('can handle the request being attempted', async () => {
-  expect(PackagistFetch({}).canHandle(new Request('test', 'cd:/composer/packagist/symfony/polyfill-mbstring/1.11.0')))
-    .to.be.true
-})
-
 let Fetch
 
 const hashes = {
@@ -23,12 +18,12 @@ const hashes = {
   }
 }
 
-describe('', () => {
+describe('packagistFetch', () => {
   beforeEach(() => {
     const resultBox = {}
     const requestPromiseStub = options => {
       if (options.url) {
-        if (options.url.includes('regError')) throw new Error('yikes')
+        if (options.url.includes('regError')) throw new Error('Invalid url')
         if (options.url.includes('missing')) throw { statusCode: 404 }
       }
       return resultBox.result
@@ -53,6 +48,11 @@ describe('', () => {
 
   afterEach(function() {
     sinon.sandbox.restore()
+  })
+
+  it('can handle the request being attempted', async () => {
+    expect(PackagistFetch({}).canHandle(new Request('test', 'cd:/composer/packagist/symfony/polyfill-mbstring/1.11.0')))
+      .to.be.true
   })
 
   it('succeeds in download, decompress and hash', async () => {
@@ -85,7 +85,7 @@ describe('', () => {
     try {
       await handler.handle(new Request('test', 'cd:/composer/packagist/-/regError/1.11.0'))
     } catch (error) {
-      expect(error.message).to.be.equal('yikes')
+      expect(error.message).to.be.equal('Invalid url')
     }
   })
 })
