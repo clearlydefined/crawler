@@ -1,0 +1,197 @@
+Path: ./pool/main/0/0ad/0ad_0.0.17-1.debian.tar.xz
+Source: 0ad
+Source-Version: 0.0.17-1
+
+Path: ./pool/main/0/0ad/0ad_0.0.17-1.dsc
+Source: 0ad
+Source-Version: 0.0.17-1
+
+Path: ./pool/main/0/0ad/0ad_0.0.17.orig.tar.xz
+Source: 0ad
+Source-Version: 0.0.17-1
+
+Path: ./pool/non-free/a/amiwm/amiwm_0.20.48-8.diff.gz
+Source: amiwm
+Source-Version: 0.20.48-8
+
+Path: ./pool/non-free/a/amiwm/amiwm_0.20.48-8.dsc
+Source: amiwm
+Source-Version: 0.20.48-8
+
+Path: ./pool/non-free/a/amiwm/amiwm_0.20.48.orig.tar.gz
+Source: amiwm
+Source-Version: 0.20.48-8
+
+Path: ./pool/non-free/a/amiwm/amiwm_0.21pl2-1.debian.tar.xz
+Source: amiwm
+Source-Version: 0.21pl2-1
+
+Path: ./pool/non-free/a/amiwm/amiwm_0.21pl2-1.dsc
+Source: amiwm
+Source-Version: 0.21pl2-1
+
+Path: ./pool/non-free/a/amiwm/amiwm_0.21pl2.orig.tar.gz
+Source: amiwm
+Source-Version: 0.21pl2-1
+
+Path: ./pool/main/0/0ad/0ad_0.0.17-1_i386.deb
+Source: 0ad
+Source-Version: 0.0.17-1
+Architecture: i386
+Binary: 0ad
+Binary-Version: 0.0.17-1
+
+Path: ./pool/main/0/0ad/0ad_0.0.17-1_amd64.deb
+Source: 0ad
+Source-Version: 0.0.17-1
+Architecture: amd64
+Binary: 0ad
+Binary-Version: 0.0.17-1
+
+Path: ./pool/main/0/0ad/0ad_0.0.17-1_armhf.deb
+Source: 0ad
+Source-Version: 0.0.17-1
+Architecture: armhf
+Binary: 0ad
+Binary-Version: 0.0.17-1
+
+Path: ./pool/main/0/0ad/0ad-dbg_0.0.17-1_armhf.deb
+Source: 0ad
+Source-Version: 0.0.17-1
+Architecture: armhf
+Binary: 0ad-dbg
+Binary-Version: 0.0.17-1
+
+Path: ./pool/main/0/0ad/0ad-dbg_0.0.17-1_amd64.deb
+Source: 0ad
+Source-Version: 0.0.17-1
+Architecture: amd64
+Binary: 0ad-dbg
+Binary-Version: 0.0.17-1
+
+Path: ./pool/main/0/0ad/0ad-dbg_0.0.17-1_i386.deb
+Source: 0ad
+Source-Version: 0.0.17-1
+Architecture: i386
+Binary: 0ad-dbg
+Binary-Version: 0.0.17-1
+
+Path: ./pool/main/0/0ad/0ad_0.0.21-2_i386.deb
+Source: 0ad
+Source-Version: 0.0.21-2
+Architecture: i386
+Binary: 0ad
+Binary-Version: 0.0.21-2
+
+Path: ./pool/main/0/0ad/0ad_0.0.21-2_armhf.deb
+Source: 0ad
+Source-Version: 0.0.21-2
+Architecture: armhf
+Binary: 0ad
+Binary-Version: 0.0.21-2
+
+Path: ./pool/main/0/0ad/0ad_0.0.21-2_amd64.deb
+Source: 0ad
+Source-Version: 0.0.21-2
+Architecture: amd64
+Binary: 0ad
+Binary-Version: 0.0.21-2
+
+Path: ./pool/main/0/0ad/0ad_0.0.23-1~bpo9+1_i386.deb
+Source: 0ad
+Source-Version: 0.0.23-1~bpo9+1
+Architecture: i386
+Binary: 0ad
+Binary-Version: 0.0.23-1~bpo9+1
+
+Path: ./pool/main/0/0ad/0ad_0.0.23-1~bpo9+1_amd64.deb
+Source: 0ad
+Source-Version: 0.0.23-1~bpo9+1
+Architecture: amd64
+Binary: 0ad
+Binary-Version: 0.0.23-1~bpo9+1
+
+Path: ./pool/main/0/0ad/0ad_0.0.23-1~bpo9+1_armhf.deb
+Source: 0ad
+Source-Version: 0.0.23-1~bpo9+1
+Architecture: armhf
+Binary: 0ad
+Binary-Version: 0.0.23-1~bpo9+1
+
+Path: ./pool/main/0/0ad/0ad_0.0.23.1-2_armhf.deb
+Source: 0ad
+Source-Version: 0.0.23.1-2
+Architecture: armhf
+Binary: 0ad
+Binary-Version: 0.0.23.1-2
+
+Path: ./pool/main/0/0ad/0ad_0.0.23.1-2_amd64.deb
+Source: 0ad
+Source-Version: 0.0.23.1-2
+Architecture: amd64
+Binary: 0ad
+Binary-Version: 0.0.23.1-2
+
+Path: ./pool/main/0/0ad/0ad_0.0.23.1-2_i386.deb
+Source: 0ad
+Source-Version: 0.0.23.1-2
+Architecture: i386
+Binary: 0ad
+Binary-Version: 0.0.23.1-2
+
+Path: ./pool/main/0/0ad-data/0ad-data_0.0.17-1_all.deb
+Source: 0ad-data
+Source-Version: 0.0.17-1
+Architecture: all
+Binary: 0ad-data
+Binary-Version: 0.0.17-1
+
+Path: ./pool/main/0/0ad-data/0ad-data-common_0.0.17-1_all.deb
+Source: 0ad-data
+Source-Version: 0.0.17-1
+Architecture: all
+Binary: 0ad-data-common
+Binary-Version: 0.0.17-1
+
+Path: ./pool/non-free/a/amiwm/amiwm_0.20.48-8_amd64.deb
+Source: amiwm
+Source-Version: 0.20.48-8
+Architecture: amd64
+Binary: amiwm
+Binary-Version: 0.20.48-8
+
+Path: ./pool/non-free/a/amiwm/amiwm_0.20.48-8_i386.deb
+Source: amiwm
+Source-Version: 0.20.48-8
+Architecture: i386
+Binary: amiwm
+Binary-Version: 0.20.48-8
+
+Path: ./pool/non-free/a/amiwm/amiwm_0.21pl2-1_armhf.deb
+Source: amiwm
+Source-Version: 0.21pl2-1
+Architecture: armhf
+Binary: amiwm
+Binary-Version: 0.21pl2-1
+
+Path: ./pool/non-free/a/amiwm/amiwm_0.21pl2-1_amd64.deb
+Source: amiwm
+Source-Version: 0.21pl2-1
+Architecture: amd64
+Binary: amiwm
+Binary-Version: 0.21pl2-1
+
+Path: ./pool/non-free/a/amiwm/amiwm_0.21pl2-1_arm64.deb
+Source: amiwm
+Source-Version: 0.21pl2-1
+Architecture: arm64
+Binary: amiwm
+Binary-Version: 0.21pl2-1
+
+Path: ./pool/non-free/a/amiwm/amiwm_0.21pl2-1_i386.deb
+Source: amiwm
+Source-Version: 0.21pl2-1
+Architecture: i386
+Binary: amiwm
+Binary-Version: 0.21pl2-1
+
