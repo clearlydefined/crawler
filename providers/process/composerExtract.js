@@ -12,7 +12,6 @@ class ComposerExtract extends AbstractClearlyDefinedProcessor {
   constructor(options, sourceFinder) {
     super(options)
     this.sourceFinder = sourceFinder
-    console.log(this.logger)
   }
 
   get toolVersion() {
