@@ -12,6 +12,7 @@ module.exports = {
   fetch: {
     cdDispatch: require('./fetch/dispatcher'),
     cocoapods: require('./fetch/podFetch'),
+    packagist: require('./fetch/packagistFetch'),
     cratesio: require('./fetch/cratesioFetch'),
     git: require('./fetch/gitCloner'),
     mavenCentral: require('./fetch/mavencentralFetch'),
@@ -31,6 +32,7 @@ module.exports = {
     nuget: require('./process/nugetExtract'),
     pypi: require('./process/pypiExtract'),
     package: require('./process/package').processor,
+    composer: require('./process/composerExtract'),
     pod: require('./process/podExtract'),
     scancode: require('./process/scancode'),
     fossology: require('./process/fossology'),

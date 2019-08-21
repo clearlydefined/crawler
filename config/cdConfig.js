@@ -34,6 +34,7 @@ module.exports = {
     mavenCentral: {},
     npmjs: {},
     nuget: {},
+    packagist: {},
     pypi: {},
     rubygems: {}
   },
@@ -51,6 +52,7 @@ module.exports = {
     npm: { githubToken },
     nuget: { githubToken },
     package: {},
+    composer: { githubToken },
     pod: { githubToken },
     pypi: { githubToken },
     scancode: {
