@@ -27,6 +27,7 @@ class PackagistFetch extends AbstractFetch {
     await this.decompress(file.name, dir.name)
     const hashes = await this.computeHashes(file.name)
     request.document = this._createDocument(dir, registryData, hashes)
+    request.document.dirRoot = this._getDirRoot(registryData.manifest)
     request.contentOrigin = 'origin'
     return request
   }
@@ -68,6 +69,10 @@ class PackagistFetch extends AbstractFetch {
         })
         .pipe(fs.createWriteStream(destination).on('finish', () => resolve(null)))
     })
+  }
+
+  _getDirRoot(manifest) {
+    return manifest.name.split('/').join('-') + '-' + manifest.dist.reference.substring(0, 7)
   }
 
   _createDocument(dir, registryData, hashes) {
