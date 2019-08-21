@@ -12,6 +12,7 @@ class ComposerExtract extends AbstractClearlyDefinedProcessor {
   constructor(options, sourceFinder) {
     super(options)
     this.sourceFinder = sourceFinder
+    console.log(this.logger)
   }
 
   get toolVersion() {
@@ -34,7 +35,7 @@ class ComposerExtract extends AbstractClearlyDefinedProcessor {
       const manifest = manifestLocation ? JSON.parse(fs.readFileSync(path.join(location, manifestLocation))) : null
       await this._createDocument(request, manifest, request.document.registryData)
       if (manifest) this.attachFiles(request.document, [manifestLocation], location)
-      else console.log('PHP package without composer.json', { url: request.url })
+      else this.logger.info('PHP package without composer.json', { url: request.url })
     }
     this.linkAndQueueTool(request, 'licensee')
     this.linkAndQueueTool(request, 'fossology')
