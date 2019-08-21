@@ -29,8 +29,9 @@ class ComposerExtract extends AbstractClearlyDefinedProcessor {
     // skip all the hard work if we are just traversing.
     if (this.isProcessing(request)) {
       const location = request.document.location
-      await super.handle(request, location, 'package')
-      const manifestLocation = this._getManifestLocation(location)
+      const dirRoot = request.document.dirRoot
+      await super.handle(request, location, dirRoot)
+      const manifestLocation = this._getManifestLocation(location, dirRoot)
       const manifest = manifestLocation ? JSON.parse(fs.readFileSync(path.join(location, manifestLocation))) : null
       await this._createDocument(request, manifest, request.document.registryData)
       if (manifest) this.attachFiles(request.document, [manifestLocation], location)
@@ -46,9 +47,9 @@ class ComposerExtract extends AbstractClearlyDefinedProcessor {
     return request
   }
 
-  _getManifestLocation(dir) {
-    if (fs.existsSync(path.join(dir, 'composer.json'))) return 'composer.json'
-    if (fs.existsSync(path.join(dir, 'composer.lock'))) return 'composer.lock'
+  _getManifestLocation(dir, dirRoot) {
+    if (fs.existsSync(path.join(dir, `${dirRoot}/composer.json`))) return `${dirRoot}/composer.json`
+    if (fs.existsSync(path.join(dir, `${dirRoot}/composer.lock`))) return `${dirRoot}/composer.lock`
     return null
   }
 
