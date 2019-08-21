@@ -4,6 +4,7 @@
 const AbstractFetch = require('./abstractFetch')
 const requestRetry = require('requestretry').defaults({ maxAttempts: 3, fullResponse: true })
 const fs = require('fs')
+const { get } = require('lodash')
 const request = require('request')
 const providerMap = {
   packagist: 'https://repo.packagist.org/'
@@ -18,7 +19,7 @@ class PackagistFetch extends AbstractFetch {
   async handle(request) {
     const spec = this.toSpec(request)
     const registryData = await this._getRegistryData(spec)
-    if (!registryData) return this.markSkip(request)
+    if (!registryData || !registryData.manifest) return this.markSkip(request)
     super.handle(request)
     const file = this.createTempFile(request)
     await this._getPackage(spec, registryData, file.name)
@@ -38,16 +39,15 @@ class PackagistFetch extends AbstractFetch {
     })
     if (statusCode !== 200 || !body) return null
     registryData = body
-    registryData.manifest = null
 
     // Some PHP package versions begin with a 'v' for example v1.0.0 so check for that case
-    if (registryData['packages'][`${spec.namespace}/${spec.name}`][`v${spec.revision}`] != null) {
+    if (registryData['packages'][`${spec.namespace}/${spec.name}`][`v${spec.revision}`]) {
       registryData.manifest = registryData['packages'][`${spec.namespace}/${spec.name}`][`v${spec.revision}`]
-    } else {
+    } else if (registryData['packages'][`${spec.namespace}/${spec.name}`][`${spec.revision}`]) {
       registryData.manifest = registryData['packages'][`${spec.namespace}/${spec.name}`][`${spec.revision}`]
     }
 
-    registryData.releaseDate = registryData.manifest['time']
+    registryData.releaseDate = get(registryData, 'manifest.time')
     delete registryData['packages']
     return registryData
   }
