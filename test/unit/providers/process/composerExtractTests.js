@@ -60,7 +60,7 @@ describe('PHP processing', () => {
 })
 
 async function setup() {
-  const processor = composerExtract({ logger: {} }, () => {})
+  const processor = composerExtract({ logger: { info: () => {} } }, () => {})
   processor._detectLicenses = () => 'MIT'
   processor.linkAndQueueTool = sinon.stub()
   const request = createRequest()
