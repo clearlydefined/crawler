@@ -42,11 +42,8 @@ class PackagistFetch extends AbstractFetch {
     registryData = body
 
     // Some PHP package versions begin with a 'v' for example v1.0.0 so check for that case
-    if (registryData['packages'][`${spec.namespace}/${spec.name}`][`v${spec.revision}`]) {
-      registryData.manifest = registryData['packages'][`${spec.namespace}/${spec.name}`][`v${spec.revision}`]
-    } else if (registryData['packages'][`${spec.namespace}/${spec.name}`][`${spec.revision}`]) {
-      registryData.manifest = registryData['packages'][`${spec.namespace}/${spec.name}`][`${spec.revision}`]
-    }
+    const packages = registryData.packages[`${spec.namespace}/${spec.name}`]
+    registryData.manifest = packages[`v${spec.revision}`] || packages[`${spec.revision}`]
 
     registryData.releaseDate = get(registryData, 'manifest.time')
     delete registryData['packages']
@@ -58,7 +55,7 @@ class PackagistFetch extends AbstractFetch {
       const options = {
         url: registryData.manifest.dist.url,
         headers: {
-          'User-Agent': 'ClearlyDefined'
+          'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)'
         }
       }
 
@@ -72,7 +69,13 @@ class PackagistFetch extends AbstractFetch {
   }
 
   _getDirRoot(manifest) {
-    return manifest.name.split('/').join('-') + '-' + manifest.dist.reference.substring(0, 7)
+    return (
+      get(manifest, 'name', '')
+        .split('/')
+        .join('-') +
+      '-' +
+      get(manifest, 'dist.reference', '').substring(0, 7)
+    )
   }
 
   _createDocument(dir, registryData, hashes) {
