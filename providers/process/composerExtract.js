@@ -49,7 +49,7 @@ class ComposerExtract extends AbstractClearlyDefinedProcessor {
 
   _getManifestLocation(dir, dirRoot) {
     if (fs.existsSync(path.join(dir, `${dirRoot}/composer.json`))) return `${dirRoot}/composer.json`
-    if (fs.existsSync(path.join(dir, `${dirRoot}/composer.lock`))) return `${dirRoot}/composer.lock`
+    if (fs.existsSync(path.join(dir, 'composer.json'))) return 'composer.json'
     return null
   }
 
