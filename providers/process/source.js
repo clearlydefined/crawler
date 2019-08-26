@@ -18,7 +18,7 @@ class SourceProcessor extends AbstractProcessor {
     super.handle(request)
     this.linkAndQueueTool(request, 'clearlydefined')
     this.linkAndQueueTool(request, 'licensee')
-    this.linkAndQueueTool(request, 'fossology')
+    // this.linkAndQueueTool(request, 'fossology')
     this.linkAndQueueTool(request, 'scancode')
     request.markNoSave()
     return request

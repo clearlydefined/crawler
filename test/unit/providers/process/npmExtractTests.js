@@ -44,8 +44,11 @@ describe('NPM processing', () => {
       expect(file.hashes.sha1).to.be.equal(hashes['redie-0.3.0'][file.path].sha1)
       expect(file.hashes.sha256).to.be.equal(hashes['redie-0.3.0'][file.path].sha256)
     })
-    expect(processor.linkAndQueueTool.callCount).to.be.equal(3)
-    expect(processor.linkAndQueueTool.args.map(call => call[1])).to.have.members(['licensee', 'scancode', 'fossology'])
+    expect(processor.linkAndQueueTool.callCount).to.be.equal(2)
+    expect(processor.linkAndQueueTool.args.map(call => call[1])).to.have.members([
+      'licensee',
+      'scancode' /*, 'fossology'*/
+    ])
     expect(request.document.attachments.length).to.eq(2)
     expect(request.document._attachments.length).to.eq(2)
     expect(request.document.summaryInfo.count).to.be.equal(4)
