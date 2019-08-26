@@ -32,7 +32,7 @@ class MavenExtract extends AbstractClearlyDefinedProcessor {
       await this._createDocument(request, spec, manifest, request.document.releaseDate)
     }
     this.linkAndQueueTool(request, 'licensee')
-    this.linkAndQueueTool(request, 'fossology')
+    // this.linkAndQueueTool(request, 'fossology')
     this.linkAndQueueTool(request, 'scancode')
     if (request.document.sourceInfo) {
       const sourceSpec = SourceSpec.fromObject(request.document.sourceInfo)

@@ -49,8 +49,11 @@ describe('PHP processing', () => {
         expect(file.hashes.sha256).to.be.equal(hashes['symfony/polyfill-mbstring-1.11.0'][file.path].sha256)
       }
     })
-    expect(processor.linkAndQueueTool.callCount).to.be.equal(3)
-    expect(processor.linkAndQueueTool.args.map(call => call[1])).to.have.members(['licensee', 'scancode', 'fossology'])
+    expect(processor.linkAndQueueTool.callCount).to.be.equal(2)
+    expect(processor.linkAndQueueTool.args.map(call => call[1])).to.have.members([
+      'licensee',
+      'scancode' /*, 'fossology'*/
+    ])
     expect(request.document.attachments.length).to.eq(1)
     expect(request.document.summaryInfo.count).to.be.equal(8)
     expect(processor.linkAndQueue.callCount).to.be.equal(1)

@@ -29,7 +29,7 @@ class PodExtract extends AbstractClearlyDefinedProcessor {
     }
     this.linkAndQueueTool(request, 'licensee')
     this.linkAndQueueTool(request, 'scancode')
-    this.linkAndQueueTool(request, 'fossology')
+    // this.linkAndQueueTool(request, 'fossology')
     if (request.document.sourceInfo) {
       const sourceSpec = SourceSpec.fromObject(request.document.sourceInfo)
       this.linkAndQueue(request, 'source', sourceSpec.toEntitySpec())

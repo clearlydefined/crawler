@@ -37,7 +37,7 @@ class NpmExtract extends AbstractClearlyDefinedProcessor {
       else this.logger.info('NPM without package.json', { url: request.url })
     }
     this.linkAndQueueTool(request, 'licensee')
-    this.linkAndQueueTool(request, 'fossology')
+    // this.linkAndQueueTool(request, 'fossology')
     this.linkAndQueueTool(request, 'scancode')
     if (request.document.sourceInfo) {
       const sourceSpec = SourceSpec.fromObject(request.document.sourceInfo)
