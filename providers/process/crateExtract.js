@@ -27,7 +27,7 @@ class CrateExtract extends AbstractClearlyDefinedProcessor {
       await this._createDocument(request, request.document.manifest, request.document.registryData)
     }
     this.linkAndQueueTool(request, 'licensee')
-    this.linkAndQueueTool(request, 'fossology')
+    // this.linkAndQueueTool(request, 'fossology')
     this.linkAndQueueTool(request, 'scancode')
     if (request.document.sourceInfo) {
       const sourceSpec = SourceSpec.fromObject(request.document.sourceInfo)
