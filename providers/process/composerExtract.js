@@ -38,7 +38,7 @@ class ComposerExtract extends AbstractClearlyDefinedProcessor {
       else this.logger.info('PHP package without composer.json', { url: request.url })
     }
     this.linkAndQueueTool(request, 'licensee')
-    this.linkAndQueueTool(request, 'fossology')
+    // this.linkAndQueueTool(request, 'fossology')
     this.linkAndQueueTool(request, 'scancode')
     if (request.document.sourceInfo) {
       const sourceSpec = SourceSpec.fromObject(request.document.sourceInfo)
