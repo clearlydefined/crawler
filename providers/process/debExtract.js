@@ -26,7 +26,8 @@ class DebExtract extends AbstractClearlyDefinedProcessor {
   async handle(request) {
     if (this.isProcessing(request)) {
       await super.handle(request)
-      await this._createDocument(request, request.document.registryData)
+      const spec = this.toSpec(request)
+      await this._createDocument(request, spec, request.document.registryData)
     }
     this.linkAndQueueTool(request, 'licensee')
     // this.linkAndQueueTool(request, 'fossology')
@@ -38,11 +39,18 @@ class DebExtract extends AbstractClearlyDefinedProcessor {
     return request
   }
 
-  async _createDocument(request, registryData) {
-    request.document = merge(this.clone(request.document), { registryData })
-    // ???
-    // const sourceInfo = await this._discoverSource(this.toSpec(request).revision, registryData)
-    // if (sourceInfo) request.document.sourceInfo = sourceInfo
+  async _discoverSource(spec) {
+    const result = SourceSpec.fromObject(spec)
+    result.type = 'debsrc'
+    result.revision = result.revision.split('_')[0] // Remove architecture
+    return result
+  }
+
+  async _createDocument(request, spec, registryData) {
+    const releaseDate = request.document.releaseDate
+    request.document = merge(this.clone(request.document), { registryData, releaseDate })
+    const sourceInfo = await this._discoverSource(spec)
+    if (sourceInfo) request.document.sourceInfo = sourceInfo
   }
 }
 

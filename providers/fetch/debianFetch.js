@@ -3,14 +3,23 @@
 
 const AbstractFetch = require('./abstractFetch')
 const bz2 = require('unbzip2-stream')
-const { clone } = require('lodash')
+const { clone, flatten } = require('lodash')
 const domain = require('domain')
 const fs = require('fs')
 const linebyline = require('linebyline')
 const memCache = require('memory-cache')
 const nodeRequest = require('request')
 const path = require('path')
+const { promisify } = require('util')
 const requestPromise = require('request-promise-native')
+const tmp = require('tmp')
+const unixArchive = require('ar-async')
+
+const exec = promisify(require('child_process').exec)
+const exists = promisify(fs.exists)
+const lstat = promisify(fs.lstat)
+const readdir = promisify(fs.readdir)
+const readFile = promisify(fs.readFile)
 
 const providerMap = {
   debian: 'http://ftp.debian.org/debian/'
@@ -39,8 +48,8 @@ class DebianFetch extends AbstractFetch {
     if (!spec.revision) return request.markSkip('Missing  ')
     const registryData = await this._getRegistryData(spec)
     if (registryData.length === 0) return this.markSkip(request)
-    const isArchPresent = this._ensureArchitecturePresenceForBinary(spec, registryData)
-    if (!isArchPresent) return request.markSkip('Missing architecture  ')
+    const isArchitceturePresent = this._ensureArchitecturePresenceForBinary(spec, registryData)
+    if (!isArchitceturePresent) return request.markSkip('Missing architecture  ')
     request.url = spec.toUrl()
     super.handle(request)
     const { binary, source, patches } = this._getDownloadUrls(spec, registryData)
@@ -85,7 +94,9 @@ class DebianFetch extends AbstractFetch {
             .pipe(bz2())
             .pipe(fs.createWriteStream(this.packageMapFileLocation))
             .on('finish', () => {
-              this.logger.info(`Retrieved ${packageFileMap.url}. Stored map file at ${this.packageMapFileLocation}`)
+              this.logger.info(
+                `Debian: retrieved ${packageFileMap.url}. Stored map file at ${this.packageMapFileLocation}`
+              )
               return resolve()
             })
         })
@@ -117,7 +128,7 @@ class DebianFetch extends AbstractFetch {
           }
         })
         .on('end', () => {
-          this.logger.info(`Got ${relevantEntries.length} entries for ${spec.toUrl()}`)
+          this.logger.info(`Debian: got ${relevantEntries.length} entries for ${spec.toUrl()}`)
           return resolve(relevantEntries)
         })
         .on('error', error => reject(error))
@@ -163,24 +174,25 @@ class DebianFetch extends AbstractFetch {
     const file = this.createTempFile(request)
     await this._download(binary || source, file.name)
     const dir = this.createTempDir(request)
-    // !!!!
-    await this.decompress(file.name, dir.name) // it doesn't work with .deb file, which is arch. Try streams instead? Before that test src.
+    binary ? await this._decompressUnixArchive(file.name, dir.name) : await this.decompress(file.name, dir.name)
     const hashes = await this.computeHashes(file.name)
+    let releaseDate = null
     if (binary) {
       // The decompressed folder should contain control.tar.xz, data.tar.xz, debian-binary. The package is in data.tar.xz
-      if (fs.existsSync(path.join(dir.name, 'data.tar.xz')))
-        await this.decompress(`${dir.name}/data.tar.xz`, `${dir.name}/data`)
+      if (await exists(path.join(dir.name, 'data.tar.xz')))
+        await this.decompress(path.join(dir.name, 'data.tar.xz'), path.join(dir.name, 'data'))
+      if (await exists(path.join(dir.name, 'data')))
+        releaseDate = await this._getLatestFileDateFromDirectory(path.join(dir.name, 'data'))
     }
-    // TODO releaseDate
     if (source && patches) {
-      // TODO assumption: only one patches URL
-      // download and decompress patches
-      // Apply patches in correct order: (new function)
-      // cat ../debian/patches/series
-      // FixDesktop.diff
-      // FixPathBinary.diff
-      // patch -p01 -i ../debian/patches/FixDesktop.diff
-      // patch -p01 -i ../debian/patches/FixPathBinary.diff
+      const sourceDirectoryName = await this._getSourceDirectoryName(dir.name)
+      const patchFile = tmp.fileSync(this.tmpOptions)
+      await this._download(patches, patchFile.name)
+      // Extracting patches into the sources folder to make sure copyrights etc. information is not lost.
+      await this.decompress(patchFile.name, dir.name)
+      patchFile.removeCallback()
+      releaseDate = await this._getLatestFileDateFromDirectory(dir.name)
+      await this._applyPatches(path.join(dir.name, sourceDirectoryName), path.join(dir.name, 'debian'), request.url)
     }
     return { dir, releaseDate, hashes }
   }
@@ -200,6 +212,78 @@ class DebianFetch extends AbstractFetch {
           .on('finish', () => resolve())
       })
     })
+  }
+
+  async _decompressUnixArchive(source, destination) {
+    return new Promise((resolve, reject) => {
+      const reader = new unixArchive.ArReader(source)
+      reader.on('entry', (entry, next) => {
+        const name = entry.fileName()
+        const fullName = path.join(destination, name)
+        entry
+          .fileData()
+          .pipe(fs.createWriteStream(fullName))
+          .on('finish', next)
+      })
+      reader.on('error', error => {
+        reject(error)
+      })
+      reader.on('end', () => {
+        resolve()
+      })
+    })
+  }
+
+  // Attempt to guess the release date.
+  // When a directory is extracted, all folders are newly created but the files retain their original last modified date,
+  // so attempting to find the latest file date.
+  async _getLatestFileDateFromDirectory(location) {
+    let latestDate = null
+    const fileLocations = await this._getFiles(location)
+    for (let location of fileLocations) {
+      const locationStat = await lstat(location)
+      if (!locationStat.isDirectory()) {
+        const { mtime } = locationStat
+        if (!latestDate || mtime > latestDate) {
+          latestDate = mtime
+        }
+      }
+    }
+    return latestDate
+  }
+
+  async _getFiles(location) {
+    const locationStat = await lstat(location)
+    if (locationStat.isSymbolicLink()) return []
+    if (!locationStat.isDirectory()) return [location]
+    const subdirs = await readdir(location)
+    const files = await Promise.all(
+      subdirs.map(subdir => {
+        const entry = path.resolve(location, subdir)
+        return this._getFiles(entry)
+      })
+    )
+    return flatten(files).filter(x => x)
+  }
+
+  async _getSourceDirectoryName(location) {
+    return (await readdir(location))[0]
+  }
+
+  // Apply patches to source in correct order
+  async _applyPatches(sourceLocation, patchesLocation, specUrl) {
+    const patchesSeriesLocation = path.join(patchesLocation, 'patches', 'series')
+    if (await exists(patchesSeriesLocation)) {
+      const orderedPatches = (await readFile(patchesSeriesLocation))
+        .toString()
+        .split('\n')
+        .filter(patch => patch)
+      for (let patchFileName of orderedPatches) {
+        const patchCommand = `patch -p01 -i ${path.join(patchesLocation, 'patches', patchFileName)}`
+        const { stdout, stderr } = await exec(patchCommand, { cwd: sourceLocation })
+        this.logger.info(`Debian: applied patch ${patchFileName} for ${specUrl}. stdout: ${stdout}. stderr: ${stderr}`)
+      }
+    }
   }
 }
 
