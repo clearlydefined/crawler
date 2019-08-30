@@ -6,7 +6,7 @@ const EntitySpec = require('../../lib/entitySpec')
 const fs = require('fs')
 const path = require('path')
 const shajs = require('sha.js')
-const { flatten, intersection, pick, set } = require('lodash')
+const { clone, flatten, intersection, pick, set } = require('lodash')
 const { promisify } = require('util')
 const readdir = promisify(fs.readdir)
 const lstat = promisify(fs.lstat)
@@ -220,7 +220,7 @@ class AbstractProcessor extends BaseHandler {
   }
 
   linkAndQueueTool(request, name, tool = name) {
-    const spec = this.toSpec(request)
+    const spec = clone(this.toSpec(request))
     const url = spec.toUrl()
     spec.tool = tool
     const urn = spec.toUrn()
