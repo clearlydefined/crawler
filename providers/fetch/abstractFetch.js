@@ -6,6 +6,7 @@ const extract = require('extract-zip')
 const decompress = require('decompress')
 const decompressTar = require('decompress-tar')
 const decompressTargz = require('decompress-targz')
+const decompressTarxz = require('decompress-tarxz')
 const decompressUnzip = require('decompress-unzip')
 
 class AbstractFetch extends BaseHandler {
@@ -32,7 +33,7 @@ class AbstractFetch extends BaseHandler {
   decompress(source, destination) {
     return decompress(source, destination, {
       filter: file => !file.path.endsWith('/'),
-      plugins: [decompressTar(), decompressTargz(), decompressUnzip({ validateEntrySizes: false })]
+      plugins: [decompressTar(), decompressTargz(), decompressTarxz(), decompressUnzip({ validateEntrySizes: false })]
     })
   }
 }
