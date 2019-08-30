@@ -281,7 +281,8 @@ class DebianFetch extends AbstractFetch {
       for (let patchFileName of orderedPatches) {
         const patchCommand = `patch -p01 -i ${path.join(patchesLocation, 'patches', patchFileName)}`
         const { stdout, stderr } = await exec(patchCommand, { cwd: sourceLocation })
-        this.logger.info(`Debian: applied patch ${patchFileName} for ${specUrl}. stdout: ${stdout}. stderr: ${stderr}`)
+        const stderrMsg = stderr ? ' stderr: ' + stderr : ''
+        this.logger.info(`Debian: applied patch ${patchFileName} for ${specUrl}. stdout: ${stdout.trim()}` + stderrMsg)
       }
     }
   }
