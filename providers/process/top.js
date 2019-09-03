@@ -40,8 +40,8 @@ class TopProcessor extends AbstractProcessor {
       //   return this._processTopPyPis(request)
       // case 'composer':
       //   return this._processTopPackagists(request)
-      // case 'deb':
-      //   return this._processTopDebians(request)
+      case 'deb':
+        return this._processTopDebians(request)
       default:
         throw new Error(`Unknown provider type for 'top' request: ${spec.provider}`)
     }
