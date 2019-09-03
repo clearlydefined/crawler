@@ -14,7 +14,9 @@ class TopProcessor extends AbstractProcessor {
     return (
       request.type === 'top' &&
       spec &&
-      ['npmjs', 'cocoapods', 'cratesio', 'mavencentral', 'nuget', 'github', 'pypi', 'composer'].includes(spec.provider)
+      ['npmjs', 'cocoapods', 'cratesio', 'mavencentral', 'nuget', 'github', 'pypi', 'composer', 'debian'].includes(
+        spec.provider
+      )
     )
   }
 
@@ -38,6 +40,8 @@ class TopProcessor extends AbstractProcessor {
       //   return this._processTopPyPis(request)
       // case 'composer':
       //   return this._processTopPackagists(request)
+      // case 'deb':
+      //   return this._processTopDebians(request)
       default:
         throw new Error(`Unknown provider type for 'top' request: ${spec.provider}`)
     }
@@ -257,7 +261,19 @@ class TopProcessor extends AbstractProcessor {
     return request.markNoSave()
   }
 
-  // TO DO: Implement _processTopPackagists
+  /* Example:
+  {
+    "type": "top",
+    "url":"cd:/deb/debian/-/test",
+    "payload": {}
+  }
+  */
+  async _processTopDebians(request) {
+    // TODO: implement
+    return request.markNoSave()
+  }
+
+  // TODO: Implement _processTopPackagists
 }
 
 module.exports = options => new TopProcessor(options)
