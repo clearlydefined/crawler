@@ -2,8 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractProcessor = require('./abstractProcessor')
+const config = require('painless-config')
+const DebianFetch = require('../fetch/debianFetch')
 const fs = require('fs')
 const ghrequestor = require('ghrequestor')
+const linebyline = require('linebyline')
 const path = require('path')
 const Request = require('ghcrawler').request
 const requestRetry = require('requestretry').defaults({ json: true, maxAttempts: 3, fullResponse: false })
@@ -40,7 +43,7 @@ class TopProcessor extends AbstractProcessor {
       //   return this._processTopPyPis(request)
       // case 'composer':
       //   return this._processTopPackagists(request)
-      case 'deb':
+      case 'debian':
         return this._processTopDebians(request)
       default:
         throw new Error(`Unknown provider type for 'top' request: ${spec.provider}`)
@@ -265,12 +268,58 @@ class TopProcessor extends AbstractProcessor {
   {
     "type": "top",
     "url":"cd:/deb/debian/-/test",
-    "payload": {}
+    "payload": {
+      "body": {
+        "start": 0,
+        "end": 100
+      }
+    }
   }
   */
   async _processTopDebians(request) {
-    // TODO: implement
+    let { start, end } = request.document
+    if (!start || start < 0) start = 0
+    if (!end || end - start <= 0) end = start + 100
+    const debianFetch = DebianFetch({
+      logger: this.logger,
+      cdFileLocation: config.get('FILE_STORE_LOCATION') || (process.platform === 'win32' ? 'c:/temp/cd' : '/tmp/cd')
+    })
+    await debianFetch._getPackageMapFile()
+    const packagesCoordinates = await this._getDebianPackagesCoordinates(debianFetch)
+    const slicedCoordinates = packagesCoordinates.slice(start, end)
+    this.logger.info(
+      `Debian top - coordinates: ${packagesCoordinates.length}, start: ${start}, end: ${end}, sliced: ${slicedCoordinates.length}`
+    )
+    const requests = slicedCoordinates.map(coordinate => new Request('package', coordinate))
+    await request.queueRequests(requests)
     return request.markNoSave()
+  }
+
+  async _getDebianPackagesCoordinates(debianFetch) {
+    return new Promise((resolve, reject) => {
+      const coordinates = []
+      const lineReader = linebyline(debianFetch.packageMapFileLocation)
+      let entry = {}
+      lineReader
+        .on('line', line => {
+          if (line === '') {
+            const architecture = entry.Architecture
+            const binary = entry.Binary
+            const binaryVersion = entry['Binary-Version']
+            if (architecture && binary && binaryVersion) {
+              coordinates.push(`cd:/deb/debian/-/${binary}/${binaryVersion}_${architecture}`)
+              entry = {}
+            }
+          } else {
+            const [key, value] = line.split(': ')
+            entry[key] = value
+          }
+        })
+        .on('end', () => {
+          return resolve(coordinates)
+        })
+        .on('error', error => reject(error))
+    })
   }
 
   // TODO: Implement _processTopPackagists
