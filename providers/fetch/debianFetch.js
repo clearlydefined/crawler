@@ -164,9 +164,8 @@ class DebianFetch extends AbstractFetch {
       ).href
       return { source, patches }
     }
-    const binary = new URL(
-      providerMap.debian + registryData.find(entry => entry.Architecture && entry.Architecture === architecture).Path
-    ).href
+    const binary = new URL(providerMap.debian + registryData.find(entry => entry.Architecture === architecture).Path)
+      .href
     return { binary }
   }
 
