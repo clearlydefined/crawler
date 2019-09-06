@@ -15,7 +15,7 @@ class SourceExtract extends AbstractClearlyDefinedProcessor {
 
   canHandle(request) {
     const spec = this.toSpec(request)
-    return request.type === 'clearlydefined' && spec && ['git', 'sourcearchive'].includes(spec.type)
+    return request.type === 'clearlydefined' && spec && ['git', 'sourcearchive', 'debsrc'].includes(spec.type)
   }
 
   async handle(request) {

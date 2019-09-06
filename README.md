@@ -54,7 +54,7 @@ cd:/type/provider/namespace/name/revision
 
 Where the segments are:
 
-- type -- the type of the component to be crawled. For exammple, npm, git, nuget, maven, ... This talks about the _shape_ of the component.
+- type -- the type of the component to be crawled. For example, npm, git, nuget, maven, ... This talks about the _shape_ of the component.
 - provider -- where the component can be found. Examples include npmjs, mavenCentral, github, nuget, ...
 - namespace -- many component systems have namespaces. GitHub orgs, NPM namespace, Maven group id, ... This segment must be supplied. If your component does not have a namespace, use '-' (ASCII hyphen).
 - name -- the name of the component you want to crawl. Given the `namespace` segment mentioned above, this is just the simple name.
@@ -72,7 +72,7 @@ Process the source, if any:
 1.  The crawler determines the revision (e.g., Git commit) that matches the version of the package.
 1.  Given the location and revision, the crawler fetches the source and runs any configured scan tools (e.g., ScanCode)
 
-The crawler's output is stored for use by the rest of the ClearlyDefined infrastructure -- it is not intended to be used directly by humans. Note that each tool's output is stored separately and the results of processing the component and the component source are alos separated.
+The crawler's output is stored for use by the rest of the ClearlyDefined infrastructure -- it is not intended to be used directly by humans. Note that each tool's output is stored separately and the results of processing the component and the component source are also separated.
 
 # Configuration
 
@@ -126,20 +126,18 @@ See `local.env.list`, `dev.env.list` and `prod.env.list` tempate files.
 
 ## Build and run Docker image locally
 
-`docker build -t crawler .`
+`docker build -t cdcrawler:latest .`
 
-`docker run --rm --env-file ../local.env.list -p 5000:5000 crawler`
-
+`docker run --rm --env-file ../local.env.list -p 5000:5000 -p 9229:9229 cdcrawler:latest`
 
 # Clouds
 
 ## Google Cloud
 
-This uses GKE (Google Kubernetes Engine).  The instructions are applicable to
+This uses GKE (Google Kubernetes Engine). The instructions are applicable to
 normal Kubernetes as well (minus anything mentioning gcloud.)
 
-`-n dev` sets the Kubernetes namespace for an action.  For prod, use `-n prod`.
-
+`-n dev` sets the Kubernetes namespace for an action. For prod, use `-n prod`.
 
 ### Environment Setup
 
@@ -228,7 +226,7 @@ Un-expose dashboard port:
 # Dashboard
 
 The ghcrawler dashboard does **not** work properly with the current version of
-ClearlyDefined crawler.  It uses a very different configuration scheme that is
+ClearlyDefined crawler. It uses a very different configuration scheme that is
 incompatible.
 
 # ClearlyDefined, defined.
