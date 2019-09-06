@@ -105,7 +105,7 @@ class DebianFetch extends AbstractFetch {
   }
 
   // Return only the relevant entries from 160+ MB file
-  // Sample: /test/fixtures/debian/package-file.map
+  // Sample: /test/fixtures/debian/fragment-package-file.map
   async _getDataFromPackageMapFile(spec) {
     return new Promise((resolve, reject) => {
       const { name, revision } = this._fromSpec(spec)
@@ -116,7 +116,7 @@ class DebianFetch extends AbstractFetch {
         .on('line', line => {
           if (line === '') {
             if (
-              [entry['Source'], entry['Binary']].includes(name) &&
+              [entry.Source, entry.Binary].includes(name) &&
               [entry['Source-Version'], entry['Binary-Version']].includes(revision)
             ) {
               relevantEntries.push(entry)
