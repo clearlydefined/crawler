@@ -27,7 +27,7 @@ class DebExtract extends AbstractClearlyDefinedProcessor {
     if (this.isProcessing(request)) {
       await super.handle(request)
       const spec = this.toSpec(request)
-      await this._createDocument(request, spec, request.document.registryData)
+      this._createDocument(request, spec, request.document.registryData)
     }
     this.linkAndQueueTool(request, 'licensee')
     // this.linkAndQueueTool(request, 'fossology')
@@ -39,18 +39,24 @@ class DebExtract extends AbstractClearlyDefinedProcessor {
     return request
   }
 
-  async _discoverSource(spec) {
-    const result = SourceSpec.fromObject(spec)
-    result.type = 'debsrc'
-    result.revision = result.revision.split('_')[0] // Remove architecture
-    return result
-  }
-
-  async _createDocument(request, spec, registryData) {
+  _createDocument(request, spec, registryData) {
     const releaseDate = request.document.releaseDate
     request.document = merge(this.clone(request.document), { registryData, releaseDate })
-    const sourceInfo = await this._discoverSource(spec)
+    const sourceInfo = this._discoverSource(spec, registryData)
     if (sourceInfo) request.document.sourceInfo = sourceInfo
+  }
+
+  _discoverSource(spec, registryData) {
+    const [revision, architecture] = spec.revision.split('_')
+    const source = (registryData.find(entry => entry.Architecture === architecture) || {}).Source
+    if (source) {
+      const result = SourceSpec.fromObject(spec)
+      result.type = 'debsrc'
+      result.name = source // Sometimes the source name differs from the binary one
+      result.revision = revision // Without architecture
+      return result
+    }
+    return null
   }
 }
 
