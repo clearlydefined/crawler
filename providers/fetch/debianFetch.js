@@ -53,6 +53,7 @@ class DebianFetch extends AbstractFetch {
     request.url = spec.toUrl()
     super.handle(request)
     const { binary, source, patches } = this._getDownloadUrls(spec, registryData)
+    if (!binary && !source) return request.markSkip('Missing  ')
     const { dir, releaseDate, hashes } = await this._getPackage(request, binary, source, patches)
     request.document = await this._createDocument(dir, registryData, releaseDate, hashes)
     request.contentOrigin = 'origin'
@@ -156,12 +157,10 @@ class DebianFetch extends AbstractFetch {
     const { architecture } = this._fromSpec(spec)
     if (isSrc) {
       const sourceAndPatches = registryData.filter(entry => !entry.Architecture && !entry.Path.endsWith('.dsc'))
-      const source = new URL(
-        providerMap.debian + sourceAndPatches.find(entry => entry.Path.includes('.orig.tar.')).Path
-      ).href
-      const patches = new URL(
-        providerMap.debian + sourceAndPatches.find(entry => !entry.Path.includes('.orig.tar.')).Path
-      ).href
+      const sourcePath = (sourceAndPatches.find(entry => entry.Path.includes('.orig.tar.')) || {}).Path
+      const source = sourcePath ? new URL(providerMap.debian + sourcePath).href : null
+      const patchPath = (sourceAndPatches.find(entry => !entry.Path.includes('.orig.tar.')) || {}).Path
+      const patches = patchPath ? new URL(providerMap.debian + patchPath).href : null
       return { source, patches }
     }
     const binary = new URL(providerMap.debian + registryData.find(entry => entry.Architecture === architecture).Path)
