@@ -275,7 +275,7 @@ class DebianFetch extends AbstractFetch {
       const orderedPatches = (await readFile(patchesSeriesLocation))
         .toString()
         .split('\n')
-        .filter(patch => patch)
+        .filter(patch => patch && !patch.trim().startsWith('#'))
       for (let patchFileName of orderedPatches) {
         const patchCommand = `patch -p01 -i ${path.join(patchesLocation, 'patches', patchFileName)}`
         const { stdout, stderr } = await exec(patchCommand, { cwd: sourceLocation })
