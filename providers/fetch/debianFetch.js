@@ -275,12 +275,15 @@ class DebianFetch extends AbstractFetch {
       const orderedPatches = (await readFile(patchesSeriesLocation))
         .toString()
         .split('\n')
-        .filter(patch => patch && !patch.trim().startsWith('#'))
+        .filter(patch => patch && !patch.trim().startsWith('#') && !patch.trim().startsWith('|'))
       for (let patchFileName of orderedPatches) {
         const patchCommand = `patch -p01 -i ${path.join(patchesLocation, 'patches', patchFileName)}`
-        const { stdout, stderr } = await exec(patchCommand, { cwd: sourceLocation })
-        const stderrMsg = stderr ? ' stderr: ' + stderr : ''
-        this.logger.info(`Debian: applied patch ${patchFileName} for ${specUrl}. stdout: ${stdout.trim()}` + stderrMsg)
+        try {
+          const { stdout } = await exec(patchCommand, { cwd: sourceLocation })
+          this.logger.info(`Debian: applied patch ${patchFileName} for ${specUrl}. stdout: ${stdout.trim()}`)
+        } catch (error) {
+          this.logger.info(`Debian: failed to apply patch ${patchFileName} for ${specUrl}. Error: ${error}`)
+        }
       }
     }
   }
