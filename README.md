@@ -128,7 +128,11 @@ See `local.env.list`, `dev.env.list` and `prod.env.list` tempate files.
 
 `docker build -t cdcrawler:latest .`
 
-`docker run --rm --env-file ../local.env.list -p 5000:5000 -p 9229:9229 cdcrawler:latest`
+`docker run --rm --env-file ../dev.env.list -p 5000:5000 -p 9229:9229 cdcrawler:latest`
+
+With a debugger:
+
+`docker run --rm -d --env-file ../dev.env.list -p 9229:9229 -p 5000:5000 --entrypoint npm cdcrawler:latest run local`
 
 # Clouds
 
