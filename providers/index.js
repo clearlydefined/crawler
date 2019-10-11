@@ -27,6 +27,7 @@ module.exports = {
     component: require('./process/component'),
     crate: require('./process/crateExtract'),
     deb: require('./process/debExtract'),
+    debsrc: require('./process/debsrcExtract'),
     gem: require('./process/gemExtract'),
     licensee: require('./process/licensee'),
     maven: require('./process/mavenExtract'),

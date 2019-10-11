@@ -13,7 +13,7 @@ class DebExtract extends AbstractClearlyDefinedProcessor {
   }
 
   get toolVersion() {
-    return '1.0.0'
+    return '1.0.1'
   }
 
   canHandle(request) {
@@ -40,8 +40,8 @@ class DebExtract extends AbstractClearlyDefinedProcessor {
   }
 
   _createDocument(request, spec, registryData) {
-    const releaseDate = request.document.releaseDate
-    request.document = merge(this.clone(request.document), { registryData, releaseDate })
+    const { releaseDate, declaredLicenses } = request.document
+    request.document = merge(this.clone(request.document), { registryData, releaseDate, declaredLicenses })
     const sourceInfo = this._discoverSource(spec, registryData)
     if (sourceInfo) request.document.sourceInfo = sourceInfo
   }
