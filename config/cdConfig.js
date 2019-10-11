@@ -44,6 +44,7 @@ module.exports = {
     component: {},
     crate: { githubToken },
     deb: {},
+    debsrc: {},
     fossology: {
       disabled: true,
       installDir: config.get('FOSSOLOGY_HOME') || '/mnt/c/git/fo/fossology/src/'
