@@ -61,10 +61,10 @@ describe('Debian utility functions', () => {
     const expectedCopyrightUrl = 'https://metadata.ftp-master.debian.org/changelogs/main/0/0ad/0ad_0.0.17-1_copyright'
     const spec1 = spec('deb', 'debian', '0ad', '0.0.17-1_armhf')
     const registryData1 = await fetch._getDataFromPackageMapFile(spec1)
-    expect(fetch._getCopyrightUrl(spec1, registryData1)).to.equal(expectedCopyrightUrl)
+    expect(fetch._getCopyrightUrl(registryData1)).to.equal(expectedCopyrightUrl)
     const spec2 = spec('debsrc', 'debian', '0ad', '0.0.17-1')
-    const registryData2 = await fetch._getDataFromPackageMapFile(spec1)
-    expect(fetch._getCopyrightUrl(spec2, registryData2)).to.equal(expectedCopyrightUrl)
+    const registryData2 = await fetch._getDataFromPackageMapFile(spec2)
+    expect(fetch._getCopyrightUrl(registryData2)).to.equal(expectedCopyrightUrl)
   })
 
   it('parses declared licenses', () => {
