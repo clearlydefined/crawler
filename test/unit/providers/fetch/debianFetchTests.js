@@ -55,6 +55,28 @@ describe('Debian utility functions', () => {
       'http://ftp.debian.org/debian/pool/main/0/0ad/0ad_0.0.17-1.debian.tar.xz'
     )
   })
+
+  it('gets copyright URL', async () => {
+    const fetch = DebianFetch(debianFetchOptions)
+    const expectedCopyrightUrl = 'https://metadata.ftp-master.debian.org/changelogs/main/0/0ad/0ad_0.0.17-1_copyright'
+    const spec1 = spec('deb', 'debian', '0ad', '0.0.17-1_armhf')
+    const registryData1 = await fetch._getDataFromPackageMapFile(spec1)
+    expect(fetch._getCopyrightUrl(spec1, registryData1)).to.equal(expectedCopyrightUrl)
+    const spec2 = spec('debsrc', 'debian', '0ad', '0.0.17-1')
+    const registryData2 = await fetch._getDataFromPackageMapFile(spec1)
+    expect(fetch._getCopyrightUrl(spec2, registryData2)).to.equal(expectedCopyrightUrl)
+  })
+
+  it('parses declared licenses', () => {
+    const fetch = DebianFetch(debianFetchOptions)
+    const copyrightResponse = fs.readFileSync('test/fixtures/debian/0ad_0.0.17-1_copyright.txt').toString()
+    expect(fetch._parseDeclaredLicenses(copyrightResponse)).to.deep.equal(['GPL-2.0+', 'MIT', 'CPL-1.0', 'BSD-3-clause', 'GPL-3.0', 'LGPL-2.1+', 'public-domain', 'MPL-1.1', 'GPL-2.0', 'LGPL-2.1'])
+    // Edge cases:
+    expect(fetch._parseDeclaredLicenses('License: GPL-1+ or Artistic')).to.deep.equal(['(GPL-1+ OR Artistic)'])
+    expect(fetch._parseDeclaredLicenses('License: GPL-2+ and BSD-3-clause')).to.deep.equal(['GPL-2+', 'BSD-3-clause'])
+    expect(fetch._parseDeclaredLicenses('License: GPL-2+ or Artistic-2.0, and BSD-3-clause')).to.deep.equal(['(GPL-2+ OR Artistic-2.0)', 'BSD-3-clause'])
+    expect(fetch._parseDeclaredLicenses('License: Expat or Artistic and Artistic-2.0')).to.deep.equal(['(MIT OR Artistic AND Artistic-2.0)'])
+  })
 })
 
 const hashes = {
@@ -69,13 +91,12 @@ describe('Debian fetching', () => {
     memCache.put('packageFileMap', true)
   })
 
-  afterEach(function() {
+  afterEach(() => {
     memCache.del('packageFileMap')
   })
 
   it('can handle the request being attempted', async () => {
-    expect(DebianFetch(debianFetchOptions).canHandle(new Request('test', 'cd:/deb/debian/-/0ad/0.0.17-1_armhf'))).to.be
-      .true
+    expect(DebianFetch(debianFetchOptions).canHandle(new Request('test', 'cd:/deb/debian/-/0ad/0.0.17-1_armhf'))).to.be.true
   })
 
   it('succeeds in download, decompress and hash', async () => {
@@ -83,10 +104,14 @@ describe('Debian fetching', () => {
     handler._download = async (downloadUrl, destination) => {
       fs.copyFileSync('test/fixtures/debian/0ad_0.0.17-1_armhf.deb', destination)
     }
+    handler._getDeclaredLicenses = async () => {
+      return ['MIT', 'BSD-3-clause']
+    }
     const request = await handler.handle(new Request('test', 'cd:/deb/debian/-/0ad/0.0.17-1_armhf'))
     expect(request.document.hashes.sha1).to.be.equal(hashes['0ad_0.0.17-1_armhf.deb']['sha1'])
     expect(request.document.hashes.sha256).to.be.equal(hashes['0ad_0.0.17-1_armhf.deb']['sha256'])
     expect(request.document.releaseDate.getFullYear()).to.be.equal(2014)
+    expect(request.document.declaredLicenses).to.deep.equal(['MIT', 'BSD-3-clause'])
   })
 })
 

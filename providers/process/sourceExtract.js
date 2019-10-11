@@ -15,17 +15,13 @@ class SourceExtract extends AbstractClearlyDefinedProcessor {
 
   canHandle(request) {
     const spec = this.toSpec(request)
-    return request.type === 'clearlydefined' && spec && ['git', 'sourcearchive', 'debsrc'].includes(spec.type)
+    return request.type === 'clearlydefined' && spec && ['git', 'sourcearchive'].includes(spec.type)
   }
 
   async handle(request) {
     await super.handle(request)
     const location = request.document.location
-    const registryData = request.document.registryData
     request.document = merge(this.clone(request.document), { releaseDate: request.document.releaseDate })
-    if (registryData) {
-      request.document.registryData = registryData
-    }
     const clearlyFile = path.join(location, 'clearly.yaml')
     if (!fs.existsSync(clearlyFile)) return
     const content = await promisify(fs.readFileSync)(clearlyFile)

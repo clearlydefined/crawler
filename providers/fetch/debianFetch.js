@@ -31,6 +31,8 @@ const packageFileMap = {
   cacheDuration: 8 * 60 * 60 * 1000 // 8 hours
 }
 
+const metadataChangelogsUrl = 'https://metadata.ftp-master.debian.org/changelogs/'
+
 class DebianFetch extends AbstractFetch {
   constructor(options) {
     super(options)
@@ -55,7 +57,8 @@ class DebianFetch extends AbstractFetch {
     const { binary, source, patches } = this._getDownloadUrls(spec, registryData)
     if (!binary && !source) return request.markSkip('Missing  ')
     const { dir, releaseDate, hashes } = await this._getPackage(request, binary, source, patches)
-    request.document = await this._createDocument(dir, registryData, releaseDate, hashes)
+    const declaredLicenses = await this._getDeclaredLicenses(spec, registryData)
+    request.document = this._createDocument({ dir, registryData, releaseDate, declaredLicenses, hashes })
     request.contentOrigin = 'origin'
     request.casedSpec = clone(spec)
     return request
@@ -69,8 +72,8 @@ class DebianFetch extends AbstractFetch {
     return response.version
   }
 
-  _createDocument(dir, registryData, releaseDate, hashes) {
-    return { location: dir.name, registryData, releaseDate, hashes }
+  _createDocument({ dir, registryData, releaseDate, declaredLicenses, hashes }) {
+    return { location: dir.name, registryData, releaseDate, declaredLicenses, hashes }
   }
 
   async _getRegistryData(spec) {
@@ -286,6 +289,64 @@ class DebianFetch extends AbstractFetch {
         }
       }
     }
+  }
+
+  async _getDeclaredLicenses(spec, registryData) {
+    const copyrightUrl = this._getCopyrightUrl(spec, registryData)
+    let response = ''
+    try {
+      response = await requestPromise({ url: copyrightUrl, json: false })
+    } catch (error) {
+      if (error.statusCode === 404) return []
+      else throw error
+    }
+    return this._parseDeclaredLicenses(response)
+  }
+
+  _getCopyrightUrl(spec, registryData) {
+    const { name, revision } = this._fromSpec(spec)
+    const sourceAndPatches = registryData.filter(entry => !entry.Architecture && !entry.Path.endsWith('.dsc'))
+    const sourcePath = (sourceAndPatches.find(entry => entry.Path.includes('.orig.tar.')) || {}).Path
+    // Example: ./pool/main/0/0ad/0ad_0.0.17-1.debian.tar.xz -> main/0
+    const pathFragment = sourcePath.replace('./pool/', '').split('/').slice(0, 2).join('/')
+    // Example: https://metadata.ftp-master.debian.org/changelogs/main/0/0ad-data/0ad-data_0.0.17-1_copyright
+    return `${metadataChangelogsUrl}${pathFragment}/${name}/${name}_${revision}_copyright`
+  }
+
+  // https://wiki.debian.org/Proposals/CopyrightFormat
+  // https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/#spdx
+  _parseDeclaredLicenses(copyrightResponse) {
+    const licensesSet = new Set()
+    const licenses = copyrightResponse.split('\n')
+      .filter(line => line.startsWith('License: '))
+      .map(line => line.replace('License:', '').trim())
+      .map(licenseId => {
+        if (licenseId.includes('CPL') && !licenseId.includes('RSCPL')) licenseId = licenseId.replace('CPL', 'CPL-1.0')
+        if (licenseId.includes('Expat')) licenseId = licenseId.replace('Expat', 'MIT')
+        return licenseId
+      })
+    // Over-simplified parsing of edge cases:
+    licenses.forEach(licenseId => {
+      if (licenseId.includes(' or ') && !licenseId.includes(',')) { // A or B and C => (A OR B AND C)
+        licenseId = licenseId.replace(' or ', ' OR ')
+        licenseId = licenseId.replace(' and ', ' AND ')
+        licensesSet.add('(' + licenseId + ')')
+      } else if (licenseId.includes(' or ') && licenseId.includes(',')) { // A or B, and C => (A OR B) AND C
+        licenseId = licenseId.replace(' or ', ' OR ')
+        licenseId.split(' and ').forEach(part => {
+          if (part.includes('OR') && part.endsWith(',')) {
+            licensesSet.add('(' + part.replace(',', ')'))
+          } else {
+            licensesSet.add(part)
+          }
+        })
+      } else if (licenseId.includes(' and ')) {
+        licenseId.split(' and ').forEach(part => licensesSet.add(part))
+      } else {
+        licensesSet.add(licenseId)
+      }
+    })
+    return Array.from(licensesSet)
   }
 }
 
