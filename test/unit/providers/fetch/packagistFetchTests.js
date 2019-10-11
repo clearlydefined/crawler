@@ -46,7 +46,7 @@ describe('packagistFetch', () => {
     Fetch._resultBox = resultBox
   })
 
-  afterEach(function() {
+  afterEach(() => {
     sinon.sandbox.restore()
   })
 
@@ -56,7 +56,8 @@ describe('packagistFetch', () => {
   })
 
   it('succeeds in download, decompress and hash', async () => {
-    const handler = setup(createRegistryData)
+    const handler = setup(createRegistryData())
+    handler._getRegistryData = () => createRegistryData()
     const request = await handler.handle(new Request('test', 'cd:/composer/packagist/symfony/polyfill-mbstring/1.11.0'))
     expect(request.document.hashes.sha1).to.be.equal(hashes['symfony-polyfill-mbstring-v1.11.0-0-gfe5e94c.zip']['sha1'])
     expect(request.document.hashes.sha256).to.be.equal(
@@ -67,6 +68,7 @@ describe('packagistFetch', () => {
 
   it('handles download error', async () => {
     const handler = setup(createRegistryData('0.3.0'))
+    handler._getRegistryData = () => { throw new Error('Error') }
     try {
       await handler.handle(new Request('test', 'cd:/composer/packagist/fakepackage/polyfill-mbstring/1.11.0'))
     } catch (error) {
@@ -76,12 +78,14 @@ describe('packagistFetch', () => {
 
   it('handles missing registry data', async () => {
     const handler = setup(createRegistryData('0.3.0'))
+    handler._getRegistryData = () => null
     const request = await handler.handle(new Request('test', 'cd:/composer/packagist/-/missing/1.11.0'))
     expect(request.processControl).to.be.equal('skip')
   })
 
   it('handles error getting registry data', async () => {
     const handler = setup(createRegistryData('0.3.0'))
+    handler._getRegistryData = () => { throw new Error('Invalid url') }
     try {
       await handler.handle(new Request('test', 'cd:/composer/packagist/-/regError/1.11.0'))
     } catch (error) {

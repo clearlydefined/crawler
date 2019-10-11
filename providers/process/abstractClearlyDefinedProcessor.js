@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractProcessor = require('./abstractProcessor')
-const { promisify } = require('util')
 const throat = require('throat')
 const path = require('path')
 const { pick, merge } = require('lodash')
@@ -74,7 +73,7 @@ class AbstractClearlyDefinedProcessor extends AbstractProcessor {
 
   async _computeSize(location) {
     let count = 0
-    const bytes = await promisify(du)(location, {
+    const bytes = await du(location, {
       filter: file => {
         if (path.basename(file) === '.git') return false
         count++
