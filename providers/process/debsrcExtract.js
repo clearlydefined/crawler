@@ -17,8 +17,8 @@ class DebSrcExtract extends AbstractClearlyDefinedProcessor {
   async handle(request) {
     await super.handle(request)
     // Re-arrange these fields to be at the end
-    const { releaseDate, registryData, declaredLicenses } = request.document
-    request.document = merge(this.clone(request.document), { releaseDate, registryData, declaredLicenses })
+    const { releaseDate, registryData, copyrightUrl, declaredLicenses } = request.document
+    request.document = merge(this.clone(request.document), { releaseDate, registryData, copyrightUrl, declaredLicenses })
   }
 }
 

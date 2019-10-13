@@ -57,8 +57,9 @@ class DebianFetch extends AbstractFetch {
     const { binary, source, patches } = this._getDownloadUrls(spec, registryData)
     if (!binary && !source) return request.markSkip('Missing  ')
     const { dir, releaseDate, hashes } = await this._getPackage(request, binary, source, patches)
-    const declaredLicenses = await this._getDeclaredLicenses(registryData)
-    request.document = this._createDocument({ dir, registryData, releaseDate, declaredLicenses, hashes })
+    const copyrightUrl = this._getCopyrightUrl(registryData)
+    const declaredLicenses = await this._getDeclaredLicenses(copyrightUrl)
+    request.document = this._createDocument({ dir, registryData, releaseDate, copyrightUrl, declaredLicenses, hashes })
     request.contentOrigin = 'origin'
     request.casedSpec = clone(spec)
     return request
@@ -72,8 +73,8 @@ class DebianFetch extends AbstractFetch {
     return response.version
   }
 
-  _createDocument({ dir, registryData, releaseDate, declaredLicenses, hashes }) {
-    return { location: dir.name, registryData, releaseDate, declaredLicenses, hashes }
+  _createDocument({ dir, registryData, releaseDate, copyrightUrl, declaredLicenses, hashes }) {
+    return { location: dir.name, registryData, releaseDate, copyrightUrl, declaredLicenses, hashes }
   }
 
   async _getRegistryData(spec) {
@@ -291,19 +292,6 @@ class DebianFetch extends AbstractFetch {
     }
   }
 
-  async _getDeclaredLicenses(registryData) {
-    const copyrightUrl = this._getCopyrightUrl(registryData)
-    if (!copyrightUrl) return []
-    let response = ''
-    try {
-      response = await requestPromise({ url: copyrightUrl, json: false })
-    } catch (error) {
-      if (error.statusCode === 404) return []
-      else throw error
-    }
-    return this._parseDeclaredLicenses(response)
-  }
-
   _getCopyrightUrl(registryData) {
     const entry = registryData.find(entry => entry.Source)
     if (!entry) return null
@@ -313,6 +301,18 @@ class DebianFetch extends AbstractFetch {
     const revision = entry['Source-Version']
     // Example: https://metadata.ftp-master.debian.org/changelogs/main/0/0ad-data/0ad-data_0.0.17-1_copyright
     return `${metadataChangelogsUrl}${pathFragment}/${name}/${name}_${revision}_copyright`
+  }
+
+  async _getDeclaredLicenses(copyrightUrl) {
+    if (!copyrightUrl) return []
+    let response = ''
+    try {
+      response = await requestPromise({ url: copyrightUrl, json: false })
+    } catch (error) {
+      if (error.statusCode === 404) return []
+      else throw error
+    }
+    return this._parseDeclaredLicenses(response)
   }
 
   // https://wiki.debian.org/Proposals/CopyrightFormat
