@@ -324,7 +324,7 @@ class DebianFetch extends AbstractFetch {
       .map(line => line.replace('License:', '').trim())
       .map(licenseId => {
         if (licenseId.includes('CPL') && !licenseId.includes('RSCPL')) licenseId = licenseId.replace('CPL', 'CPL-1.0')
-        if (licenseId.includes('Expat')) licenseId = licenseId.replace('Expat', 'MIT')
+        if (licenseId.toLowerCase().includes('expat')) licenseId = licenseId.toLowerCase().replace(/expat/i, 'MIT')
         return licenseId
       })
     // Over-simplified parsing of edge cases:
