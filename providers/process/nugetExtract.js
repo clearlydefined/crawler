@@ -16,7 +16,7 @@ class NuGetExtract extends AbstractClearlyDefinedProcessor {
   }
 
   get toolVersion() {
-    return '1.2.1'
+    return '1.2.2'
   }
 
   canHandle(request) {
