@@ -43,6 +43,7 @@ function pickFile(url) {
   if (url.endsWith('.json')) return 'xunit.core.2.4.1.json'
   if (url.endsWith('.nuspec')) return 'xunit.core.2.4.1.nuspec'
   if (url.endsWith('.nupkg')) return 'xunit.core.2.4.1.nupkg'
+  if (url.endsWith('license.txt')) return 'license.txt'
   return null
 }
 
@@ -70,7 +71,7 @@ describe('', () => {
     Fetch = proxyquire('../../../../providers/fetch/nugetFetch', { requestretry: requestRetryStub })
   })
 
-  afterEach(function() {
+  afterEach(() => {
     sinon.sandbox.restore()
   })
 
@@ -125,8 +126,8 @@ describe('', () => {
     }
     handler._getManifest = () => '{}'
     handler._getNuspec = () => '{}'
-    handler._createTempDir = () => {}
-    handler._persistMetadata = () => {}
+    handler._createTempDir = () => { }
+    handler._persistMetadata = () => { }
     try {
       await handler.handle(new Request('test', 'cd:/nuget/nuget/-/xunit.core/2.4.1'))
       expect(false).to.be.true
