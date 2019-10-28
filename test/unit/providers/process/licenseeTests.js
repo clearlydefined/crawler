@@ -8,7 +8,7 @@ const sinon = require('sinon')
 const sandbox = sinon.createSandbox()
 const fs = require('fs')
 const path = require('path')
-const { request } = require('ghcrawler')
+const { request } = require('../../../../ghcrawler')
 
 let Handler
 

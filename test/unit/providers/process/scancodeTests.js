@@ -6,7 +6,7 @@ const expect = chai.expect
 const proxyquire = require('proxyquire')
 const sinon = require('sinon')
 const sandbox = sinon.createSandbox()
-const { request } = require('ghcrawler')
+const { request } = require('../../../../ghcrawler')
 const { flatten } = require('lodash')
 
 let Handler
