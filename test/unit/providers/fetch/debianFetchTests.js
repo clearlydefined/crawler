@@ -5,7 +5,7 @@ const expect = require('chai').expect
 const sinon = require('sinon')
 const DebianFetch = require('../../../../providers/fetch/debianFetch')
 const memCache = require('memory-cache')
-const Request = require('ghcrawler').request
+const Request = require('../../../../ghcrawler').request
 const fs = require('fs')
 
 const debianFetchOptions = { logger: { info: sinon.stub() }, cdFileLocation: 'test/fixtures/debian/fragment' }
@@ -70,12 +70,28 @@ describe('Debian utility functions', () => {
   it('parses declared licenses', () => {
     const fetch = DebianFetch(debianFetchOptions)
     const copyrightResponse = fs.readFileSync('test/fixtures/debian/0ad_0.0.17-1_copyright.txt').toString()
-    expect(fetch._parseDeclaredLicenses(copyrightResponse)).to.deep.equal(['GPL-2.0+', 'MIT', 'CPL-1.0', 'BSD-3-clause', 'GPL-3.0', 'LGPL-2.1+', 'public-domain', 'MPL-1.1', 'GPL-2.0', 'LGPL-2.1'])
+    expect(fetch._parseDeclaredLicenses(copyrightResponse)).to.deep.equal([
+      'GPL-2.0+',
+      'MIT',
+      'CPL-1.0',
+      'BSD-3-clause',
+      'GPL-3.0',
+      'LGPL-2.1+',
+      'public-domain',
+      'MPL-1.1',
+      'GPL-2.0',
+      'LGPL-2.1'
+    ])
     // Edge cases:
     expect(fetch._parseDeclaredLicenses('License: GPL-1+ or Artistic')).to.deep.equal(['(GPL-1+ OR Artistic)'])
     expect(fetch._parseDeclaredLicenses('License: GPL-2+ and BSD-3-clause')).to.deep.equal(['GPL-2+', 'BSD-3-clause'])
-    expect(fetch._parseDeclaredLicenses('License: GPL-2+ or Artistic-2.0, and BSD-3-clause')).to.deep.equal(['(GPL-2+ OR Artistic-2.0)', 'BSD-3-clause'])
-    expect(fetch._parseDeclaredLicenses('License: Expat or Artistic and Artistic-2.0')).to.deep.equal(['(MIT OR Artistic AND Artistic-2.0)'])
+    expect(fetch._parseDeclaredLicenses('License: GPL-2+ or Artistic-2.0, and BSD-3-clause')).to.deep.equal([
+      '(GPL-2+ OR Artistic-2.0)',
+      'BSD-3-clause'
+    ])
+    expect(fetch._parseDeclaredLicenses('License: Expat or Artistic and Artistic-2.0')).to.deep.equal([
+      '(MIT OR Artistic AND Artistic-2.0)'
+    ])
   })
 })
 
@@ -96,7 +112,8 @@ describe('Debian fetching', () => {
   })
 
   it('can handle the request being attempted', async () => {
-    expect(DebianFetch(debianFetchOptions).canHandle(new Request('test', 'cd:/deb/debian/-/0ad/0.0.17-1_armhf'))).to.be.true
+    expect(DebianFetch(debianFetchOptions).canHandle(new Request('test', 'cd:/deb/debian/-/0ad/0.0.17-1_armhf'))).to.be
+      .true
   })
 
   it('succeeds in download, decompress and hash', async () => {
@@ -111,7 +128,9 @@ describe('Debian fetching', () => {
     expect(request.document.hashes.sha1).to.be.equal(hashes['0ad_0.0.17-1_armhf.deb']['sha1'])
     expect(request.document.hashes.sha256).to.be.equal(hashes['0ad_0.0.17-1_armhf.deb']['sha256'])
     expect(request.document.releaseDate.getFullYear()).to.be.equal(2014)
-    expect(request.document.copyrightUrl).to.be.equal('https://metadata.ftp-master.debian.org/changelogs/main/0/0ad/0ad_0.0.17-1_copyright')
+    expect(request.document.copyrightUrl).to.be.equal(
+      'https://metadata.ftp-master.debian.org/changelogs/main/0/0ad/0ad_0.0.17-1_copyright'
+    )
     expect(request.document.declaredLicenses).to.deep.equal(['MIT', 'BSD-3-clause'])
   })
 })

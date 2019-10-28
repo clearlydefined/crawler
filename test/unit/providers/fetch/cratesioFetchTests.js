@@ -6,7 +6,7 @@ const sinon = require('sinon')
 const CrateFetch = require('../../../../providers/fetch/cratesioFetch')
 const PassThrough = require('stream').PassThrough
 const proxyquire = require('proxyquire')
-const Request = require('ghcrawler').request
+const Request = require('../../../../ghcrawler').request
 const fs = require('fs')
 
 let Fetch

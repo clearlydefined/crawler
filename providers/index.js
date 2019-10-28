@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 const AttachmentStoreFactory = require('./store/attachmentStoreFactory')
-const providers = require('ghcrawler').providers
+const providers = require('../ghcrawler').providers
 
 module.exports = {
   filter: {
