@@ -3,7 +3,7 @@
 
 const expect = require('chai').expect
 const sinon = require('sinon')
-const Request = require('ghcrawler').request
+const Request = require('../../../../ghcrawler').request
 const composerExtract = require('../../../../providers/process/composerExtract')
 const AbstractFetch = require('../../../../providers/fetch/abstractFetch')
 const SourceSpec = require('../../../../lib/sourceSpec')

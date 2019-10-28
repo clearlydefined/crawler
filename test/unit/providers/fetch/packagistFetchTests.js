@@ -6,7 +6,7 @@ const sinon = require('sinon')
 const PassThrough = require('stream').PassThrough
 const PackagistFetch = require('../../../../providers/fetch/packagistFetch')
 const proxyquire = require('proxyquire')
-const Request = require('ghcrawler').request
+const Request = require('../../../../ghcrawler').request
 const fs = require('fs')
 
 let Fetch
@@ -68,7 +68,9 @@ describe('packagistFetch', () => {
 
   it('handles download error', async () => {
     const handler = setup(createRegistryData('0.3.0'))
-    handler._getRegistryData = () => { throw new Error('Error') }
+    handler._getRegistryData = () => {
+      throw new Error('Error')
+    }
     try {
       await handler.handle(new Request('test', 'cd:/composer/packagist/fakepackage/polyfill-mbstring/1.11.0'))
     } catch (error) {
@@ -85,7 +87,9 @@ describe('packagistFetch', () => {
 
   it('handles error getting registry data', async () => {
     const handler = setup(createRegistryData('0.3.0'))
-    handler._getRegistryData = () => { throw new Error('Invalid url') }
+    handler._getRegistryData = () => {
+      throw new Error('Invalid url')
+    }
     try {
       await handler.handle(new Request('test', 'cd:/composer/packagist/-/regError/1.11.0'))
     } catch (error) {
