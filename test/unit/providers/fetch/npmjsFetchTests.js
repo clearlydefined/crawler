@@ -7,7 +7,7 @@ const NpmFetch = require('../../../../providers/fetch/npmjsFetch')
 const EntitySpec = require('../../../../lib/entitySpec')
 const PassThrough = require('stream').PassThrough
 const proxyquire = require('proxyquire')
-const Request = require('ghcrawler').request
+const Request = require('../../../../ghcrawler').request
 const fs = require('fs')
 
 const spec_nonnamespace = new EntitySpec('npm', 'npmjs', '-', 'name1', '1.0.0')

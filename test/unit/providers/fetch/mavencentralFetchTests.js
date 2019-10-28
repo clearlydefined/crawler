@@ -6,7 +6,7 @@ const sinon = require('sinon')
 const MavenFetch = require('../../../../providers/fetch/mavencentralFetch')
 const PassThrough = require('stream').PassThrough
 const proxyquire = require('proxyquire')
-const Request = require('ghcrawler').request
+const Request = require('../../../../ghcrawler').request
 const fs = require('fs')
 
 const stub = 'https://search.maven.org/remotecontent?filepath='

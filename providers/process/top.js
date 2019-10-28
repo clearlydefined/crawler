@@ -8,7 +8,7 @@ const fs = require('fs')
 const ghrequestor = require('ghrequestor')
 const linebyline = require('linebyline')
 const path = require('path')
-const Request = require('ghcrawler').request
+const Request = require('../../ghcrawler').request
 const requestRetry = require('requestretry').defaults({ json: true, maxAttempts: 3, fullResponse: false })
 
 class TopProcessor extends AbstractProcessor {

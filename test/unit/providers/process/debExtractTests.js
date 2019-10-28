@@ -3,7 +3,7 @@
 
 const expect = require('chai').expect
 const sinon = require('sinon')
-const Request = require('ghcrawler').request
+const Request = require('../../../../ghcrawler').request
 const debianExtract = require('../../../../providers/process/debExtract')
 
 describe('Debian processing', () => {
@@ -25,7 +25,7 @@ describe('Debian processing', () => {
 })
 
 async function setup() {
-  const processor = debianExtract({ logger: { info: () => { } } }, () => { })
+  const processor = debianExtract({ logger: { info: () => {} } }, () => {})
   processor.linkAndQueueTool = sinon.stub()
   const request = createRequest()
   const dir = processor.createTempDir(request)

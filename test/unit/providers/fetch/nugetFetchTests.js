@@ -5,7 +5,7 @@ const expect = require('chai').expect
 const sinon = require('sinon')
 const NuGetFetch = require('../../../../providers/fetch/nugetFetch')
 const proxyquire = require('proxyquire')
-const Request = require('ghcrawler').request
+const Request = require('../../../../ghcrawler').request
 const PassThrough = require('stream').PassThrough
 const fs = require('fs')
 
@@ -126,8 +126,8 @@ describe('', () => {
     }
     handler._getManifest = () => '{}'
     handler._getNuspec = () => '{}'
-    handler._createTempDir = () => { }
-    handler._persistMetadata = () => { }
+    handler._createTempDir = () => {}
+    handler._persistMetadata = () => {}
     try {
       await handler.handle(new Request('test', 'cd:/nuget/nuget/-/xunit.core/2.4.1'))
       expect(false).to.be.true

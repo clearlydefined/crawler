@@ -9,8 +9,8 @@ const chai = require('chai')
 const expect = chai.expect
 const { find } = require('lodash')
 const AbstractProcessor = require('../../../../providers/process/abstractProcessor')
-const Request = require('ghcrawler').request
-const VisitorMap = require('ghcrawler').visitorMap
+const Request = require('../../../../ghcrawler').request
+const VisitorMap = require('../../../../ghcrawler').visitorMap
 const map = require('../../../../config/map')
 
 let Handler
