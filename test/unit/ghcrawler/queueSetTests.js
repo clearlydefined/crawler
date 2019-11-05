@@ -4,7 +4,6 @@
 const assert = require('chai').assert
 const expect = require('chai').expect
 const Request = require('../../../ghcrawler/lib/request.js')
-const Q = require('q')
 const QueueSet = require('../../../ghcrawler/providers/queuing/queueSet.js')
 const sinon = require('sinon')
 
@@ -26,7 +25,7 @@ describe('QueueSet weighting', () => {
   })
 
   it('should create a default startMap if no weights given', () => {
-    const set = new QueueSet([createBaseQueue('1'), createBaseQueue('2')], { _config: { on: () => {} } })
+    const set = new QueueSet([createBaseQueue('1'), createBaseQueue('2')], { _config: { on: () => { } } })
     expect(set.startMap.length).to.be.equal(2)
     expect(set.startMap[0]).to.be.equal(0)
     expect(set.startMap[1]).to.be.equal(1)
@@ -36,57 +35,47 @@ describe('QueueSet weighting', () => {
     expect(() => new QueueSet([createBaseQueue('1'), createBaseQueue('2')], {})).to.throw(Error)
   })
 
-  it('should pop other queue if nothing available', () => {
+  it('should pop other queue if nothing available', async () => {
     const priority = createBaseQueue('priority', {
-      pop: () => {
-        return Q(new Request('priority', 'http://test'))
-      }
+      pop: async () => new Request('priority', 'http://test')
     })
     const normal = createBaseQueue('normal', {
-      pop: () => {
-        return Q(null)
-      }
+      pop: async () => null
     })
     const queues = createBaseQueues([priority, normal], null, [1, 1])
     queues.popCount = 1
 
-    return Q.all([queues.pop(), queues.pop()]).spread((first, second) => {
-      expect(first.type).to.be.equal('priority')
-      expect(first._originQueue === priority).to.be.true
-      expect(second.type).to.be.equal('priority')
-      expect(second._originQueue === priority).to.be.true
-    })
+    const first = await queues.pop()
+    const second = await queues.pop()
+    expect(first.type).to.be.equal('priority')
+    expect(first._originQueue === priority).to.be.true
+    expect(second.type).to.be.equal('priority')
+    expect(second._originQueue === priority).to.be.true
   })
 })
 
 describe('QueueSet pushing', () => {
-  it('should accept a simple request into a named queue', () => {
+  it('should accept a simple request into a named queue', async () => {
     const priority = createBaseQueue('priority', {
-      push: () => {
-        return Q()
-      }
+      push: async () => null
+
     })
     const normal = createBaseQueue('normal')
     const queues = createBaseQueues([priority, normal])
     sinon.spy(priority, 'push')
     const request = new Request('test', 'http://test')
 
-    return queues.push(request, 'priority').then(() => {
-      expect(priority.push.callCount).to.be.equal(1)
-      expect(priority.push.getCall(0).args[0].type).to.be.equal('test')
-    })
+    await queues.push(request, 'priority')
+    expect(priority.push.callCount).to.be.equal(1)
+    expect(priority.push.getCall(0).args[0].type).to.be.equal('test')
   })
 
-  it('should throw when pushing into an unknown queue', () => {
+  it('should throw when pushing into an unknown queue', async () => {
     const priority = createBaseQueue('priority', {
-      push: () => {
-        return Q()
-      }
+      push: async () => null
     })
     const normal = createBaseQueue('normal', {
-      push: () => {
-        return Q()
-      }
+      push: async () => null
     })
     const queues = createBaseQueues([priority, normal])
     const request = new Request('test', 'http://test')
@@ -94,127 +83,93 @@ describe('QueueSet pushing', () => {
     expect(() => queues.push(request, 'foo')).to.throw(Error)
   })
 
-  it('should repush into the same queue', () => {
+  it('should repush into the same queue', async () => {
     const priority = createBaseQueue('priority', {
-      pop: () => {
-        return Q(new Request('test', 'http://test'))
-      },
-      push: () => {
-        return Q()
-      }
+      pop: async () => new Request('test', 'http://test'),
+      push: () => null
     })
     const queues = createBaseQueues([priority])
     sinon.spy(priority, 'push')
 
-    return queues.pop().then(request => {
-      return queues.repush(request, request).then(() => {
-        expect(request._originQueue === priority).to.be.true
-        expect(priority.push.callCount).to.be.equal(1)
-        expect(priority.push.getCall(0).args[0].type).to.be.equal('test')
-      })
-    })
+    const request = await queues.pop()
+    await queues.repush(request, request)
+    expect(request._originQueue === priority).to.be.true
+    expect(priority.push.callCount).to.be.equal(1)
+    expect(priority.push.getCall(0).args[0].type).to.be.equal('test')
   })
 })
 
 describe('QueueSet originQueue management', () => {
-  it('should call done and mark acked on done', () => {
+  it('should call done and mark acked on done', async () => {
     const priority = createBaseQueue('priority', {
-      pop: () => {
-        return Q(new Request('test', 'http://test'))
-      },
-      done: () => {
-        return Q()
-      }
+      pop: async () => new Request('test', 'http://test'),
+      done: async () => null
     })
     const queues = createBaseQueues([priority])
     sinon.spy(priority, 'done')
 
-    return queues.pop().then(request => {
-      return queues.done(request).then(() => {
-        expect(request.acked).to.be.true
-        expect(priority.done.callCount).to.be.equal(1)
-        expect(priority.done.getCall(0).args[0].type).to.be.equal('test')
-      })
-    })
+    const request = await queues.pop()
+    await queues.done(request)
+    expect(request.acked).to.be.true
+    expect(priority.done.callCount).to.be.equal(1)
+    expect(priority.done.getCall(0).args[0].type).to.be.equal('test')
   })
 
-  it('should call done and mark acked on abandon', () => {
+  it('should call done and mark acked on abandon', async () => {
     const priority = createBaseQueue('priority', {
-      pop: () => {
-        return Q(new Request('test', 'http://test'))
-      },
-      abandon: () => {
-        return Q()
-      }
+      pop: async () => new Request('test', 'http://test'),
+      abandon: async () => null
     })
     const queues = createBaseQueues([priority])
     sinon.spy(priority, 'abandon')
 
-    return queues.pop().then(request => {
-      return queues.abandon(request).then(() => {
-        expect(request.acked).to.be.true
-        expect(priority.abandon.callCount).to.be.equal(1)
-        expect(priority.abandon.getCall(0).args[0].type).to.be.equal('test')
-      })
-    })
+    const request = await queues.pop()
+    await queues.abandon(request)
+    expect(request.acked).to.be.true
+    expect(priority.abandon.callCount).to.be.equal(1)
+    expect(priority.abandon.getCall(0).args[0].type).to.be.equal('test')
   })
 
-  it('should not abandon twice', () => {
+  it('should not abandon twice', async () => {
     const priority = createBaseQueue('priority', {
-      pop: () => {
-        return Q(new Request('test', 'http://test'))
-      },
-      abandon: () => {
-        return Q()
-      }
+      pop: async () => new Request('test', 'http://test'),
+      abandon: async () => null
     })
     const queues = createBaseQueues([priority])
     sinon.spy(priority, 'abandon')
 
-    return queues.pop().then(request => {
-      return queues.abandon(request).then(() => {
-        return queues.abandon(request).then(() => {
-          expect(request.acked).to.be.true
-          expect(priority.abandon.callCount).to.be.equal(1)
-          expect(priority.abandon.getCall(0).args[0].type).to.be.equal('test')
-        })
-      })
-    })
+    const request = await queues.pop()
+    await queues.abandon(request)
+    await queues.abandon(request)
+    expect(request.acked).to.be.true
+    expect(priority.abandon.callCount).to.be.equal(1)
+    expect(priority.abandon.getCall(0).args[0].type).to.be.equal('test')
   })
 
-  it('should not done after abandon ', () => {
+  it('should not done after abandon ', async () => {
     const priority = createBaseQueue('priority', {
-      pop: () => {
-        return Q(new Request('test', 'http://test'))
-      },
-      abandon: () => {
-        return Q()
-      },
-      done: () => {
-        return Q()
-      }
+      pop: async () => new Request('test', 'http://test'),
+      abandon: async () => null,
+      done: async () => null
     })
     const queues = createBaseQueues([priority])
     sinon.spy(priority, 'abandon')
     sinon.spy(priority, 'done')
 
-    return queues.pop().then(request => {
-      return queues.abandon(request).then(() => {
-        return queues.done(request).then(() => {
-          expect(request.acked).to.be.true
-          expect(priority.done.callCount).to.be.equal(0)
-          expect(priority.abandon.callCount).to.be.equal(1)
-          expect(priority.abandon.getCall(0).args[0].type).to.be.equal('test')
-        })
-      })
-    })
+    const request = await queues.pop()
+    await queues.abandon(request)
+    await queues.done(request)
+    expect(request.acked).to.be.true
+    expect(priority.done.callCount).to.be.equal(0)
+    expect(priority.abandon.callCount).to.be.equal(1)
+    expect(priority.abandon.getCall(0).args[0].type).to.be.equal('test')
   })
 })
 
 describe('QueueSet subscription management', () => {
   it('should subscribe all', () => {
-    const priority = createBaseQueue('priority', { subscribe: () => {} })
-    const normal = createBaseQueue('normal', { subscribe: () => {} })
+    const priority = createBaseQueue('priority', { subscribe: () => { } })
+    const normal = createBaseQueue('normal', { subscribe: () => { } })
     const queues = createBaseQueues([priority, normal])
     sinon.spy(priority, 'subscribe')
     sinon.spy(normal, 'subscribe')
@@ -226,8 +181,8 @@ describe('QueueSet subscription management', () => {
   })
 
   it('should unsubscribe all', () => {
-    const priority = createBaseQueue('priority', { unsubscribe: () => {} })
-    const normal = createBaseQueue('normal', { unsubscribe: () => {} })
+    const priority = createBaseQueue('priority', { unsubscribe: () => { } })
+    const normal = createBaseQueue('normal', { unsubscribe: () => { } })
     const queues = createBaseQueues([priority, normal])
     sinon.spy(priority, 'unsubscribe')
     sinon.spy(normal, 'unsubscribe')
@@ -242,7 +197,7 @@ describe('QueueSet subscription management', () => {
 function createOptions(weights) {
   return {
     weights: weights,
-    _config: { on: () => {} }
+    _config: { on: () => { } }
   }
 }
 
