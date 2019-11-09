@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 const extend = require('extend')
-const Q = require('q')
 const Request = require('../../lib/request')
 
 class InMemoryCrawlQueue {
@@ -17,62 +16,47 @@ class InMemoryCrawlQueue {
     return this.name
   }
 
-  push(requests) {
-    this._incrementMetric('push')
+  async push(requests) {
     requests = Array.isArray(requests) ? requests : [requests]
     requests = requests.map(request => extend(true, {}, request))
     this.queue = this.queue.concat(requests)
-    return Q.resolve()
   }
 
-  subscribe() {
-    return Q(null)
+  async subscribe() {
+    return
   }
 
-  pop() {
+  async pop() {
     const result = this.queue.shift()
     if (!result) {
-      return Q()
+      return
     }
 
-    this._incrementMetric('pop')
-    return Q.resolve(Request.adopt(result))
+    return Request.adopt(result)
   }
 
-  done() {
-    this._incrementMetric('done')
-    return Q(null)
+  async done() {
+    return
   }
 
   // We popped but cannot process right now (e.g., no rate limit).  Stash it away and allow it to be popped later.
-  defer(request) {
-    this._incrementMetric('defer')
+  async defer(request) {
     // TODO likely need to do more here.  see the amqp10 code
     this.queue.push(request)
   }
 
-  abandon(request) {
-    this._incrementMetric('abandon')
+  async abandon(request) {
     this.queue.unshift(request)
-    return Q.resolve()
   }
 
-  flush() {
+  async flush() {
     this.queue = []
-    return Q(this)
   }
 
-  getInfo() {
-    return Q({
+  async getInfo() {
+    return {
       count: this.queue.length,
       metricsName: this.name
-    })
-  }
-
-  _incrementMetric(operation) {
-    const metrics = this.logger.metrics
-    if (metrics && metrics[this.name] && metrics[this.name][operation]) {
-      metrics[this.name][operation].incr()
     }
   }
 }
