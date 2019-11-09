@@ -3,7 +3,6 @@
 
 const memoryCache = require('memory-cache')
 const NestedQueue = require('./nestedQueue')
-const Q = require('q')
 const qlimit = require('qlimit')
 
 class AttenuatedQueue extends NestedQueue {
@@ -16,7 +15,7 @@ class AttenuatedQueue extends NestedQueue {
   push(requests) {
     const self = this
     requests = Array.isArray(requests) ? requests : [requests]
-    return Q.all(
+    return Promise.all(
       requests.map(
         qlimit(this.options.parallelPush || 1)(request => {
           return self._pushOne(request)
