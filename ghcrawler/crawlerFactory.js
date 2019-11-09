@@ -3,7 +3,6 @@
 
 const Crawler = require('./lib/crawler')
 const CrawlerService = require('./lib/crawlerService')
-const Q = require('q')
 const QueueSet = require('./providers/queuing/queueSet')
 const RefreshingConfig = require('@microsoft/refreshing-config')
 
@@ -44,14 +43,6 @@ class CrawlerFactory {
 
   static _decorateOptions(key, options) {
     if (!options.logger) options.logger = logger
-    if (!options.logger.metrics) {
-      const capitalized = key.charAt(0).toUpperCase() + key.slice(1)
-      const metricsFactory = CrawlerFactory[`create${capitalized}Metrics`]
-      if (metricsFactory) {
-        logger.info('Creating metrics factory', { factory: capitalized })
-        logger.metrics = metricsFactory(options.crawler.name, options[key])
-      }
-    }
   }
 
   static createCrawler(
@@ -81,17 +72,17 @@ class CrawlerFactory {
     return result
   }
 
-  static _initialize() {
-    return Q.try(this.queues.subscribe.bind(this.queues))
-      .then(this.store.connect.bind(this.store))
-      .then(this.deadletters.connect.bind(this.deadletters))
+  static async _initialize() {
+    await this.queues.subscribe()
+    await this.store.connect()
+    await this.deadletters.connect()
   }
 
-  static createRefreshingOptions(crawlerName, subsystemNames, defaults, refreshingProvider = 'redis') {
+  static async createRefreshingOptions(crawlerName, subsystemNames, defaults, refreshingProvider = 'memory') {
     logger.info(`creating refreshing options with crawlerName:${crawlerName}`)
     const result = {}
     refreshingProvider = refreshingProvider.toLowerCase()
-    return Q.all(
+    await Promise.all(
       subsystemNames.map(subsystemName => {
         // Any given subsytem may have a provider or may be a list of providers. If a particular provider is
         // identified then hook up just that set of options for refreshing.
@@ -118,22 +109,20 @@ class CrawlerFactory {
           })
         })
       })
-    ).then(() => {
-      return result
-    })
+    )
+    return result
   }
 
-  static initializeSubsystemOptions(config, defaults) {
+  static async initializeSubsystemOptions(config, defaults) {
     if (Object.getOwnPropertyNames(config).length > 1) {
-      return Q(config)
+      return config
     }
-    return Q.all(
+    await Promise.all(
       Object.getOwnPropertyNames(defaults).map(optionName => {
         return config._config.set(optionName, defaults[optionName])
       })
-    ).then(() => {
-      return config._config.getAll()
-    })
+    )
+    return config._config.getAll()
   }
 
   static createInMemoryRefreshingConfig(values = {}) {
