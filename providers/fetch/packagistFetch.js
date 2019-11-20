@@ -5,7 +5,7 @@ const AbstractFetch = require('./abstractFetch')
 const requestRetry = require('requestretry').defaults({ maxAttempts: 3, fullResponse: true })
 const fs = require('fs')
 const { get } = require('lodash')
-const request = require('request')
+const nodeRequest = require('request')
 const providerMap = {
   packagist: 'https://repo.packagist.org/'
 }
@@ -22,7 +22,7 @@ class PackagistFetch extends AbstractFetch {
     if (!registryData || !registryData.manifest) return this.markSkip(request)
     super.handle(request)
     const file = this.createTempFile(request)
-    await this._getPackage(spec, registryData, file.name)
+    await this._getPackage(request, registryData, file.name)
     const dir = this.createTempDir(request)
     await this.decompress(file.name, dir.name)
     const hashes = await this.computeHashes(file.name)
@@ -50,20 +50,20 @@ class PackagistFetch extends AbstractFetch {
     return registryData
   }
 
-  async _getPackage(spec, registryData, destination) {
+  async _getPackage(request, registryData, destination) {
+    const distUrl = get(registryData, 'manifest.dist.url')
+    if (!distUrl) return request.markSkip('Missing dist.url ')
     return new Promise((resolve, reject) => {
       const options = {
-        url: registryData.manifest.dist.url,
+        url: distUrl,
         headers: {
           'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)'
         }
       }
-
-      request
-        .get(options, (error, response) => {
-          if (error) return reject(error)
-          if (response.statusCode !== 200) reject(new Error(`${response.statusCode} ${response.statusMessage}`))
-        })
+      nodeRequest.get(options, (error, response) => {
+        if (error) return reject(error)
+        if (response.statusCode !== 200) reject(new Error(`${response.statusCode} ${response.statusMessage}`))
+      })
         .pipe(fs.createWriteStream(destination).on('finish', () => resolve(null)))
     })
   }
