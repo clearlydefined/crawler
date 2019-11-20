@@ -31,7 +31,7 @@ class PyPiFetch extends AbstractFetch {
     const hashes = await this.computeHashes(file.name)
     request.document = await this._createDocument(dir, spec, registryData, hashes)
     request.contentOrigin = 'origin'
-    if (registryData.info.name) {
+    if (get(registryData, 'info.name')) {
       request.casedSpec = clone(spec)
       request.casedSpec.name = registryData.info.name
     }
