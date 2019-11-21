@@ -18,16 +18,17 @@ function configureApp(service, logger) {
   app.use(morgan('dev'))
   app.use(sendHelper())
 
-  app.use(bodyParser.json({ limit: '10mb', strict: false }))
+  // It's safe to set limitation to 2mb.
+  app.use(bodyParser.json({ limit: '2mb', strict: false }))
   app.use('/requests', require('./routes/requests')(service))
 
   // to keep AlwaysOn flooding logs with errors
-  app.get('/', (request, response) => {
+  app.get('/', function(request, response) {
     response.helpers.send.noContent()
   })
 
   // Catch 404 and forward to error handler
-  const requestHandler = (request, response, next) => {
+  const requestHandler = function(request, response, next) {
     let error = new Error('404 - Not Found')
     error.status = 404
     error.success = false
@@ -53,7 +54,7 @@ function configureApp(service, logger) {
   }
 
   // Error handlers
-  const handler = (error, request, response, next) => {
+  const handler = function(error, request, response, next) {
     if (response.headersSent) return next(error)
     if (!(request && request.url && request.url.includes('robots933456.txt')))
       // https://feedback.azure.com/forums/169385-web-apps/suggestions/32120617-document-healthcheck-url-requirement-for-custom-co
