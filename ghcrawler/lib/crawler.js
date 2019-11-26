@@ -4,8 +4,8 @@
 const debug = require('debug')('crawler:crawler')
 const fs = require('fs')
 const moment = require('moment')
-const Q = require('q')
 const Request = require('./request')
+const sleep = require('util').promisify(setTimeout)
 const uuid = require('node-uuid')
 const _ = require('lodash')
 
@@ -63,15 +63,20 @@ class Crawler {
     }, delay)
   }
 
-  _run(context) {
+  async _run(context) {
     try {
       // if this loop got cancelled while sleeping, exit
       if (context.delay === -1) {
         return context.done ? context.done() : null
       }
-      return Q.try(() => this.processOne(context))
-        .then(this._computeDelay.bind(this, context), this._panic.bind(this, context))
-        .finally(this.run.bind(this, context))
+      try {
+        const request = await this.processOne(context)
+        this._computeDelay(context, request)
+      } catch (error) {
+        this._panic(context, error)
+      } finally {
+        this.run(context)
+      }
     } catch (error) {
       // If for some reason we throw all the way out of start, log and restart the loop
       this._panic(context, error)
@@ -106,7 +111,7 @@ class Crawler {
   processOne(context) {
     let requestBox = []
     requestBox.loopName = context.name
-    return Q()
+    return Promise.resolve()
       .then(this._getRequest.bind(this, requestBox, context))
       .then(this._filter.bind(this))
       .then(this._fetch.bind(this))
@@ -150,86 +155,71 @@ class Crawler {
     })
   }
 
-  _getRequestWork(requestBox) {
-    const self = this
+  async _getRequestWork(requestBox) {
     debug(`getRequestWork(${requestBox.loopName}): enter`)
-    return this.queues
-      .pop()
-      .then(request => {
-        if (!request) {
-          request = new Request('_blank', null)
-          const delay = self.options.pollingDelay || 2000
-          request.delay(delay)
-          request.markSkip('Drained  ', `Waiting ${delay} milliseconds`)
-          debug(`getRequestWork(${requestBox.loopName}): drained waiting ${delay} milliseconds`)
-        }
-        this.counter = ++this.counter % this.counterRollover
-        request.addMeta({ loopName: requestBox.loopName, cid: this.counter.toString(36) })
-        requestBox[0] = request.open(self)
-        debug(`getRequestWork(${requestBox.loopName}:${request.toUniqueString()}): exit (success)`)
-        if (request.attemptCount) {
-          return Q.delay(requestBox[0], (self.options.requeueDelay || 5000) * request.attemptCount)
-        }
-        return requestBox[0]
-      })
-      .then(self._acquireLock.bind(self))
+    let request = await this.queues.pop()
+    if (!request) {
+      request = new Request('_blank', null)
+      const delay = this.options.pollingDelay || 2000
+      request.delay(delay)
+      request.markSkip('Drained  ', `Waiting ${delay} milliseconds`)
+      debug(`getRequestWork(${requestBox.loopName}): drained waiting ${delay} milliseconds`)
+    }
+    this.counter = ++this.counter % this.counterRollover
+    request.addMeta({ loopName: requestBox.loopName, cid: this.counter.toString(36) })
+    requestBox[0] = request.open(this)
+    debug(`getRequestWork(${requestBox.loopName}:${request.toUniqueString()}): exit (success)`)
+    if (request.attemptCount) {
+      await sleep(requestBox[0], (this.options.requeueDelay || 5000) * request.attemptCount)
+    }
+    return this._acquireLock(requestBox[0])
   }
 
-  _acquireLock(request) {
+  async _acquireLock(request) {
     const loopName = request.meta ? request.meta.loopName : ''
     debug(`_acquireLock(${loopName}:${request.toUniqueString()}): enter`)
     if (!request.url || !this.locker || request.requiresLock === false) {
       debug(`_acquireLock(${loopName}:${request.toUniqueString()}): exit (nothing to do)`)
-      return Q(request)
+      return request
     }
-    const self = this
-    return Q.try(() => {
-      return self.locker.lock(request.url, self.options.processingTtl || 60 * 1000)
-    }).then(
-      lock => {
-        debug(`_acquireLock(${loopName}:${request.toUniqueString()}): exit (success)`)
-        request.lock = lock
-        return request
-      },
-      error => {
-        // If we could not acquire a lock, requeue.  If the "error" is a normal Exceeded scenario, requeue normally
-        // noting that we could not get a lock.  For any other error, requeue and capture the error for debugging.
-        debug(`_acquireLock(${loopName}:${request.toUniqueString()}): exit (error)`)
-        if (error.message.startsWith('Exceeded')) {
-          return request.markRequeue('Collision', 'Could not lock')
-        }
-        this.logger.error(error, request.meta)
-        return request.markRequeue('Internal Error', error.message)
+    try {
+      const lock = await this.locker.lock(request.url, this.options.processingTtl || 60 * 1000)
+      debug(`_acquireLock(${loopName}:${request.toUniqueString()}): exit (success)`)
+      request.lock = lock
+      return request
+    } catch (error) {
+      // If we could not acquire a lock, requeue. If the "error" is a normal Exceeded scenario, requeue normally
+      // noting that we could not get a lock. For any other error, requeue and capture the error for debugging.
+      debug(`_acquireLock(${loopName}:${request.toUniqueString()}): exit (error)`)
+      if (error.message.startsWith('Exceeded')) {
+        return request.markRequeue('Collision', 'Could not lock')
       }
-    )
+      this.logger.error(error, request.meta)
+      return request.markRequeue('Internal Error', error.message)
+    }
   }
 
-  _releaseLock(request) {
+  async _releaseLock(request) {
     const loopName = request.meta ? request.meta.loopName : ''
     debug(`_releaseLock(${loopName}:${request.toUniqueString()}): enter`)
     if (!request.lock || !this.locker) {
       debug(`_releaseLock(${loopName}:${request.toUniqueString()}): exit (nothing to do)`)
-      return Q(request)
+      return request
     }
-    const self = this
-    return Q.try(() => {
-      return this.locker.unlock(request.lock)
-    }).then(
-      () => {
-        debug(`_releaseLock(${loopName}:${request.toUniqueString()}): exit (success)`)
-        request.lock = null
-        return request
-      },
-      error => {
-        debug(`_releaseLock(${loopName}:${request.toUniqueString()}): exit (error)`)
-        request.lock = null
-        self.logger.error(error)
-        return request
-      }
-    )
+    try {
+      await this.locker.unlock(request.lock)
+      debug(`_releaseLock(${loopName}:${request.toUniqueString()}): exit (success)`)
+      request.lock = null
+      return request
+    } catch (error) {
+      debug(`_releaseLock(${loopName}:${request.toUniqueString()}): exit (error)`)
+      request.lock = null
+      this.logger.error(error)
+      return request
+    }
   }
 
-  _completeRequest(request, forceRequeue = false) {
+  async _completeRequest(request, forceRequeue = false) {
     // There are two paths through here, happy and sad.  The happy path requeues the request (if needed),
     // waits for all the promises to finish and then releases the lock on the URL and deletes the request
     // from the queue.  However, if requeuing fails we should still release the lock but NOT delete the
@@ -254,29 +244,22 @@ class Crawler {
     const self = this
 
     if (forceRequeue || (request.shouldRequeue() && request.url)) {
-      return Q.try(() => {
-        return self._requeue(request)
-      })
-        .catch(error => {
-          debug(`_completeRequest(${loopName}:${request.toUniqueString()}): catch force requeue`)
-          self.logger.error(error)
-          throw error
-        })
-        .finally(() => {
-          return self._releaseLock(request)
-        })
-        .then(
-          () => {
-            return self._deleteFromQueue(request)
-          },
-          (/*error*/) => {
-            return self._abandonInQueue(request)
-          }
-        )
-        .then(() => {
-          debug(`_completeRequest(${loopName}:${request.toUniqueString()}): exit (success - force requeue)`)
-          return request
-        })
+      try {
+        await self._requeue(request)
+      } catch (error) {
+        debug(`_completeRequest(${loopName}:${request.toUniqueString()}): catch force requeue`)
+        self.logger.error(error)
+        throw error
+      } finally {
+        try {
+          request = await self._releaseLock(request)
+          request = await self._deleteFromQueue(request)
+        } catch (error) {
+          request = await self._abandonInQueue(request)
+        }
+      }
+      debug(`_completeRequest(${loopName}:${request.toUniqueString()}): exit (success - force requeue)`)
+      return request
     }
 
     request.getTrackedCleanups().forEach(cleanup => {
@@ -298,7 +281,7 @@ class Crawler {
           completedPromises++
           debug(
             `_completeRequest(${loopName}:${request.toUniqueString()}): completed ${completedPromises} of ${
-              trackedPromises.length
+            trackedPromises.length
             } promises (${failedPromises} failed)`
           )
           return result
@@ -308,7 +291,7 @@ class Crawler {
           failedPromises++
           debug(
             `_completeRequest(${loopName}:${request.toUniqueString()}): completed ${completedPromises} of ${
-              trackedPromises.length
+            trackedPromises.length
             } promises (${failedPromises} failed)`
           )
           throw error
@@ -316,7 +299,7 @@ class Crawler {
       )
     }
     debug(`_completeRequest(${loopName}:${request.toUniqueString()}): ${trackedPromises.length} tracked promises`)
-    const completeWork = Q.all(trackedPromises).then(
+    const completeWork = Promise.all(trackedPromises).then(
       () => {
         debug(`_completeRequest(${loopName}:${request.toUniqueString()}): resolved tracked promises`)
         return self._releaseLock(request).then(
@@ -347,21 +330,18 @@ class Crawler {
       })
   }
 
-  _requeue(request) {
+  async _requeue(request) {
     const loopName = request.meta ? request.meta.loopName : ''
     debug(`_requeue(${loopName}:${request.toUniqueString()}): enter`)
-    return Q.try(() => {
-      request.attemptCount = request.attemptCount || 0
-      if (++request.attemptCount > 5) {
-        return this._storeDeadletter(request, `Exceeded attempt count for ${request.type}@${request.url}`)
-      }
-      request.addMeta({ attempt: request.attemptCount })
-      const queuable = request.createRequeuable()
-      return this.queues.repush(request, queuable)
-    }).then(result => {
-      debug(`_requeue(${loopName}:${request.toUniqueString()}): exit (success)`)
-      return result
-    })
+    request.attemptCount = request.attemptCount || 0
+    if (++request.attemptCount > 5) {
+      return this._storeDeadletter(request, `Exceeded attempt count for ${request.type}@${request.url}`)
+    }
+    request.addMeta({ attempt: request.attemptCount })
+    const queuable = request.createRequeuable()
+    const result = await this.queues.repush(request, queuable)
+    debug(`_requeue(${loopName}:${request.toUniqueString()}): exit (success)`)
+    return result
   }
 
   _filter(request) {
@@ -422,12 +402,12 @@ class Crawler {
     return null
   }
 
-  _convertToDocument(request) {
+  async _convertToDocument(request) {
     const loopName = request.meta ? request.meta.loopName : ''
     debug(`_convertToDocument(${loopName}:${request.toUniqueString()}): enter`)
     if (request.shouldSkip()) {
       debug(`_convertToDocument(${loopName}:${request.toUniqueString()}): exit (nothing to do)`)
-      return Q(request)
+      return request
     }
 
     if (request.context.deletedAt) {
@@ -435,7 +415,7 @@ class Crawler {
         throw new Error('Delete without metadata')
       }
       request.document._metadata = request.response._metadataTemplate
-      return Q(request)
+      return request
     }
 
     const metadata = {
@@ -473,15 +453,15 @@ class Crawler {
     if (typeof request.document === 'string') console.log('got a string document')
     request.document._metadata = metadata
     debug(`_convertToDocument(${loopName}:${request.toUniqueString()}): exit (success)`)
-    return Q(request)
+    return request
   }
 
-  _processDocument(request) {
+  async _processDocument(request) {
     const loopName = request.meta ? request.meta.loopName : ''
     debug(`_processDocument(${loopName}:${request.toUniqueString()}): enter`)
     if (request.shouldSkip()) {
       debug(`_processDocument(${loopName}:${request.toUniqueString()}): exit (nothing to do)`)
-      return Q(request)
+      return request
     }
     // if the request is a delete, mark the document as deleted and be done
     if (request.context.deletedAt) {
@@ -497,11 +477,11 @@ class Crawler {
     })
   }
 
-  _process(request) {
+  async _process(request) {
     const handler = this._getHandler(request, this.processors)
     if (!handler) {
       request.markDead('Error', `No handler found for request type: ${request.type}`)
-      return Q(request)
+      return request
     }
 
     const oldVersion = request.document._metadata.version
@@ -516,59 +496,56 @@ class Crawler {
         request.markNoSave()
       } else {
         request.markSkip('Excluded ', 'Traversal policy excluded this resource')
-        return Q(request)
+        return request
       }
     }
 
-    return Q(handler.handle(request)).then(result => {
-      if (result) {
-        // Be resilient to processors returning either the request or a document.
-        request.document = result === request ? request.document : result
-        const metadata = request.document._metadata
-        metadata.processedAt = moment.utc().toISOString()
-        if (request.save !== false && metadata.version !== oldVersion) {
-          request.markSave()
-        }
+    const result = await handler.handle(request)
+    if (result) {
+      // Be resilient to processors returning either the request or a document.
+      request.document = result === request ? request.document : result
+      const metadata = request.document._metadata
+      metadata.processedAt = moment.utc().toISOString()
+      if (request.save !== false && metadata.version !== oldVersion) {
+        request.markSave()
       }
-      if (!request.shouldSave()) {
-        request.outcome = request.outcome || 'Traversed'
-      }
-      return request
-    })
+    }
+    if (!request.shouldSave()) {
+      request.outcome = request.outcome || 'Traversed'
+    }
+    return request
+
   }
 
-  _logStartEnd(name, request, work) {
+  async _logStartEnd(name, request, work) {
     const start = Date.now()
     let uniqueString = request ? request.toUniqueString() : ''
     const meta = request ? request.meta : null
     this.logger.verbose(`Started ${name} ${uniqueString}`, meta)
     let result = null
-    return Q.try(() => {
-      return work()
-    })
-      .then(workResult => {
-        result = workResult
-        return result
-      })
-      .finally(() => {
-        // in the getRequest case we did not have a request to start.  Report on the one we found.
-        if (!request && result instanceof Request) {
-          uniqueString = result.toUniqueString()
-        } else if (uniqueString === '') {
-          // This is likely a case where an error is being thrown out of the work. Let it go as it will be
-          // caught and handled by the outer context.
-          console.log('what?!')
-        }
-        this.logger.verbose(`Finished ${name} (${Date.now() - start}ms) ${uniqueString}`, meta)
-      })
+    try {
+      const workResult = await work()
+      result = workResult
+      return result
+    } finally {
+      // in the getRequest case we did not have a request to start.  Report on the one we found.
+      if (!request && result instanceof Request) {
+        uniqueString = result.toUniqueString()
+      } else if (uniqueString === '') {
+        // This is likely a case where an error is being thrown out of the work. Let it go as it will be
+        // caught and handled by the outer context.
+        console.log('what?!')
+      }
+      this.logger.verbose(`Finished ${name} (${Date.now() - start}ms) ${uniqueString}`, meta)
+    }
   }
 
-  _storeDocument(request) {
+  async _storeDocument(request) {
     const loopName = request.meta ? request.meta.loopName : ''
     debug(`_storeDocument(${loopName}:${request.toUniqueString()}): enter`)
     if (request.shouldSkip() || !request.shouldSave()) {
       debug(`_storeDocument(${loopName}:${request.toUniqueString()}): exit (nothing to do)`)
-      return Q(request)
+      return request
     }
 
     const start = Date.now()
@@ -596,26 +573,20 @@ class Crawler {
     return { _metadata, content }
   }
 
-  _deleteFromQueue(request) {
+  async _deleteFromQueue(request) {
     const loopName = request.meta ? request.meta.loopName : ''
     debug(`_deleteFromQueue(${loopName}:${request.toUniqueString()}): enter`)
-    return Q.try(() => {
-      return this.queues.done(request).then(() => {
-        debug(`_deleteFromQueue(${loopName}:${request.toUniqueString()}): exit (success)`)
-        return request
-      })
-    })
+    await this.queues.done(request)
+    debug(`_deleteFromQueue(${loopName}:${request.toUniqueString()}): exit (success)`)
+    return request
   }
 
-  _abandonInQueue(request) {
+  async _abandonInQueue(request) {
     const loopName = request.meta ? request.meta.loopName : ''
     debug(`_abandonInQueue(${loopName}:${request.toUniqueString()}): enter`)
-    return Q.try(() => {
-      return this.queues.abandon(request).then(() => {
-        debug(`_abandonInQueue(${loopName}:${request.toUniqueString()}): exit (success)`)
-        return request
-      })
-    })
+    await this.queues.abandon(request)
+    debug(`_abandonInQueue(${loopName}:${request.toUniqueString()}): exit (success)`)
+    return request
   }
 
   _logOutcome(request) {
@@ -645,14 +616,14 @@ class Crawler {
     return request.markDead('Deadletter', reason)
   }
 
-  storeDeadletter(request, reason = null) {
+  async storeDeadletter(request, reason = null) {
     const loopName = request.meta ? request.meta.loopName : ''
     debug(`storeDeadletter(${loopName}:${request.toUniqueString()}): enter`)
     if (this.options.deadletterPolicy === 'excludeNotFound' && reason && reason.toLowerCase().includes('status 404')) {
       this.logger.info(
         `storeDeadletter(${loopName}:${request.toUniqueString()}): not storing due to configured deadletter policy`
       )
-      return Q(request)
+      return request
     }
     const document = this._createDeadletter(request, reason)
     return this.deadletters.upsert(document).then(() => {
