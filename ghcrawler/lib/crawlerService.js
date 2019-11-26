@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-const Q = require('q')
 const Request = require('./request')
 
 class CrawlerService {
@@ -11,10 +10,10 @@ class CrawlerService {
     this.loops = []
   }
 
-  ensureInitialized() {
+  async ensureInitialized() {
     // deferred initialization of the options and crawler.  When they are available, swap them in and listen for changes
     if (typeof this.crawler.then !== 'function') {
-      return Q()
+      return
     }
     return this.crawler
       .then(([crawler, options]) => {
@@ -37,7 +36,7 @@ class CrawlerService {
     console.log(`Done loop ${loop.options.name}`)
   }
 
-  ensureLoops() {
+  async ensureLoops() {
     this.loops = this.loops.filter(loop => loop.running())
     const running = this.status()
     const delta = this.options.crawler.count - running
@@ -53,7 +52,6 @@ class CrawlerService {
         this.loops.push(loop)
       }
     }
-    return Q()
   }
 
   status() {
@@ -74,10 +72,10 @@ class CrawlerService {
     return this.crawler.queue(requests, name)
   }
 
-  flushQueue(name) {
+  async flushQueue(name) {
     const queue = this.crawler.queues.getQueue(name)
     if (!queue) {
-      return Q(null)
+      return null
     }
     return queue.flush()
   }
@@ -85,24 +83,24 @@ class CrawlerService {
   getQueueInfo(name) {
     const queue = this.crawler.queues.getQueue(name)
     if (!queue) {
-      return Q.reject(`No queue found: ${name}`)
+      return Promise.reject(`No queue found: ${name}`)
     }
     return queue.getInfo()
   }
 
-  getRequests(name, count, remove = false) {
+  async getRequests(name, count, remove = false) {
     const queue = this.crawler.queues.getQueue(name)
     if (!queue) {
-      return Q(null)
+      return null
     }
 
     const result = []
     for (let i = 0; i < count; i++) {
       result.push(queue.pop())
     }
-    return Q.all(result).then(requests => {
+    return Promise.all(result).then(requests => {
       const filtered = requests.filter(request => request)
-      return Q.all(filtered.map(request => (remove ? queue.done(request) : queue.abandon(request)))).thenResolve(
+      return Promise.all(filtered.map(request => (remove ? queue.done(request) : queue.abandon(request)))).then(
         filtered
       )
     })
@@ -164,10 +162,10 @@ class CrawlerLoop {
     }
     this.state = 'running'
     // Create callback that when run, resolves a promise and completes this loop
-    const doneDeferred = Q.defer()
-    this.done = value => doneDeferred.resolve(value)
-    this.options.done = this.done
-    const donePromise = doneDeferred.promise
+    const donePromise = new Promise(resolve => {
+      this.done = value => resolve(value)
+      this.options.done = this.done
+    })
     donePromise.finally(() => {
       this.state = 'stopped'
     })
