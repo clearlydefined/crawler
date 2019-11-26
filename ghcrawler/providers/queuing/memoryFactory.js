@@ -7,9 +7,9 @@ const InMemoryCrawlQueue = require('./inmemorycrawlqueue')
 
 module.exports = options => {
   const manager = {
-    createQueueChain: (name, tracker, options) => {
+    createQueueChain: (name, options) => {
       return new AttenuatedQueue(new InMemoryCrawlQueue(name, options), options)
     }
   }
-  return CrawlerFactory.createQueueSet(manager, null, options)
+  return CrawlerFactory.createQueueSet(manager, options)
 }
