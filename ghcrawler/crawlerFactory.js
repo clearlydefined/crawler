@@ -202,18 +202,18 @@ class CrawlerFactory {
   }
 
   static createNolock() {
-    return { lock: () => null, unlock: () => {} }
+    return { lock: () => null, unlock: () => { } }
   }
 
   static createQueues(options, provider = options.provider) {
     return CrawlerFactory._getProvider(options, provider, 'queue')
   }
 
-  static createQueueSet(manager, tracker, options) {
-    const immediate = manager.createQueueChain('immediate', tracker, options)
-    const soon = manager.createQueueChain('soon', tracker, options)
-    const normal = manager.createQueueChain('normal', tracker, options)
-    const later = manager.createQueueChain('later', tracker, options)
+  static createQueueSet(manager, options) {
+    const immediate = manager.createQueueChain('immediate', options)
+    const soon = manager.createQueueChain('soon', options)
+    const normal = manager.createQueueChain('normal', options)
+    const later = manager.createQueueChain('later', options)
     return new QueueSet([immediate, soon, normal, later], options)
   }
 }
