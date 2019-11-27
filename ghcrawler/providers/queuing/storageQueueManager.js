@@ -5,7 +5,6 @@ const AttenuatedQueue = require('./attenuatedQueue')
 const AzureStorage = require('azure-storage')
 const Request = require('../../lib/request')
 const StorageQueue = require('./storageQueue')
-const TrackedQueue = require('./trackedQueue')
 
 class StorageQueueManager {
   constructor(connectionString) {
@@ -17,16 +16,13 @@ class StorageQueueManager {
     return new StorageQueue(this.client, name, `${options.queueName}-${name}`, formatter, options)
   }
 
-  createQueueChain(name, tracker, options) {
+  createQueueChain(name, options) {
     const formatter = message => {
       // make sure the message/request object is copied to enable deferral scenarios (i.e., the request is modified
       // and then put back on the queue)
       return Request.adopt(Object.assign({}, message.body))
     }
-    let queue = this.createQueueClient(name, formatter, options)
-    if (tracker) {
-      queue = new TrackedQueue(queue, tracker, options)
-    }
+    const queue = this.createQueueClient(name, formatter, options)
     return new AttenuatedQueue(queue, options)
   }
 }

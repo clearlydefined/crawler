@@ -2,5 +2,5 @@
 // SPDX-License-Identifier: MIT
 
 module.exports = (manager, options) => {
-  return manager.createQueueChain('events', null, options)
+  return manager.createQueueChain('events', options)
 }
