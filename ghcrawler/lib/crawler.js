@@ -170,7 +170,7 @@ class Crawler {
     requestBox[0] = request.open(this)
     debug(`getRequestWork(${requestBox.loopName}:${request.toUniqueString()}): exit (success)`)
     if (request.attemptCount) {
-      await sleep(requestBox[0], (this.options.requeueDelay || 5000) * request.attemptCount)
+      await sleep((this.options.requeueDelay || 5000) * request.attemptCount)
     }
     return this._acquireLock(requestBox[0])
   }
