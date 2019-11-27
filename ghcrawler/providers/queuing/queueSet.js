@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // SPDX-License-Identifier: MIT
 
-const Q = require('q')
-
 class QueueSet {
   constructor(queues, options) {
     this.queues = queues
@@ -33,7 +31,7 @@ class QueueSet {
     if (changes.some(patch => patch.path.includes('/weights'))) {
       this._startMap = this._createStartMap(this.options.weights)
     }
-    return Q()
+    return Promise.resolve()
   }
 
   push(requests, name) {
@@ -46,7 +44,7 @@ class QueueSet {
   }
 
   subscribe() {
-    return Q.all(
+    return Promise.all(
       this.queues.map(queue => {
         return queue.subscribe()
       })
@@ -54,7 +52,7 @@ class QueueSet {
   }
 
   unsubscribe() {
-    return Q.all(
+    return Promise.all(
       this.queues.map(queue => {
         return queue.unsubscribe()
       })
@@ -62,7 +60,7 @@ class QueueSet {
   }
 
   pop(startMap = this.startMap) {
-    let result = Q()
+    let result = Promise.resolve()
     const start = startMap[Math.floor(Math.random() * startMap.length)]
     for (let i = 0; i < this.queues.length; i++) {
       const queue = this.queues[(start + i) % this.queues.length]
@@ -71,31 +69,28 @@ class QueueSet {
     return result
   }
 
-  _pop(queue, request = null) {
-    return Q.try(() => {
-      return request ? request : queue.pop()
-    }).then(result => {
-      if (result && !result._originQueue) {
-        result._originQueue = queue
-      }
-      return result
-    })
+  async _pop(queue, request = null) {
+    const result = request || await queue.pop()
+    if (result && !result._originQueue) {
+      result._originQueue = queue
+    }
+    return result
   }
 
   done(request) {
     const acked = request.acked
     request.acked = true
-    return !acked && request._originQueue ? request._originQueue.done(request) : Q()
+    return !acked && request._originQueue ? request._originQueue.done(request) : Promise.resolve()
   }
 
   defer(request) {
-    return request._originQueue ? request._originQueue.defer(request) : Q()
+    return request._originQueue ? request._originQueue.defer(request) : Promise.resolve()
   }
 
   abandon(request) {
     const acked = request.acked
     request.acked = true
-    return !acked && request._originQueue ? request._originQueue.abandon(request) : Q()
+    return !acked && request._originQueue ? request._originQueue.abandon(request) : Promise.resolve()
   }
 
   getQueue(name) {

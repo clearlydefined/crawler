@@ -1,18 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // SPDX-License-Identifier: MIT
 
-const Q = require('q')
-
 class InmemoryDocStore {
   constructor() {
     this.collections = {}
   }
 
-  connect() {
-    return Q(null)
+  async connect() {
+    return null
   }
 
-  upsert(document) {
+  async upsert(document) {
     const type = document._metadata.type
     const url = document._metadata.url
     const urn = document._metadata.links.self.href
@@ -23,57 +21,55 @@ class InmemoryDocStore {
     }
     collection[url] = document
     collection[urn] = document
-    return Q(document)
+    return document
   }
 
-  get(type, key) {
+  async get(type, key) {
     const collection = this.collections[type]
     if (!collection) {
-      return Q.reject()
+      return Promise.reject()
     }
-    return collection[key] ? Q(collection[key]) : Q.reject()
+    return collection[key] ? collection[key] : Promise.reject()
   }
 
-  etag(type, key) {
+  async etag(type, key) {
     const collection = this.collections[type]
     if (!collection) {
-      return Q(null)
+      return null
     }
     let result = collection[key]
     result = result ? result._metadata.etag : null
-    return Q(result)
+    return result
   }
 
-  list(type) {
+  async list(type) {
     let collection = this.collections[type]
     if (!collection) {
       collection = {}
     }
-    return Q(
-      Object.keys(collection)
-        .filter(key => {
-          return key.startsWith('urn:') ? true : false
-        })
-        .map(key => {
-          const metadata = collection[key]._metadata
-          return {
-            version: metadata.version,
-            etag: metadata.etag,
-            type: metadata.type,
-            url: metadata.url,
-            urn: metadata.links.self.href,
-            fetchedAt: metadata.fetchedAt,
-            processedAt: metadata.processedAt,
-            extra: metadata.extra
-          }
-        })
-    )
+    return Object.keys(collection)
+      .filter(key => {
+        return key.startsWith('urn:') ? true : false
+      })
+      .map(key => {
+        const metadata = collection[key]._metadata
+        return {
+          version: metadata.version,
+          etag: metadata.etag,
+          type: metadata.type,
+          url: metadata.url,
+          urn: metadata.links.self.href,
+          fetchedAt: metadata.fetchedAt,
+          processedAt: metadata.processedAt,
+          extra: metadata.extra
+        }
+      })
   }
 
-  delete(type, key) {
+  async delete(type, key) {
     const collection = this.collections[type]
     if (!collection) {
-      return Q(null)
+      return null
     }
     const document = collection[key]
     if (document) {
@@ -81,13 +77,12 @@ class InmemoryDocStore {
       delete collection[anotherKey]
     }
     delete collection[key]
-    return Q(true)
+    return true
   }
 
-  count(type) {
-    return this.list(type).then(results => {
-      return results.length
-    })
+  async count(type) {
+    const results = await this.list(type)
+    return results.length
   }
 
   close() {
