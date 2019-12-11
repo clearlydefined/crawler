@@ -22,7 +22,7 @@ class RubyGemsFetch extends AbstractFetch {
   async handle(request) {
     const spec = this.toSpec(request)
     const registryData = await this._getRegistryData(spec)
-    if (!registryData) return this.markSkip('Missing registryData')
+    if (!registryData) return request.markSkip('Missing registryData')
     spec.revision = spec.revision || registryData.version
     if (!spec.revision) return request.markSkip('Missing revision')
     request.url = spec.toUrl()
