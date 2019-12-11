@@ -22,12 +22,13 @@ class RubyGemsFetch extends AbstractFetch {
   async handle(request) {
     const spec = this.toSpec(request)
     const registryData = await this._getRegistryData(spec)
-    spec.revision = spec.revision || (registryData ? registryData.version : null)
-    if (!spec.revision) return request.markSkip('Missing  ')
+    if (!registryData) return this.markSkip('Missing registryData')
+    spec.revision = spec.revision || registryData.version
+    if (!spec.revision) return request.markSkip('Missing revision')
     request.url = spec.toUrl()
     super.handle(request)
     const file = this.createTempFile(request)
-    await this._getPackage(spec, file.name)
+    await this._getPackage(spec, registryData, file.name)
     const dir = this.createTempDir(request)
     await this.decompress(file.name, dir.name)
     await this._extractFiles(dir.name)
@@ -49,20 +50,17 @@ class RubyGemsFetch extends AbstractFetch {
     return statusCode === 200 && body ? body : null
   }
 
-  async _getPackage(spec, destination) {
+  async _getPackage(spec, registryData, destination) {
+    const fullName = spec.namespace ? `${spec.namespace}/${spec.name}` : spec.name
+    const gemUrl = registryData.gem_uri || `${providerMap.rubyGems}/gems/${fullName}-${spec.revision}.gem`
     return new Promise((resolve, reject) => {
       nodeRequest
-        .get(this._buildUrl(spec), (error, response) => {
+        .get(gemUrl, (error, response) => {
           if (error) return reject(error)
           if (response.statusCode !== 200) reject(new Error(`${response.statusCode} ${response.statusMessage}`))
         })
         .pipe(fs.createWriteStream(destination).on('finish', () => resolve(null)))
     })
-  }
-
-  _buildUrl(spec) {
-    const fullName = spec.namespace ? `${spec.namespace}/${spec.name}` : spec.name
-    return `${providerMap.rubyGems}/downloads/${fullName}-${spec.revision}.gem`
   }
 
   _createDocument(dir, registryData, hashes) {
