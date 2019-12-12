@@ -69,7 +69,7 @@ class NpmFetch extends AbstractFetch {
     if (!registryData || !registryData.versions) return null
     const version = spec.revision || this.getLatestVersion(Object.keys(registryData.versions))
     if (!registryData.versions[version]) return null
-    const date = registryData.time[version]
+    const date = registryData.time ? registryData.time[version] : undefined
     const registryManifest = registryData.versions[version]
     delete registryData.versions
     delete registryData.time
