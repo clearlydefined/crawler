@@ -6,6 +6,8 @@ const requestRetry = require('requestretry').defaults({ maxAttempts: 3, fullResp
 const fs = require('fs')
 const { get } = require('lodash')
 const nodeRequest = require('request')
+const { promisify } = require('util')
+const readdir = promisify(fs.readdir)
 const providerMap = {
   packagist: 'https://repo.packagist.org/'
 }
@@ -27,7 +29,7 @@ class PackagistFetch extends AbstractFetch {
     await this.decompress(file.name, dir.name)
     const hashes = await this.computeHashes(file.name)
     request.document = this._createDocument(dir, registryData, hashes)
-    request.document.dirRoot = this._getDirRoot(registryData.manifest)
+    request.document.dirRoot = await this._getDirRoot(dir.name)
     request.contentOrigin = 'origin'
     return request
   }
@@ -68,14 +70,8 @@ class PackagistFetch extends AbstractFetch {
     })
   }
 
-  _getDirRoot(manifest) {
-    return (
-      get(manifest, 'name', '')
-        .split('/')
-        .join('-') +
-      '-' +
-      get(manifest, 'dist.reference', '').substring(0, 7)
-    )
+  async _getDirRoot(location) {
+    return (await readdir(location))[0]
   }
 
   _createDocument(dir, registryData, hashes) {
