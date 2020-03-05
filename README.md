@@ -114,6 +114,7 @@ If a CRAWLER_ID is specified, then each instance must have this setting globally
 
 ## Run Docker image from Docker Hub
 
+You can run the image as is from docker (this is w/o any port forwarding, which means the only way you can interact with the crawler locally is through the queue. See below for examples of how to run with ports exposed to do curl based testing).
 `docker run --env-file ../<env_name>.env.list clearlydefined/crawler`
 
 See `local.env.list`, `dev.env.list` and `prod.env.list` tempate files.
@@ -209,12 +210,16 @@ Add curl:
     apk add curl
 
 Queue work:
+Make sure you started the container with the 5000 port forwarded for this to work.
 
     curl -d '{"type":"npm", "url":"cd:/npm/npmjs/-/redie/0.3.0"}' \
       -H "Content-Type: application/json" \
       -H "X-token: secret" \
       -X POST \
       http://crawler:5000/requests
+
+  On windows:
+    curl -d "{\"type\":\"npm\", \"url\":\"cd:/npm/npmjs/-/redie/0.3.0\"}" -H "Content-Type: application/json" -H "X-token: secret" -X POST http://localhost:5000/requests
 
 Expose dashboard port:
 
