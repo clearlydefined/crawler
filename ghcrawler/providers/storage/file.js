@@ -20,9 +20,10 @@ class FileStore {
     // TODO there may be a thing about accessing the data either by URL or URN.
     // This method is just using URN. Need to look at the usecases and clarify.
     // const type = document._metadata.type
-    const urn = document._metadata.links.self.href
-    const filePath = this._getPath(urn)
-    mkdirp.sync(path.dirname(filePath))
+    const urn = document._metadata.links.self.href;
+    const filePath = this._getPath(urn);
+    mkdirp.sync(path.dirname(filePath));
+    console.log("Trying to write file at: " + filePath);
     return new Promise((resolve, reject) =>
       fs.writeFile(filePath, JSON.stringify(document, null, 2), error => (error ? reject(error) : resolve(document)))
     )
@@ -62,7 +63,7 @@ class FileStore {
     })
   }
 
-  close() {}
+  close() { }
 }
 
 module.exports = options => new FileStore(options)
