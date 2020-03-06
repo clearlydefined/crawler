@@ -27,6 +27,6 @@ describe('pypiFetch handle function', () => {
     let fetch = PypiFetch(pypiFetchOptions)
     let result = await fetch.handle(new Request("pypi", "cd:/pypi/pypi/-/reuse/0.8.1"));
 
-    expect(result.outcome).to().be("Missing ");
+    expect(result.outcome).to.be.equal("Missing  ");
   })
 });
