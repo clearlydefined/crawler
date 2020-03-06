@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractFetch = require('./abstractFetch')
-const requestRetry = require('requestretry').defaults({ maxAttempts: 3, fullResponse: true })
+const requestRetry = require('./requestRetryWithDefaults')
 const nodeRequest = require('request')
 const fs = require('fs')
 const spdxCorrect = require('spdx-correct')
@@ -21,6 +21,7 @@ class PyPiFetch extends AbstractFetch {
   async handle(request) {
     const spec = this.toSpec(request)
     const registryData = await this._getRegistryData(spec)
+    if (!registryData) return request.markSkip('Missing  ')
     spec.revision = spec.revision ? spec.revision : this._getRevision(registryData)
     request.url = spec.toUrl()
     super.handle(request)
