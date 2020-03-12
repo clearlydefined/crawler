@@ -44,7 +44,7 @@ class GitCloner extends AbstractFetch {
     const reset = commit ? `&& git reset --hard ${commit} --quiet` : ''
     return new Promise((resolve, reject) => {
       exec(
-        `cd ${dirName} && git clone ${sourceUrl} --quiet && cd ${specName} ${reset} && git count-objects -v`,
+        `cd ${dirName} && git clone ${sourceUrl} --quiet --depth 1 && cd ${specName} ${reset} && git count-objects -v`,
         (error, stdout) => (error ? reject(error) : resolve(this._getRepoSize(stdout)))
       )
     })
