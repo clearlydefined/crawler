@@ -135,6 +135,8 @@ With a debugger:
 
 `docker run --rm -d --env-file ../dev.env.list -p 9229:9229 -p 5000:5000 --entrypoint npm cdcrawler:latest run local`
 
+At this point you can attach VS Code with the built in debugging profile (see .vscode/launch.json)
+
 # Clouds
 
 ## Google Cloud

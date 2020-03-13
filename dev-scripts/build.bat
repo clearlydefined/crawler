@@ -1,0 +1,1 @@
+docker build -t cdcrawler:latest %~dp0\..\.
