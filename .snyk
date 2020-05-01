@@ -1,0 +1,34 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.14.1
+ignore: {}
+# patches apply the minimum changes required to fix a vulnerability
+patch:
+  SNYK-JS-LODASH-567746:
+    - lodash:
+        patched: '2020-05-01T03:25:18.351Z'
+    - eslint > lodash:
+        patched: '2020-05-01T03:25:18.351Z'
+    - express-init > lodash:
+        patched: '2020-05-01T03:25:18.351Z'
+    - requestretry > lodash:
+        patched: '2020-05-01T03:25:18.351Z'
+    - eslint > inquirer > lodash:
+        patched: '2020-05-01T03:25:18.351Z'
+    - eslint > table > lodash:
+        patched: '2020-05-01T03:25:18.351Z'
+    - mocha > yargs-unparser > lodash:
+        patched: '2020-05-01T03:25:18.351Z'
+    - ghrequestor > requestretry > lodash:
+        patched: '2020-05-01T03:25:18.351Z'
+    - request-promise-native > request-promise-core > lodash:
+        patched: '2020-05-01T03:25:18.351Z'
+    - nyc > istanbul-lib-instrument > @babel/traverse > lodash:
+        patched: '2020-05-01T03:25:18.351Z'
+    - nyc > istanbul-lib-instrument > @babel/traverse > @babel/generator > lodash:
+        patched: '2020-05-01T03:25:18.351Z'
+    - sinon > nise > @sinonjs/formatio > @sinonjs/samsam > lodash:
+        patched: '2020-05-01T03:25:18.351Z'
+    - nyc > istanbul-lib-instrument > @babel/traverse > @babel/helper-split-export-declaration > @babel/types > lodash:
+        patched: '2020-05-01T03:25:18.351Z'
+    - nyc > istanbul-lib-instrument > @babel/traverse > @babel/helper-function-name > @babel/helper-get-function-arity > @babel/types > lodash:
+        patched: '2020-05-01T03:25:18.351Z'
