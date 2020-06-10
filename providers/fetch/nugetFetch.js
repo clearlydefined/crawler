@@ -64,10 +64,10 @@ class NuGetFetch extends AbstractFetch {
   async _getRegistryData(spec) {
     const baseUrl = providerMap.nuget
     // https://docs.microsoft.com/en-us/nuget/api/registration-base-url-resource
-    // Example: https://api.nuget.org/v3/registration4/moq/4.8.2.json and follow catalogEntry
-    // https://api.nuget.org/v3/registration4-gz-semver2/microsoft.powershell.native/7.0.0-preview.1.json
+    // Example: https://api.nuget.org/v3/registration5/moq/4.8.2.json and follow catalogEntry
+    // https://api.nuget.org/v3/registration5-gz-semver2/microsoft.powershell.native/7.0.0-preview.1.json
     const { body, statusCode } = await requestRetry.get(
-      `${baseUrl}/v3/registration4-gz-semver2/${spec.name.toLowerCase()}/${spec.revision}.json`,
+      `${baseUrl}/v3/registration5-gz-semver2/${spec.name.toLowerCase()}/${spec.revision}.json`,
       { gzip: true }
     )
     return statusCode !== 200 || !body ? null : JSON.parse(body)
