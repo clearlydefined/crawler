@@ -42,7 +42,7 @@
     "express": "^4.17.1",
     "express-init": "^1.1.1",
     "extend": "^3.0.1",
-    "extract-zip": "^1.6.6",
+    "extract-zip": "^1.6.8",
     "geit": "0.0.7",
     "ghrequestor": "^0.1.7",
     "htmlencode": "0.0.4",
