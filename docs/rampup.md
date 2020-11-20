@@ -63,4 +63,22 @@ These are suggested steps / tips to get familiar with the codebase:
 - Then “tool” type messages for each tool (clearlydefined/scancode/licensee)
 - Runs (type)fetch and (type)process for each tool
 
+## Dependency Security Management
 
+This project uses two tools to monitor (and fix) vulnerabilities in this project's dependencies.
+
+### Dependabot
+
+* [Dependabot](https://docs.github.com/en/free-pro-team@latest/github/managing-security-vulnerabilities/about-dependabot-security-updates) is a GitHub Security Feature. It tracks vulnerabilities in several languages including JavaScript.
+* When Dependabot detects any vulnerabilities in the [GitHub Advisory Database](https://docs.github.com/en/free-pro-team@latest/github/managing-security-vulnerabilities/browsing-security-vulnerabilities-in-the-github-advisory-database), it sends a notification and may also open a pull request to fix the vulnerability.
+* Only project maintainers can see Dependabot alerts
+
+### Snyk
+* [Synk Open Source](https://solutions.snyk.io/snyk-academy/open-source) is similar to Dependabot, though not GitHub specific. It also tracks vulnerabilities in dependencies.
+* When Synk detects a vulnerability in the [Synk Intel Vulnerability Database](https://snyk.io/product/vulnerability-database/), it also opens a pull request with a fix for the vulnerability.
+* Everyone can see pull requests opened by Snyk, but only members of the Clearly Defined organization on Snyk can see details of the vulnerability.
+* If you do not have access to the Clearly Defined Snyk organization, reach out to @nellshamrell 
+
+### Why both?
+
+We are using both Dependabot and Snyk partly for experimental purposes but also because they use different vulnerability databases. One may detect a vulnerability that the other does not. At some point we may settle on one, but currently lose nothing by having both.
