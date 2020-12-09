@@ -1,0 +1,41 @@
+# Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
+# SPDX-License-Identifier: MIT
+
+FROM node:12
+ENV APPDIR=/opt/service
+
+ARG BUILD_NUMBER=0
+ENV CRAWLER_BUILD_NUMBER=$BUILD_NUMBER
+
+# Ruby
+RUN apt-get update && apt-get install -y --no-install-recommends --no-install-suggests curl bzip2 build-essential libssl-dev libreadline-dev zlib1g-dev cmake && \
+  rm -rf /var/lib/apt/lists/* && \
+  curl -L https://github.com/rbenv/ruby-build/archive/v20180822.tar.gz | tar -zxvf - -C /tmp/ && \
+  cd /tmp/ruby-build-* && ./install.sh && cd / && \
+  ruby-build -v 2.5.1 /usr/local && rm -rfv /tmp/ruby-build-* && \
+  gem install bundler --no-rdoc --no-ri
+
+# Scancode
+RUN curl -sL https://github.com/nexB/scancode-toolkit/releases/download/v3.0.2/scancode-toolkit-3.0.2.tar.bz2 | tar -C /opt -jx \
+  && /opt/scancode-toolkit-3.0.2/scancode --reindex-licenses \
+  && /opt/scancode-toolkit-3.0.2/scancode --version
+ENV SCANCODE_HOME=/opt/scancode-toolkit-3.0.2
+
+# Licensee
+RUN gem install licensee -v 9.11.0 --no-rdoc --no-ri
+
+COPY package*.json /tmp/
+RUN cd /tmp && npm install
+RUN mkdir -p "${APPDIR}" && cp -a /tmp/node_modules "${APPDIR}"
+
+WORKDIR "${APPDIR}"
+COPY . "${APPDIR}"
+
+ENV NODE_ENV "localhost"
+
+# Uncomment this if you want to see debug output
+#ENV DEBUG=*
+
+ENV PORT 5000
+EXPOSE 5000
+ENTRYPOINT ["npm", "start"]
