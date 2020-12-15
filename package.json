@@ -8,7 +8,8 @@
     "test": "nyc mocha \"test/unit/**/*.js\" --timeout 20000 && eslint .",
     "local": "node --inspect-brk=0.0.0.0:9229 ./index.js",
     "integration": "mocha \"test/integration/**/*.js\" --timeout 20000",
-    "eslint": "eslint ."
+    "eslint": "eslint .",
+    "postinstall": "patch-package"
   },
   "keywords": [
     "license",
