@@ -2,7 +2,13 @@
 
 A service that crawls projects and packages for information relevant to ClearlyDefined. Typically users do not need to directly interact with the crawler. Rather, you would use the ClearlyDefined service API to queue "harvesting" of more component's data. It can be convenient to run the crawler directly if, for example, you are developing a handler for a new package type.
 
-# Quick start
+## Quick start
+
+The quickest way to get a fully functional local ClearlyDefined set up (including the crawler) is to use the [Dockerized ClearlyDefined environment setup](https://github.com/clearlydefined/docker_dev_env_experiment). This runs all services locally and does not require access to the ClearlyDefined Azure account.
+
+## Alternative Setup
+
+Some parts of this set up may require access to the ClearlyDefined Azure Account.
 
 1.  Clone this repo
 1.  `cd` to the repo dir and run `npm install`
