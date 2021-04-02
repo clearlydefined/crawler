@@ -17,6 +17,7 @@ module.exports = {
     debian: require('./fetch/debianFetch'),
     git: require('./fetch/gitCloner'),
     mavenCentral: require('./fetch/mavencentralFetch'),
+    mavenGoogle: require('./fetch/mavenGoogleFetch'),
     npmjs: require('./fetch/npmjsFetch'),
     nuget: require('./fetch/nugetFetch'),
     pypi: require('./fetch/pypiFetch'),
