@@ -30,7 +30,6 @@ class MavenGoogleFetch extends AbstractFetch {
 
   async handle(request) {
     const spec = this.toSpec(request)
-    if (!spec.revision) spec.revision = await this._getLatestVersion(spec)
     if (!spec.revision) return this.markSkip(request)
     // rewrite the request URL as it is used throughout the system to derive locations and urns etc.
     request.url = spec.toUrl()
@@ -53,14 +52,6 @@ class MavenGoogleFetch extends AbstractFetch {
       request.casedSpec.name = get(summary, 'artifactId[0]') || spec.name
     }
     return request
-  }
-
-  async _getLatestVersion(spec) {
-    const namespacePath = `${spec.namespace.replace(/\./g, '/')}`
-    const url = `https://dl.google.com/android/maven2/"${namespacePath}"/"${spec.name}"/group-index.xml`
-    const responseXml = await requestPromise({ url, json: false })
-    const response = await parseString(responseXml)
-    return get(response, 'response.docs[0].latestVersion')
   }
 
   _createDocument(dir, releaseDate, hashes, poms, summary) {
@@ -144,7 +135,9 @@ class MavenGoogleFetch extends AbstractFetch {
         if (!isNaN(releaseDate.getTime())) return releaseDate.toISOString()
       }
     }
-    return null;
+
+    const timestamp = new Date()
+    if (timestamp) return timestamp.toISOString()
   }
 }
 
