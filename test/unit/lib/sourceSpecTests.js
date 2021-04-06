@@ -11,6 +11,12 @@ describe('sourceSpec', () => {
     expect(spec.toUrn()).to.eq('urn:maven:mavencentral:com.group:a1:revision:1.0.0')
   })
 
+  it('creates maven url/urn', () => {
+    const spec = new SourceSpec('maven', 'mavengoogle', 'androidx.activity', 'activity', '1.3.0-alpha05')
+    expect(spec.toUrl()).to.eq('https://dl.google.com/android/maven2/androidx/activity/activity/1.3.0-alpha05/activity-1.3.0-alpha05-sources.jar')
+    expect(spec.toUrn()).to.eq('urn:maven.google.com/web/index.html#androidx.activity:activity:1.3.0-alpha05')
+  })
+
   it('creates github url/urn', () => {
     const spec = new SourceSpec('git', 'github', 'org', 'repo', '123456')
     expect(spec.toUrl()).to.eq('https://github.com/org/repo.git')

@@ -58,6 +58,12 @@ class MavenGoogleFetch extends AbstractFetch {
     return { location: dir.name, releaseDate, hashes, poms, summary }
   }
 
+  //The format for source url is: https://dl.google.com/android/maven2/groudId1/groupdId2/artifactId/revision/artifactId-revision-sources.jar
+  // E.g.: https://maven.google.com/web/index.html#androidx.browser:browser:1.3.0
+  // where - groupId      = androidx.browser
+  //       - artifactId   = browser
+  //       - revision     = 1.3.0
+  // Becomes https://dl.google.com/android/maven2/androidx/browser/browser/1.3.0/browser-1.3.0-sources.jar
   _buildUrl(spec, extension = extensionMap.jar) {
     const fullName = `${spec.namespace.replace(/\./g, '/')}/${spec.name}`
     return `${providerMap[spec.provider]}${fullName}/${spec.revision}/${spec.name}-${spec.revision}${extension}`
