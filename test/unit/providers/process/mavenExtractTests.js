@@ -36,6 +36,17 @@ describe('mavenExtract source discovery', () => {
     expect(sourceLocation.name).to.eq('url')
   })
 
+  it('handles maven google', async () => {
+    const spec = new EntitySpec('maven', 'mavengoogle', 'testorg', 'test', '42')
+    const extractor = extract({}, () => {})
+    const sourceLocation = await extractor._discoverSource(spec)
+    expect(sourceLocation.revision).to.eq('42')
+    expect(sourceLocation.type).to.eq('sourcearchive')
+    expect(sourceLocation.provider).to.eq('mavengoogle')
+    expect(sourceLocation.name).to.eq('test')
+    expect(sourceLocation.namespace).to.eq('testorg')
+  })
+
   it('falls back to maven central', async () => {
     const spec = createSpec('test')
     const extractor = extract({}, () => {})
