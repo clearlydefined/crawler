@@ -13,8 +13,8 @@ describe('sourceSpec', () => {
 
   it('creates maven url/urn', () => {
     const spec = new SourceSpec('maven', 'mavengoogle', 'androidx.activity', 'activity', '1.3.0-alpha05')
-    expect(spec.toUrl()).to.eq('https://dl.google.com/android/maven2/androidx/activity/activity/1.3.0-alpha05/activity-1.3.0-alpha05-sources.jar')
-    expect(spec.toUrn()).to.eq('urn:maven.google.com/web/index.html#androidx.activity:activity:1.3.0-alpha05')
+    expect(spec.toUrl()).to.eq('https://dl.google.com/android/maven2/androidx/activity/activity/1.3.0-alpha05/activity-1.3.0-alpha05.jar')
+    expect(spec.toUrn()).to.eq('urn:maven:mavengoogle:androidx.activity:activity:revision:1.3.0-alpha05')
   })
 
   it('creates github url/urn', () => {
