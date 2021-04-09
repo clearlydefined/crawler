@@ -101,10 +101,8 @@ describe('MavenGoogle fetching', () => {
   it('succeeds in download, decompress and hash', async () => {
     const handler = Fetch({ logger: { log: sinon.stub() } })
     const request = await handler.handle(new Request('test', 'cd:/maven/mavengoogle/org.eclipse/swt/3.3.0-v3344'))
-    const exampleDate = '2007-11-27T07:15:10.000Z'
     expect(request.document.hashes.sha1).to.be.equal(hashes['swt-3.3.0-v3346.jar']['sha1'])
     expect(request.document.hashes.sha256).to.be.equal(hashes['swt-3.3.0-v3346.jar']['sha256'])
-    expect(request.document.releaseDate).to.have.lengthOf(exampleDate.length)
     expect(request.casedSpec.name).to.equal('swt')
     expect(request.casedSpec.namespace).to.equal('org.eclipse')
     expect(request.document.location).to.be.a('string')
