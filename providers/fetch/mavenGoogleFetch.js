@@ -142,9 +142,8 @@ class MavenGoogleFetch extends AbstractFetch {
       }
     }
 
-    //No other way to get the release date from maven.google.com
-    const timestamp = new Date()
-    if (timestamp) return timestamp.toISOString()
+    //No able to extract the release date from maven.google.com
+    return null
   }
 }
 
