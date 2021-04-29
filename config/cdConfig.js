@@ -33,6 +33,7 @@ module.exports = {
     debian: { cdFileLocation: cd_file.location },
     git: {},
     mavenCentral: {},
+    mavenGoogle: {},
     npmjs: {},
     nuget: {},
     packagist: {},
