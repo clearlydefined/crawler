@@ -17,7 +17,7 @@ class TopProcessor extends AbstractProcessor {
     return (
       request.type === 'top' &&
       spec &&
-      ['npmjs', 'cocoapods', 'cratesio', 'mavencentral', 'nuget', 'github', 'pypi', 'composer', 'debian'].includes(
+      ['npmjs', 'cocoapods', 'cratesio', 'mavencentral', 'mavengoogle', 'nuget', 'github', 'pypi', 'composer', 'debian'].includes(
         spec.provider
       )
     )
@@ -35,6 +35,8 @@ class TopProcessor extends AbstractProcessor {
         return this._processTopCrates(request)
       case 'mavencentral':
         return this._processTopMavenCentrals(request)
+      case 'mavengoogle':
+          return this._processTopMavenGoogle(request)
       case 'nuget':
         return this._processTopNuGets(request)
       case 'github':
@@ -195,6 +197,23 @@ class TopProcessor extends AbstractProcessor {
       groupId = groupId.substring(1, groupId.length - 1) // Remove quotes
       artifactId = artifactId.substring(1, artifactId.length - 1)
       return new Request('package', `cd:/maven/mavencentral/${groupId}/${artifactId}`)
+    })
+    await request.queueRequests(requests)
+    return request.markNoSave()
+  }
+
+  async _processTopMavenGoogle(request) {
+    const contents = fs.readFileSync(path.join(__dirname, '..', '..', 'data', 'mvn1.5k.csv'))
+    const fileLines = contents.toString().split('\n')
+    let { start, end } = request.document
+    start = start && start >= 0 ? ++start : 1 // Exclude header from CSV file
+    end = end && end > 0 ? ++end : fileLines.length
+    const lines = fileLines.slice(start, end)
+    const requests = lines.map(line => {
+      let [, groupId, artifactId] = line.split(',')
+      groupId = groupId.substring(1, groupId.length - 1) // Remove quotes
+      artifactId = artifactId.substring(1, artifactId.length - 1)
+      return new Request('package', `cd:/maven/mavengoogle/${groupId}/${artifactId}`)
     })
     await request.queueRequests(requests)
     return request.markNoSave()
