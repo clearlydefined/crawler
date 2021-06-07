@@ -17,7 +17,7 @@ class TopProcessor extends AbstractProcessor {
     return (
       request.type === 'top' &&
       spec &&
-      ['npmjs', 'cocoapods', 'cratesio', 'mavencentral', 'mavengoogle', 'nuget', 'github', 'pypi', 'composer', 'debian'].includes(
+      ['npmjs', 'cocoapods', 'cratesio', 'mavencentral', 'mavengoogle', 'nuget', 'github', 'gitlab', 'pypi', 'composer', 'debian'].includes(
         spec.provider
       )
     )
@@ -36,7 +36,7 @@ class TopProcessor extends AbstractProcessor {
       case 'mavencentral':
         return this._processTopMavenCentrals(request)
       case 'mavengoogle':
-          return this._processTopMavenGoogle(request)
+        return this._processTopMavenGoogle(request)
       case 'nuget':
         return this._processTopNuGets(request)
       case 'github':
