@@ -3,9 +3,13 @@
 
 const AbstractFetch = require('./abstractFetch')
 const { exec } = require('child_process')
-const SourceSpec = require('../../lib/sourceSpec')
 const { clone } = require('lodash')
 const rimraf = require('rimraf')
+
+const providerDictionary = {
+  gitlab: 'https://gitlab.com',
+  github: 'https://github.com'
+}
 
 class GitCloner extends AbstractFetch {
   canHandle(request) {
@@ -14,6 +18,8 @@ class GitCloner extends AbstractFetch {
   }
 
   async handle(request) {
+    const SourceSpec = require('../../lib/sourceSpec')
+
     super.handle(request)
     const spec = this.toSpec(request)
     const sourceSpec = SourceSpec.fromObject(spec)
@@ -82,6 +88,11 @@ class GitCloner extends AbstractFetch {
         error ? reject(error) : resolve()
       })
     })
+  }
+
+  _buildUrl(spec) {
+    const fullName = `${spec.namespace.replace(/\./g, '/')}/${spec.name}`
+    return `${providerDictionary[spec.provider]}/${fullName}.git`
   }
 }
 

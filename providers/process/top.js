@@ -36,7 +36,7 @@ class TopProcessor extends AbstractProcessor {
       case 'mavencentral':
         return this._processTopMavenCentrals(request)
       case 'mavengoogle':
-          return this._processTopMavenGoogle(request)
+        return this._processTopMavenGoogle(request)
       case 'nuget':
         return this._processTopNuGets(request)
       case 'github':
