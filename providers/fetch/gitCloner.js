@@ -3,7 +3,6 @@
 
 const AbstractFetch = require('./abstractFetch')
 const { exec } = require('child_process')
-const SourceSpec = require('../../lib/sourceSpec')
 const { clone } = require('lodash')
 const rimraf = require('rimraf')
 
@@ -19,6 +18,8 @@ class GitCloner extends AbstractFetch {
   }
 
   async handle(request) {
+    const SourceSpec = require('../../lib/sourceSpec')
+
     super.handle(request)
     const spec = this.toSpec(request)
     const sourceSpec = SourceSpec.fromObject(spec)
