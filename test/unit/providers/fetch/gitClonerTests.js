@@ -1,5 +1,4 @@
 const expect = require('chai').expect
-const sinon = require('sinon')
 const gitCloner = require('../../../../providers/fetch/gitCloner')
 
 const gitlab_stub = 'https://gitlab.com/'
