@@ -23,6 +23,18 @@ describe('sourceSpec', () => {
     expect(spec.toUrn()).to.eq('urn:git:github:org:repo:revision:123456')
   })
 
+  it('creates gitlab url/urn', () => {
+    const spec = new SourceSpec('git', 'gitlab', 'org.sub.namespace', 'repo', '123456')
+    expect(spec.toUrl()).to.eq('https://gitlab.com/org/sub/namespace/repo.git')
+    expect(spec.toUrn()).to.eq('urn:git:gitlab:org.sub.namespace:repo:revision:123456')
+  })
+
+  it('creates gitlab url/urn', () => {
+    const spec = new SourceSpec('git', 'gitlab', 'org', 'repo', '123456')
+    expect(spec.toUrl()).to.eq('https://gitlab.com/org/repo.git')
+    expect(spec.toUrn()).to.eq('urn:git:gitlab:org:repo:revision:123456')
+  })
+
   it('returns null urls for unsupported providers', () => {
     const spec = new SourceSpec('git', 'unsupport', 'org', 'repo', '123456')
     expect(spec.toUrl()).to.be.null
