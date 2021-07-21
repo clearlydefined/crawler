@@ -13,11 +13,9 @@ const stub = 'https://proxy.golang.org/'
 describe('Go utility functions', () => {
   it('builds URLs', () => {
     const fetch = GoFetch({})
-    expect(fetch._buildUrl(spec('go', 'github.com', 'mymodule', 'v1.2.3'), '.mod')).to.equal(stub + 'github.com/mymodule/@v/v1.2.3.mod')
-    expect(fetch._buildUrl(spec('go', 'github.com', 'mymodule', 'v1.2.3'))).to.equal(stub + 'github.com/mymodule/@v/v1.2.3.zip')
-    expect(fetch._buildUrl(spec('go', 'github.com', 'thing.mymodule', 'v1.2.3'))).to.equal(
-      stub + 'github.com/thing/mymodule/v1.2.3/zip'
-    )
+    expect(fetch._buildUrl(spec('go', 'github.com/myname', 'mymodule', 'v1.2.3'), '.mod')).to.equal(stub + 'github.com/myname/mymodule/@v/v1.2.3.mod')
+    expect(fetch._buildUrl(spec('go', 'github.com/myname', 'mymodule', 'v1.2.3'), '.info')).to.equal(stub + 'github.com/myname/mymodule/@v/v1.2.3.info')
+    expect(fetch._buildUrl(spec('go', 'github.com/myname', 'mymodule', 'v1.2.3'))).to.equal(stub + 'github.com/myname/mymodule/@v/v1.2.3.zip')
   })
 })
 
