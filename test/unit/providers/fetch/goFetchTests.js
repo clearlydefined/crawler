@@ -16,6 +16,8 @@ describe('Go utility functions', () => {
     expect(fetch._buildUrl(spec('go', 'github.com/myname', 'mymodule', 'v1.2.3'), '.mod')).to.equal(stub + 'github.com/myname/mymodule/@v/v1.2.3.mod')
     expect(fetch._buildUrl(spec('go', 'github.com/myname', 'mymodule', 'v1.2.3'), '.info')).to.equal(stub + 'github.com/myname/mymodule/@v/v1.2.3.info')
     expect(fetch._buildUrl(spec('go', 'github.com/myname', 'mymodule', 'v1.2.3'))).to.equal(stub + 'github.com/myname/mymodule/@v/v1.2.3.zip')
+    expect(fetch._buildUrl(spec('go', 'rsc.io', 'pdf', 'v1.2.3'))).to.equal(stub + 'rsc.io/pdf/@v/v1.2.3.zip')
+    expect(fetch._buildUrl(spec('go', 'sigs.k8s.io/kustomize/kustomize', 'v4', 'v4.1.2'))).to.equal(stub + 'sigs.k8s.io/kustomize/kustomize/v4/@v/v4.1.2.zip')
   })
 })
 
