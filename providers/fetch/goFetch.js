@@ -1,10 +1,12 @@
 const AbstractFetch = require("./abstractFetch");
 
 class GoFetch extends AbstractFetch {
+  async handle(request) {
+    const spec = this.toSpec(request)
+  }
 
   _buildUrl(spec, extension = '.zip') {
     let initial_url = `https://proxy.golang.org/${spec.provider}/${spec.namespace}/${spec.name}/@v/${spec.revision}${extension}`
-
     return this._replace_encodings(this._remove_blank_fields(initial_url))
   }
 
