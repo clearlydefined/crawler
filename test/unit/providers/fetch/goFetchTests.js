@@ -13,15 +13,16 @@ const stub = 'https://proxy.golang.org/'
 describe('Go utility functions', () => {
   it('builds URLs', () => {
     const fetch = GoFetch({})
-    expect(fetch._buildUrl(spec('go', 'github.com/myname', 'mymodule', 'v1.2.3'), '.mod')).to.equal(stub + 'github.com/myname/mymodule/@v/v1.2.3.mod')
-    expect(fetch._buildUrl(spec('go', 'github.com/myname', 'mymodule', 'v1.2.3'), '.info')).to.equal(stub + 'github.com/myname/mymodule/@v/v1.2.3.info')
-    expect(fetch._buildUrl(spec('go', 'github.com/myname', 'mymodule', 'v1.2.3'))).to.equal(stub + 'github.com/myname/mymodule/@v/v1.2.3.zip')
-    expect(fetch._buildUrl(spec('go', 'rsc.io', 'pdf', 'v1.2.3'))).to.equal(stub + 'rsc.io/pdf/@v/v1.2.3.zip')
-    expect(fetch._buildUrl(spec('go', 'sigs.k8s.io/kustomize/kustomize', 'v4', 'v4.1.2'))).to.equal(stub + 'sigs.k8s.io/kustomize/kustomize/v4/@v/v4.1.2.zip')
+    expect(fetch._buildUrl(spec('go', 'golang.org', 'x', 'net', 'v0.0.0-20210226172049-e18ecbb05110'))).to.equal(stub + 'golang.org/x/net/@v/v0.0.0-20210226172049-e18ecbb05110.zip')
+    expect(fetch._buildUrl(spec('go', 'golang.org', 'x', 'net', 'v0.0.0-20210226172049-e18ecbb05110'), '.mod')).to.equal(stub + 'golang.org/x/net/@v/v0.0.0-20210226172049-e18ecbb05110.mod')
+    expect(fetch._buildUrl(spec('go', 'golang.org', 'x', 'net', 'v0.0.0-20210226172049-e18ecbb05110'), '.info')).to.equal(stub + 'golang.org/x/net/@v/v0.0.0-20210226172049-e18ecbb05110.info')
+    expect(fetch._buildUrl(spec('go', '-', '-', 'collectd.org', 'v0.5.0'))).to.equal(stub + 'collectd.org/@v/v0.5.0.zip')
+    expect(fetch._buildUrl(spec('go', 'cloud.google.com', '-', 'go', 'v0.56.0'))).to.equal(stub + 'cloud.google.com/go/@v/v0.56.0.zip')
+    expect(fetch._buildUrl(spec('go', 'github.com', 'Azure%2fazure-event-hubs-go', 'v3', 'v3.2.0'))).to.equal(stub + 'github.com/Azure/azure-event-hubs-go/v3/@v/v3.2.0.zip')
   })
 })
 
-function spec(type, namespace, name, revision) {
-  return { type, provider: 'googleproxy', namespace, name, revision }
+function spec(type, provider, namespace, name, revision) {
+  return { type, provider, namespace, name, revision }
 }
 
