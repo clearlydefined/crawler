@@ -86,8 +86,11 @@ describe('Go Proxy fetching', () => {
   })
 
   it('queries for the latest version when coordinates are missing a revision', async () => {
+    // Versions are listed in test/fixtures/go/list
+
     const handler = Fetch({ logger: { log: sinon.stub() } })
-    const request = await handler.handle(new Request('test', 'cd:/go/golang.org/x/net/'))
+    const request = await handler.handle(new Request('test', 'cd:/go/rsc.io/-/quote'))
+    expect(request.casedSpec.revison).to.equal('v1.5.3-pre1')
   })
 })
 
