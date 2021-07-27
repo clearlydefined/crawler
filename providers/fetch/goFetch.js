@@ -7,6 +7,7 @@ class GoFetch extends AbstractFetch {
   async handle(request) {
     const spec = this.toSpec(request)
     if (!spec.revision) spec.revision = await this._getLatestVersion(spec)
+    if (!spec.revision) return this.markSkip(request)
 
     super.handle(request)
 
