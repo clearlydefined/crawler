@@ -95,8 +95,25 @@ describe('Go Proxy fetching', () => {
     const request = await handler.handle(new Request('test', 'cd:/go/rsc.io/-/quote'))
     expect(request.casedSpec.revision).to.equal('v1.5.3-pre1')
   })
+
+  it('marks the request for skipping when no revision is found', async () => {
+    const handler = setup()
+    handler._getLatestVersion = () => null
+
+    const request = await handler.handle(new Request('test', 'cd:/go/rsc.io/-/quote'))
+
+    expect(request.processControl).to.equal('skip')
+    expect(request.document).to.be.undefined
+    expect(request.casedSpec).to.be.undefined
+  })
 })
 
 function spec(type, provider, namespace, name, revision) {
   return { type, provider, namespace, name, revision }
+}
+
+function setup() {
+  const options = { logger: { log: sinon.stub() } }
+  const handler = Fetch(options)
+  return handler
 }
