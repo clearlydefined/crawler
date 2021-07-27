@@ -9,14 +9,12 @@ class GoFetch extends AbstractFetch {
 
     super.handle(request)
 
-
     const artifact = this.createTempFile(request)
-
     const dir = this.createTempDir(request)
+
     await this.decompress(artifact.name, dir.name)
 
     const hashes = await this.computeHashes(artifact.name)
-
     const info = await this._getInfo(spec)
     const releaseDate = info.Time
 

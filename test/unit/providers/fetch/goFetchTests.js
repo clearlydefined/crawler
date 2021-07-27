@@ -35,6 +35,7 @@ function pickArtifact(url) {
   if (url.endsWith('.mod')) return 'v1.3.0.mod'
   if (url.endsWith('.info')) return 'v1.3.0.info'
   if (url.endsWith('.zip')) return 'v1.3.0.zip'
+  if (url.endsWith('.list')) return 'list'
   return null
 }
 
@@ -75,13 +76,18 @@ describe('Go Proxy fetching', () => {
 
   it('succeeds in download, decompress, and hash', async () => {
     const handler = Fetch({ logger: { log: sinon.stub() } })
-    const request = await handler.handle(new Request('test', 'cd:/go/golang.org/x/net/v0.0.0-20210226172049-e18ecbb05110'))
+    const request = await handler.handle(new Request('test', 'cd:/go/rsc.io/-/quote/v1.3.0'))
     expect(request.document.hashes.sha1).to.be.equal(hashes['v1.3.0.zip']['sha1'])
     expect(request.document.hashes.sha256).to.be.equal(hashes['v1.3.0.zip']['sha256'])
     expect(request.document.releaseDate).to.equal('2018-02-14T00:54:53Z')
-    expect(request.casedSpec.name).to.equal('net')
-    expect(request.casedSpec.namespace).to.equal('x')
+    expect(request.casedSpec.name).to.equal('quote')
+    expect(request.casedSpec.namespace).to.equal(null)
     expect(request.contentOrigin).to.equal('origin')
+  })
+
+  it('queries for the latest version when coordinates are missing a revision', async () => {
+    const handler = Fetch({ logger: { log: sinon.stub() } })
+    const request = await handler.handle(new Request('test', 'cd:/go/golang.org/x/net/'))
   })
 })
 
