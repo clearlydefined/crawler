@@ -52,10 +52,8 @@ class GoFetch extends AbstractFetch {
       else throw error
     }
 
-    return parseString(content)
+    return JSON.parse(content.toString())
   }
-
-
 }
 
 

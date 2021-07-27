@@ -106,7 +106,9 @@ class MavenFetch extends AbstractFetch {
       if (error.statusCode === 404) return null
       else throw error
     }
+
     const pom = await parseString(content)
+
     // clean up some stuff we don't actually look at.
     delete pom.project.build
     delete pom.project.dependencies
