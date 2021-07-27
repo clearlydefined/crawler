@@ -79,6 +79,9 @@ describe('Go Proxy fetching', () => {
     expect(request.document.hashes.sha1).to.be.equal(hashes['v1.3.0.zip']['sha1'])
     expect(request.document.hashes.sha256).to.be.equal(hashes['v1.3.0.zip']['sha256'])
     expect(request.document.releaseDate).to.equal('2018-02-14T00:54:53Z')
+    expect(request.casedSpec.name).to.equal('net')
+    expect(request.casedSpec.namespace).to.equal('x')
+    expect(request.contentOrigin).to.equal('origin')
   })
 })
 

@@ -1,3 +1,4 @@
+const { clone } = require('lodash')
 const requestPromise = require("request-promise-native");
 const { parseString } = require("xml2js");
 const AbstractFetch = require("./abstractFetch");
@@ -20,6 +21,8 @@ class GoFetch extends AbstractFetch {
     const releaseDate = info.Time
 
     request.document = this._createDocument(dir, releaseDate, hashes)
+    request.contentOrigin = 'origin'
+    request.casedSpec = clone(spec)
 
     return request
   }
