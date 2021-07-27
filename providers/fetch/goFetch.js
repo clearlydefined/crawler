@@ -6,6 +6,7 @@ const AbstractFetch = require("./abstractFetch");
 class GoFetch extends AbstractFetch {
   async handle(request) {
     const spec = this.toSpec(request)
+    if (!spec.revision) spec.revision = await this._getLatestVersion(spec)
 
     super.handle(request)
 
@@ -23,6 +24,22 @@ class GoFetch extends AbstractFetch {
     request.casedSpec = clone(spec)
 
     return request
+  }
+
+  async _getLatestVersion(spec) {
+    const initial_url = `https://proxy.golang.org/${spec.provider}/${spec.namespace}/${spec.name}/@v/list`
+    const replace_encoded_url = this._replace_encodings(initial_url)
+    const url = replace_encoded_url.replace(/null\//g, '')
+
+    const response = await requestPromise({ url })
+    const versions = response.toString().split("\n").sort()
+
+    // return last version in sorted versions array
+    return versions[versions.length - 1];
+  }
+
+  _convert_to_versions_array(versions_string) {
+    versions_string.split("\n").sort()
   }
 
   _createDocument(dir, releaseDate, hashes) {

@@ -32,10 +32,11 @@ const hashes = {
 let Fetch
 
 function pickArtifact(url) {
+
   if (url.endsWith('.mod')) return 'v1.3.0.mod'
   if (url.endsWith('.info')) return 'v1.3.0.info'
   if (url.endsWith('.zip')) return 'v1.3.0.zip'
-  if (url.endsWith('.list')) return 'list'
+  if (url.endsWith('list')) return 'list'
   return null
 }
 
@@ -47,6 +48,7 @@ describe('Go Proxy fetching', () => {
         if (options.url.includes('code')) throw { statusCode: 500, message: 'Code' }
         if (options.url.includes('missing')) throw { statusCode: 404 }
       }
+
       const file = pickArtifact(options.url)
       const content = fs.readFileSync(`test/fixtures/go/${file}`)
       return options.json ? JSON.parse(content) : content
@@ -90,7 +92,7 @@ describe('Go Proxy fetching', () => {
 
     const handler = Fetch({ logger: { log: sinon.stub() } })
     const request = await handler.handle(new Request('test', 'cd:/go/rsc.io/-/quote'))
-    expect(request.casedSpec.revison).to.equal('v1.5.3-pre1')
+    expect(request.casedSpec.revision).to.equal('v1.5.3-pre1')
   })
 })
 
