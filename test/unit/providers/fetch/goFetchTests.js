@@ -85,6 +85,7 @@ describe('Go Proxy fetching', () => {
     expect(request.casedSpec.name).to.equal('quote')
     expect(request.casedSpec.namespace).to.equal(null)
     expect(request.contentOrigin).to.equal('origin')
+    expect(request.url).to.equal('cd:/go/rsc.io/-/quote/v1.3.0')
   })
 
   it('queries for the latest version when coordinates are missing a revision', async () => {

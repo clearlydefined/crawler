@@ -9,6 +9,8 @@ class GoFetch extends AbstractFetch {
     if (!spec.revision) spec.revision = await this._getLatestVersion(spec)
     if (!spec.revision) return this.markSkip(request)
 
+    request.url = spec.toUrl()
+
     super.handle(request)
 
     const artifact = this.createTempFile(request)
