@@ -78,6 +78,7 @@ describe('Go Proxy fetching', () => {
     const request = await handler.handle(new Request('test', 'cd:/go/golang.org/x/net/v0.0.0-20210226172049-e18ecbb05110'))
     expect(request.document.hashes.sha1).to.be.equal(hashes['v1.3.0.zip']['sha1'])
     expect(request.document.hashes.sha256).to.be.equal(hashes['v1.3.0.zip']['sha256'])
+    expect(request.document.releaseDate).to.equal('2018-02-14T00:54:53Z')
   })
 })
 

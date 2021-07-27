@@ -8,8 +8,6 @@ class GoFetch extends AbstractFetch {
 
     super.handle(request)
 
-    const info = await this._getInfo(spec)
-    console.log(info)
 
     const artifact = this.createTempFile(request)
 
@@ -18,13 +16,16 @@ class GoFetch extends AbstractFetch {
 
     const hashes = await this.computeHashes(artifact.name)
 
-    request.document = this._createDocument(dir, hashes)
+    const info = await this._getInfo(spec)
+    const releaseDate = info.Time
+
+    request.document = this._createDocument(dir, releaseDate, hashes)
 
     return request
   }
 
-  _createDocument(dir, hashes) {
-    return { location: dir.name, hashes }
+  _createDocument(dir, releaseDate, hashes) {
+    return { location: dir.name, releaseDate, hashes }
   }
 
   _buildUrl(spec, extension = '.zip') {
@@ -42,7 +43,6 @@ class GoFetch extends AbstractFetch {
 
   async _getInfo(spec) {
     const url = this._buildUrl(spec, '.info')
-
     let content
 
     try {
