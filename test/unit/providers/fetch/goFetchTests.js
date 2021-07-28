@@ -24,8 +24,8 @@ describe('Go utility functions', () => {
 
 const hashes = {
   'v1.3.0.zip': {
-    sha1: 'da39a3ee5e6b4b0d3255bfef95601890afd80709',
-    sha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+    sha1: '270d80279fca2d21c401dd40b6fc6370c41bfd94',
+    sha256: '03872ee7d6747bc2ee0abadbd4eb09e60f6df17d0a6142264abe8a8a00af50e7'
   }
 }
 
@@ -101,6 +101,17 @@ describe('Go Proxy fetching', () => {
     handler._getLatestVersion = () => null
 
     const request = await handler.handle(new Request('test', 'cd:/go/rsc.io/-/quote'))
+
+    expect(request.processControl).to.equal('skip')
+    expect(request.document).to.be.undefined
+    expect(request.casedSpec).to.be.undefined
+  })
+
+  it('marks the request for skipping when no artifact is found', async () => {
+    const handler = setup()
+    handler._getArtifact = () => false
+
+    const request = await handler.handle(new Request('test', 'cd:/go/rsc.io/-/quote/v1.3.0'))
 
     expect(request.processControl).to.equal('skip')
     expect(request.document).to.be.undefined

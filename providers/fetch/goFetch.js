@@ -1,7 +1,8 @@
 const { clone } = require('lodash')
 const requestPromise = require("request-promise-native");
-const { parseString } = require("xml2js");
 const AbstractFetch = require("./abstractFetch");
+const nodeRequest = require('request')
+const fs = require('fs')
 
 class GoFetch extends AbstractFetch {
   async handle(request) {
@@ -14,6 +15,9 @@ class GoFetch extends AbstractFetch {
     super.handle(request)
 
     const artifact = this.createTempFile(request)
+    const artifactResult = await this._getArtifact(spec, artifact.name)
+    if (!artifactResult) return this.markSkip(request)
+
     const dir = this.createTempDir(request)
 
     await this.decompress(artifact.name, dir.name)
@@ -60,6 +64,21 @@ class GoFetch extends AbstractFetch {
 
   _replace_encodings(url) {
     return `${url.replace(/%2f/g, '/')}`
+  }
+
+  async _getArtifact(spec, destination) {
+    const url = this._buildUrl(spec)
+
+    const status = await new Promise(resolve => {
+      nodeRequest
+        .get(url, (error, response) => {
+          if (error) this.logger.error(error)
+          if (response.statusCode !== 200) return resolve(false)
+        })
+        .pipe(fs.createWriteStream(destination).on('finish', () => resolve(true)))
+    })
+
+    if (status) return true
   }
 
   async _getInfo(spec) {
