@@ -5,5 +5,5 @@ const GoExtract = require('../../../../providers/process/goExtract')
 const AbstractFetch = require('../../../../providers/fetch/abstractFetch')
 
 async function setup() {
-  const processor = CrateExtract({ logger: {} }, () => { })
+  const processor = GoExtract({ logger: {} }, () => { })
 }
