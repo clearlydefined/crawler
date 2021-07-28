@@ -1,6 +1,6 @@
 const { clone } = require('lodash')
-const requestPromise = require("request-promise-native");
-const AbstractFetch = require("./abstractFetch");
+const requestPromise = require('request-promise-native')
+const AbstractFetch = require('./abstractFetch')
 const nodeRequest = require('request')
 const fs = require('fs')
 
@@ -41,14 +41,14 @@ class GoFetch extends AbstractFetch {
     const url = replace_encoded_url.replace(/null\//g, '')
 
     const response = await requestPromise({ url })
-    const versions = response.toString().split("\n").sort()
+    const versions = response.toString().split('\n').sort()
 
     // return last version in sorted versions array
-    return versions[versions.length - 1];
+    return versions[versions.length - 1]
   }
 
   _convert_to_versions_array(versions_string) {
-    versions_string.split("\n").sort()
+    versions_string.split('\n').sort()
   }
 
   _createDocument(dir, releaseDate, hashes) {
@@ -61,7 +61,7 @@ class GoFetch extends AbstractFetch {
   }
 
   _remove_blank_fields(url) {
-    return `${url.replace(/\-\//g, '')}`
+    return `${url.replace(/-\//g, '')}`
   }
 
   _replace_encodings(url) {
