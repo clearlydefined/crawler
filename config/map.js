@@ -50,6 +50,15 @@ const deb = {
   fossology
 }
 
+const go = {
+  _type: 'go',
+  source,
+  clearlydefined,
+  licensee,
+  scancode,
+  fossology
+}
+
 const maven = {
   _type: 'maven',
   source,
@@ -108,6 +117,7 @@ const _package = {
   npm,
   crate,
   deb,
+  go,
   maven,
   nuget,
   pod,
@@ -135,6 +145,7 @@ const entities = {
   npm,
   crate,
   deb,
+  go,
   maven,
   nuget,
   composer,
