@@ -96,6 +96,17 @@ describe('Go Proxy fetching', () => {
     expect(request.casedSpec.revision).to.equal('v1.5.3-pre1')
   })
 
+  it('marks the request for skipping when no info is found', async () => {
+    const handler = setup()
+    handler._getInfo = () => null
+
+    const request = await handler.handle(new Request('test', 'cd:/go/rsc.io/-/quote/v1.3.0'))
+
+    expect(request.processControl).to.equal('skip')
+    expect(request.document).to.be.undefined
+    expect(request.casedSpec).to.be.undefined
+  })
+
   it('marks the request for skipping when no revision is found', async () => {
     const handler = setup()
     handler._getLatestVersion = () => null

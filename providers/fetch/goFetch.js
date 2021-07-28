@@ -14,6 +14,9 @@ class GoFetch extends AbstractFetch {
 
     super.handle(request)
 
+    const info = await this._getInfo(spec)
+    if (!info) return this.markSkip(request)
+
     const artifact = this.createTempFile(request)
     const artifactResult = await this._getArtifact(spec, artifact.name)
     if (!artifactResult) return this.markSkip(request)
@@ -23,7 +26,6 @@ class GoFetch extends AbstractFetch {
     await this.decompress(artifact.name, dir.name)
 
     const hashes = await this.computeHashes(artifact.name)
-    const info = await this._getInfo(spec)
     const releaseDate = info.Time
 
     request.document = this._createDocument(dir, releaseDate, hashes)
