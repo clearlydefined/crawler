@@ -125,6 +125,7 @@ describe('Go Proxy fetching', () => {
     const request = await handler.handle(new Request('test', 'cd:/go/rsc.io/-/quote/v1.3.0'))
 
     expect(request.processControl).to.equal('skip')
+    expect(request.outcome).to.eq('Missing  ')
     expect(request.document).to.be.undefined
     expect(request.casedSpec).to.be.undefined
   })
