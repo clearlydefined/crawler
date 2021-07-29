@@ -1,6 +1,5 @@
 const AbstractClearlyDefinedProcessor = require('./abstractClearlyDefinedProcessor')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
-const SourceSpec = require('../../lib/sourceSpec')
 const { merge } = require('lodash')
 
 class GoExtract extends AbstractClearlyDefinedProcessor {
