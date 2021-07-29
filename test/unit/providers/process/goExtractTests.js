@@ -27,6 +27,12 @@ describe('Go processing', () => {
     const { processor, request } = await setup()
     processor.linkAndQueue = sinon.stub()
     await processor.handle(request)
+
+    expect(processor.linkAndQueueTool.callCount).to.be.equal(2)
+    expect(processor.linkAndQueueTool.args.map(call => call[1])).to.have.members([
+      'licensee',
+      'scancode'
+    ])
   })
 })
 
