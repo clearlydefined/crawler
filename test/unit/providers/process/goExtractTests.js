@@ -13,12 +13,22 @@ describe('Go processing', () => {
     expect(processor.canHandle(invalidRequest)).to.be.equal(false)
   })
 
+  it('determines whether the request is already processing', async () => {
+    const { processor, request } = await setup()
+    processor.isProcessing = () => true
+    sinon.spy(processor, 'createDocument')
+
+    await processor.handle(request)
+
+    expect(processor.createDocument.callCount).to.be.equal(1)
+
+  })
+
   it('processes a Go package correctly', async () => {
     const { processor, request } = await setup()
     processor.linkAndQueue = sinon.stub()
     await processor.handle(request)
   })
-
 })
 
 async function setup() {
