@@ -4,6 +4,60 @@ const Request = require('../../../../ghcrawler').request
 const GoExtract = require('../../../../providers/process/goExtract')
 const AbstractFetch = require('../../../../providers/fetch/abstractFetch')
 
+describe('Go processing', () => {
+  it('determines whether the request can be handled', async () => {
+    const { processor, request } = await setup()
+    expect(processor.canHandle(request)).to.be.equal(true)
+
+    const invalidRequest = createInvalidRequest()
+    expect(processor.canHandle(invalidRequest)).to.be.equal(false)
+  })
+
+  it('processes a Go package correctly', async () => {
+    const { processor, request } = await setup()
+    processor.linkAndQueue = sinon.stub()
+    await processor.handle(request)
+  })
+
+})
+
 async function setup() {
   const processor = GoExtract({ logger: {} }, () => { })
+  processor.linkAndQueueTool = sinon.stub()
+  const request = createRequest()
+  const dir = processor.createTempDir(request)
+  request.document.location = dir.name
+  return { processor, request }
+}
+
+function createRequest() {
+  const request = new Request('go', 'cd:/go/rsc.io/-/quote/1.5.2')
+  request.document = {
+    _metadata: { links: {} },
+    sourceInfo: {
+      type: 'go',
+      provider: 'rsc.io',
+      namespace: '-',
+      name: 'quote',
+      revision: '1.5.2'
+    }
+  }
+  request.processMode = 'process'
+  return request
+}
+
+function createInvalidRequest() {
+  const request = new Request('deb', 'cd:/go/rsc.io/-/quote/1.5.2')
+  request.document = {
+    _metadata: { links: {} },
+    sourceInfo: {
+      type: 'deb',
+      provider: 'rsc.io',
+      namespace: '-',
+      name: 'quote',
+      revision: '1.5.2'
+    }
+  }
+  request.processMode = 'process'
+  return request
 }
