@@ -23,11 +23,11 @@ class GoExtract extends AbstractClearlyDefinedProcessor {
     if (this.isProcessing(request)) {
       await super.handle(request)
       const spec = this.toSpec(request)
-      this.createDocument(request, spec)
+      this._createDocument(request, spec)
     }
   }
 
-  createDocument(request) {
+  _createDocument(request) {
     request.document = merge(this.clone(request.document))
   }
 }

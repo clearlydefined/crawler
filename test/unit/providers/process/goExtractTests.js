@@ -16,12 +16,11 @@ describe('Go processing', () => {
   it('determines whether the request is already processing', async () => {
     const { processor, request } = await setup()
     processor.isProcessing = () => true
-    sinon.spy(processor, 'createDocument')
+    processor._createDocument = sinon.stub()
 
     await processor.handle(request)
 
-    expect(processor.createDocument.callCount).to.be.equal(1)
-
+    expect(processor._createDocument.callCount).to.be.equal(1)
   })
 
   it('processes a Go package correctly', async () => {
