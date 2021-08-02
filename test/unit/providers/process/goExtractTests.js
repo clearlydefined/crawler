@@ -45,12 +45,12 @@ async function setup() {
 }
 
 function createRequest() {
-  const request = new Request('go', 'cd:/go/proxy.golang.org/rsc.io/quote/1.5.2')
+  const request = new Request('go', 'cd:/go/golang/rsc.io/quote/1.5.2')
   request.document = {
     _metadata: { links: {} },
     sourceInfo: {
       type: 'go',
-      provider: 'proxy.golang.org',
+      provider: 'golang',
       namespace: 'rsc.io',
       name: 'quote',
       revision: '1.5.2'
@@ -61,12 +61,12 @@ function createRequest() {
 }
 
 function createInvalidRequest() {
-  const request = new Request('deb', 'cd:/go/proxy.golang.org/rsc.io/quote/1.5.2')
+  const request = new Request('deb', 'cd:/go/golang/rsc.io/quote/1.5.2')
   request.document = {
     _metadata: { links: {} },
     sourceInfo: {
       type: 'deb',
-      provider: 'proxy.golang.org',
+      provider: 'golang',
       namespace: 'rsc.io',
       name: 'quote',
       revision: '1.5.2'

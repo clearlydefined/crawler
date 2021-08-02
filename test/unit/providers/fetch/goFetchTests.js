@@ -13,11 +13,11 @@ const stub = 'https://proxy.golang.org/'
 describe('Go utility functions', () => {
   it('builds URLs', () => {
     const fetch = GoFetch({})
-    expect(fetch._buildUrl(spec('go', 'proxy.golang.org', 'golang.org%x', 'net', 'v0.0.0-20210226172049-e18ecbb05110'))).to.equal(stub + 'golang.org%x/net/@v/v0.0.0-20210226172049-e18ecbb05110.zip')
-    expect(fetch._buildUrl(spec('go', 'proxy.golang.org', 'golang.org%x', 'net', 'v0.0.0-20210226172049-e18ecbb05110'), '.mod')).to.equal(stub + 'golang.org%x/net/@v/v0.0.0-20210226172049-e18ecbb05110.mod')
-    expect(fetch._buildUrl(spec('go', 'proxy.golang.org', '-', 'collectd.org', 'v0.5.0'))).to.equal(stub + 'collectd.org/@v/v0.5.0.zip')
-    expect(fetch._buildUrl(spec('go', 'proxy.golang.org', 'cloud.google.com', 'go', 'v0.56.0'))).to.equal(stub + 'cloud.google.com/go/@v/v0.56.0.zip')
-    expect(fetch._buildUrl(spec('go', 'proxy.golang.org', 'github.com%2fAzure%2fazure-event-hubs-go', 'v3', 'v3.2.0'))).to.equal(stub + 'github.com/Azure/azure-event-hubs-go/v3/@v/v3.2.0.zip')
+    expect(fetch._buildUrl(spec('go', 'golang', 'golang.org%x', 'net', 'v0.0.0-20210226172049-e18ecbb05110'))).to.equal(stub + 'golang.org%x/net/@v/v0.0.0-20210226172049-e18ecbb05110.zip')
+    expect(fetch._buildUrl(spec('go', 'golang', 'golang.org%x', 'net', 'v0.0.0-20210226172049-e18ecbb05110'), '.mod')).to.equal(stub + 'golang.org%x/net/@v/v0.0.0-20210226172049-e18ecbb05110.mod')
+    expect(fetch._buildUrl(spec('go', 'golang', '-', 'collectd.org', 'v0.5.0'))).to.equal(stub + 'collectd.org/@v/v0.5.0.zip')
+    expect(fetch._buildUrl(spec('go', 'golang', 'cloud.google.com', 'go', 'v0.56.0'))).to.equal(stub + 'cloud.google.com/go/@v/v0.56.0.zip')
+    expect(fetch._buildUrl(spec('go', 'golang', 'github.com%2fAzure%2fazure-event-hubs-go', 'v3', 'v3.2.0'))).to.equal(stub + 'github.com/Azure/azure-event-hubs-go/v3/@v/v3.2.0.zip')
   })
 })
 
@@ -78,21 +78,21 @@ describe('Go Proxy fetching', () => {
 
   it('succeeds in download, decompress, and hash', async () => {
     const handler = Fetch({ logger: { log: sinon.stub() } })
-    const request = await handler.handle(new Request('test', 'cd:/go/proxy.golang.org/rsc.io/quote/v1.3.0'))
+    const request = await handler.handle(new Request('test', 'cd:/go/golang/rsc.io/quote/v1.3.0'))
     expect(request.document.hashes.sha1).to.be.equal(hashes['v1.3.0.zip']['sha1'])
     expect(request.document.hashes.sha256).to.be.equal(hashes['v1.3.0.zip']['sha256'])
     expect(request.document.releaseDate).to.equal('2018-02-14T00:54:53Z')
     expect(request.casedSpec.name).to.equal('quote')
     expect(request.casedSpec.namespace).to.equal('rsc.io')
     expect(request.contentOrigin).to.equal('origin')
-    expect(request.url).to.equal('cd:/go/proxy.golang.org/rsc.io/quote/v1.3.0')
+    expect(request.url).to.equal('cd:/go/golang/rsc.io/quote/v1.3.0')
   })
 
   it('queries for the latest version when coordinates are missing a revision', async () => {
     // Versions are listed in test/fixtures/go/list
 
     const handler = Fetch({ logger: { log: sinon.stub() } })
-    const request = await handler.handle(new Request('test', 'cd:/go/proxy.golang.org/rsc.io/quote'))
+    const request = await handler.handle(new Request('test', 'cd:/go/golang/rsc.io/quote'))
     expect(request.casedSpec.revision).to.equal('v1.5.3-pre1')
   })
 
@@ -100,7 +100,7 @@ describe('Go Proxy fetching', () => {
     const handler = setup()
     handler._getInfo = () => null
 
-    const request = await handler.handle(new Request('test', 'cd:/go/proxy.golang.org/rsc.io/quote/v1.3.0'))
+    const request = await handler.handle(new Request('test', 'cd:/go/golang/rsc.io/quote/v1.3.0'))
 
     expect(request.processControl).to.equal('skip')
     expect(request.document).to.be.undefined
@@ -111,7 +111,7 @@ describe('Go Proxy fetching', () => {
     const handler = setup()
     handler._getLatestVersion = () => null
 
-    const request = await handler.handle(new Request('test', 'cd:/go/proxy.golang.org/rsc.io/quote'))
+    const request = await handler.handle(new Request('test', 'cd:/go/golang/rsc.io/quote'))
 
     expect(request.processControl).to.equal('skip')
     expect(request.document).to.be.undefined
@@ -122,7 +122,7 @@ describe('Go Proxy fetching', () => {
     const handler = setup()
     handler._getArtifact = () => false
 
-    const request = await handler.handle(new Request('test', 'cd:/go/proxy.golang.org/rsc.io/quote/v1.3.0'))
+    const request = await handler.handle(new Request('test', 'cd:/go/golang/rsc.io/quote/v1.3.0'))
 
     expect(request.processControl).to.equal('skip')
     expect(request.outcome).to.eq('Missing  ')

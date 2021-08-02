@@ -5,6 +5,12 @@ const nodeRequest = require('request')
 const fs = require('fs')
 
 class GoFetch extends AbstractFetch {
+
+  canHandle(request) {
+    const spec = this.toSpec(request)
+    return spec && spec.provider === 'golang'
+  }
+
   async handle(request) {
     const spec = this.toSpec(request)
     if (!spec.revision) spec.revision = await this._getLatestVersion(spec)
@@ -56,7 +62,7 @@ class GoFetch extends AbstractFetch {
   }
 
   _buildUrl(spec, extension = '.zip') {
-    let initial_url = `https://${spec.provider}/${spec.namespace}/${spec.name}/@v/${spec.revision}${extension}`
+    let initial_url = `https://proxy.golang.org/${spec.namespace}/${spec.name}/@v/${spec.revision}${extension}`
     return this._replace_encodings(this._remove_blank_fields(initial_url))
   }
 
