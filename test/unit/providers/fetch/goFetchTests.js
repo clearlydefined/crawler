@@ -13,8 +13,8 @@ const stub = 'https://proxy.golang.org/'
 describe('Go utility functions', () => {
   it('builds URLs', () => {
     const fetch = GoFetch({})
-    expect(fetch._buildUrl(spec('go', 'golang', 'golang.org%x', 'net', 'v0.0.0-20210226172049-e18ecbb05110'))).to.equal(stub + 'golang.org%x/net/@v/v0.0.0-20210226172049-e18ecbb05110.zip')
-    expect(fetch._buildUrl(spec('go', 'golang', 'golang.org%x', 'net', 'v0.0.0-20210226172049-e18ecbb05110'), '.mod')).to.equal(stub + 'golang.org%x/net/@v/v0.0.0-20210226172049-e18ecbb05110.mod')
+    expect(fetch._buildUrl(spec('go', 'golang', 'golang.org%2fx', 'net', 'v0.0.0-20210226172049-e18ecbb05110'))).to.equal(stub + 'golang.org/x/net/@v/v0.0.0-20210226172049-e18ecbb05110.zip')
+    expect(fetch._buildUrl(spec('go', 'golang', 'golang.org%2fx', 'net', 'v0.0.0-20210226172049-e18ecbb05110'), '.mod')).to.equal(stub + 'golang.org/x/net/@v/v0.0.0-20210226172049-e18ecbb05110.mod')
     expect(fetch._buildUrl(spec('go', 'golang', '-', 'collectd.org', 'v0.5.0'))).to.equal(stub + 'collectd.org/@v/v0.5.0.zip')
     expect(fetch._buildUrl(spec('go', 'golang', 'cloud.google.com', 'go', 'v0.56.0'))).to.equal(stub + 'cloud.google.com/go/@v/v0.56.0.zip')
     expect(fetch._buildUrl(spec('go', 'golang', 'github.com%2fAzure%2fazure-event-hubs-go', 'v3', 'v3.2.0'))).to.equal(stub + 'github.com/Azure/azure-event-hubs-go/v3/@v/v3.2.0.zip')
