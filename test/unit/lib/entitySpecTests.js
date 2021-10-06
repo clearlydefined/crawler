@@ -22,10 +22,4 @@ describe('entitySpec', () => {
     expect(entityFromUrl.name).to.eq('org.eclipse.xtext.common.types')
     expect(entityFromUrl.revision).to.eq('2.25.0')
   })
-
-  it('handles a namespace with additional slashes', () => {
-    const entityFromUrl = EntitySpec.fromUrl('cd:/go/golang/rsc.io/quote/v3/v3.1.0')
-    expect(entityFromUrl.namespace).to.eq('rsc.io/v3')
-    expect(entityFromUrl.revision).to.eq('v3.1.0')
-  })
 })
