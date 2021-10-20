@@ -80,7 +80,7 @@ class GoFetch extends AbstractFetch {
     const status = await new Promise(resolve => {
       nodeRequest
         .get(url, (error, response) => {
-          if (error) this.logger.error(error)
+          if (error) this.logger.error(this._google_proxy_error_string(error))
           if (response.statusCode !== 200) return resolve(false)
         })
         .pipe(fs.createWriteStream(destination).on('finish', () => resolve(true)))
@@ -97,10 +97,14 @@ class GoFetch extends AbstractFetch {
       content = await requestPromise({ url })
     } catch (error) {
       if (error.statusCode === 404) return null
-      else throw error
+      else throw this._google_proxy_error_string(error)
     }
 
     return JSON.parse(content.toString())
+  }
+
+  _google_proxy_error_string(error) {
+    return `Error encountered when querying proxy.golang.org. Please check whether the component has a valid go.mod file. ${error}`
   }
 }
 
