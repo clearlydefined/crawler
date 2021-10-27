@@ -32,6 +32,7 @@ module.exports = {
     cratesio: {},
     debian: { cdFileLocation: cd_file.location },
     git: {},
+    go: {},
     mavenCentral: {},
     mavenGoogle: {},
     npmjs: {},
@@ -51,6 +52,7 @@ module.exports = {
       installDir: config.get('FOSSOLOGY_HOME') || '/mnt/c/git/fo/fossology/src/'
     },
     gem: { githubToken },
+    go: { githubToken },
     licensee: {},
     maven: { githubToken },
     npm: { githubToken },
