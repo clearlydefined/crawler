@@ -13,9 +13,8 @@ class GoExtract extends AbstractClearlyDefinedProcessor {
     return request.type === 'go' && spec && spec.type === 'go'
   }
 
-  // Placeholder until I figure out what to put here
   get toolVersion() {
-    return '0.0.0'
+    return '1.0.0'
   }
 
   async handle(request) {
