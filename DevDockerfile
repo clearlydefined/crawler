@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 # SPDX-License-Identifier: MIT
 
-FROM node:12
+FROM node:14
 ENV APPDIR=/opt/service
 
 ARG BUILD_NUMBER=0
