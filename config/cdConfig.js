@@ -61,6 +61,7 @@ module.exports = {
     composer: { githubToken },
     pod: { githubToken },
     pypi: { githubToken },
+    reuse: {},
     scancode: {
       installDir: config.get('SCANCODE_HOME') || 'C:\\installs\\scancode-toolkit-3.0.2',
       options: [

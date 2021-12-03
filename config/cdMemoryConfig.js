@@ -10,7 +10,8 @@ module.exports = {
   },
   process: {
     scancode: {},
-    licensee: {}
+    licensee: {},
+    reuse: {}
   },
   store: {
     provider: 'memory'
