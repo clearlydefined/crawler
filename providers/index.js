@@ -41,6 +41,7 @@ module.exports = {
     package: require('./process/package').processor,
     composer: require('./process/composerExtract'),
     pod: require('./process/podExtract'),
+    reuse: require('./process/fsfeReuse'),
     scancode: require('./process/scancode'),
     fossology: require('./process/fossology'),
     source: require('./process/source').processor,

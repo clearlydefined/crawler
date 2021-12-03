@@ -11,6 +11,7 @@ function neighbors() {
 const scancode = self
 const fossology = self
 const licensee = self
+const reuse = self
 
 // default ClearlyDefined tool
 const clearlydefined = self
@@ -19,6 +20,7 @@ const source = {
   _type: 'source',
   clearlydefined,
   licensee,
+  reuse,
   scancode,
   fossology
 }
@@ -142,6 +144,7 @@ const entities = {
   scancode,
   fossology,
   licensee,
+  reuse,
   npm,
   crate,
   deb,
