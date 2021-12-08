@@ -5,7 +5,7 @@
 #COPY fossology_init.sh fossology_init.sh
 #RUN ./fossology_init.sh
 
-FROM node:12
+FROM node:14
 ENV APPDIR=/opt/service
 #RUN apk update && apk upgrade && \
 #    apk add --no-cache bash git openssh
