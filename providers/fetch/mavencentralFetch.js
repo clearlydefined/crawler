@@ -9,6 +9,7 @@ const { promisify } = require('util')
 const fs = require('fs')
 const exists = promisify(fs.exists)
 const path = require('path')
+const { DateTime } = require('luxon')
 const parseString = promisify(require('xml2js').parseString)
 const EntitySpec = require('../../lib/entitySpec')
 
@@ -135,16 +136,24 @@ class MavenFetch extends AbstractFetch {
     }, {})
   }
 
+  _extractDate(dateAndTime) {
+    let result = DateTime.fromISO(dateAndTime)
+    if (!result.isValid) result = DateTime.fromRFC2822(dateAndTime)
+    if (!result.isValid) result = DateTime.fromHTTP(dateAndTime)
+    return result.isValid ? result.toJSDate() : null
+  }
+
   async _getReleaseDate(dirName, spec) {
     const location = path.join(dirName, `META-INF/${spec.type}/${spec.namespace}/${spec.name}/pom.properties`)
     if (await exists(location)) {
       const pomProperties = (await promisify(fs.readFile)(location)).toString().split('\n')
       for (const line of pomProperties) {
-        const releaseDate = new Date(line.slice(1))
-        if (!isNaN(releaseDate.getTime())) return releaseDate.toISOString()
+        const releaseDate = this._extractDate(line.slice(1))
+        if (releaseDate) return releaseDate.toISOString()
       }
     }
-    const url = `https://search.maven.org/solrsearch/select?q=g:"${spec.namespace}"+AND+a:"${spec.name}"&rows=1&wt=json`
+    const specForQuery = `g:"${spec.namespace}"+AND+a:"${spec.name}"+AND+v:"${spec.revision}"`
+    const url = `https://search.maven.org/solrsearch/select?q=${specForQuery}&rows=1&wt=json`
     const response = await requestPromise({ url, json: true })
     const timestamp = get(response, 'response.docs[0].timestamp')
     if (timestamp) return new Date(timestamp).toISOString()
