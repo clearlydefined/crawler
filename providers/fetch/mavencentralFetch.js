@@ -137,6 +137,7 @@ class MavenFetch extends AbstractFetch {
   }
 
   _extractDate(dateAndTime) {
+    if (!dateAndTime) return dateAndTime
     let result = DateTime.fromISO(dateAndTime)
     if (!result.isValid) result = DateTime.fromRFC2822(dateAndTime)
     if (!result.isValid) result = DateTime.fromHTTP(dateAndTime)
