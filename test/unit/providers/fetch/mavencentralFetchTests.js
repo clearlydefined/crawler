@@ -42,27 +42,6 @@ describe('Maven Central utility functions', () => {
     const date = await fetch._getReleaseDate('/tmp/', spec('maven', 'g1', 'a1', '1.2.3'))
     expect(date).to.eq('2011-05-13T11:26:22.000Z')
   })
-
-  describe('test _extractDate', () => {
-    const fetch = MavenFetch({})
-    it('handle null', () => {
-      expect(fetch._extractDate(null)).to.be.null
-    })
-    it('invalid date', () => {
-      expect(fetch._extractDate('Created by Maven 3.5.4')).to.be.null
-    })
-    it('unparseable date', () => {
-      expect(fetch._extractDate('Thu Jun 18 20:06:26 CEST 2009')).to.be.null
-    })
-    it('parseable date found in pom properties', () => {
-      const parsed = fetch._extractDate('Sat Nov 13 19:35:12 GMT+01:00 2010')
-      expect(parsed.toISOString()).to.be.eq('2010-11-13T18:35:12.000Z')
-    })
-    it('parseable date: ISO format', () => {
-      const parsed = fetch._extractDate('2010-11-13T18:35:12.000Z')
-      expect(parsed.toISOString()).to.be.eq('2010-11-13T18:35:12.000Z')
-    })
-  })
 })
 
 function spec(type, namespace, name, revision) {
@@ -115,7 +94,7 @@ describe('MavenCentral fetching', () => {
     })
   })
 
-  afterEach(function() {
+  afterEach(function () {
     sinon.sandbox.restore()
   })
 
@@ -134,8 +113,8 @@ describe('MavenCentral fetching', () => {
     const handler = setup()
     handler._getRegistryData = () => dummyRegistryData
     handler._getPoms = () => [dummyPom1]
-    handler.decompress = () => {}
-    handler.computeHashes = () => {}
+    handler.decompress = () => { }
+    handler.computeHashes = () => { }
     handler.createTempDir = () => {
       return { name: '/tmp/' }
     }
@@ -144,7 +123,7 @@ describe('MavenCentral fetching', () => {
         name: '/tmp/random'
       }
     }
-    handler._getArtifact = () => {}
+    handler._getArtifact = () => { }
     try {
       const result = await handler.handle(new Request('test', 'cd:/maven/mavencentral/org.eclipse/error/3.3.0-v3344'))
       expect(result.outcome).to.eq('Missing  ')
