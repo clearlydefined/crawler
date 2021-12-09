@@ -140,6 +140,7 @@ class MavenFetch extends AbstractFetch {
     let result = DateTime.fromISO(dateAndTime)
     if (!result.isValid) result = DateTime.fromRFC2822(dateAndTime)
     if (!result.isValid) result = DateTime.fromHTTP(dateAndTime)
+    if (!result.isValid) result = DateTime.fromFormat(dateAndTime, 'EEE MMM d HH:mm:ss \'GMT\'ZZ yyyy')
     return result.isValid ? result.toJSDate() : null
   }
 
