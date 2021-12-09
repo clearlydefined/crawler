@@ -61,7 +61,7 @@ This arrangement allows one to apply an overall policy (e.g., freshness and fetc
 The traversal is driven by the scenario such as Initialization, or Update where the graph is cut differently to suit the need.
  */
 
-const moment = require('moment')
+const { DateTime } = require('luxon')
 const VisitorMap = require('./visitorMap')
 
 class TraversalPolicy {
@@ -86,6 +86,12 @@ class TraversalPolicy {
     return VisitorMap.getMap(mapName, path)
   }
 
+  static _hasExpired(processedAt, expiration = 0, unit = 'hours') {
+    return (
+      !processedAt ||
+      DateTime.now().diff(DateTime.fromISO(processedAt), unit)[unit] > expiration
+    )
+  }
   /**
    * A policy spec has the following form:  <policyName>[:<[scenario/]mapName[@path]].  That means a spec can be just
    * a policy name (e.g., default, reprocess, ...) in which case the map is selected from the default scenario,
@@ -178,12 +184,7 @@ class TraversalPolicy {
       // TODO this is not quite right. To tell time freshness we need to get the cached version but if we need to process
       // we need the content from origin. Essentially we need to read the processed time with the etag (at that point)
       // determine if the content is stale.  Testing here is too late.
-      return (
-        !request.document ||
-        !request.document._metadata ||
-        !request.document._metadata.processedAt ||
-        moment.diff(request.document._metadata.processedAt, 'hours') > this.freshness * 24
-      )
+      return TraversalPolicy._hasExpired(request.document?._metadata?.processedAt, this.freshness * 24, 'hours')
     }
     if (this.freshness === 'version' || this.freshness === 'matchOrVersion') {
       return (
