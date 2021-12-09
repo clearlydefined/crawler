@@ -9,9 +9,9 @@ const { promisify } = require('util')
 const fs = require('fs')
 const exists = promisify(fs.exists)
 const path = require('path')
-const { DateTime } = require('luxon')
 const parseString = promisify(require('xml2js').parseString)
 const EntitySpec = require('../../lib/entitySpec')
+const { extractDate } = require('../../lib/utils')
 
 const providerMap = {
   mavencentral: 'https://search.maven.org/remotecontent?filepath='
@@ -136,22 +136,13 @@ class MavenFetch extends AbstractFetch {
     }, {})
   }
 
-  _extractDate(dateAndTime) {
-    if (!dateAndTime) return dateAndTime
-    let result = DateTime.fromISO(dateAndTime)
-    if (!result.isValid) result = DateTime.fromRFC2822(dateAndTime)
-    if (!result.isValid) result = DateTime.fromHTTP(dateAndTime)
-    if (!result.isValid) result = DateTime.fromFormat(dateAndTime, 'EEE MMM d HH:mm:ss \'GMT\'ZZ yyyy')
-    return result.isValid ? result.toJSDate() : null
-  }
-
   async _getReleaseDate(dirName, spec) {
     const location = path.join(dirName, `META-INF/${spec.type}/${spec.namespace}/${spec.name}/pom.properties`)
     if (await exists(location)) {
       const pomProperties = (await promisify(fs.readFile)(location)).toString().split('\n')
       for (const line of pomProperties) {
-        const releaseDate = this._extractDate(line.slice(1))
-        if (releaseDate) return releaseDate.toISOString()
+        const releaseDate = extractDate(line.slice(1))
+        if (releaseDate) return releaseDate.toJSDate().toISOString()
       }
     }
     const specForQuery = `g:"${spec.namespace}"+AND+a:"${spec.name}"+AND+v:"${spec.revision}"`
