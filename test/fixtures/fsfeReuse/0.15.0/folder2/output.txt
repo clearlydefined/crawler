@@ -1,0 +1,10 @@
+SPDXVersion: SPDX-2.1
+DataLicense: CC0-1.0
+SPDXID: SPDXRef-DOCUMENT
+DocumentName: ospo-reuse
+DocumentNamespace: http://spdx.org/spdxdocs/spdx-v2.1-9968fabf-60d1-4b33-a05a-81c292fff1a0
+Creator: Person: Anonymous ()
+Creator: Organization: Anonymous ()
+Creator: Tool: reuse-0.13
+Created: 2021-12-09T12:52:26Z
+CreatorComment: <text>This document was created automatically using available reuse information consistent with REUSE.</text>

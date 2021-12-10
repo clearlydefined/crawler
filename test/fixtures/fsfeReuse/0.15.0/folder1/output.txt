@@ -1,0 +1,42 @@
+SPDXVersion: SPDX-2.1
+DataLicense: CC0-1.0
+SPDXID: SPDXRef-DOCUMENT
+DocumentName: ospo-reuse
+DocumentNamespace: http://spdx.org/spdxdocs/spdx-v2.1-9968fabf-60d1-4b33-a05a-81c292fff1a0
+Creator: Person: Anonymous ()
+Creator: Organization: Anonymous ()
+Creator: Tool: reuse-0.13
+Created: 2021-12-09T12:52:26Z
+CreatorComment: <text>This document was created automatically using available reuse information consistent with REUSE.</text>
+Relationship: SPDXRef-DOCUMENT describes SPDXRef-4f323cb885523eef8c3f46b4ddcd52bf
+Relationship: SPDXRef-DOCUMENT describes SPDXRef-f2e7d158dd7a091da9350183e3809b62
+Relationship: SPDXRef-DOCUMENT describes SPDXRef-70af95ff066a356980f85142fd732081
+Relationship: SPDXRef-DOCUMENT describes SPDXRef-3cd8f22fac294a4f08c4b282df343c04
+
+FileName: ./README.md
+SPDXID: SPDXRef-4f323cb885523eef8c3f46b4ddcd52bf
+FileChecksum: SHA1: a2f500b09e77f5112857ef9add7bce1fd4378bee
+LicenseConcluded: NOASSERTION
+LicenseInfoInFile: Apache-2.0
+FileCopyrightText: <text>1982-2021 SAP SE or an SAP affiliate company and ospo-reuse contributors</text>
+
+FileName: ./SECURITY.md
+SPDXID: SPDXRef-f2e7d158dd7a091da9350183e3809b62
+FileChecksum: SHA1: 914bc531dd7ab3efab3c11b57aa55505aed53064
+LicenseConcluded: NOASSERTION
+LicenseInfoInFile: Beerware
+FileCopyrightText: <text>2013-2017 SAP SE or an SAP affiliate company and ospo-reuse contributors</text>
+
+FileName: ./ospo-reuse/src/main/java/com/sap/ospo-reuse/HelloWorld.java
+SPDXID: SPDXRef-70af95ff066a356980f85142fd732081
+FileChecksum: SHA1: 2e7b02cf7248e879954f89feaaa07a19d8843c1b
+LicenseConcluded: NOASSERTION
+LicenseInfoInFile: GPL-3.0-or-later
+FileCopyrightText: <text>2019-2021 SAP SE or an SAP affiliate company and ospo-reuse contributors</text>
+
+FileName: ./ospo-reuse/src/test/java/com/sap/ospo-reuse/TestsHelloWorld.java
+SPDXID: SPDXRef-3cd8f22fac294a4f08c4b282df343c04
+FileChecksum: SHA1: c19a546867d982dfee06d61504c12a7fb555b936
+LicenseConcluded: WTFPL
+LicenseInfoInFile: NOASSERTION
+FileCopyrightText: <text>2019-2021 SAP SE or an SAP affiliate company and ospo-reuse contributors</text>

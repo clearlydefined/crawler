@@ -4,15 +4,12 @@
 const AbstractProcessor = require('./abstractProcessor')
 const { promisify } = require('util')
 const execFile = promisify(require('child_process').execFile)
-const { flatten, merge, uniqBy } = require('lodash')
-const { trimAllParents } = require('../../lib/utils')
-const path = require('path')
-const throat = require('throat')
+const { merge } = require('lodash')
 
 class FsfeReuseProcessor extends AbstractProcessor {
   constructor(options) {
     super(options)
-    // Kick off version detection but don't wait. We'll wait before processing anything
+    // Kick off version detection but don't wait. We'll wait before processing anything...
     this._versionPromise = this._detectVersion()
   }
 
@@ -29,7 +26,6 @@ class FsfeReuseProcessor extends AbstractProcessor {
   }
 
   async handle(request) {
-    this.logger.info(`All hope abandon, ye who enter here!`)
     if (this.options.disabled) return request.markSkip('Disabled  ')
     if (!(await this._versionPromise)) return request.markSkip('REUSE tool not properly configured')
     super.handle(request)
@@ -40,12 +36,7 @@ class FsfeReuseProcessor extends AbstractProcessor {
   async _createDocument(request) {
     const record = await this._run(request)
     if (!record) return
-    const location = request.document.location
     request.document = merge(this.clone(request.document), { reuse: record })
-    /*
-    const toAttach = record.output.content.matched_files.map(file => file.filename)
-    this.attachFiles(request.document, toAttach, location)
-    */
   }
 
   async _run(request) {
@@ -59,7 +50,7 @@ class FsfeReuseProcessor extends AbstractProcessor {
         const spdxResultFile = {}
         const spdxRawValues = spdxResult.split(/\n/)
         spdxRawValues.forEach(spdxRawValue => {
-          const spdxMatchResult = spdxRawValue.match(/((?<first_key>\w+)\:\s)((?<second_key>\w+)\:\s)?(?<spdx_value>.+)/)
+          const spdxMatchResult = spdxRawValue.match(/((?<first_key>\w+):\s)((?<second_key>\w+):\s)?(?<spdx_value>.+)/)
           if (spdxMatchResult !== null) {
             const spdxResultValue = { key: spdxMatchResult.groups.first_key, secondaryKey: spdxMatchResult.groups.second_key, spdxValue: spdxMatchResult.groups.spdx_value.replace(/(<\/?([^>]+)>)/g, '') }
             if (entryIndex === 0) {
@@ -67,7 +58,11 @@ class FsfeReuseProcessor extends AbstractProcessor {
                 results.metadata[spdxResultValue.key + (spdxResultValue.secondaryKey ? spdxResultValue.secondaryKey : '')] = spdxResultValue.spdxValue
               }
             } else {
-              spdxResultFile[spdxResultValue.key + (spdxResultValue.secondaryKey ? spdxResultValue.secondaryKey : '')] = spdxResultValue.spdxValue
+              let attributeValue = spdxResultValue.spdxValue
+              if (spdxResultValue.key === 'FileName' && attributeValue.startsWith('./')) {
+                attributeValue = attributeValue.substring(2)
+              }
+              spdxResultFile[spdxResultValue.key + (spdxResultValue.secondaryKey ? spdxResultValue.secondaryKey : '')] = attributeValue
             }
           }
         })
