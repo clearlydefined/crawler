@@ -92,6 +92,7 @@ const pypi = {
   source,
   clearlydefined,
   licensee,
+  reuse,
   scancode,
   fossology
 }

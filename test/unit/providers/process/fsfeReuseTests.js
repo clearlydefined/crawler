@@ -46,8 +46,8 @@ describe('FSFE REUSE software process', () => {
       if (document.reuse.files[i].FileName === 'ospo-reuse/src/test/java/com/sap/ospo-reuse/TestsHelloWorld.java') {
         testHelloWorldFound = true
         expect(document.reuse.files[i].LicenseConcluded).to.equal('WTFPL')
-        expect(document.reuse.files[i].LicenseInfoInFile).to.equal('NOASSERTION')
-        expect(document.reuse.files[i].FileCopyrightText).to.equal('2019-2021 SAP SE or an SAP affiliate company and ospo-reuse contributors')
+        expect(document.reuse.files[i].LicenseInfoInFile).to.be.undefined
+        expect(document.reuse.files[i].FileCopyrightText).to.equal('NONE')
       }
     }
     expect(readmeFound).to.be.true
