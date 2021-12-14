@@ -5,7 +5,7 @@
 #COPY fossology_init.sh fossology_init.sh
 #RUN ./fossology_init.sh
 
-FROM node:14
+FROM node:16
 ENV APPDIR=/opt/service
 #RUN apk update && apk upgrade && \
 #    apk add --no-cache bash git openssh
@@ -14,7 +14,7 @@ ARG BUILD_NUMBER=0
 ENV CRAWLER_BUILD_NUMBER=$BUILD_NUMBER
 
 # Ruby
-RUN apt-get update && apt-get install -y --no-install-recommends --no-install-suggests curl bzip2 build-essential libssl-dev libreadline-dev zlib1g-dev cmake && \
+RUN apt-get update && apt-get install -y --no-install-recommends --no-install-suggests curl bzip2 build-essential libssl-dev libreadline-dev zlib1g-dev cmake python3 python3-pip && \
   rm -rf /var/lib/apt/lists/* && \
   curl -L https://github.com/rbenv/ruby-build/archive/v20180822.tar.gz | tar -zxvf - -C /tmp/ && \
   cd /tmp/ruby-build-* && ./install.sh && cd / && \
@@ -29,6 +29,10 @@ ENV SCANCODE_HOME=/opt/scancode-toolkit-3.0.2
 
 # Licensee
 RUN gem install licensee -v 9.11.0 --no-rdoc --no-ri
+
+# REUSE
+RUN pip3 install setuptools
+RUN pip3 install reuse
 
 # FOSSology
 # WORKDIR /opt
