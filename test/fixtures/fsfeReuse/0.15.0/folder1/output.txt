@@ -32,7 +32,7 @@ SPDXID: SPDXRef-70af95ff066a356980f85142fd732081
 FileChecksum: SHA1: 2e7b02cf7248e879954f89feaaa07a19d8843c1b
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: GPL-3.0-or-later
-FileCopyrightText: <text>2019-2021 SAP SE or an SAP affiliate company and ospo-reuse contributors</text>
+FileCopyrightText: <text>SPDX-FileCopyrightText: 2019-2021 SAP SE or an SAP affiliate company and ospo-reuse contributors</text>
 
 FileName: ./ospo-reuse/src/test/java/com/sap/ospo-reuse/TestsHelloWorld.java
 SPDXID: SPDXRef-3cd8f22fac294a4f08c4b282df343c04

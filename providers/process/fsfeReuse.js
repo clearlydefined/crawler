@@ -62,6 +62,9 @@ class FsfeReuseProcessor extends AbstractProcessor {
               if (spdxResultValue.key === 'FileName' && attributeValue.startsWith('./')) {
                 attributeValue = attributeValue.substring(2)
               }
+              if (spdxResultValue.key === 'FileCopyrightText' && attributeValue.startsWith('SPDX-FileCopyrightText: ')) {
+                attributeValue = attributeValue.substring(24)
+              }
               spdxResultFile[spdxResultValue.key + (spdxResultValue.secondaryKey ? spdxResultValue.secondaryKey : '')] = attributeValue
             }
           }
