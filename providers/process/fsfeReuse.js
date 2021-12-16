@@ -5,6 +5,7 @@ const AbstractProcessor = require('./abstractProcessor')
 const { promisify } = require('util')
 const execFile = promisify(require('child_process').execFile)
 const { merge } = require('lodash')
+const { readdirSync } = require('fs')
 
 class FsfeReuseProcessor extends AbstractProcessor {
   constructor(options) {
@@ -36,7 +37,9 @@ class FsfeReuseProcessor extends AbstractProcessor {
   async _createDocument(request) {
     const record = await this._run(request)
     if (!record) return
+    const location = request.document.location
     request.document = merge(this.clone(request.document), { reuse: record })
+    this.attachFiles(request.document, record.licenses.map(file => file.filePath), location)
   }
 
   async _run(request) {
@@ -45,7 +48,7 @@ class FsfeReuseProcessor extends AbstractProcessor {
     try {
       const { stdout } = await execFile('reuse', parameters, { cwd: root })
       if (!stdout) return
-      const results = { metadata: {}, files: [] }
+      const results = { metadata: {}, files: [], licenses: this._getLicenses(request) }
       stdout.trim().split(/\n\n/).forEach((spdxResult, entryIndex) => {
         const spdxResultFile = {}
         const spdxRawValues = spdxResult.split(/\n/)
@@ -77,6 +80,22 @@ class FsfeReuseProcessor extends AbstractProcessor {
     } catch (error) {
       request.markDead('Error', error ? error.message : 'REUSE run failed')
     }
+  }
+
+  _getLicenses(request) {
+    const licenses = []
+    const licensesDir = 'LICENSES'
+    try {
+      const licenseFiles = readdirSync(request.document.location + '/' + licensesDir)
+      licenseFiles.forEach(file => {
+        licenses.push({
+          filePath: licensesDir + '/' + file, spdxId: file.substring(0, file.indexOf('.txt'))
+        })
+      })
+    } catch (error) {
+      this.logger.log(`Error reading LICENSES directory: ${error.message}`)
+    }
+    return licenses
   }
 
   _detectVersion() {
