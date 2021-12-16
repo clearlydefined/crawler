@@ -47,7 +47,7 @@ describe('packagistFetch', () => {
   })
 
   afterEach(() => {
-    sinon.sandbox.restore()
+    sinon.restore()
   })
 
   it('can handle the request being attempted', async () => {

@@ -43,8 +43,8 @@ describe('', () => {
     })
   })
 
-  afterEach(function() {
-    sinon.sandbox.restore()
+  afterEach(function () {
+    sinon.restore()
   })
 
   it('succeeds in download, decompress and hash', async () => {
@@ -158,7 +158,7 @@ function mockCrateFetch(options) {
     return { name: '/tmp' }
   }
   crateFetch._getPackage = () => '/tmp/crate'
-  crateFetch.decompress = () => {}
+  crateFetch.decompress = () => { }
   crateFetch.computeHashes = () => {
     return { sha1: '42' }
   }
