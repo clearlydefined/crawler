@@ -94,8 +94,8 @@ describe('MavenGoogle fetching', () => {
     })
   })
 
-  afterEach(function() {
-    sinon.sandbox.restore()
+  afterEach(function () {
+    sinon.restore()
   })
 
   it('succeeds in download, decompress and hash', async () => {
@@ -112,8 +112,8 @@ describe('MavenGoogle fetching', () => {
     const handler = setup()
     handler._getRegistryData = () => dummyRegistryData
     handler._getPoms = () => [dummyPom1]
-    handler.decompress = () => {}
-    handler.computeHashes = () => {}
+    handler.decompress = () => { }
+    handler.computeHashes = () => { }
     handler.createTempDir = () => {
       return { name: '/tmp/' }
     }
@@ -122,7 +122,7 @@ describe('MavenGoogle fetching', () => {
         name: '/tmp/random'
       }
     }
-    handler._getArtifact = () => {}
+    handler._getArtifact = () => { }
     try {
       const result = await handler.handle(new Request('test', 'cd:/maven/mavengoogle/org.eclipse/error/3.3.0-v3344'))
       expect(result.outcome).to.eq('Missing  ')

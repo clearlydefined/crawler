@@ -96,7 +96,7 @@ describe('MavenCentral fetching', () => {
   })
 
   afterEach(function () {
-    sinon.sandbox.restore()
+    sinon.restore()
   })
 
   it('succeeds in download, decompress and hash', async () => {
