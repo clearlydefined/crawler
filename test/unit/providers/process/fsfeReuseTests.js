@@ -15,11 +15,14 @@ let Handler
 describe('FSFE REUSE software process', () => {
   it('should handle a standard output', async () => {
     const { request, processor } = setup('0.15.0/folder1')
+    Handler._resultBox.licensesDirectory = ['Apache-2.0.txt', 'CC-BY-3.0.txt']
     await processor.handle(request)
     const { document } = request
     expect(document.reuse.metadata.DocumentName).to.equal('ospo-reuse')
     expect(document.reuse.metadata.CreatorTool).to.equal('reuse-0.13')
     expect(document.reuse.files.length).to.equal(4)
+    expect(document.attachments.length).to.equal(2)
+    expect(document.reuse.licenses).to.eql([{ filePath: 'LICENSES/Apache-2.0.txt', spdxId: 'Apache-2.0' }, { filePath: 'LICENSES/CC-BY-3.0.txt', spdxId: 'CC-BY-3.0' }])
     let readmeFound = false
     let securityFound = false
     let helloWorldFound = false
@@ -81,7 +84,7 @@ describe('FSFE REUSE software process', () => {
   })
 
   beforeEach(function () {
-    const resultBox = { error: null, versionResult: 'reuse 0.13.0', versionError: null }
+    const resultBox = { error: null, versionResult: 'reuse 0.13.0', versionError: null, licensesDirectory: [] }
     const processStub = {
       execFile: (command, parameters, callbackOrOptions, callback) => {
         if (parameters.includes('--version')) {
@@ -90,7 +93,8 @@ describe('FSFE REUSE software process', () => {
         callback(resultBox.error, { stdout: fs.readFileSync(`${callbackOrOptions.cwd}/output.txt`).toString() })
       }
     }
-    Handler = proxyquire('../../../../providers/process/fsfeReuse', { child_process: processStub })
+    const fsStub = { readdirSync: () => resultBox.licensesDirectory }
+    Handler = proxyquire('../../../../providers/process/fsfeReuse', { child_process: processStub, fs: fsStub })
     Handler._resultBox = resultBox
   })
 
@@ -107,6 +111,6 @@ function setup(fixture, error, versionError) {
   Handler._resultBox.error = error
   Handler._resultBox.versionError = versionError
   const processor = Handler(options)
-  processor.attachFiles = sinon.stub()
+  //processor.attachFiles = sinon.stub()
   return { request: testRequest, processor }
 }
