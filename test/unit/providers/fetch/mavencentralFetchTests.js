@@ -76,7 +76,8 @@ describe('MavenCentral fetching', () => {
       const content = fs.readFileSync(`test/fixtures/maven/${file}`)
       return options.json ? JSON.parse(content) : content
     }
-    const getStub = (url, callback) => {
+    const getStub = (options, callback) => {
+      const url = options.uri
       const response = new PassThrough()
       const file = `test/fixtures/maven/${pickArtifact(url)}`
       if (file) {
@@ -94,7 +95,7 @@ describe('MavenCentral fetching', () => {
     })
   })
 
-  afterEach(function() {
+  afterEach(function () {
     sinon.sandbox.restore()
   })
 
@@ -113,8 +114,8 @@ describe('MavenCentral fetching', () => {
     const handler = setup()
     handler._getRegistryData = () => dummyRegistryData
     handler._getPoms = () => [dummyPom1]
-    handler.decompress = () => {}
-    handler.computeHashes = () => {}
+    handler.decompress = () => { }
+    handler.computeHashes = () => { }
     handler.createTempDir = () => {
       return { name: '/tmp/' }
     }
@@ -123,7 +124,7 @@ describe('MavenCentral fetching', () => {
         name: '/tmp/random'
       }
     }
-    handler._getArtifact = () => {}
+    handler._getArtifact = () => { }
     try {
       const result = await handler.handle(new Request('test', 'cd:/maven/mavencentral/org.eclipse/error/3.3.0-v3344'))
       expect(result.outcome).to.eq('Missing  ')
