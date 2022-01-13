@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractFetch = require('./abstractFetch')
-const requestPromise = require('request-promise-native')
-const nodeRequest = require('request')
+const defaultHeaders = { headers: { 'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)' } }
+const requestPromise = require('request-promise-native').defaults(defaultHeaders)
+const nodeRequest = require('request').defaults(defaultHeaders)
 const { clone, get } = require('lodash')
 const { promisify } = require('util')
 const fs = require('fs')
