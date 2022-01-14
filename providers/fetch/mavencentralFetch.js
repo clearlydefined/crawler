@@ -20,13 +20,13 @@ class MavenCentralFetch extends MavenBasedFetch {
   }
 
   async _getReleaseDate(dirName, spec) {
-    const releaseDate = await super._getReleaseDate(dirName, spec)
-    if (releaseDate) return releaseDate
     const specForQuery = `g:"${spec.namespace}"+AND+a:"${spec.name}"+AND+v:"${spec.revision}"`
     const url = `https://search.maven.org/solrsearch/select?q=${specForQuery}&rows=1&wt=json`
     const response = await this._requestPromise({ url, json: true })
     const timestamp = get(response, 'response.docs[0].timestamp')
     if (timestamp) return new Date(timestamp).toISOString()
+
+    return await super._getReleaseDate(dirName, spec)
   }
 }
 
