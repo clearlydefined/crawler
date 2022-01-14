@@ -75,9 +75,13 @@ class MavenBasedFetch extends AbstractFetch {
     return { location: dir.name, releaseDate, hashes, poms, summary }
   }
 
-  _buildUrl(spec, extension = extensionMap.jar) {
+  _buildBaseUrl(spec) {
     const fullName = `${spec.namespace.replace(/\./g, '/')}/${spec.name}`
-    return `${this._providerMap[spec.provider]}${fullName}/${spec.revision}/${spec.name}-${spec.revision}${extension}`
+    return `${this._providerMap[spec.provider]}${fullName}`
+  }
+
+  _buildUrl(spec, extension = extensionMap.jar) {
+    return `${this._buildBaseUrl(spec)}/${spec.revision}/${spec.name}-${spec.revision}${extension}`
   }
 
   _getArtifactExtensions(spec) {
