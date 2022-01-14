@@ -159,6 +159,12 @@ class MavenBasedFetch extends AbstractFetch {
         if (releaseDate) return releaseDate.toJSDate().toISOString()
       }
     }
+    //Get "File Data Last Modified" from the MANIFEST.MF file, and infer release date.
+    const manifest = path.join(dirName, 'META-INF/MANIFEST.MF')
+    if (await exists(manifest)) {
+      const stats = await fs.promises.stat(manifest)
+      return stats.mtime.toISOString()
+    }
   }
 }
 
