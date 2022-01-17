@@ -36,7 +36,8 @@ class MavenBasedFetch extends AbstractFetch {
   }
 
   async handle(request) {
-    const spec = await this._processCoordinates(this.toSpec(request))
+    const spec = this.toSpec(request)
+    if (!spec.revision) spec.revision = await this._getLatestVersion(spec)
     if (!spec.revision) return this.markSkip(request)
     // rewrite the request URL as it is used throughout the system to derive locations and urns etc.
     request.url = spec.toUrl()
@@ -61,14 +62,13 @@ class MavenBasedFetch extends AbstractFetch {
     return request
   }
 
-  async _processCoordinates(spec) {
-    if (spec.revision) return spec
-    const latestRelease = await this._getLatestVersion(spec)
-    return latestRelease ? EntitySpec.fromObject({ ...spec, revision: latestRelease }) : spec
-  }
-
-  async _getLatestVersion() {
-    return undefined
+  async _getLatestVersion(spec) {
+    //Use Maven repository meta data model to get the latest version
+    //https://maven.apache.org/ref/3.2.5/maven-repository-metadata/repository-metadata.html#class_versioning
+    const url = `${this._buildBaseUrl(spec)}/maven-metadata.xml`
+    const response = await this._requestPromise({ url, json: false })
+    const meta = await parseString(response)
+    return get(meta, 'metadata.versioning[0].release[0]')
   }
 
   _createDocument(dir, releaseDate, hashes, poms, summary) {
