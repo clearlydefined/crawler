@@ -145,7 +145,7 @@ describe('MavenCentral fetching', () => {
   })
 
   it('handles missing registry data getting latest version', async () => {
-    handler._getRegistryData = () => null
+    handler._getLatestVersion = () => null
     const request = await handler.handle(new Request('test', 'cd:/maven/mavencentral/org.eclipse/swt'))
     expect(request.processControl).to.be.equal('skip')
   })

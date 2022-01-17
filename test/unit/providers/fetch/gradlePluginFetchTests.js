@@ -10,29 +10,31 @@ describe('Gradle plugin fetch functions', () => {
 
   after(() => sinon.restore())
 
-  it('spec without revision', async () => {
+  it('get latest version from maven meta data', async () => {
     const gradleFetch = GradlePluginFetch({
       logger: { log: sinon.stub() },
       requestPromise: sinon.stub().resolves(fs.readFileSync('test/fixtures/maven/maven-metadata.xml'))
     })
-    const specWithRevision = await gradleFetch._processCoordinates({
+    const latest = await gradleFetch._getLatestVersion({
       type: 'maven',
       provider: 'gradle-plugins',
       namespace: 'io.github.lognet',
       name: 'grpc-spring-boot-starter-gradle-plugin'
     })
-    expect(specWithRevision.revision).to.be.eq('4.5.10')
+    expect(latest).to.be.eq('4.5.10')
   })
 
-  it('spec with revision', async () => {
-    const gradleFetch = GradlePluginFetch({})
-    const specWithRevision = await gradleFetch._processCoordinates({
+  it('no latest version', async () => {
+    const gradleFetch = GradlePluginFetch({
+      logger: { log: sinon.stub() },
+      requestPromise: sinon.stub().resolves('')
+    })
+    const latest = await gradleFetch._getLatestVersion({
       type: 'maven',
       provider: 'gradle-plugins',
       namespace: 'io.github.lognet',
-      name: 'grpc-spring-boot-starter-gradle-plugin',
-      revision: '4.4'
+      name: 'grpc-spring-boot-starter-gradle-plugin'
     })
-    expect(specWithRevision.revision).to.be.eq('4.4')
+    expect(latest).to.be.undefined
   })
 })
