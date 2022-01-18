@@ -17,7 +17,7 @@ describe('Gradle plugin fetch functions', () => {
     })
     const latest = await gradleFetch._getLatestVersion({
       type: 'maven',
-      provider: 'gradle-plugins',
+      provider: 'gradleplugin',
       namespace: 'io.github.lognet',
       name: 'grpc-spring-boot-starter-gradle-plugin'
     })
@@ -31,10 +31,20 @@ describe('Gradle plugin fetch functions', () => {
     })
     const latest = await gradleFetch._getLatestVersion({
       type: 'maven',
-      provider: 'gradle-plugins',
+      provider: 'gradleplugin',
       namespace: 'io.github.lognet',
       name: 'grpc-spring-boot-starter-gradle-plugin'
     })
     expect(latest).to.be.undefined
+  })
+
+  it('build base url if namespace is not provided', async () => {
+    const gradleFetch = GradlePluginFetch({})
+    const url = gradleFetch._buildBaseUrl({
+      type: 'maven',
+      provider: 'gradleplugin',
+      name: 'grpc-spring-boot-starter-gradle-plugin'
+    })
+    expect(url).not.to.be.undefined
   })
 })
