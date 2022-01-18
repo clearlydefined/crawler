@@ -7,9 +7,9 @@ const { get } = require('lodash')
 class MavenCentralFetch extends MavenBasedFetch {
 
   constructor(options) {
-    super(options, {
+    super({
       mavencentral: 'https://search.maven.org/remotecontent?filepath='
-    })
+    }, options)
   }
   // query maven to get the latest version if we don't already have that.
   // Example: https://search.maven.org/solrsearch/select?q=g:%22org.eclipse%22+AND+a:%22swt%22+AND+v:%223.3.0-v3346%22&rows=1&wt=json

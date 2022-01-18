@@ -6,9 +6,9 @@ const MavenBasedFetch = require('./mavenBasedFetch')
 class GradlePluginFetch extends MavenBasedFetch {
 
   constructor(options) {
-    super(options, {
-      'gradle-plugins': 'https://plugins.gradle.org/m2/'
-    })
+    super({
+      'gradleplugin': 'https://plugins.gradle.org/m2/'
+    }, options)
   }
 
   _getArtifactExtensions(spec) {

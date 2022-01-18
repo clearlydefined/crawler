@@ -23,7 +23,7 @@ const extensionMap = {
 const defaultHeaders = { headers: { 'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)' } }
 
 class MavenBasedFetch extends AbstractFetch {
-  constructor(options, providerMap) {
+  constructor(providerMap, options) {
     super(options)
     this._providerMap = { ...providerMap }
     this._requestPromise = options.requestPromise || requestPromise.defaults(defaultHeaders)
@@ -38,7 +38,7 @@ class MavenBasedFetch extends AbstractFetch {
   async handle(request) {
     const spec = this.toSpec(request)
     if (!spec.revision) spec.revision = await this._getLatestVersion(spec)
-    if (!spec.revision) return this.markSkip(request)
+    if (!spec.namespace || !spec.revision) return this.markSkip(request)
     // rewrite the request URL as it is used throughout the system to derive locations and urns etc.
     request.url = spec.toUrl()
     super.handle(request)
@@ -76,7 +76,7 @@ class MavenBasedFetch extends AbstractFetch {
   }
 
   _buildBaseUrl(spec) {
-    const fullName = `${spec.namespace.replace(/\./g, '/')}/${spec.name}`
+    const fullName = `${spec.namespace?.replace(/\./g, '/')}/${spec.name}`
     return `${this._providerMap[spec.provider]}${fullName}`
   }
 

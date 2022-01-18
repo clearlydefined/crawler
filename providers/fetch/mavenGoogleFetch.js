@@ -5,9 +5,9 @@ const MavenBasedFetch = require('./mavenBasedFetch')
 
 class MavenGoogleFetch extends MavenBasedFetch {
   constructor(options) {
-    super(options, {
+    super({
       mavengoogle: 'https://dl.google.com/android/maven2/'
-    })
+    }, options)
   }
   //The format for source url is: https://dl.google.com/android/maven2/groudId1/groupdId2/artifactId/revision/artifactId-revision-sources.jar
   // E.g.: https://maven.google.com/web/index.html#androidx.browser:browser:1.3.0
