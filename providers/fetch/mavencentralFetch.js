@@ -12,6 +12,7 @@ const exists = promisify(fs.exists)
 const path = require('path')
 const parseString = promisify(require('xml2js').parseString)
 const EntitySpec = require('../../lib/entitySpec')
+const { extractDate } = require('../../lib/utils')
 
 const providerMap = {
   mavencentral: 'https://search.maven.org/remotecontent?filepath='
@@ -141,11 +142,12 @@ class MavenFetch extends AbstractFetch {
     if (await exists(location)) {
       const pomProperties = (await promisify(fs.readFile)(location)).toString().split('\n')
       for (const line of pomProperties) {
-        const releaseDate = new Date(line.slice(1))
-        if (!isNaN(releaseDate.getTime())) return releaseDate.toISOString()
+        const releaseDate = extractDate(line.slice(1))
+        if (releaseDate) return releaseDate.toJSDate().toISOString()
       }
     }
-    const url = `https://search.maven.org/solrsearch/select?q=g:"${spec.namespace}"+AND+a:"${spec.name}"&rows=1&wt=json`
+    const specForQuery = `g:"${spec.namespace}"+AND+a:"${spec.name}"+AND+v:"${spec.revision}"`
+    const url = `https://search.maven.org/solrsearch/select?q=${specForQuery}&rows=1&wt=json`
     const response = await requestPromise({ url, json: true })
     const timestamp = get(response, 'response.docs[0].timestamp')
     if (timestamp) return new Date(timestamp).toISOString()

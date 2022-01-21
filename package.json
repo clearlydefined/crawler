@@ -52,6 +52,7 @@
     "lodash": "^4.17.21",
     "luxon": "^2.1.1",
     "lzma-native": "^8.0.1",
+    "luxon": "^2.1.1",
     "memory-cache": "^0.2.0",
     "mkdirp": "^0.5.1",
     "morgan": "^1.9.0",
