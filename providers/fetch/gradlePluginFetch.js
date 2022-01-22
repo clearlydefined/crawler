@@ -11,9 +11,10 @@ class GradlePluginFetch extends MavenBasedFetch {
     }, options)
   }
 
-  _getArtifactExtensions(spec) {
-    //TODO module files?
-    return super._getArtifactExtensions(spec)
+  async _getPoms(spec, result = []) {
+    //TODO: Newer plugins have plugin_id-version.module files. Include?
+    //See https://docs.gradle.org/current/userguide/publishing_gradle_module_metadata.html
+    return super._getPoms(spec, result)
   }
 
 }

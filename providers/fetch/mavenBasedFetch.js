@@ -26,8 +26,8 @@ class MavenBasedFetch extends AbstractFetch {
   constructor(providerMap, options) {
     super(options)
     this._providerMap = { ...providerMap }
-    this._requestPromise = options.requestPromise || requestPromise.defaults(defaultHeaders)
-    this._requestStream = options.requestStream || nodeRequest.defaults(defaultHeaders).get
+    this._handleRequestPromise = options.requestPromise || requestPromise.defaults(defaultHeaders)
+    this._handleRequestStream = options.requestStream || nodeRequest.defaults(defaultHeaders).get
   }
 
   canHandle(request) {
@@ -67,6 +67,7 @@ class MavenBasedFetch extends AbstractFetch {
     //https://maven.apache.org/ref/3.2.5/maven-repository-metadata/repository-metadata.html#class_versioning
     const url = `${this._buildBaseUrl(spec)}/maven-metadata.xml`
     const response = await this._requestPromise({ url, json: false })
+    if (!response) return null
     const meta = await parseString(response)
     return get(meta, 'metadata.versioning[0].release[0]')
   }
@@ -84,16 +85,12 @@ class MavenBasedFetch extends AbstractFetch {
     return `${this._buildBaseUrl(spec)}/${spec.revision}/${spec.name}-${spec.revision}${extension}`
   }
 
-  _getArtifactExtensions(spec) {
-    return spec.type === 'sourcearchive' ? [extensionMap.sourcesJar] : [extensionMap.jar, extensionMap.aar]
-  }
-
   async _getArtifact(spec, destination) {
-    const extensions = this._getArtifactExtensions(spec)
+    const extensions = spec.type === 'sourcearchive' ? [extensionMap.sourcesJar] : [extensionMap.jar, extensionMap.aar]
     for (let extension of extensions) {
       const url = this._buildUrl(spec, extension)
       const status = await new Promise(resolve => {
-        this._requestStream(url, (error, response) => {
+        this._handleRequestStream(url, (error, response) => {
           if (error) this.logger.error(error)
           if (response.statusCode !== 200) return resolve(false)
         })
@@ -114,13 +111,8 @@ class MavenBasedFetch extends AbstractFetch {
 
   async _getPom(spec) {
     const url = this._buildUrl(spec, extensionMap.pom)
-    let content
-    try {
-      content = await this._requestPromise({ url, json: false })
-    } catch (error) {
-      if (error.statusCode === 404) return null
-      else throw error
-    }
+    const content = await this._requestPromise({ url, json: false })
+    if (!content) return null
     const pom = await parseString(content)
     // clean up some stuff we don't actually look at.
     delete pom.project.build
@@ -164,6 +156,15 @@ class MavenBasedFetch extends AbstractFetch {
     if (await exists(manifest)) {
       const stats = await fs.promises.stat(manifest)
       return stats.mtime.toISOString()
+    }
+  }
+
+  async _requestPromise(options) {
+    try {
+      return await this._handleRequestPromise(options)
+    } catch (error) {
+      if (error.statusCode === 404) return null
+      else throw error
     }
   }
 }

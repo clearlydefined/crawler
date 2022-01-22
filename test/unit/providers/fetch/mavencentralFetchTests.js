@@ -58,7 +58,7 @@ const hashes = {
 
 function pickArtifact(url) {
   if (url.endsWith('.pom')) return 'swt-3.3.0-v3346.pom'
-  if (url.endsWith('-sources.jar')) return 'swt-3.3.0-v3346-sources.jar'
+  if (url.endsWith('-sources.jar')) return 'swt-3.3.0-v3346.jar'
   if (url.endsWith('.jar')) return 'swt-3.3.0-v3346.jar'
   return null
 }
@@ -114,7 +114,6 @@ describe('MavenCentral fetching', () => {
   })
 
   it('handles download error', async () => {
-    handler._getRegistryData = () => dummyRegistryData
     handler._getPoms = () => [dummyPom1]
     handler.decompress = () => { }
     handler.computeHashes = () => { }
@@ -159,20 +158,6 @@ describe('MavenCentral fetching', () => {
     }
   })
 })
-
-const dummyRegistryData = {
-  docs: [
-    {
-      id: 'org.eclipse:swt:3.3.0-v3346',
-      g: 'org.eclipse',
-      a: 'swt',
-      v: '3.3.0-v3346',
-      p: 'jar',
-      timestamp: 1196147710000,
-      ec: ['.jar', '.pom']
-    }
-  ]
-}
 
 const dummyPom1 = {
   project: {
