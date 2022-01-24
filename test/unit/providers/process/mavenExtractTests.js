@@ -38,7 +38,7 @@ describe('mavenExtract source discovery', () => {
 
   it('handles maven google', async () => {
     const spec = new EntitySpec('maven', 'mavengoogle', 'testorg', 'test', '42')
-    const extractor = extract({}, () => {})
+    const extractor = extract({}, () => { })
     const sourceLocation = await extractor._discoverSource(spec)
     expect(sourceLocation.revision).to.eq('42')
     expect(sourceLocation.type).to.eq('sourcearchive')
@@ -49,7 +49,7 @@ describe('mavenExtract source discovery', () => {
 
   it('falls back to maven central', async () => {
     const spec = createSpec('test')
-    const extractor = extract({}, () => {})
+    const extractor = extract({}, () => { })
     const sourceLocation = await extractor._discoverSource(spec)
     expect(sourceLocation.revision).to.eq('42')
     expect(sourceLocation.type).to.eq('sourcearchive')
@@ -70,7 +70,7 @@ const githubResults = {
 }
 
 function createManifest(url) {
-  return { project: { scm: { url } } }
+  return { summary: { scm: [{ url: [url] }] } }
 }
 
 function createSourceSpec(repo, revision) {
