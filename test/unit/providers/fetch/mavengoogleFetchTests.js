@@ -105,7 +105,7 @@ describe('MavenGoogle fetching', () => {
     expect(request.document.hashes.sha1).to.be.equal(hashes['swt-3.3.0-v3346.jar']['sha1'])
     expect(request.document.hashes.sha256).to.be.equal(hashes['swt-3.3.0-v3346.jar']['sha256'])
     //date from manifest
-    expect(request.document.releaseDate).to.equal('2007-06-25T23:56:56.000Z')
+    expect(request.document.releaseDate.startsWith('2007-06-25')).to.be.true
     expect(request.casedSpec.name).to.equal('swt')
     expect(request.casedSpec.namespace).to.equal('org.eclipse')
     expect(request.document.location).to.be.a('string')
