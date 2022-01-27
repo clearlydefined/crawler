@@ -17,11 +17,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends --no-install-su
 
 # Scancode
 RUN pip3 install --upgrade pip setuptools wheel && \
-  pip3 install scancode-toolkit && \
+  pip3 install scancode-toolkit==30.1.0 && \
   scancode --reindex-licenses && \
   scancode --version
 
-ENV SCANCODE_HOME=/usr/local/bin/scancode
+ENV SCANCODE_HOME=/usr/local/bin
 
 # Licensee
 RUN gem install licensee -v 9.11.0 --no-rdoc --no-ri

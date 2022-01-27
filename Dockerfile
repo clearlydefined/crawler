@@ -13,8 +13,8 @@ ENV APPDIR=/opt/service
 ARG BUILD_NUMBER=0
 ENV CRAWLER_BUILD_NUMBER=$BUILD_NUMBER
 
-# Ruby
-RUN apt-get update && apt-get install -y --no-install-recommends --no-install-suggests curl bzip2 build-essential libssl-dev libreadline-dev zlib1g-dev cmake && \
+# Ruby and Python Dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends --no-install-suggests curl bzip2 build-essential libssl-dev libreadline-dev zlib1g-dev cmake python3 python3-dev python3-pip && \
   rm -rf /var/lib/apt/lists/* && \
   curl -L https://github.com/rbenv/ruby-build/archive/v20180822.tar.gz | tar -zxvf - -C /tmp/ && \
   cd /tmp/ruby-build-* && ./install.sh && cd / && \
@@ -22,10 +22,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends --no-install-su
   gem install bundler --no-rdoc --no-ri
 
 # Scancode
-RUN curl -sL https://github.com/nexB/scancode-toolkit/releases/download/v30.1.0/scancode-toolkit-30.1.0.tar.bz2 | tar -C /opt -jx \
-  && /opt/scancode-toolkit-30.1.0/scancode --reindex-licenses \
-  && /opt/scancode-toolkit-30.1.0/scancode --version
-ENV SCANCODE_HOME=/opt/scancode-toolkit-30.1.0
+RUN pip3 install --upgrade pip setuptools wheel && \
+  pip3 install scancode-toolkit==30.1.0 && \
+  scancode --reindex-licenses && \
+  scancode --version
+
+ENV SCANCODE_HOME=/usr/local/bin/scancode
 
 # Licensee
 RUN gem install licensee -v 9.11.0 --no-rdoc --no-ri
