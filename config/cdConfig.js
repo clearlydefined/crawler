@@ -70,7 +70,6 @@ module.exports = {
         '--license-text',
         '--is-license-text',
         '--package',
-        '--license-diag',
         '--strip-root',
         '--email',
         '--url',
