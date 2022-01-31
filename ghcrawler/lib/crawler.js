@@ -3,7 +3,7 @@
 
 const debug = require('debug')('crawler:crawler')
 const fs = require('fs')
-const moment = require('moment')
+const { DateTime } = require('luxon')
 const Request = require('./request')
 const sleep = require('util').promisify(setTimeout)
 const uuid = require('node-uuid')
@@ -421,7 +421,7 @@ class Crawler {
     const metadata = {
       type: request.type,
       url: request.url,
-      fetchedAt: moment.utc().toISOString(),
+      fetchedAt: DateTime.utc().toISO(),
       links: {}
     }
     if (request.response) {
@@ -505,7 +505,7 @@ class Crawler {
       // Be resilient to processors returning either the request or a document.
       request.document = result === request ? request.document : result
       const metadata = request.document._metadata
-      metadata.processedAt = moment.utc().toISOString()
+      metadata.processedAt = DateTime.utc().toISO()
       if (request.save !== false && metadata.version !== oldVersion) {
         request.markSave()
       }
@@ -643,7 +643,7 @@ class Crawler {
     metadata.meta = request.meta
     metadata.type = 'deadletter'
     metadata.url = request.url.replace('//', '//deadletter.')
-    metadata.fetchedAt = metadata.processedAt = moment.utc().toISOString()
+    metadata.fetchedAt = metadata.processedAt = DateTime.utc().toISO()
     metadata.links = { self: { href: `urn:deadletter:${uuid.v4()}`, type: 'resource' } }
     metadata.extra = { type: request.type, url: request.url, reason: reason }
     return deadDocument
