@@ -27,7 +27,7 @@ RUN pip3 install --upgrade pip setuptools wheel && \
   scancode --reindex-licenses && \
   scancode --version
 
-ENV SCANCODE_HOME=/usr/local/bin/scancode
+ENV SCANCODE_HOME=/usr/local/bin
 
 # Licensee
 RUN gem install licensee -v 9.11.0 --no-rdoc --no-ri
