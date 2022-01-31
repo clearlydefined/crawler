@@ -39,7 +39,7 @@ describe('ScanCode misc', () => {
     const handlerFactory = proxyquire('../../../../providers/process/scancode', {
       fs: fsStub
     })
-    Handler = handlerFactory({ logger: { log: () => {} } })
+    Handler = handlerFactory({ logger: { log: () => { } } })
     Handler._resultBox = resultBox
   })
 
@@ -84,8 +84,8 @@ describe('ScanCode process', () => {
     }
   })
 
-  beforeEach(function() {
-    const resultBox = { error: null, versionResult: '1.2.0', versionError: null }
+  beforeEach(function () {
+    const resultBox = { error: null, versionResult: 'ScanCode version 1.2.0\n', versionError: null }
     const processStub = {
       execFile: (command, parameters, callbackOrOptions, callback) => {
         if (parameters.includes('--version'))
@@ -97,7 +97,7 @@ describe('ScanCode process', () => {
     Handler._resultBox = resultBox
   })
 
-  afterEach(function() {
+  afterEach(function () {
     sandbox.restore()
   })
 })
