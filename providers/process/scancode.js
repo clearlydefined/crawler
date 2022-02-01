@@ -110,7 +110,7 @@ class ScanCodeProcessor extends AbstractProcessor {
     if (this._versionPromise) return this._versionPromise
     this._versionPromise = execFile(`${this.options.installDir}/scancode`, ['--version'])
       .then(result => {
-        this.logger.info('Detecting Scancode version')
+        this.logger.info('Detecting ScanCode version')
 
         const raw_output = result.stdout
         const scancode_line = raw_output.match(/ScanCode version .*\n/)[0]
