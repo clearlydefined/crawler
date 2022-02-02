@@ -8,6 +8,8 @@ const sinon = require('sinon')
 const sandbox = sinon.createSandbox()
 const { request } = require('../../../../ghcrawler')
 const { flatten } = require('lodash')
+const fs = require('fs')
+const child_process = require('child_process')
 
 let Handler
 
@@ -52,7 +54,7 @@ describe('ScanCode process', () => {
   it('should handle gems', async () => {
     const { request, processor } = setup('2.9.8/gem.json')
     await processor.handle(request)
-    expect(request.document._metadata.toolVersion).to.equal('1.2.0')
+    expect(request.document._metadata.toolVersion).to.equal('30.1.0')
     expect(flatten(processor.attachFiles.args.map(x => x[1]))).to.have.members([])
   })
 
@@ -85,10 +87,12 @@ describe('ScanCode process', () => {
   })
 
   beforeEach(function () {
-    const resultBox = { error: null, versionResult: 'ScanCode version 1.2.0\n', versionError: null }
+    let versionJsonOutput = '{ "headers": [ { "tool_name": "scancode-toolkit", "tool_version": "30.1.0"}]}'
+
+    const resultBox = { error: null, versionResult: versionJsonOutput, versionError: null }
     const processStub = {
       execFile: (command, parameters, callbackOrOptions, callback) => {
-        if (parameters.includes('--version'))
+        if (parameters.includes('--json-pp'))
           return callbackOrOptions(resultBox.versionError, { stdout: resultBox.versionResult })
         callback(resultBox.error)
       }
@@ -98,6 +102,12 @@ describe('ScanCode process', () => {
   })
 
   afterEach(function () {
+    // Check if NOTICE file (generated when checking the ScanCode version) exists
+    // If it does, delete it
+    if (fs.existsSync('NOTICE')) {
+      child_process.exec('rm NOTICE')
+    }
+
     sandbox.restore()
   })
 })
