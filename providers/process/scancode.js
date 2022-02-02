@@ -108,13 +108,27 @@ class ScanCodeProcessor extends AbstractProcessor {
 
   _detectVersion() {
     if (this._versionPromise) return this._versionPromise
-    this._versionPromise = execFile(`${this.options.installDir}/scancode`, ['--version'])
+
+    // Create trivial file to run Scancode on so we can get the version
+    // of it in a safer way than parsing stdout
+    let fileCreationErrors = ''
+
+    child_process.exec('touch NOTICE', (error) => {
+      fileCreationErrors += error
+    })
+
+    if (fileCreationErrors != '') {
+      this.logger.error(`Could not create NOTICE file to determine scancode version ${fileCreationErrors}`)
+    }
+
+    this._versionPromise = execFile(`${this.options.installDir}/scancode`, ['--json-pp', '-', 'NOTICE'])
       .then(result => {
         this.logger.info('Detecting ScanCode version')
 
         const raw_output = result.stdout
-        const scancode_line = raw_output.match(/ScanCode version .*\n/)[0]
-        this._toolVersion = scancode_line.replace('ScanCode version ', '').trim()
+        const scanCodeOutputJson = JSON.parse(raw_output)
+        this._toolVersion = scanCodeOutputJson.headers[0].tool_version
+
         this._schemaVersion = this.aggregateVersions(
           [this._schemaVersion, this.toolVersion, this.configVersion],
           'Invalid ScanCode version'
