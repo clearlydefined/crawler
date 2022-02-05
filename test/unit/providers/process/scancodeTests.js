@@ -8,8 +8,6 @@ const sinon = require('sinon')
 const sandbox = sinon.createSandbox()
 const { request } = require('../../../../ghcrawler')
 const { flatten } = require('lodash')
-const fs = require('fs')
-const child_process = require('child_process')
 
 let Handler
 
@@ -36,7 +34,8 @@ describe('ScanCode misc', () => {
   beforeEach(() => {
     const resultBox = {}
     const fsStub = {
-      readFileSync: () => JSON.stringify(resultBox.result)
+      readFileSync: () => JSON.stringify(resultBox.result),
+      writeFileSync: () => 7
     }
     const handlerFactory = proxyquire('../../../../providers/process/scancode', {
       fs: fsStub
@@ -90,6 +89,11 @@ describe('ScanCode process', () => {
     let versionJsonOutput = '{ "headers": [ { "tool_name": "scancode-toolkit", "tool_version": "30.1.0"}]}'
 
     const resultBox = { error: null, versionResult: versionJsonOutput, versionError: null }
+
+    const fsStub = {
+      writeFileSync: () => 7
+    }
+
     const processStub = {
       execFile: (command, parameters, callbackOrOptions, callback) => {
         if (parameters.includes('--json-pp'))
@@ -97,17 +101,12 @@ describe('ScanCode process', () => {
         callback(resultBox.error)
       }
     }
-    Handler = proxyquire('../../../../providers/process/scancode', { child_process: processStub })
+
+    Handler = proxyquire('../../../../providers/process/scancode', { child_process: processStub, fs: fsStub })
     Handler._resultBox = resultBox
   })
 
   afterEach(function () {
-    // Check if NOTICE file (generated when checking the ScanCode version) exists
-    // If it does, delete it
-    if (fs.existsSync('NOTICE')) {
-      child_process.exec('rm NOTICE')
-    }
-
     sandbox.restore()
   })
 })
