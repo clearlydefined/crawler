@@ -111,15 +111,8 @@ class ScanCodeProcessor extends AbstractProcessor {
 
     // Create trivial file to run Scancode on so we can get the version
     // of it in a safer way than parsing stdout
-    let fileCreationErrors = ''
 
-    child_process.exec('touch NOTICE', (error) => {
-      fileCreationErrors += error
-    })
-
-    if (fileCreationErrors != '') {
-      this.logger.error(`Could not create NOTICE file to determine scancode version ${fileCreationErrors}`)
-    }
+    fs.writeFileSync('NOTICE', 'Sample text')
 
     this._versionPromise = execFile(`${this.options.installDir}/scancode`, ['--json-pp', '-', 'NOTICE'])
       .then(result => {
