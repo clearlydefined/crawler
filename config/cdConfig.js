@@ -62,7 +62,7 @@ module.exports = {
     pod: { githubToken },
     pypi: { githubToken },
     scancode: {
-      installDir: config.get('SCANCODE_HOME') || 'C:\\installs\\scancode-toolkit-3.0.2',
+      installDir: config.get('SCANCODE_HOME'),
       options: [
         '--copyright',
         '--license',
@@ -70,6 +70,7 @@ module.exports = {
         '--license-text',
         '--is-license-text',
         '--package',
+        '--license-text-diagnostics',
         '--strip-root',
         '--email',
         '--url',
