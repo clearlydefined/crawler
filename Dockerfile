@@ -13,13 +13,8 @@ ENV APPDIR=/opt/service
 ARG BUILD_NUMBER=0
 ENV CRAWLER_BUILD_NUMBER=$BUILD_NUMBER
 
-<<<<<<< HEAD
-# Ruby
-RUN apt-get update && apt-get install -y --no-install-recommends --no-install-suggests curl bzip2 build-essential libssl-dev libreadline-dev zlib1g-dev cmake python3 python3-pip && \
-=======
 # Ruby and Python Dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends --no-install-suggests curl bzip2 build-essential libssl-dev libreadline-dev zlib1g-dev cmake python3 python3-dev python3-pip && \
->>>>>>> upstream/master
   rm -rf /var/lib/apt/lists/* && \
   curl -L https://github.com/rbenv/ruby-build/archive/v20180822.tar.gz | tar -zxvf - -C /tmp/ && \
   cd /tmp/ruby-build-* && ./install.sh && cd / && \
