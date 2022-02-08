@@ -49,37 +49,59 @@ class FsfeReuseProcessor extends AbstractProcessor {
       const { stdout } = await execFile('reuse', parameters, { cwd: root })
       if (!stdout) return
       const results = { metadata: {}, files: [], licenses: this._getLicenses(request) }
-      stdout.trim().split(/\n\n/).forEach((spdxResult, entryIndex) => {
-        const spdxResultFile = {}
-        const spdxRawValues = spdxResult.split(/\n/)
-        spdxRawValues.forEach(spdxRawValue => {
-          const spdxMatchResult = spdxRawValue.match(/((?<first_key>\w+):\s)((?<second_key>\w+):\s)?(?<spdx_value>.+)/)
-          if (spdxMatchResult !== null) {
-            const spdxResultValue = { key: spdxMatchResult.groups.first_key, secondaryKey: spdxMatchResult.groups.second_key, spdxValue: spdxMatchResult.groups.spdx_value.replace(/(<\/?([^>]+)>)/g, '') }
-            if (entryIndex === 0) {
-              if (spdxResultValue.key !== 'Relationship') {
-                results.metadata[spdxResultValue.key + (spdxResultValue.secondaryKey ? spdxResultValue.secondaryKey : '')] = spdxResultValue.spdxValue
-              }
-            } else {
-              let attributeValue = spdxResultValue.spdxValue
-              if (spdxResultValue.key === 'FileName' && attributeValue.startsWith('./')) {
-                attributeValue = attributeValue.substring(2)
-              }
-              if (spdxResultValue.key === 'FileCopyrightText' && attributeValue.startsWith('SPDX-FileCopyrightText: ')) {
-                attributeValue = attributeValue.substring(24)
-              }
-              spdxResultFile[spdxResultValue.key + (spdxResultValue.secondaryKey ? spdxResultValue.secondaryKey : '')] = attributeValue
-            }
-          }
-        })
-        if (entryIndex > 0) {
-          results.files.push(spdxResultFile)
-        }
-      })
+      // REUSE SPDX results are grouped in sections that are separated with two newlines
+      // The first result group contains generic result metadata, the following ones represent a file each. We process both variants in a single loop...
+      stdout.trim().split(/\n\n/).forEach((spdxResult, entryIndex) => this._handleResultSection(spdxResult, entryIndex, results))
       return results
     } catch (error) {
       request.markDead('Error', error ? error.message : 'REUSE run failed')
     }
+  }
+
+  _handleResultSection(spdxResult, entryIndex, results) {
+    const spdxResultFile = {}
+    const spdxRawValues = spdxResult.split(/\n/)
+    // Each line represents a single result attribute
+    spdxRawValues.forEach(spdxRawValue => this._handleResultAttribute(spdxRawValue, entryIndex, results, spdxResultFile))
+    // Generic metadata was already added to results.metadata
+    // In case we have file metadata, all attributes are read now and information can be added to the file results
+    if (entryIndex > 0) {
+      results.files.push(spdxResultFile)
+    }
+  }
+
+  _handleResultAttribute(spdxRawValue, entryIndex, results, spdxResultFile) {
+    const spdxMatchResult = spdxRawValue.match(/((?<first_key>\w+):\s)((?<second_key>\w+):\s)?(?<spdx_value>.+)/)
+    if (spdxMatchResult !== null) {
+      const spdxResultValue = { key: spdxMatchResult.groups.first_key, secondaryKey: spdxMatchResult.groups.second_key, spdxValue: spdxMatchResult.groups.spdx_value.replace(/(<\/?([^>]+)>)/g, '') }
+      // First result section contains generic metadata, any other section attributes for a particular file
+      if (entryIndex === 0) {
+        this._addMetadataAttribute(spdxResultValue, results)
+      } else {
+        this._addResultFileAttribute(spdxResultValue, spdxResultFile)
+      }
+    }
+  }
+
+  _addMetadataAttribute(spdxResultValue, results) {
+    // Relationship attributes are ignored on purpose as they won't be used later and would only consume memory...
+    if (spdxResultValue.key !== 'Relationship') {
+      results.metadata[spdxResultValue.key + (spdxResultValue.secondaryKey ? spdxResultValue.secondaryKey : '')] = spdxResultValue.spdxValue
+    }
+  }
+
+  _addResultFileAttribute(spdxResultValue, spdxResultFile) {
+    let attributeValue = spdxResultValue.spdxValue
+    // ClearlyDefined gets confused by file paths starting with './'. As they are normal relative paths, we remove this prefix here...
+    if (spdxResultValue.key === 'FileName' && attributeValue.startsWith('./')) {
+      attributeValue = attributeValue.substring(2)
+    }
+    // If copyright text is extracted from the file header, REUSE might add 'SPDX-FileCopyrightText' to the value
+    // We don't need this additional information and remove it here, so that all copyright texts are consistent...
+    if (spdxResultValue.key === 'FileCopyrightText' && attributeValue.startsWith('SPDX-FileCopyrightText: ')) {
+      attributeValue = attributeValue.substring(24)
+    }
+    spdxResultFile[spdxResultValue.key + (spdxResultValue.secondaryKey ? spdxResultValue.secondaryKey : '')] = attributeValue
   }
 
   _getLicenses(request) {
