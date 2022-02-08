@@ -34,8 +34,7 @@ describe('ScanCode misc', () => {
   beforeEach(() => {
     const resultBox = {}
     const fsStub = {
-      readFileSync: () => JSON.stringify(resultBox.result),
-      writeFileSync: () => 7
+      readFileSync: () => JSON.stringify(resultBox.result)
     }
     const handlerFactory = proxyquire('../../../../providers/process/scancode', {
       fs: fsStub
@@ -53,7 +52,7 @@ describe('ScanCode process', () => {
   it('should handle gems', async () => {
     const { request, processor } = setup('2.9.8/gem.json')
     await processor.handle(request)
-    expect(request.document._metadata.toolVersion).to.equal('30.1.0')
+    expect(request.document._metadata.toolVersion).to.equal('1.2.0')
     expect(flatten(processor.attachFiles.args.map(x => x[1]))).to.have.members([])
   })
 
@@ -86,23 +85,15 @@ describe('ScanCode process', () => {
   })
 
   beforeEach(function () {
-    let versionJsonOutput = '{ "headers": [ { "tool_name": "scancode-toolkit", "tool_version": "30.1.0"}]}'
-
-    const resultBox = { error: null, versionResult: versionJsonOutput, versionError: null }
-
-    const fsStub = {
-      writeFileSync: () => 7
-    }
-
+    const resultBox = { error: null, versionResult: 'ScanCode version 1.2.0\n', versionError: null }
     const processStub = {
       execFile: (command, parameters, callbackOrOptions, callback) => {
-        if (parameters.includes('--json-pp'))
+        if (parameters.includes('--version'))
           return callbackOrOptions(resultBox.versionError, { stdout: resultBox.versionResult })
         callback(resultBox.error)
       }
     }
-
-    Handler = proxyquire('../../../../providers/process/scancode', { child_process: processStub, fs: fsStub })
+    Handler = proxyquire('../../../../providers/process/scancode', { child_process: processStub })
     Handler._resultBox = resultBox
   })
 
