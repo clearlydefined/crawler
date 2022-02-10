@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='US-ASCII'?>
+<metadata>
+<groupId>io.github.lognet</groupId>
+<artifactId>grpc-spring-boot-starter-gradle-plugin</artifactId>
+<version>4.5.10</version>
+<versioning>
+	<latest>4.5.10</latest>
+	<release>4.5.10</release>
+	<versions>
+	  <version>4.5.10</version><version>4.5.4</version><version>4.5.5</version><version>4.5.6</version><version>4.5.7</version><version>4.5.8</version><version>4.5.9</version>
+	</versions>
+	<lastUpdated>20211110111208</lastUpdated>
+</versioning>
+</metadata>

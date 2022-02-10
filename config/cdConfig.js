@@ -35,6 +35,7 @@ module.exports = {
     go: {},
     mavenCentral: {},
     mavenGoogle: {},
+    gradlePlugin: {},
     npmjs: {},
     nuget: {},
     packagist: {},
