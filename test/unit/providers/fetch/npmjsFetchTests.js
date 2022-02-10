@@ -78,8 +78,8 @@ describe('', () => {
     Fetch._resultBox = resultBox
   })
 
-  afterEach(function() {
-    sinon.sandbox.restore()
+  afterEach(function () {
+    sinon.restore()
   })
 
   it('succeeds in download, decompress and hash', async () => {
