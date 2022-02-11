@@ -35,6 +35,7 @@ module.exports = {
     go: {},
     mavenCentral: {},
     mavenGoogle: {},
+    gradlePlugin: {},
     npmjs: {},
     nuget: {},
     packagist: {},
@@ -63,7 +64,7 @@ module.exports = {
     pypi: { githubToken },
     reuse: {},
     scancode: {
-      installDir: config.get('SCANCODE_HOME') || 'C:\\installs\\scancode-toolkit-3.0.2',
+      installDir: config.get('SCANCODE_HOME'),
       options: [
         '--copyright',
         '--license',
@@ -71,6 +72,7 @@ module.exports = {
         '--license-text',
         '--is-license-text',
         '--package',
+        '--license-text-diagnostics',
         '--strip-root',
         '--email',
         '--url',

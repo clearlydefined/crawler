@@ -72,7 +72,7 @@ describe('', () => {
   })
 
   afterEach(() => {
-    sinon.sandbox.restore()
+    sinon.restore()
   })
 
   it('succeeds in download, decompress and hash', async () => {
@@ -126,8 +126,8 @@ describe('', () => {
     }
     handler._getManifest = () => '{}'
     handler._getNuspec = () => '{}'
-    handler._createTempDir = () => {}
-    handler._persistMetadata = () => {}
+    handler._createTempDir = () => { }
+    handler._persistMetadata = () => { }
     try {
       await handler.handle(new Request('test', 'cd:/nuget/nuget/-/xunit.core/2.4.1'))
       expect(false).to.be.true

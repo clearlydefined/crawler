@@ -19,6 +19,7 @@ module.exports = {
     go: require('./fetch/goFetch'),
     mavenCentral: require('./fetch/mavencentralFetch'),
     mavenGoogle: require('./fetch/mavenGoogleFetch'),
+    gradlePlugin: require('./fetch/gradlePluginFetch'),
     npmjs: require('./fetch/npmjsFetch'),
     nuget: require('./fetch/nugetFetch'),
     pypi: require('./fetch/pypiFetch'),
