@@ -49,10 +49,11 @@ describe('PHP processing', () => {
         expect(file.hashes.sha256).to.be.equal(hashes['symfony/polyfill-mbstring-1.11.0'][file.path].sha256)
       }
     })
-    expect(processor.linkAndQueueTool.callCount).to.be.equal(2)
+    expect(processor.linkAndQueueTool.callCount).to.be.equal(3)
     expect(processor.linkAndQueueTool.args.map(call => call[1])).to.have.members([
       'licensee',
-      'scancode' /*, 'fossology'*/
+      'scancode',
+      'reuse' /*, 'fossology'*/
     ])
     expect(request.document.attachments.length).to.eq(1)
     expect(request.document.summaryInfo.count).to.be.equal(8)
@@ -63,7 +64,7 @@ describe('PHP processing', () => {
 })
 
 async function setup() {
-  const processor = composerExtract({ logger: { info: () => {} } }, () => {})
+  const processor = composerExtract({ logger: { info: () => { } } }, () => { })
   processor._detectLicenses = () => 'MIT'
   processor.linkAndQueueTool = sinon.stub()
   const request = createRequest()
@@ -85,14 +86,14 @@ function createRequest() {
 
 describe('composerExtract source discovery', () => {
   it('discovers source candidates', async () => {
-    const processor = composerExtract({ logger: { info: () => {} } }, () => {})
+    const processor = composerExtract({ logger: { info: () => { } } }, () => { })
     const manifest = { source: { url: 'one' }, homepage: 'two', bugs: 'http://three' }
     const candidates = processor._discoverCandidateSourceLocations(manifest)
     expect(candidates).to.have.members(['one', 'two', 'http://three'])
   })
 
   it('discovers source candidates with odd structures', async () => {
-    const processor = composerExtract({ logger: { info: () => {} } }, () => {})
+    const processor = composerExtract({ logger: { info: () => { } } }, () => { })
     const manifest = { source: { url: 'one' }, homepage: ['two', 'three'], bugs: { url: 'four' } }
     const candidates = processor._discoverCandidateSourceLocations(manifest)
     expect(candidates.length).to.eq(3)
