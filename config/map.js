@@ -30,6 +30,7 @@ const npm = {
   source,
   clearlydefined,
   licensee,
+  reuse,
   scancode,
   fossology
 }
@@ -39,6 +40,7 @@ const crate = {
   source,
   clearlydefined,
   licensee,
+  reuse,
   scancode,
   fossology
 }
@@ -48,6 +50,7 @@ const deb = {
   source,
   clearlydefined,
   licensee,
+  reuse,
   scancode,
   fossology
 }
@@ -66,6 +69,7 @@ const maven = {
   source,
   clearlydefined,
   licensee,
+  reuse,
   scancode,
   fossology
 }
@@ -75,7 +79,8 @@ const nuget = {
   source,
   clearlydefined,
   licensee,
-  scancode
+  scancode,
+  reuse
 }
 
 const pod = {
@@ -102,6 +107,7 @@ const composer = {
   source,
   clearlydefined,
   licensee,
+  reuse,
   scancode,
   fossology
 }
@@ -111,6 +117,7 @@ const gem = {
   source,
   clearlydefined,
   licensee,
+  reuse,
   scancode,
   fossology
 }
