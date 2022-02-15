@@ -46,7 +46,8 @@ class FsfeReuseProcessor extends AbstractProcessor {
     const root = request.document.location
     const parameters = [('spdx')]
     try {
-      const { stdout } = await execFile('reuse', parameters, { cwd: root })
+      // Default buffer of 1024x1024 (see https://nodejs.org/api/child_process.html#child_processexecfilefile-args-options-callback) doesn't seem to be enough sometimes
+      const { stdout } = await execFile('reuse', parameters, { cwd: root, maxBuffer: (2048 * 1024) })
       if (!stdout) return
       const results = { metadata: {}, files: [], licenses: this._getLicenses(request) }
       // REUSE SPDX results are grouped in sections that are separated with two newlines
