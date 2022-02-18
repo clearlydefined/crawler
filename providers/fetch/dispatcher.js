@@ -2,14 +2,17 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractFetch = require('./abstractFetch')
+const MemoryCache = require('../../lib/memoryCache')
 
 class FetchDispatcher extends AbstractFetch {
-  constructor(options, store, fetchers, processors, filter) {
+  constructor(options, store, fetchers, processors, filter, fetchResultCache, inProgressFetchCache) {
     super(options)
     this.store = store
     this.fetchers = fetchers
     this.processors = processors
     this.filter = filter
+    this.fetched = fetchResultCache || MemoryCache({ defaultTtlSeconds: 60 * 60 * 24 })
+    this.inProgressFetches = inProgressFetchCache || {}
   }
 
   canHandle() {
@@ -54,8 +57,35 @@ class FetchDispatcher extends AbstractFetch {
     // get the right real fetcher for this request and dispatch
     const handler = this._getHandler(request, this.fetchers)
     if (!handler) throw new Error(`No fetcher found for ${request.toString()}`)
-    await handler.handle(request)
+
+    await this._fetchResult(request, handler)
     return request
+  }
+
+  async _fetchResult(request, handler) {
+    const cacheKey = this.toSpec(request).toUrlPath()
+    let fetchResult = this.fetched.get(cacheKey)
+    if (!fetchResult) {
+      fetchResult = await this._fetchPromise(handler, request, cacheKey)
+      if (fetchResult) this.fetched.set(cacheKey, fetchResult, (key, value) =>
+        value.cleanup(error => this.logger.info(`Cleanup  Problem cleaning up after ${key} ${error.message}`)))
+    }
+    fetchResult?.copyTo(request)
+  }
+
+  async _fetchPromise(handler, request, cacheKey) {
+    return this.inProgressFetches[cacheKey] ||
+      (this.inProgressFetches[cacheKey] = this._fetch(handler, request, cacheKey)
+        .finally(() => delete this.inProgressFetches[cacheKey]))
+  }
+
+  async _fetch(handler, request, cacheKey) {
+    this.logger.debug(`---Start Fetch: ${cacheKey}`)
+    await handler.handle(request)
+    const fetchResult = request.fetchResult
+    delete request.fetchResult
+    this.logger.debug(`---End Fetch: ${cacheKey}`)
+    return fetchResult
   }
 
   // get all the handler that apply to this request from the given list of handlers
@@ -64,5 +94,5 @@ class FetchDispatcher extends AbstractFetch {
   }
 }
 
-module.exports = (options, store, fetchers, processors, filter) =>
-  new FetchDispatcher(options, store, fetchers, processors, filter)
+module.exports = (options, store, fetchers, processors, filter, fetchResultCache, inProgressFetchCache) =>
+  new FetchDispatcher(options, store, fetchers, processors, filter, fetchResultCache, inProgressFetchCache)

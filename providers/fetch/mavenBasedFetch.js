@@ -12,6 +12,7 @@ const path = require('path')
 const parseString = promisify(require('xml2js').parseString)
 const EntitySpec = require('../../lib/entitySpec')
 const { extractDate } = require('../../lib/utils')
+const FetchResult = require('../../lib/fetchResult')
 
 const extensionMap = {
   sourcesJar: '-sources.jar',
@@ -48,17 +49,22 @@ class MavenBasedFetch extends AbstractFetch {
     const artifact = this.createTempFile(request)
     const artifactResult = await this._getArtifact(spec, artifact.name)
     if (!artifactResult) return this.markSkip(request)
-    const dir = this.createTempDir(request)
+
+    const fetchResult = new FetchResult()
+    fetchResult.url = request.url
+
+    const dir = this.createTempDir(fetchResult)
     await this.decompress(artifact.name, dir.name)
     const hashes = await this.computeHashes(artifact.name)
     const releaseDate = await this._getReleaseDate(dir.name, spec)
-    request.document = this._createDocument(dir, releaseDate, hashes, poms, summary)
-    request.contentOrigin = 'origin'
+    fetchResult.document = this._createDocument(dir, releaseDate, hashes, poms, summary)
+
     if (get(summary, 'groupId[0]') || get(summary, 'artifactId[0]')) {
-      request.casedSpec = clone(spec)
-      request.casedSpec.namespace = get(summary, 'groupId[0]') || spec.namespace
-      request.casedSpec.name = get(summary, 'artifactId[0]') || spec.name
+      fetchResult.casedSpec = clone(spec)
+      fetchResult.casedSpec.namespace = get(summary, 'groupId[0]') || spec.namespace
+      fetchResult.casedSpec.name = get(summary, 'artifactId[0]') || spec.name
     }
+    request.fetchResult = fetchResult
     return request
   }
 
