@@ -8,6 +8,7 @@ const mkdirp = require('mkdirp')
 const path = require('path')
 const { promisify } = require('util')
 const requestRetry = require('requestretry').defaults({ maxAttempts: 3, fullResponse: true })
+const FetchResult = require('../../lib/fetchResult')
 
 const providerMap = {
   nuget: 'https://api.nuget.org'
@@ -42,7 +43,9 @@ class NuGetFetch extends AbstractFetch {
     await this._getPackage(zip, registryData.packageContent)
     const location = path.join(dir.name, 'nupkg')
     await this.decompress(zip, location)
-    request.document = {
+
+    const fetchResult = new FetchResult(request.url)
+    fetchResult.document = {
       registryData,
       location,
       metadataLocation,
@@ -52,11 +55,11 @@ class NuGetFetch extends AbstractFetch {
     if (manifest.licenseUrl) {
       await this._downloadLicense({ dirName: location, licenseUrl: manifest.licenseUrl })
     }
-    request.contentOrigin = 'origin'
     if (get(manifest, 'id')) {
-      request.casedSpec = clone(spec)
-      request.casedSpec.name = manifest.id
+      fetchResult.casedSpec = clone(spec)
+      fetchResult.casedSpec.name = manifest.id
     }
+    request.fetchResult = fetchResult.adoptCleanup(dir, request)
     return request
   }
 

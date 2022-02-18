@@ -7,6 +7,7 @@ const nodeRequest = require('request')
 const fs = require('fs')
 const spdxCorrect = require('spdx-correct')
 const { findLastKey, get, find, clone } = require('lodash')
+const FetchResult = require('../../lib/fetchResult')
 
 const providerMap = {
   pypi: 'https://pypi.python.org'
@@ -32,12 +33,14 @@ class PyPiFetch extends AbstractFetch {
     const dir = this.createTempDir(request)
     await this.decompress(file.name, dir.name)
     const hashes = await this.computeHashes(file.name)
-    request.document = await this._createDocument(dir, spec, registryData, hashes)
-    request.contentOrigin = 'origin'
+
+    const fetchResult = new FetchResult(request.url)
+    fetchResult.document = await this._createDocument(dir, spec, registryData, hashes)
     if (get(registryData, 'info.name')) {
-      request.casedSpec = clone(spec)
-      request.casedSpec.name = registryData.info.name
+      fetchResult.casedSpec = clone(spec)
+      fetchResult.casedSpec.name = registryData.info.name
     }
+    request.fetchResult = fetchResult.adoptCleanup(dir, request)
     return request
   }
 

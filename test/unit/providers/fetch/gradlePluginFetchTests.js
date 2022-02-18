@@ -66,13 +66,13 @@ describe('Gradle plugin fetch', () => {
       return fs.readFileSync(`test/fixtures/maven/${pickArtifact(url)}`)
     }
 
-    function verifySuccess(request) {
-      expect(request.document.hashes.sha1).to.be.equal(hashes['swt-3.3.0-v3346.jar']['sha1'])
-      expect(request.document.hashes.sha256).to.be.equal(hashes['swt-3.3.0-v3346.jar']['sha256'])
+    function verifySuccess({ document, casedSpec }) {
+      expect(document.hashes.sha1).to.be.equal(hashes['swt-3.3.0-v3346.jar']['sha1'])
+      expect(document.hashes.sha256).to.be.equal(hashes['swt-3.3.0-v3346.jar']['sha256'])
       //date from manifest.mf modification date
-      expect(request.document.releaseDate.startsWith('2007-06-25')).to.be.true
-      expect(request.casedSpec.name).to.equal('swt')
-      expect(request.casedSpec.namespace).to.equal('org.eclipse')
+      expect(document.releaseDate.startsWith('2007-06-25')).to.be.true
+      expect(casedSpec.name).to.equal('swt')
+      expect(casedSpec.namespace).to.equal('org.eclipse')
     }
 
     let handler
@@ -113,25 +113,25 @@ describe('Gradle plugin fetch', () => {
 
     it('test success with maven spec with version', async () => {
       const request = await handler.handle(new Request('test', 'cd:/maven/gradleplugin/org.eclipse/swt/3.3.0-v3344'))
-      verifySuccess(request)
-      expect(request.casedSpec.revision).to.equal('3.3.0-v3344')
-      expect(request.document.location).to.be.a('string')
-      expect(request.document.poms.length).to.equal(1)
+      verifySuccess(request.fetchResult)
+      expect(request.fetchResult.casedSpec.revision).to.equal('3.3.0-v3344')
+      expect(request.fetchResult.document.location).to.be.a('string')
+      expect(request.fetchResult.document.poms.length).to.equal(1)
     })
 
     it('test success with maven spec without version', async () => {
       const request = await handler.handle(new Request('test', 'cd:/maven/gradleplugin/org.eclipse/swt'))
-      verifySuccess(request)
-      expect(request.casedSpec.revision).to.equal('4.5.10')
-      expect(request.url).to.equal('cd:/maven/gradleplugin/org.eclipse/swt/4.5.10')
+      verifySuccess(request.fetchResult)
+      expect(request.fetchResult.casedSpec.revision).to.equal('4.5.10')
+      expect(request.fetchResult.url).to.equal('cd:/maven/gradleplugin/org.eclipse/swt/4.5.10')
     })
 
     it('test success with sourcearchive', async () => {
       const request = await handler.handle(new Request('test', 'cd:/sourcearchive/gradleplugin/org.eclipse/swt/3.3.0-v3344'))
-      verifySuccess(request)
-      expect(request.casedSpec.revision).to.equal('3.3.0-v3344')
-      expect(request.document.location).to.be.a('string')
-      expect(request.document.poms.length).to.equal(1)
+      verifySuccess(request.fetchResult)
+      expect(request.fetchResult.casedSpec.revision).to.equal('3.3.0-v3344')
+      expect(request.fetchResult.document.location).to.be.a('string')
+      expect(request.fetchResult.document.poms.length).to.equal(1)
     })
 
     it('handle no maven meta data found', async () => {

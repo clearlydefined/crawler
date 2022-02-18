@@ -1,0 +1,32 @@
+{
+  "name": "SwiftLCS",
+  "version": "1.0",
+  "summary": "SwiftLCS is a Swift implementation of longest common subsequence (LCS) algorithm.",
+  "homepage": "https://github.com/Frugghi/SwiftLCS",
+  "license": "MIT",
+  "authors": {},
+  "source": {
+    "git": "https://github.com/Frugghi/SwiftLCS.git",
+    "tag": "1.0"
+  },
+  "requires_arc": true,
+  "default_subspecs": "Foundation",
+  "platforms": {
+    "ios": "8.0",
+    "osx": "10.9",
+    "watchos": "2.0"
+  },
+  "subspecs": [
+    {
+      "name": "Core",
+      "source_files": "SwiftLCS/SwiftLCS.swift"
+    },
+    {
+      "name": "Foundation",
+      "source_files": "SwiftLCS/SwiftLCS+Foundation.swift",
+      "dependencies": {
+        "SwiftLCS/Core": []
+      }
+    }
+  ]
+}

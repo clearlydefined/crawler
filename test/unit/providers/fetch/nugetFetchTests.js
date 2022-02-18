@@ -78,6 +78,7 @@ describe('', () => {
   it('succeeds in download, decompress and hash', async () => {
     const handler = setup()
     const request = await handler.handle(new Request('test', 'cd:/nuget/nuget/-/xunit.core/2.4.1'))
+    request.fetchResult.copyTo(request)
     expect(request.document.hashes.sha1).to.be.equal(hashes['xunit.core.2.4.1.nupkg']['sha1'])
     expect(request.document.hashes.sha256).to.be.equal(hashes['xunit.core.2.4.1.nupkg']['sha256'])
     expect(request.document.releaseDate).to.equal('2018-10-29T04:18:45.803Z')
@@ -88,6 +89,7 @@ describe('', () => {
   it('succeeds for latest version for download, decompress and hash', async () => {
     const handler = setup()
     const request = await handler.handle(new Request('test', 'cd:/nuget/nuget/-/xunit.core'))
+    request.fetchResult.copyTo(request)
     expect(request.document.hashes.sha1).to.be.equal(hashes['xunit.core.2.4.1.nupkg']['sha1'])
     expect(request.document.hashes.sha256).to.be.equal(hashes['xunit.core.2.4.1.nupkg']['sha256'])
     expect(request.document.releaseDate).to.equal('2018-10-29T04:18:45.803Z')

@@ -7,6 +7,7 @@ const axios = require('axios')
 const { default: axiosRetry, exponentialDelay, isNetworkOrIdempotentRequestError } = require('axios-retry')
 const { parse: htmlParser } = require('node-html-parser')
 const { parse: spdxParser } = require('@clearlydefined/spdx')
+const FetchResult = require('../../lib/fetchResult')
 
 class GoFetch extends AbstractFetch {
   constructor(options) {
@@ -59,9 +60,10 @@ class GoFetch extends AbstractFetch {
       }
     }
 
-    request.document = this._createDocument(dir, releaseDate, hashes, registryData)
-    request.contentOrigin = 'origin'
-    request.casedSpec = clone(spec)
+    const fetchResult = new FetchResult(request.url)
+    fetchResult.document = this._createDocument(dir, releaseDate, hashes, registryData)
+    fetchResult.casedSpec = clone(spec)
+    request.fetchResult = fetchResult.adoptCleanup(dir, request)
 
     return request
   }
