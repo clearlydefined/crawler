@@ -13,6 +13,7 @@ const expect = chai.expect
 
 const FetchDispatcher = require('../../../../providers/fetch/dispatcher')
 const MavenFetch = require('../../../../providers/fetch/mavencentralFetch')
+const GitCloner = require('../../../../providers/fetch/gitCloner')
 
 describe('fetchDispatcher', () => {
   it('should handle any request', () => {
@@ -57,19 +58,23 @@ describe('fetchDispatcher cache fetch result', () => {
     return FetchDispatcher(options, storeStub, [fetcher], processorsStub, filterStub, mockResultCache(resultCache), promiseCache)
   }
 
+  let resultCache
+  let inProgressPromiseCache
+
+  beforeEach(() => {
+    resultCache = {}
+    inProgressPromiseCache = {}
+  })
+
+  afterEach(() => {
+    Object.values(resultCache).forEach(fetched => fetched.cleanup())
+  })
+
   describe('cache maven fetch result', () => {
-    let resultCache
-    let inProgressPromiseCache
     let fetchDispatcher
 
     beforeEach(() => {
-      resultCache = {}
-      inProgressPromiseCache = {}
       fetchDispatcher = setupDispatcher(setupMavenFetch(), resultCache, inProgressPromiseCache)
-    })
-
-    afterEach(() => {
-      Object.values(resultCache).forEach(fetched => fetched.cleanup())
     })
 
     it('cached result same as fetched', async () => {
@@ -78,7 +83,7 @@ describe('fetchDispatcher cache fetch result', () => {
       expect(Object.keys(resultCache).length).to.be.equal(1)
       expect(Object.keys(inProgressPromiseCache).length).to.be.equal(0)
       const { cleanups, ...expected } = fetched
-      expect(cleanups).not.to.be.null
+      expect(cleanups.length).to.be.equal(1)
 
       fetchDispatcher._fetchPromise = sinon.stub().rejects('should not be called')
       const resultFromCache = await fetchDispatcher.handle(new Request('test', 'cd:/maven/mavencentral/org.eclipse/swt/3.3.0-v3344'))
@@ -92,7 +97,6 @@ describe('fetchDispatcher cache fetch result', () => {
       expect(Object.keys(inProgressPromiseCache).length).to.be.equal(0)
     })
 
-
     it('no cache for failed maven fetch', async () => {
       try {
         await fetchDispatcher.handle(new Request('test', 'cd:/maven/mavencentral/org.eclipse/error/3.3.0-v3344'))
@@ -104,8 +108,29 @@ describe('fetchDispatcher cache fetch result', () => {
       }
     })
   })
-})
 
+  describe('cache gitClone fetch result', () => {
+    let fetchDispatcher
+
+    beforeEach(() => {
+      const gitCloner = GitCloner({ logger: { log: sinon.stub() } })
+      gitCloner._cloneRepo = sinon.stub().resolves(532)
+      gitCloner._getRevision = sinon.stub().resolves('deef80a18aa929943e5dab1dba7276c231c84519')
+      gitCloner._getDate = sinon.stub().resolves(new Date('2021-04-08T13:27:49.000Z'))
+      fetchDispatcher = setupDispatcher(gitCloner, resultCache, inProgressPromiseCache)
+    })
+
+    it('cached result same as fetched', async () => {
+      const fetched = await fetchDispatcher.handle(new Request('licensee', 'cd:git/github/palantir/refreshable/2.0.0'))
+      expect(Object.keys(resultCache).length).to.be.equal(1)
+      expect(Object.keys(inProgressPromiseCache).length).to.be.equal(0)
+
+      fetchDispatcher._fetchPromise = sinon.stub().rejects('should not be called')
+      const resultFromCache = await fetchDispatcher.handle(new Request('licensee', 'cd:git/github/palantir/refreshable/2.0.0'))
+      expect(resultFromCache).to.be.deep.equal(fetched)
+    })
+  })
+})
 
 function setupMavenFetch() {
   const pickArtifact = url => {

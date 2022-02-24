@@ -5,6 +5,7 @@ const AbstractFetch = require('./abstractFetch')
 const { exec } = require('child_process')
 const { clone } = require('lodash')
 const rimraf = require('rimraf')
+const FetchResult = require('../../lib/fetchResult')
 
 const providerDictionary = {
   gitlab: 'https://gitlab.com',
@@ -24,20 +25,24 @@ class GitCloner extends AbstractFetch {
     const spec = this.toSpec(request)
     const sourceSpec = SourceSpec.fromObject(spec)
     const options = { version: sourceSpec.revision }
-    const dir = this.createTempDir(request)
+
+    const fetchResult = new FetchResult()
+    const dir = this.createTempDir(fetchResult)
     const repoSize = await this._cloneRepo(sourceSpec.toUrl(), dir.name, spec.name, options.version)
-    request.addMeta({ gitSize: repoSize })
+    fetchResult.addMeta({ gitSize: repoSize })
+
     spec.revision = await this._getRevision(dir.name, spec.name)
-    request.url = spec.toUrl()
+    fetchResult.url = request.url = spec.toUrl()
     const releaseDate = await this._getDate(dir.name, spec.name)
     await this._deleteGitDatabase(dir.name, spec.name)
-    request.contentOrigin = 'origin'
-    request.document = this._createDocument(dir.name + '/' + spec.name, repoSize, releaseDate, options.version)
+
+    fetchResult.document = this._createDocument(dir.name + '/' + spec.name, repoSize, releaseDate, options.version)
     if (spec.provider === 'github') {
-      request.casedSpec = clone(spec)
-      request.casedSpec.namespace = spec.namespace.toLowerCase()
-      request.casedSpec.name = spec.name.toLowerCase()
+      fetchResult.casedSpec = clone(spec)
+      fetchResult.casedSpec.namespace = spec.namespace.toLowerCase()
+      fetchResult.casedSpec.name = spec.name.toLowerCase()
     }
+    request.fetchResult = fetchResult
     return request
   }
 

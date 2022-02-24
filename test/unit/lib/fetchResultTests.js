@@ -45,4 +45,17 @@ describe('fetchResult', () => {
     fetchResult.copyTo(result)
     expect(result).to.be.deep.equal({ contentOrigin: 'origin' })
   })
+
+  it('avoid copy for empty meta', () => {
+    const result = { addMeta: sinon.stub() }
+    fetchResult.copyTo(result)
+    expect(result.addMeta.called).to.be.false
+  })
+
+  it('verify addMeta', () => {
+    fetchResult.addMeta({ gitSize: 532 })
+    const result = { addMeta: sinon.stub() }
+    fetchResult.copyTo(result)
+    expect(result.addMeta.calledWith({ gitSize: 532 })).to.be.true
+  })
 })

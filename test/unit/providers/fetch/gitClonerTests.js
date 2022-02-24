@@ -28,6 +28,7 @@ describe('fetch result', () => {
 
   it('fetch success', async () => {
     const request = await gitClient.handle(new Request('licensee', 'cd:git/github/palantir/refreshable/2.0.0'))
+    request.fetchResult.copyTo(request)
     expect(request.url).to.be.equal('cd:/git/github/palantir/refreshable/deef80a18aa929943e5dab1dba7276c231c84519')
     expect(request.meta.gitSize).to.be.equal(532)
     expect(request.contentOrigin).to.be.equal('origin')
