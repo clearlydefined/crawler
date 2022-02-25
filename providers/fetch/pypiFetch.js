@@ -29,8 +29,7 @@ class PyPiFetch extends AbstractFetch {
     const file = this.createTempFile(request)
     await this._getPackage(spec, registryData, file.name)
 
-    const fetchResult = new FetchResult()
-    fetchResult.url = request.url
+    const fetchResult = new FetchResult(request.url)
     const dir = this.createTempDir(fetchResult)
     await this.decompress(file.name, dir.name)
     const hashes = await this.computeHashes(file.name)

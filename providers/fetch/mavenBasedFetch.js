@@ -50,9 +50,7 @@ class MavenBasedFetch extends AbstractFetch {
     const artifactResult = await this._getArtifact(spec, artifact.name)
     if (!artifactResult) return this.markSkip(request)
 
-    const fetchResult = new FetchResult()
-    fetchResult.url = request.url
-
+    const fetchResult = new FetchResult(request.url)
     const dir = this.createTempDir(fetchResult)
     await this.decompress(artifact.name, dir.name)
     const hashes = await this.computeHashes(artifact.name)

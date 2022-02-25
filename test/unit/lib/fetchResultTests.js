@@ -46,6 +46,13 @@ describe('fetchResult', () => {
     expect(result).to.be.deep.equal({ contentOrigin: 'origin' })
   })
 
+  it('verify copyTo with url', () => {
+    const result = {}
+    fetchResult = new FetchResult('http://localhost')
+    fetchResult.copyTo(result)
+    expect(result).to.be.deep.equal({ contentOrigin: 'origin', url: 'http://localhost' })
+  })
+
   it('avoid copy for empty meta', () => {
     const result = { addMeta: sinon.stub() }
     fetchResult.copyTo(result)
