@@ -85,6 +85,7 @@ describe('', () => {
   it('succeeds in download, decompress and hash', async () => {
     const handler = setup(createRegistryData('0.3.0'))
     const request = await handler.handle(new Request('test', 'cd:/npm/npmjs/-/redie/0.3.0'))
+    request.fetchResult.copyTo(request)
     expect(request.document.hashes.sha1).to.be.equal(hashes['redie-0.3.0.tgz']['sha1'])
     expect(request.document.hashes.sha256).to.be.equal(hashes['redie-0.3.0.tgz']['sha256'])
     expect(request.document.releaseDate).to.equal('42')

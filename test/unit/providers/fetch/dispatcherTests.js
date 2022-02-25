@@ -6,6 +6,8 @@ const spies = require('chai-spies')
 const sinon = require('sinon')
 const fs = require('fs')
 const PassThrough = require('stream').PassThrough
+const proxyquire = require('proxyquire')
+
 const Request = require('../../../../ghcrawler').request
 const { promisify } = require('util')
 
@@ -60,6 +62,22 @@ describe('fetchDispatcher cache fetch result', () => {
     return FetchDispatcher(options, storeStub, [fetcher], processorsStub, filterStub, mockResultCache(resultCache), promiseCache)
   }
 
+  function verifyFetchSuccess(resultCache, inProgressPromiseCache) {
+    expect(Object.keys(resultCache).length).to.be.equal(1)
+    expect(Object.keys(inProgressPromiseCache).length).to.be.equal(0)
+  }
+
+  function verifyFetchFailure(resultCache, inProgressPromiseCache) {
+    expect(Object.keys(resultCache).length).to.be.equal(0)
+    expect(Object.keys(inProgressPromiseCache).length).to.be.equal(0)
+  }
+
+  function verifyFetchResult(fetched, resultFromCache) {
+    // eslint-disable-next-line no-unused-vars
+    const { cleanups, ...expected } = fetched
+    expect(resultFromCache).to.be.deep.equal(expected)
+  }
+
   let resultCache
   let inProgressPromiseCache
 
@@ -81,22 +99,17 @@ describe('fetchDispatcher cache fetch result', () => {
 
     it('cached result same as fetched', async () => {
       const fetched = await fetchDispatcher.handle(new Request('test', 'cd:/maven/mavencentral/org.eclipse/swt/3.3.0-v3344'))
-
-      expect(Object.keys(resultCache).length).to.be.equal(1)
-      expect(Object.keys(inProgressPromiseCache).length).to.be.equal(0)
-      const { cleanups, ...expected } = fetched
-      expect(cleanups.length).to.be.equal(1)
+      verifyFetchSuccess(resultCache, inProgressPromiseCache)
 
       fetchDispatcher._fetchPromise = sinon.stub().rejects('should not be called')
       const resultFromCache = await fetchDispatcher.handle(new Request('test', 'cd:/maven/mavencentral/org.eclipse/swt/3.3.0-v3344'))
-      expect(resultFromCache).to.be.deep.equal(expected)
+      verifyFetchResult(fetched, resultFromCache)
     })
 
     it('no cache for missing maven fetch', async () => {
       const fetched = await fetchDispatcher.handle(new Request('test', 'cd:/maven/mavencentral/org.eclipse/swt'))
       expect(fetched.processControl).to.be.equal('skip')
-      expect(Object.keys(resultCache).length).to.be.equal(0)
-      expect(Object.keys(inProgressPromiseCache).length).to.be.equal(0)
+      verifyFetchFailure(resultCache, inProgressPromiseCache)
     })
 
     it('no cache for failed maven fetch', async () => {
@@ -105,8 +118,7 @@ describe('fetchDispatcher cache fetch result', () => {
         expect(false).to.be.true
       } catch (error) {
         expect(error.message).to.be.equal('yikes')
-        expect(Object.keys(resultCache).length).to.be.equal(0)
-        expect(Object.keys(inProgressPromiseCache).length).to.be.equal(0)
+        verifyFetchFailure(resultCache, inProgressPromiseCache)
       }
     })
   })
@@ -124,12 +136,11 @@ describe('fetchDispatcher cache fetch result', () => {
 
     it('cached result same as fetched', async () => {
       const fetched = await fetchDispatcher.handle(new Request('licensee', 'cd:git/github/palantir/refreshable/2.0.0'))
-      expect(Object.keys(resultCache).length).to.be.equal(1)
-      expect(Object.keys(inProgressPromiseCache).length).to.be.equal(0)
+      verifyFetchSuccess(resultCache, inProgressPromiseCache)
 
       fetchDispatcher._fetchPromise = sinon.stub().rejects('should not be called')
       const resultFromCache = await fetchDispatcher.handle(new Request('licensee', 'cd:git/github/palantir/refreshable/2.0.0'))
-      expect(resultFromCache).to.be.deep.equal(fetched)
+      verifyFetchResult(fetched, resultFromCache)
     })
   })
 
@@ -138,11 +149,8 @@ describe('fetchDispatcher cache fetch result', () => {
 
     beforeEach(() => {
       pypiFetch = PypiFetch({ logger: { log: sinon.stub() } })
-      pypiFetch._getPackage = sinon.stub().callsFake(async (spec, registryData, destination) => {
-        const file = 'test/fixtures/maven/swt-3.3.0-v3346.jar'
-        const content = await promisify(fs.readFile)(file)
-        await promisify(fs.writeFile)(destination, content)
-      })
+      pypiFetch._getPackage = sinon.stub().callsFake(async (spec, registryData, destination) =>
+        await getPacakgeStub('test/fixtures/maven/swt-3.3.0-v3346.jar', destination))
     })
 
     it('cached result same as fetched', async () => {
@@ -150,14 +158,11 @@ describe('fetchDispatcher cache fetch result', () => {
       const fetchDispatcher = setupDispatcher(pypiFetch, resultCache, inProgressPromiseCache)
 
       const fetched = await fetchDispatcher.handle(new Request('licensee', 'cd:/pypi/pypi/-/backports.ssl-match-hostname/3.7.0.1'))
-      expect(Object.keys(resultCache).length).to.be.equal(1)
-      expect(Object.keys(inProgressPromiseCache).length).to.be.equal(0)
-      const { cleanups, ...expected } = fetched
-      expect(cleanups.length).to.be.equal(1)
+      verifyFetchSuccess(resultCache, inProgressPromiseCache)
 
       fetchDispatcher._fetchPromise = sinon.stub().rejects('should not be called')
       const resultFromCache = await fetchDispatcher.handle(new Request('licensee', 'cd:/pypi/pypi/-/backports.ssl-match-hostname/3.7.0.1'))
-      expect(resultFromCache).to.be.deep.equal(expected)
+      verifyFetchResult(fetched, resultFromCache)
     })
 
     it('no cache for missing package', async () => {
@@ -166,8 +171,31 @@ describe('fetchDispatcher cache fetch result', () => {
 
       const fetched = await fetchDispatcher.handle(new Request('licensee', 'cd:/pypi/pypi/-/test/revision'))
       expect(fetched.processControl).to.be.equal('skip')
-      expect(Object.keys(resultCache).length).to.be.equal(0)
-      expect(Object.keys(inProgressPromiseCache).length).to.be.equal(0)
+      verifyFetchFailure(resultCache, inProgressPromiseCache)
+    })
+  })
+
+  describe('cache npm fetch result', () => {
+    let fetchDispatcher
+
+    beforeEach(() => {
+      const NpmFetch = proxyquire('../../../../providers/fetch/npmjsFetch', {
+        'request-promise-native': npmRegistryRequestStub
+      })
+      const npmFetch = NpmFetch({ logger: { log: sinon.stub() } })
+      npmFetch._getPackage = sinon.stub().callsFake(async (spec, destination) =>
+        await getPacakgeStub('test/fixtures/npm/redie-0.3.0.tgz', destination))
+
+      fetchDispatcher = setupDispatcher(npmFetch, resultCache, inProgressPromiseCache)
+    })
+
+    it('cached result same as fetched', async () => {
+      const fetched = await fetchDispatcher.handle(new Request('licensee', 'cd:/npm/npmjs/-/redie/0.3.0'))
+      verifyFetchSuccess(resultCache, inProgressPromiseCache)
+
+      fetchDispatcher._fetchPromise = sinon.stub().rejects('should not be called')
+      const resultFromCache = await fetchDispatcher.handle(new Request('licensee', 'cd:/npm/npmjs/-/redie/0.3.0'))
+      verifyFetchResult(fetched, resultFromCache)
     })
   })
 })
@@ -207,4 +235,18 @@ function setupMavenFetch() {
     requestPromise: requestPromiseStub,
     requestStream: getStub
   })
+}
+
+const getPacakgeStub = async (file, destination) => {
+  const content = await promisify(fs.readFile)(file)
+  await promisify(fs.writeFile)(destination, content)
+}
+
+const npmRegistryRequestStub = () => {
+  const version = '0.3.0'
+  return {
+    manifest: { version },
+    versions: { [version]: { test: true } },
+    time: { [version]: '42' }
+  }
 }

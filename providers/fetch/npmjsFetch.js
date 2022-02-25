@@ -6,6 +6,7 @@ const nodeRequest = require('request')
 const requestPromise = require('request-promise-native')
 const fs = require('fs')
 const { clone, get } = require('lodash')
+const FetchResult = require('../../lib/fetchResult')
 
 const providerMap = {
   npmjs: 'https://registry.npmjs.com'
@@ -27,13 +28,16 @@ class NpmFetch extends AbstractFetch {
     super.handle(request)
     const file = this.createTempFile(request)
     await this._getPackage(spec, file.name)
-    const dir = this.createTempDir(request)
+
+    const fetchResult = new FetchResult(request.url)
+    const dir = this.createTempDir(fetchResult)
     await this.decompress(file.name, dir.name)
     const hashes = await this.computeHashes(file.name)
-    request.document = this._createDocument(dir, registryData, hashes)
-    request.contentOrigin = 'origin'
+
+    fetchResult.document = this._createDocument(dir, registryData, hashes)
     const casedSpec = this._getCasedSpec(spec, registryData)
-    if (casedSpec) request.casedSpec = casedSpec
+    if (casedSpec) fetchResult.casedSpec = casedSpec
+    request.fetchResult = fetchResult
     return request
   }
 
