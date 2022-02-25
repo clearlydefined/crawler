@@ -40,6 +40,7 @@ describe('pypiFetch handle function', () => {
     requestGetStub.resolves({ body: registryData, statusCode: 200 })
 
     const result = await fetch.handle(new Request('pypi', 'cd:/pypi/pypi/-/backports.ssl-match-hostname/3.7.0.1'))
+    result.fetchResult.copyTo(result)
     expect(result.url).to.be.equal('cd:/pypi/pypi/-/backports.ssl-match-hostname/3.7.0.1')
     expect(result.contentOrigin).to.be.equal('origin')
     expect(result.casedSpec.toUrl()).to.be.equal('cd:/pypi/pypi/-/backports.ssl_match_hostname/3.7.0.1')
