@@ -30,12 +30,12 @@ describe('rubyGemsFetch', () => {
 
   it('fetch spec with version', async () => {
     const result = await fetch.handle(new Request('test', 'cd:/ruby/rubygems/-/small/0.5.1'))
-    verifyFetch(result)
+    verifyFetch(result.fetchResult)
   })
 
   it('fetch spec without version', async () => {
     const result = await fetch.handle(new Request('test', 'cd:/ruby/rubygems/-/small'))
-    verifyFetch(result)
+    verifyFetch(result.fetchResult)
   })
 })
 

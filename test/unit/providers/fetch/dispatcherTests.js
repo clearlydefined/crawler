@@ -18,6 +18,7 @@ const FetchDispatcher = require('../../../../providers/fetch/dispatcher')
 const MavenFetch = require('../../../../providers/fetch/mavencentralFetch')
 const GitCloner = require('../../../../providers/fetch/gitCloner')
 const PypiFetch = require('../../../../providers/fetch/pypiFetch')
+const RubyGemsFetch = require('../../../../providers/fetch/rubyGemsFetch')
 
 describe('fetchDispatcher', () => {
   it('should handle any request', () => {
@@ -195,6 +196,32 @@ describe('fetchDispatcher cache fetch result', () => {
 
       fetchDispatcher._fetchPromise = sinon.stub().rejects('should not be called')
       const resultFromCache = await fetchDispatcher.handle(new Request('licensee', 'cd:/npm/npmjs/-/redie/0.3.0'))
+      verifyFetchResult(fetched, resultFromCache)
+    })
+  })
+
+  describe('cache rubyGems fetch result', () => {
+    let fetchDispatcher
+
+    beforeEach(() => {
+      const rubyGemsFetch = RubyGemsFetch({ logger: { log: sinon.stub() } })
+      rubyGemsFetch._getRegistryData = sinon.stub().resolves({
+        name: 'small',
+        version: '0.5.1',
+        gem_uri: 'https://rubygems.org/gems/small-0.5.1.gem',
+      })
+      rubyGemsFetch._getPackage = sinon.stub().callsFake(async (spec, registryData, destination) =>
+        await getPacakgeStub('test/fixtures/ruby/small-0.5.1.gem', destination))
+
+      fetchDispatcher = setupDispatcher(rubyGemsFetch, resultCache, inProgressPromiseCache)
+    })
+
+    it('cached result same as fetched', async () => {
+      const fetched = await fetchDispatcher.handle(new Request('test', 'cd:/ruby/rubygems/-/small/0.5.1'))
+      verifyFetchSuccess(resultCache, inProgressPromiseCache)
+
+      fetchDispatcher._fetchPromise = sinon.stub().rejects('should not be called')
+      const resultFromCache = await fetchDispatcher.handle(new Request('test', 'cd:/ruby/rubygems/-/small/0.5.1'))
       verifyFetchResult(fetched, resultFromCache)
     })
   })

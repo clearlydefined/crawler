@@ -8,6 +8,7 @@ const fs = require('fs')
 const zlib = require('zlib')
 const path = require('path')
 const { clone, get } = require('lodash')
+const FetchResult = require('../../lib/fetchResult')
 
 const providerMap = {
   rubyGems: 'https://rubygems.org'
@@ -29,16 +30,18 @@ class RubyGemsFetch extends AbstractFetch {
     super.handle(request)
     const file = this.createTempFile(request)
     await this._getPackage(spec, registryData, file.name)
-    const dir = this.createTempDir(request)
+
+    const fetchResult = new FetchResult(request.url)
+    const dir = this.createTempDir(fetchResult)
     await this.decompress(file.name, dir.name)
     await this._extractFiles(dir.name)
     const hashes = await this.computeHashes(file.name)
-    request.document = await this._createDocument(dir, registryData, hashes)
-    request.contentOrigin = 'origin'
+    fetchResult.document = await this._createDocument(dir, registryData, hashes)
     if (get(registryData, 'name')) {
-      request.casedSpec = clone(spec)
-      request.casedSpec.name = registryData.name
+      fetchResult.casedSpec = clone(spec)
+      fetchResult.casedSpec.name = registryData.name
     }
+    request.fetchResult = fetchResult
     return request
   }
 
