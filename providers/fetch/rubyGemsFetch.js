@@ -52,6 +52,7 @@ class RubyGemsFetch extends AbstractFetch {
 
   async _getPackage(spec, registryData, destination) {
     const fullName = spec.namespace ? `${spec.namespace}/${spec.name}` : spec.name
+    //TODO: registryData.gem_uri seems to be for the latest version
     const gemUrl = registryData.gem_uri || `${providerMap.rubyGems}/gems/${fullName}-${spec.revision}.gem`
     return new Promise((resolve, reject) => {
       nodeRequest
