@@ -278,6 +278,32 @@ describe('fetchDispatcher cache fetch result', () => {
       verifyFetchResult(fetched, resultFromCache)
     })
   })
+
+  describe('cache debianFetch result', () => {
+    const memCacheStub = { get: () => true }
+    let fetchDispatcher
+
+    beforeEach(() => {
+      const DebianFetch = proxyquire('../../../../providers/fetch/debianFetch', {
+        'memory-cache': memCacheStub
+      })
+      const fetch = DebianFetch({ logger: { info: sinon.stub() }, cdFileLocation: 'test/fixtures/debian/fragment' })
+      fetch._download = async (downloadUrl, destination) =>
+        getPacakgeStub('test/fixtures/debian/0ad_0.0.17-1_armhf.deb', destination)
+      fetch._getDeclaredLicenses = async () => {
+        return ['MIT', 'BSD-3-clause']
+      }
+      fetchDispatcher = setupDispatcher(fetch, resultCache, inProgressPromiseCache)
+    })
+    it('cached result same as fetched', async () => {
+      const fetched = await fetchDispatcher.handle(new Request('test', 'cd:/deb/debian/-/0ad/0.0.17-1_armhf'))
+      verifyFetchSuccess()
+
+      fetchDispatcher._fetchPromise = sinon.stub().rejects('should not be called')
+      const resultFromCache = await fetchDispatcher.handle(new Request('test', 'cd:/deb/debian/-/0ad/0.0.17-1_armhf'))
+      verifyFetchResult(fetched, resultFromCache)
+    })
+  })
 })
 
 function setupMavenFetch() {
@@ -318,8 +344,7 @@ function setupMavenFetch() {
 }
 
 const getPacakgeStub = async (file, destination) => {
-  const content = await promisify(fs.readFile)(file)
-  await promisify(fs.writeFile)(destination, content)
+  await promisify(fs.copyFile)(file, destination)
 }
 
 const npmRegistryRequestStub = () => {

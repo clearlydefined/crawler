@@ -125,6 +125,7 @@ describe('Debian fetching', () => {
       return ['MIT', 'BSD-3-clause']
     }
     const request = await handler.handle(new Request('test', 'cd:/deb/debian/-/0ad/0.0.17-1_armhf'))
+    request.fetchResult.copyTo(request)
     expect(request.document.hashes.sha1).to.be.equal(hashes['0ad_0.0.17-1_armhf.deb']['sha1'])
     expect(request.document.hashes.sha256).to.be.equal(hashes['0ad_0.0.17-1_armhf.deb']['sha256'])
     expect(request.document.releaseDate.getFullYear()).to.be.equal(2014)
