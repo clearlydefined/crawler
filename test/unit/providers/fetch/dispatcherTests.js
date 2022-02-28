@@ -64,16 +64,6 @@ describe('fetchDispatcher cache fetch result', () => {
     return FetchDispatcher(options, storeStub, [fetcher], processorsStub, filterStub, mockResultCache(resultCache), promiseCache)
   }
 
-  function verifyFetchSuccess(resultCache, inProgressPromiseCache) {
-    expect(Object.keys(resultCache).length).to.be.equal(1)
-    expect(Object.keys(inProgressPromiseCache).length).to.be.equal(0)
-  }
-
-  function verifyFetchFailure(resultCache, inProgressPromiseCache) {
-    expect(Object.keys(resultCache).length).to.be.equal(0)
-    expect(Object.keys(inProgressPromiseCache).length).to.be.equal(0)
-  }
-
   function verifyFetchResult(fetched, resultFromCache) {
     // eslint-disable-next-line no-unused-vars
     const { cleanups, ...expected } = fetched
@@ -92,6 +82,16 @@ describe('fetchDispatcher cache fetch result', () => {
     Object.values(resultCache).forEach(fetched => fetched.cleanup())
   })
 
+  function verifyFetchSuccess() {
+    expect(Object.keys(resultCache).length).to.be.equal(1)
+    expect(Object.keys(inProgressPromiseCache).length).to.be.equal(0)
+  }
+
+  function verifyFetchFailure() {
+    expect(Object.keys(resultCache).length).to.be.equal(0)
+    expect(Object.keys(inProgressPromiseCache).length).to.be.equal(0)
+  }
+
   describe('cache maven fetch result', () => {
     let fetchDispatcher
 
@@ -101,7 +101,7 @@ describe('fetchDispatcher cache fetch result', () => {
 
     it('cached result same as fetched', async () => {
       const fetched = await fetchDispatcher.handle(new Request('test', 'cd:/maven/mavencentral/org.eclipse/swt/3.3.0-v3344'))
-      verifyFetchSuccess(resultCache, inProgressPromiseCache)
+      verifyFetchSuccess()
 
       fetchDispatcher._fetchPromise = sinon.stub().rejects('should not be called')
       const resultFromCache = await fetchDispatcher.handle(new Request('test', 'cd:/maven/mavencentral/org.eclipse/swt/3.3.0-v3344'))
@@ -111,7 +111,7 @@ describe('fetchDispatcher cache fetch result', () => {
     it('no cache for missing maven fetch', async () => {
       const fetched = await fetchDispatcher.handle(new Request('test', 'cd:/maven/mavencentral/org.eclipse/swt'))
       expect(fetched.processControl).to.be.equal('skip')
-      verifyFetchFailure(resultCache, inProgressPromiseCache)
+      verifyFetchFailure()
     })
 
     it('no cache for failed maven fetch', async () => {
@@ -120,7 +120,7 @@ describe('fetchDispatcher cache fetch result', () => {
         expect(false).to.be.true
       } catch (error) {
         expect(error.message).to.be.equal('yikes')
-        verifyFetchFailure(resultCache, inProgressPromiseCache)
+        verifyFetchFailure()
       }
     })
   })
@@ -138,7 +138,7 @@ describe('fetchDispatcher cache fetch result', () => {
 
     it('cached result same as fetched', async () => {
       const fetched = await fetchDispatcher.handle(new Request('licensee', 'cd:git/github/palantir/refreshable/2.0.0'))
-      verifyFetchSuccess(resultCache, inProgressPromiseCache)
+      verifyFetchSuccess()
 
       fetchDispatcher._fetchPromise = sinon.stub().rejects('should not be called')
       const resultFromCache = await fetchDispatcher.handle(new Request('licensee', 'cd:git/github/palantir/refreshable/2.0.0'))
@@ -160,7 +160,7 @@ describe('fetchDispatcher cache fetch result', () => {
       const fetchDispatcher = setupDispatcher(pypiFetch, resultCache, inProgressPromiseCache)
 
       const fetched = await fetchDispatcher.handle(new Request('licensee', 'cd:/pypi/pypi/-/backports.ssl-match-hostname/3.7.0.1'))
-      verifyFetchSuccess(resultCache, inProgressPromiseCache)
+      verifyFetchSuccess()
 
       fetchDispatcher._fetchPromise = sinon.stub().rejects('should not be called')
       const resultFromCache = await fetchDispatcher.handle(new Request('licensee', 'cd:/pypi/pypi/-/backports.ssl-match-hostname/3.7.0.1'))
@@ -173,7 +173,7 @@ describe('fetchDispatcher cache fetch result', () => {
 
       const fetched = await fetchDispatcher.handle(new Request('licensee', 'cd:/pypi/pypi/-/test/revision'))
       expect(fetched.processControl).to.be.equal('skip')
-      verifyFetchFailure(resultCache, inProgressPromiseCache)
+      verifyFetchFailure()
     })
   })
 
@@ -193,7 +193,7 @@ describe('fetchDispatcher cache fetch result', () => {
 
     it('cached result same as fetched', async () => {
       const fetched = await fetchDispatcher.handle(new Request('licensee', 'cd:/npm/npmjs/-/redie/0.3.0'))
-      verifyFetchSuccess(resultCache, inProgressPromiseCache)
+      verifyFetchSuccess()
 
       fetchDispatcher._fetchPromise = sinon.stub().rejects('should not be called')
       const resultFromCache = await fetchDispatcher.handle(new Request('licensee', 'cd:/npm/npmjs/-/redie/0.3.0'))
@@ -218,11 +218,11 @@ describe('fetchDispatcher cache fetch result', () => {
     })
 
     it('cached result same as fetched', async () => {
-      const fetched = await fetchDispatcher.handle(new Request('test', 'cd:/ruby/rubygems/-/small/0.5.1'))
-      verifyFetchSuccess(resultCache, inProgressPromiseCache)
+      const fetched = await fetchDispatcher.handle(new Request('test', 'cd:/gem/rubygems/-/small/0.5.1'))
+      verifyFetchSuccess()
 
       fetchDispatcher._fetchPromise = sinon.stub().rejects('should not be called')
-      const resultFromCache = await fetchDispatcher.handle(new Request('test', 'cd:/ruby/rubygems/-/small/0.5.1'))
+      const resultFromCache = await fetchDispatcher.handle(new Request('test', 'cd:/gem/rubygems/-/small/0.5.1'))
       verifyFetchResult(fetched, resultFromCache)
     })
   })
@@ -241,10 +241,40 @@ describe('fetchDispatcher cache fetch result', () => {
     })
     it('cached result same as fetched', async () => {
       const fetched = await fetchDispatcher.handle(new Request('test', 'cd:/composer/packagist/symfony/polyfill-mbstring/1.11.0'))
-      verifyFetchSuccess(resultCache, inProgressPromiseCache)
+      verifyFetchSuccess()
 
       fetchDispatcher._fetchPromise = sinon.stub().rejects('should not be called')
       const resultFromCache = await fetchDispatcher.handle(new Request('test', 'cd:/composer/packagist/symfony/polyfill-mbstring/1.11.0'))
+      verifyFetchResult(fetched, resultFromCache)
+    })
+  })
+
+  describe('cache crateioFetch result', () => {
+    const requestPromiseStub = options => {
+      const body = fs.readFileSync('test/fixtures/crates/bitflags.json')
+      if (options && options.json) return JSON.parse(body)
+      const response = new PassThrough()
+      response.write(fs.readFileSync('test/fixtures/crates/bitflags-1.0.4.crate'))
+      response.statusCode = 200
+      response.end()
+      return response
+    }
+
+    let fetchDispatcher
+
+    beforeEach(() => {
+      const CrateioFetch = proxyquire('../../../../providers/fetch/cratesioFetch', {
+        'request-promise-native': requestPromiseStub
+      })
+      const packagistFetch = CrateioFetch({ logger: { log: sinon.stub() } })
+      fetchDispatcher = setupDispatcher(packagistFetch, resultCache, inProgressPromiseCache)
+    })
+    it('cached result same as fetched', async () => {
+      const fetched = await fetchDispatcher.handle(new Request('test', 'cd:/crate/cratesio/-/bitflags/1.0.4'))
+      verifyFetchSuccess()
+
+      fetchDispatcher._fetchPromise = sinon.stub().rejects('should not be called')
+      const resultFromCache = await fetchDispatcher.handle(new Request('test', 'cd:/crate/cratesio/-/bitflags/1.0.4'))
       verifyFetchResult(fetched, resultFromCache)
     })
   })

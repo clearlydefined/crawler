@@ -23,7 +23,7 @@ function pickFile(url) {
   return 'bitflags.json'
 }
 
-describe('', () => {
+describe('crateFetch workflow', () => {
   beforeEach(() => {
     const requestPromiseStub = options => {
       if (options && options.url) {
@@ -50,6 +50,7 @@ describe('', () => {
   it('succeeds in download, decompress and hash', async () => {
     const handler = setup()
     const request = await handler.handle(new Request('test', 'cd:/crate/cratesio/-/bitflags/1.0.4'))
+    request.fetchResult.copyTo(request)
     expect(request.document.hashes.sha1).to.be.equal(hashes['bitflags-1.0.4.crate']['sha1'])
     expect(request.document.hashes.sha256).to.be.equal(hashes['bitflags-1.0.4.crate']['sha256'])
     expect(request.document.releaseDate).to.equal('2018-08-21T19:55:12.284583+00:00')
@@ -137,6 +138,7 @@ describe('crateFetch', () => {
       }
     })
     const request = await crateFetch.handle({ url: 'cd:/crate/cratesio/-/name/0.1.0' })
+    request.fetchResult.copyTo(request)
     expect(request.url).to.eq('cd:/crate/cratesio/-/name/0.5.0')
   })
 
@@ -147,6 +149,7 @@ describe('crateFetch', () => {
       }
     })
     const request = await crateFetch.handle({ url: 'cd:/crate/cratesio/-/naME/0.1.0' })
+    request.fetchResult.copyTo(request)
     expect(request.casedSpec.name).to.eq('name')
   })
 })

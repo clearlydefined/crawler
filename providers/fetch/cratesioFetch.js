@@ -6,6 +6,7 @@ const AbstractFetch = require('./abstractFetch')
 const request = require('request-promise-native')
 const fs = require('fs')
 const path = require('path')
+const FetchResult = require('../../lib/fetchResult')
 
 class CratesioFetch extends AbstractFetch {
   canHandle(request) {
@@ -21,24 +22,27 @@ class CratesioFetch extends AbstractFetch {
     spec.revision = version.num
     request.url = spec.toUrl()
     super.handle(request)
-    const dir = this.createTempDir(request)
+
+    const fetchResult = new FetchResult(request.url)
+    const dir = this.createTempDir(fetchResult)
     const zip = path.join(dir.name, 'crate.zip')
     await this._getPackage(zip, version)
     const crateDir = path.join(dir.name, 'crate')
     await this.decompress(zip, crateDir)
+
     const location = path.join(crateDir, `${version.crate}-${version.num}`)
-    request.document = {
+    fetchResult.document = {
       registryData: version,
       releaseDate: version.created_at,
       location,
       hashes: await this.computeHashes(zip),
       manifest: registryData.manifest
     }
-    request.contentOrigin = 'origin'
     if (version.crate) {
-      request.casedSpec = clone(spec)
-      request.casedSpec.name = version.crate
+      fetchResult.casedSpec = clone(spec)
+      fetchResult.casedSpec.name = version.crate
     }
+    request.fetchResult = fetchResult
     return request
   }
 
