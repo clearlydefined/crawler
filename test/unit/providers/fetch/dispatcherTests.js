@@ -19,6 +19,7 @@ const MavenFetch = require('../../../../providers/fetch/mavencentralFetch')
 const GitCloner = require('../../../../providers/fetch/gitCloner')
 const PypiFetch = require('../../../../providers/fetch/pypiFetch')
 const RubyGemsFetch = require('../../../../providers/fetch/rubyGemsFetch')
+const PackagistFetch = require('../../../../providers/fetch/packagistFetch')
 
 describe('fetchDispatcher', () => {
   it('should handle any request', () => {
@@ -222,6 +223,28 @@ describe('fetchDispatcher cache fetch result', () => {
 
       fetchDispatcher._fetchPromise = sinon.stub().rejects('should not be called')
       const resultFromCache = await fetchDispatcher.handle(new Request('test', 'cd:/ruby/rubygems/-/small/0.5.1'))
+      verifyFetchResult(fetched, resultFromCache)
+    })
+  })
+
+  describe('cache packagistFetch result', () => {
+    let fetchDispatcher
+
+    beforeEach(() => {
+      const packagistFetch = PackagistFetch({ logger: { log: sinon.stub() } })
+      packagistFetch._getRegistryData = sinon.stub().resolves(
+        JSON.parse(fs.readFileSync('test/fixtures/packagist/registryData.json')))
+      packagistFetch._getPackage = sinon.stub().callsFake(async (spec, registryData, destination) =>
+        await getPacakgeStub('test/fixtures/composer/symfony-polyfill-mbstring-v1.11.0-0-gfe5e94c.zip', destination))
+
+      fetchDispatcher = setupDispatcher(packagistFetch, resultCache, inProgressPromiseCache)
+    })
+    it('cached result same as fetched', async () => {
+      const fetched = await fetchDispatcher.handle(new Request('test', 'cd:/composer/packagist/symfony/polyfill-mbstring/1.11.0'))
+      verifyFetchSuccess(resultCache, inProgressPromiseCache)
+
+      fetchDispatcher._fetchPromise = sinon.stub().rejects('should not be called')
+      const resultFromCache = await fetchDispatcher.handle(new Request('test', 'cd:/composer/packagist/symfony/polyfill-mbstring/1.11.0'))
       verifyFetchResult(fetched, resultFromCache)
     })
   })

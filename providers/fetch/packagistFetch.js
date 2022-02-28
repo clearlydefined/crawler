@@ -8,6 +8,8 @@ const { get } = require('lodash')
 const nodeRequest = require('request')
 const { promisify } = require('util')
 const readdir = promisify(fs.readdir)
+const FetchResult = require('../../lib/fetchResult')
+
 const providerMap = {
   packagist: 'https://repo.packagist.org/'
 }
@@ -25,12 +27,14 @@ class PackagistFetch extends AbstractFetch {
     super.handle(request)
     const file = this.createTempFile(request)
     await this._getPackage(request, registryData, file.name)
-    const dir = this.createTempDir(request)
+
+    const fetchResult = new FetchResult(request.url)
+    const dir = this.createTempDir(fetchResult)
     await this.decompress(file.name, dir.name)
     const hashes = await this.computeHashes(file.name)
-    request.document = this._createDocument(dir, registryData, hashes)
-    request.document.dirRoot = await this._getDirRoot(dir.name)
-    request.contentOrigin = 'origin'
+    fetchResult.document = this._createDocument(dir, registryData, hashes)
+    fetchResult.document.dirRoot = await this._getDirRoot(dir.name)
+    request.fetchResult = fetchResult
     return request
   }
 
