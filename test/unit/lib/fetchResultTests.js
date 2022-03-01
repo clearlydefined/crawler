@@ -46,6 +46,19 @@ describe('fetchResult', () => {
     expect(result).to.be.deep.equal({ contentOrigin: 'origin' })
   })
 
+  it('verify deepCopy', () => {
+    fetchResult.document = { test: true }
+    const result1 = {}
+    fetchResult.copyTo(result1)
+    expect(result1.document).to.be.deep.equal({ test: true })
+    result1.document.result1Flag = true
+    expect(result1.document).to.be.deep.equal({ test: true, result1Flag: true })
+
+    const result2 = {}
+    fetchResult.copyTo(result2)
+    expect(result2.document).to.be.deep.equal({ test: true })
+  })
+
   it('verify copyTo with url', () => {
     const result = {}
     fetchResult = new FetchResult('http://localhost')
