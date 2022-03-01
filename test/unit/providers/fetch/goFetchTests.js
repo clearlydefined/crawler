@@ -78,6 +78,7 @@ describe('Go Proxy fetching', () => {
   it('succeeds in download, decompress, and hash', async () => {
     const handler = Fetch({ logger: { log: sinon.stub() } })
     const request = await handler.handle(new Request('test', 'cd:/go/golang/rsc.io/quote/v1.3.0'))
+    request.fetchResult.copyTo(request)
     expect(request.document.hashes.sha1).to.be.equal(hashes['v1.3.0.zip']['sha1'])
     expect(request.document.hashes.sha256).to.be.equal(hashes['v1.3.0.zip']['sha256'])
     expect(request.document.releaseDate).to.equal('2018-02-14T00:54:53Z')
@@ -92,6 +93,7 @@ describe('Go Proxy fetching', () => {
 
     const handler = Fetch({ logger: { log: sinon.stub() } })
     const request = await handler.handle(new Request('test', 'cd:/go/golang/rsc.io/quote'))
+    request.fetchResult.copyTo(request)
     expect(request.casedSpec.revision).to.equal('v1.5.3-pre1')
   })
 
@@ -104,6 +106,7 @@ describe('Go Proxy fetching', () => {
     expect(request.processControl).to.equal('skip')
     expect(request.document).to.be.undefined
     expect(request.casedSpec).to.be.undefined
+    expect(request.fetchResult).to.be.undefined
   })
 
   it('marks the request for skipping when no revision is found', async () => {
@@ -115,6 +118,7 @@ describe('Go Proxy fetching', () => {
     expect(request.processControl).to.equal('skip')
     expect(request.document).to.be.undefined
     expect(request.casedSpec).to.be.undefined
+    expect(request.fetchResult).to.be.undefined
   })
 
   it('marks the request for skipping when no artifact is found', async () => {
@@ -127,6 +131,7 @@ describe('Go Proxy fetching', () => {
     expect(request.outcome).to.eq('Missing  ')
     expect(request.document).to.be.undefined
     expect(request.casedSpec).to.be.undefined
+    expect(request.fetchResult).to.be.undefined
   })
 })
 

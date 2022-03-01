@@ -304,6 +304,32 @@ describe('fetchDispatcher cache fetch result', () => {
       verifyFetchResult(fetched, resultFromCache)
     })
   })
+
+  describe('cache goFetch result', () => {
+    function fileSupplier(url) {
+      const fileName = url.endsWith('.info') ? 'v1.3.0.info' : 'v1.3.0.zip'
+      return `/go/${fileName}`
+    }
+
+    let fetchDispatcher
+
+    beforeEach(() => {
+      const GoFetch = proxyquire('../../../../providers/fetch/goFetch', {
+        request: { get: createGetStub(fileSupplier) },
+        'request-promise-native': createRequestPromiseStub(fileSupplier)
+      })
+      const fetch = GoFetch({ logger: { info: sinon.stub() } })
+      fetchDispatcher = setupDispatcher(fetch, resultCache, inProgressPromiseCache)
+    })
+    it('cached result same as fetched', async () => {
+      const fetched = await fetchDispatcher.handle(new Request('test', 'cd:/go/golang/rsc.io/quote/v1.3.0'))
+      verifyFetchSuccess()
+
+      fetchDispatcher._fetchPromise = sinon.stub().rejects('should not be called')
+      const resultFromCache = await fetchDispatcher.handle(new Request('test', 'cd:/go/golang/rsc.io/quote/v1.3.0'))
+      verifyFetchResult(fetched, resultFromCache)
+    })
+  })
 })
 
 function setupMavenFetch() {
@@ -313,19 +339,33 @@ function setupMavenFetch() {
     if (url.endsWith('.jar')) return 'swt-3.3.0-v3346.jar'
     return null
   }
-  const requestPromiseStub = options => {
+  const fileSupplier = url => {
+    const fileName = url.includes('solrsearch') ? 'swt-3.3.0-v3346.json' : pickArtifact(url)
+    return `/maven/${fileName}`
+  }
+  return MavenFetch({
+    logger: { log: sinon.stub() },
+    requestPromise: createRequestPromiseStub(fileSupplier),
+    requestStream: createGetStub(fileSupplier)
+  })
+}
+
+const createRequestPromiseStub = fileSupplier => {
+  return options => {
     if (options.url) {
       if (options.url.includes('error')) throw new Error('yikes')
       if (options.url.includes('code')) throw { statusCode: 500, message: 'Code' }
       if (options.url.includes('missing')) throw { statusCode: 404 }
     }
-    const file = options.url.includes('solrsearch') ? 'swt-3.3.0-v3346.json' : pickArtifact(options.url)
-    const content = fs.readFileSync(`test/fixtures/maven/${file}`)
+    const content = fs.readFileSync(`test/fixtures/${fileSupplier(options.url)}`)
     return options.json ? JSON.parse(content) : content
   }
-  const getStub = (url, callback) => {
+}
+
+const createGetStub = fileSupplier => {
+  return (url, callback) => {
     const response = new PassThrough()
-    const file = `test/fixtures/maven/${pickArtifact(url)}`
+    const file = `test/fixtures/${fileSupplier(url)}`
     if (file) {
       response.write(fs.readFileSync(file))
       callback(null, { statusCode: 200 })
@@ -335,12 +375,6 @@ function setupMavenFetch() {
     response.end()
     return response
   }
-
-  return MavenFetch({
-    logger: { log: sinon.stub() },
-    requestPromise: requestPromiseStub,
-    requestStream: getStub
-  })
 }
 
 const getPacakgeStub = async (file, destination) => {

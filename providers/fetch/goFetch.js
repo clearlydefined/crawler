@@ -3,6 +3,7 @@ const requestPromise = require('request-promise-native')
 const AbstractFetch = require('./abstractFetch')
 const nodeRequest = require('request')
 const fs = require('fs')
+const FetchResult = require('../../lib/fetchResult')
 
 class GoFetch extends AbstractFetch {
 
@@ -27,16 +28,17 @@ class GoFetch extends AbstractFetch {
     const artifactResult = await this._getArtifact(spec, artifact.name)
     if (!artifactResult) return this.markSkip(request)
 
-    const dir = this.createTempDir(request)
+    const fetchResult = new FetchResult(request.url)
+    const dir = this.createTempDir(fetchResult)
 
     await this.decompress(artifact.name, dir.name)
 
     const hashes = await this.computeHashes(artifact.name)
     const releaseDate = info.Time
 
-    request.document = this._createDocument(dir, releaseDate, hashes)
-    request.contentOrigin = 'origin'
-    request.casedSpec = clone(spec)
+    fetchResult.document = this._createDocument(dir, releaseDate, hashes)
+    fetchResult.casedSpec = clone(spec)
+    request.fetchResult = fetchResult
 
     return request
   }
