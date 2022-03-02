@@ -330,6 +330,52 @@ describe('fetchDispatcher cache fetch result', () => {
       verifyFetchResult(fetched, resultFromCache)
     })
   })
+
+  describe('cache nugetFetch result', () => {
+    const fileSupplier = (url) => {
+      let fileName = null
+      if (url.includes('catalog')) fileName = 'xunit.core.2.4.1.catalog.json'
+      if (url.endsWith('index.json')) fileName = 'xunit.core.index.json'
+      if (url.endsWith('.json')) fileName = 'xunit.core.2.4.1.json'
+      if (url.endsWith('.nuspec')) fileName = 'xunit.core.2.4.1.nuspec'
+      if (url.endsWith('.nupkg')) fileName = 'xunit.core.2.4.1.nupkg'
+      if (url.endsWith('license.txt')) fileName = 'license.txt'
+      return `nuget/${fileName}`
+    }
+
+    const requestPromiseStub = (url, options) => {
+      const body = fs.readFileSync(`test/fixtures/${fileSupplier(url)}`)
+      if (options?.json) return { body: JSON.parse(body), statusCode: 200 }
+      const response = new PassThrough()
+      response.body = body
+      response.write(body)
+      response.statusCode = 200
+      response.end()
+      return response
+    }
+
+    let fetchDispatcher
+
+    beforeEach(() => {
+      const NugetFetch = proxyquire('../../../../providers/fetch/nugetFetch', {
+        requestretry: {
+          defaults: () => {
+            return { get: requestPromiseStub }
+          }
+        }
+      })
+      const fetch = NugetFetch({ logger: { info: sinon.stub() } })
+      fetchDispatcher = setupDispatcher(fetch, resultCache, inProgressPromiseCache)
+    })
+    it('cached result same as fetched', async () => {
+      const fetched = await fetchDispatcher.handle(new Request('test', 'cd:/nuget/nuget/-/xunit.core/2.4.1'))
+      verifyFetchSuccess()
+
+      fetchDispatcher._fetchPromise = sinon.stub().rejects('should not be called')
+      const resultFromCache = await fetchDispatcher.handle(new Request('test', 'cd:/nuget/nuget/-/xunit.core/2.4.1'))
+      verifyFetchResult(fetched, resultFromCache)
+    })
+  })
 })
 
 function setupMavenFetch() {
