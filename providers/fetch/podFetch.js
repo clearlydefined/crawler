@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const { clone, get, remove } = require('lodash')
+const { clone, get } = require('lodash')
 const AbstractFetch = require('./abstractFetch')
 const request = require('request-promise-native')
 const fs = require('fs')
@@ -40,8 +40,6 @@ class PodFetch extends AbstractFetch {
     if (!location) return request.markSkip('Missing  ')
 
     const fetchResult = new FetchResult(spec.toUrl())
-      //transfer the clean up to fetchResult
-      .trackCleanup(remove(request.getTrackedCleanups(), cleanup => cleanup === dir.removeCallback))
     fetchResult.document = {
       location: location,
       registryData: registryData,
@@ -52,7 +50,7 @@ class PodFetch extends AbstractFetch {
       fetchResult.casedSpec = clone(spec)
       fetchResult.casedSpec.name = registryData.name
     }
-    request.fetchResult = fetchResult
+    request.fetchResult = fetchResult.adoptCleanup(dir, request)
     return request
   }
 

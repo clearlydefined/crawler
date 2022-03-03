@@ -22,14 +22,13 @@ class CratesioFetch extends AbstractFetch {
     spec.revision = version.num
     request.url = spec.toUrl()
     super.handle(request)
-
-    const fetchResult = new FetchResult(request.url)
-    const dir = this.createTempDir(fetchResult)
+    const dir = this.createTempDir(request)
     const zip = path.join(dir.name, 'crate.zip')
     await this._getPackage(zip, version)
     const crateDir = path.join(dir.name, 'crate')
     await this.decompress(zip, crateDir)
 
+    const fetchResult = new FetchResult(request.url)
     const location = path.join(crateDir, `${version.crate}-${version.num}`)
     fetchResult.document = {
       registryData: version,
@@ -42,7 +41,7 @@ class CratesioFetch extends AbstractFetch {
       fetchResult.casedSpec = clone(spec)
       fetchResult.casedSpec.name = version.crate
     }
-    request.fetchResult = fetchResult
+    request.fetchResult = fetchResult.adoptCleanup(dir, request)
     return request
   }
 

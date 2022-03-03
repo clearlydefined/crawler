@@ -30,18 +30,18 @@ class RubyGemsFetch extends AbstractFetch {
     super.handle(request)
     const file = this.createTempFile(request)
     await this._getPackage(spec, registryData, file.name)
-
-    const fetchResult = new FetchResult(request.url)
-    const dir = this.createTempDir(fetchResult)
+    const dir = this.createTempDir(request)
     await this.decompress(file.name, dir.name)
     await this._extractFiles(dir.name)
     const hashes = await this.computeHashes(file.name)
+
+    const fetchResult = new FetchResult(request.url)
     fetchResult.document = await this._createDocument(dir, registryData, hashes)
     if (get(registryData, 'name')) {
       fetchResult.casedSpec = clone(spec)
       fetchResult.casedSpec.name = registryData.name
     }
-    request.fetchResult = fetchResult
+    request.fetchResult = fetchResult.adoptCleanup(dir, request)
     return request
   }
 

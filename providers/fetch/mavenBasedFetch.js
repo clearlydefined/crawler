@@ -49,20 +49,19 @@ class MavenBasedFetch extends AbstractFetch {
     const artifact = this.createTempFile(request)
     const artifactResult = await this._getArtifact(spec, artifact.name)
     if (!artifactResult) return this.markSkip(request)
-
-    const fetchResult = new FetchResult(request.url)
-    const dir = this.createTempDir(fetchResult)
+    const dir = this.createTempDir(request)
     await this.decompress(artifact.name, dir.name)
     const hashes = await this.computeHashes(artifact.name)
     const releaseDate = await this._getReleaseDate(dir.name, spec)
-    fetchResult.document = this._createDocument(dir, releaseDate, hashes, poms, summary)
 
+    const fetchResult = new FetchResult(request.url)
+    fetchResult.document = this._createDocument(dir, releaseDate, hashes, poms, summary)
     if (get(summary, 'groupId[0]') || get(summary, 'artifactId[0]')) {
       fetchResult.casedSpec = clone(spec)
       fetchResult.casedSpec.namespace = get(summary, 'groupId[0]') || spec.namespace
       fetchResult.casedSpec.name = get(summary, 'artifactId[0]') || spec.name
     }
-    request.fetchResult = fetchResult
+    request.fetchResult = fetchResult.adoptCleanup(dir, request)
     return request
   }
 

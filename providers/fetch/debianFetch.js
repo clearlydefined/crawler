@@ -57,15 +57,14 @@ class DebianFetch extends AbstractFetch {
     super.handle(request)
     const { binary, source, patches } = this._getDownloadUrls(spec, registryData)
     if (!binary && !source) return request.markSkip('Missing  ')
-
-    const fetchResult = new FetchResult(request.url)
-    const dir = this.createTempDir(fetchResult)
-    const { releaseDate, hashes } = await this._getPackage(request, binary, source, patches, dir)
+    const { dir, releaseDate, hashes } = await this._getPackage(request, binary, source, patches)
     const copyrightUrl = this._getCopyrightUrl(registryData)
     const declaredLicenses = await this._getDeclaredLicenses(copyrightUrl)
+
+    const fetchResult = new FetchResult(request.url)
     fetchResult.document = this._createDocument({ dir, registryData, releaseDate, copyrightUrl, declaredLicenses, hashes })
     fetchResult.casedSpec = clone(spec)
-    request.fetchResult = fetchResult
+    request.fetchResult = fetchResult.adoptCleanup(dir, request)
     return request
   }
 
@@ -176,9 +175,10 @@ class DebianFetch extends AbstractFetch {
     return { binary }
   }
 
-  async _getPackage(request, binary, source, patches, dir) {
+  async _getPackage(request, binary, source, patches) {
     const file = this.createTempFile(request)
     await this._download(binary || source, file.name)
+    const dir = this.createTempDir(request)
     binary ? await this._decompressUnixArchive(file.name, dir.name) : await this.decompress(file.name, dir.name)
     const hashes = await this.computeHashes(file.name)
     let releaseDate = null
@@ -199,7 +199,7 @@ class DebianFetch extends AbstractFetch {
       releaseDate = await this._getLatestFileDateFromDirectory(dir.name)
       await this._applyPatches(path.join(dir.name, sourceDirectoryName), path.join(dir.name, 'debian'), request.url)
     }
-    return { releaseDate, hashes }
+    return { dir, releaseDate, hashes }
   }
 
   async _download(downloadUrl, destination) {

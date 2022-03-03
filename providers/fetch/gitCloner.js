@@ -25,24 +25,22 @@ class GitCloner extends AbstractFetch {
     const spec = this.toSpec(request)
     const sourceSpec = SourceSpec.fromObject(spec)
     const options = { version: sourceSpec.revision }
-
-    const fetchResult = new FetchResult()
-    const dir = this.createTempDir(fetchResult)
+    const dir = this.createTempDir(request)
     const repoSize = await this._cloneRepo(sourceSpec.toUrl(), dir.name, spec.name, options.version)
-    fetchResult.addMeta({ gitSize: repoSize })
-
+    request.addMeta({ gitSize: repoSize })
     spec.revision = await this._getRevision(dir.name, spec.name)
-    fetchResult.url = request.url = spec.toUrl()
+    request.url = spec.toUrl()
     const releaseDate = await this._getDate(dir.name, spec.name)
     await this._deleteGitDatabase(dir.name, spec.name)
 
+    const fetchResult = new FetchResult(request.url).addMeta({ gitSize: repoSize })
     fetchResult.document = this._createDocument(dir.name + '/' + spec.name, repoSize, releaseDate, options.version)
     if (spec.provider === 'github') {
       fetchResult.casedSpec = clone(spec)
       fetchResult.casedSpec.namespace = spec.namespace.toLowerCase()
       fetchResult.casedSpec.name = spec.name.toLowerCase()
     }
-    request.fetchResult = fetchResult
+    request.fetchResult = fetchResult.adoptCleanup(dir, request)
     return request
   }
 

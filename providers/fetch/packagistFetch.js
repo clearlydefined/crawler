@@ -27,14 +27,14 @@ class PackagistFetch extends AbstractFetch {
     super.handle(request)
     const file = this.createTempFile(request)
     await this._getPackage(request, registryData, file.name)
-
-    const fetchResult = new FetchResult(request.url)
-    const dir = this.createTempDir(fetchResult)
+    const dir = this.createTempDir(request)
     await this.decompress(file.name, dir.name)
     const hashes = await this.computeHashes(file.name)
+
+    const fetchResult = new FetchResult(request.url)
     fetchResult.document = this._createDocument(dir, registryData, hashes)
     fetchResult.document.dirRoot = await this._getDirRoot(dir.name)
-    request.fetchResult = fetchResult
+    request.fetchResult = fetchResult.adoptCleanup(dir, request)
     return request
   }
 

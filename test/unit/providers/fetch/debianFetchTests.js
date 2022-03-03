@@ -134,6 +134,21 @@ describe('Debian fetching', () => {
     )
     expect(request.document.declaredLicenses).to.deep.equal(['MIT', 'BSD-3-clause'])
   })
+
+  it('failed to get declared license', async () => {
+    const handler = DebianFetch(debianFetchOptions)
+    handler._download = async (downloadUrl, destination) => {
+      fs.copyFileSync('test/fixtures/debian/0ad_0.0.17-1_armhf.deb', destination)
+    }
+    handler._getDeclaredLicenses = sinon.stub().rejects('failed')
+    const request = new Request('test', 'cd:/deb/debian/-/0ad/0.0.17-1_armhf')
+    try {
+      await handler.handle(request)
+      expect(false).to.be.true
+    } catch (error) {
+      expect(request.getTrackedCleanups().length).to.be.equal(2)
+    }
+  })
 })
 
 function spec(type, provider, name, revision) {

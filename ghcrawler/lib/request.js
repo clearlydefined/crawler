@@ -126,6 +126,15 @@ class Request {
     return this
   }
 
+  removeCleanup(cleanups) {
+    if (!cleanups || !this.cleanups) {
+      return this
+    }
+    const toRemove = Array.isArray(cleanups) ? cleanups : [cleanups]
+    this.cleanups = this.cleanups.filter(item => !toRemove.includes(item))
+    return this
+  }
+
   addMeta(data) {
     this.meta = Object.assign({}, this.meta, data)
     return this

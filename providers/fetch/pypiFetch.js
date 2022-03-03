@@ -28,17 +28,17 @@ class PyPiFetch extends AbstractFetch {
     super.handle(request)
     const file = this.createTempFile(request)
     await this._getPackage(spec, registryData, file.name)
-
-    const fetchResult = new FetchResult(request.url)
-    const dir = this.createTempDir(fetchResult)
+    const dir = this.createTempDir(request)
     await this.decompress(file.name, dir.name)
     const hashes = await this.computeHashes(file.name)
+
+    const fetchResult = new FetchResult(request.url)
     fetchResult.document = await this._createDocument(dir, spec, registryData, hashes)
     if (get(registryData, 'info.name')) {
       fetchResult.casedSpec = clone(spec)
       fetchResult.casedSpec.name = registryData.info.name
     }
-    request.fetchResult = fetchResult
+    request.fetchResult = fetchResult.adoptCleanup(dir, request)
     return request
   }
 

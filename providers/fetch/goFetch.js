@@ -28,17 +28,17 @@ class GoFetch extends AbstractFetch {
     const artifactResult = await this._getArtifact(spec, artifact.name)
     if (!artifactResult) return this.markSkip(request)
 
-    const fetchResult = new FetchResult(request.url)
-    const dir = this.createTempDir(fetchResult)
+    const dir = this.createTempDir(request)
 
     await this.decompress(artifact.name, dir.name)
 
     const hashes = await this.computeHashes(artifact.name)
     const releaseDate = info.Time
 
+    const fetchResult = new FetchResult(request.url)
     fetchResult.document = this._createDocument(dir, releaseDate, hashes)
     fetchResult.casedSpec = clone(spec)
-    request.fetchResult = fetchResult
+    request.fetchResult = fetchResult.adoptCleanup(dir, request)
 
     return request
   }

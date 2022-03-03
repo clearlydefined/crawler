@@ -65,11 +65,13 @@ describe('crateFetch workflow', () => {
         version: { num: '1.0.4', dl_path: 'error' }
       }
     }
+    const request = new Request('test', 'cd:/crate/cratesio/-/bitflags/1.0.4')
     try {
-      await handler.handle(new Request('test', 'cd:/crate/cratesio/-/bitflags/1.0.4'))
+      await handler.handle(request)
       expect(false).to.be.true
     } catch (error) {
       expect(error.message).to.be.equal('yikes')
+      expect(request.getTrackedCleanups().length).to.be.greaterThan(0)
     }
   })
 
@@ -80,11 +82,13 @@ describe('crateFetch workflow', () => {
         version: { num: '1.0.4', dl_path: 'missing' }
       }
     }
+    const request = new Request('test', 'cd:/crate/cratesio/-/bitflags/1.0.4')
     try {
-      await handler.handle(new Request('test', 'cd:/crate/cratesio/-/bitflags/1.0.4'))
+      await handler.handle(request)
       expect(false).to.be.true
     } catch (error) {
       expect(error.statusCode).to.be.equal(404)
+      expect(request.getTrackedCleanups().length).to.be.greaterThan(0)
     }
   })
 
@@ -137,7 +141,7 @@ describe('crateFetch', () => {
         return { manifest: {}, version: { num: '0.5.0', crate: 'name' } }
       }
     })
-    const request = await crateFetch.handle({ url: 'cd:/crate/cratesio/-/name/0.1.0' })
+    const request = await crateFetch.handle(new Request('crate', 'cd:/crate/cratesio/-/name/0.1.0'))
     request.fetchResult.copyTo(request)
     expect(request.url).to.eq('cd:/crate/cratesio/-/name/0.5.0')
   })
@@ -148,7 +152,7 @@ describe('crateFetch', () => {
         return { manifest: {}, version: { num: '0.1.0', crate: 'name' } }
       }
     })
-    const request = await crateFetch.handle({ url: 'cd:/crate/cratesio/-/naME/0.1.0' })
+    const request = await crateFetch.handle(new Request('crate', 'cd:/crate/cratesio/-/naME/0.1.0'))
     request.fetchResult.copyTo(request)
     expect(request.casedSpec.name).to.eq('name')
   })

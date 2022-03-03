@@ -37,14 +37,14 @@ class NuGetFetch extends AbstractFetch {
       latestNuspec = await this._getNuspec(latestSpec)
     }
     super.handle(request)
-
-    const fetchResult = new FetchResult(request.url)
-    const dir = this.createTempDir(fetchResult)
+    const dir = this.createTempDir(request)
     const metadataLocation = await this._persistMetadata(dir, manifest, nuspec, latestNuspec)
     const zip = path.join(dir.name, 'nupkg.zip')
     await this._getPackage(zip, registryData.packageContent)
     const location = path.join(dir.name, 'nupkg')
     await this.decompress(zip, location)
+
+    const fetchResult = new FetchResult(request.url)
     fetchResult.document = {
       registryData,
       location,
@@ -59,7 +59,7 @@ class NuGetFetch extends AbstractFetch {
       fetchResult.casedSpec = clone(spec)
       fetchResult.casedSpec.name = manifest.id
     }
-    request.fetchResult = fetchResult
+    request.fetchResult = fetchResult.adoptCleanup(dir, request)
     return request
   }
 

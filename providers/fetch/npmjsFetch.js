@@ -28,16 +28,15 @@ class NpmFetch extends AbstractFetch {
     super.handle(request)
     const file = this.createTempFile(request)
     await this._getPackage(spec, file.name)
-
-    const fetchResult = new FetchResult(request.url)
-    const dir = this.createTempDir(fetchResult)
+    const dir = this.createTempDir(request)
     await this.decompress(file.name, dir.name)
     const hashes = await this.computeHashes(file.name)
 
+    const fetchResult = new FetchResult(request.url)
     fetchResult.document = this._createDocument(dir, registryData, hashes)
     const casedSpec = this._getCasedSpec(spec, registryData)
     if (casedSpec) fetchResult.casedSpec = casedSpec
-    request.fetchResult = fetchResult
+    request.fetchResult = fetchResult.adoptCleanup(dir, request)
     return request
   }
 

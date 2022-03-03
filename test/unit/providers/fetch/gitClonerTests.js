@@ -35,6 +35,18 @@ describe('fetch result', () => {
     expect(request.casedSpec.toUrl()).to.be.equal('cd:/git/github/palantir/refreshable/deef80a18aa929943e5dab1dba7276c231c84519')
     expect(request.document.size).to.be.equal(532)
     expect(request.document.releaseDate.toISOString()).to.be.equal('2021-04-08T13:27:49.000Z')
+    expect(request.getTrackedCleanups().length).to.be.equal(0)
+  })
+
+  it('fetch failed', async () => {
+    gitClient._getDate = sinon.stub().rejects('failed')
+    const request = new Request('licensee', 'cd:git/github/palantir/refreshable/2.0.0')
+    try {
+      await gitClient.handle(request)
+    } catch (error) {
+      expect(request.fetchResult).to.be.undefined
+      expect(request.getTrackedCleanups().length).to.be.equal(1)
+    }
   })
 })
 
