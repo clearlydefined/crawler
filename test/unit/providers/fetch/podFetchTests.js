@@ -31,6 +31,7 @@ describe('podFetch', () => {
 
   it('spec with version', async () => {
     const result = await fetch.handle(new Request('test', 'cd:/pod/cocoapods/-/SwiftLCS/1.0'))
+    result.fetchResult.copyTo(result)
     expect(result.url).to.be.equal('cd:/pod/cocoapods/-/SwiftLCS/1.0')
     expect(result.document.location).to.be.a.string
     expect(result.document.registryData.name).to.be.equal('SwiftLCS')
@@ -40,6 +41,7 @@ describe('podFetch', () => {
 
   it('spec without version', async () => {
     const result = await fetch.handle(new Request('test', 'cd:/pod/cocoapods/-/SwiftLCS'))
+    result.fetchResult.copyTo(result)
     expect(result.url).to.be.equal('cd:/pod/cocoapods/-/SwiftLCS/1.3.4')
     expect(result.document.releaseDate).to.be.equal('2019-04-10 00:22:10 UTC')
     expect(result.casedSpec.toUrl()).to.be.equal('cd:/pod/cocoapods/-/SwiftLCS/1.3.4')

@@ -55,15 +55,6 @@ describe('fetchDispatcher cache fetch result', () => {
       set: (key, value) => cache[key] = value,
     }
   }
-
-  function setupDispatcher(fetcher, resultCache, promiseCache) {
-    const storeStub = { get: () => null }
-    const processorsStub = [{ canHandle: () => true, shouldFetch: () => true, getUrnFor: () => 'documentkey' }]
-    const filterStub = { shouldFetchMissing: () => true, shouldFetch: () => true }
-    const options = { logger: { info: sinon.stub(), debug: sinon.stub() } }
-    return FetchDispatcher(options, storeStub, [fetcher], processorsStub, filterStub, mockResultCache(resultCache), promiseCache)
-  }
-
   function verifyFetchResult(fetched, resultFromCache) {
     // eslint-disable-next-line no-unused-vars
     const { cleanups, ...expected } = fetched
@@ -82,6 +73,23 @@ describe('fetchDispatcher cache fetch result', () => {
     Object.values(resultCache).forEach(fetched => fetched.cleanup())
   })
 
+  function setupDispatcher(fetcher) {
+    const storeStub = { get: () => null }
+    const processorsStub = [{ canHandle: () => true, shouldFetch: () => true, getUrnFor: () => 'documentkey' }]
+    const filterStub = { shouldFetchMissing: () => true, shouldFetch: () => true }
+    const options = { logger: { info: sinon.stub(), debug: sinon.stub() } }
+    return FetchDispatcher(options, storeStub, [fetcher], processorsStub, filterStub, mockResultCache(resultCache), inProgressPromiseCache)
+  }
+
+  async function verifyFetchAndCache(fetchDispatcher, url) {
+    const fetched = await fetchDispatcher.handle(new Request('test', url))
+    verifyFetchSuccess()
+
+    fetchDispatcher._fetchPromise = sinon.stub().rejects('should not be called')
+    const resultFromCache = await fetchDispatcher.handle(new Request('test', url))
+    verifyFetchResult(fetched, resultFromCache)
+  }
+
   function verifyFetchSuccess() {
     expect(Object.keys(resultCache).length).to.be.equal(1)
     expect(Object.keys(inProgressPromiseCache).length).to.be.equal(0)
@@ -93,19 +101,30 @@ describe('fetchDispatcher cache fetch result', () => {
   }
 
   describe('cache maven fetch result', () => {
+    function setupMavenFetch() {
+      const fileSupplier = url => {
+        let fileName
+        if (url.includes('solrsearch')) fileName = 'swt-3.3.0-v3346.json'
+        if (url.endsWith('.pom')) fileName = 'swt-3.3.0-v3346.pom'
+        if (url.endsWith('-sources.jar')) fileName = 'swt-3.3.0-v3346.jar'
+        if (url.endsWith('.jar')) fileName = 'swt-3.3.0-v3346.jar'
+        return `/maven/${fileName}`
+      }
+      return MavenFetch({
+        logger: { log: sinon.stub() },
+        requestPromise: createRequestPromiseStub(fileSupplier),
+        requestStream: createGetStub(fileSupplier)
+      })
+    }
+
     let fetchDispatcher
 
     beforeEach(() => {
-      fetchDispatcher = setupDispatcher(setupMavenFetch(), resultCache, inProgressPromiseCache)
+      fetchDispatcher = setupDispatcher(setupMavenFetch())
     })
 
     it('cached result same as fetched', async () => {
-      const fetched = await fetchDispatcher.handle(new Request('test', 'cd:/maven/mavencentral/org.eclipse/swt/3.3.0-v3344'))
-      verifyFetchSuccess()
-
-      fetchDispatcher._fetchPromise = sinon.stub().rejects('should not be called')
-      const resultFromCache = await fetchDispatcher.handle(new Request('test', 'cd:/maven/mavencentral/org.eclipse/swt/3.3.0-v3344'))
-      verifyFetchResult(fetched, resultFromCache)
+      await verifyFetchAndCache(fetchDispatcher, 'cd:/maven/mavencentral/org.eclipse/swt/3.3.0-v3344')
     })
 
     it('no cache for missing maven fetch', async () => {
@@ -133,16 +152,11 @@ describe('fetchDispatcher cache fetch result', () => {
       gitCloner._cloneRepo = sinon.stub().resolves(532)
       gitCloner._getRevision = sinon.stub().resolves('deef80a18aa929943e5dab1dba7276c231c84519')
       gitCloner._getDate = sinon.stub().resolves(new Date('2021-04-08T13:27:49.000Z'))
-      fetchDispatcher = setupDispatcher(gitCloner, resultCache, inProgressPromiseCache)
+      fetchDispatcher = setupDispatcher(gitCloner)
     })
 
     it('cached result same as fetched', async () => {
-      const fetched = await fetchDispatcher.handle(new Request('licensee', 'cd:git/github/palantir/refreshable/2.0.0'))
-      verifyFetchSuccess()
-
-      fetchDispatcher._fetchPromise = sinon.stub().rejects('should not be called')
-      const resultFromCache = await fetchDispatcher.handle(new Request('licensee', 'cd:git/github/palantir/refreshable/2.0.0'))
-      verifyFetchResult(fetched, resultFromCache)
+      await verifyFetchAndCache(fetchDispatcher, 'cd:git/github/palantir/refreshable/2.0.0')
     })
   })
 
@@ -157,19 +171,13 @@ describe('fetchDispatcher cache fetch result', () => {
 
     it('cached result same as fetched', async () => {
       pypiFetch._getRegistryData = sinon.stub().resolves(JSON.parse(fs.readFileSync('test/fixtures/pypi/registryData.json')))
-      const fetchDispatcher = setupDispatcher(pypiFetch, resultCache, inProgressPromiseCache)
-
-      const fetched = await fetchDispatcher.handle(new Request('licensee', 'cd:/pypi/pypi/-/backports.ssl-match-hostname/3.7.0.1'))
-      verifyFetchSuccess()
-
-      fetchDispatcher._fetchPromise = sinon.stub().rejects('should not be called')
-      const resultFromCache = await fetchDispatcher.handle(new Request('licensee', 'cd:/pypi/pypi/-/backports.ssl-match-hostname/3.7.0.1'))
-      verifyFetchResult(fetched, resultFromCache)
+      const fetchDispatcher = setupDispatcher(pypiFetch)
+      await verifyFetchAndCache(fetchDispatcher, 'cd:/pypi/pypi/-/backports.ssl-match-hostname/3.7.0.1')
     })
 
     it('no cache for missing package', async () => {
       pypiFetch._getRegistryData = sinon.stub().resolves(null)
-      const fetchDispatcher = setupDispatcher(pypiFetch, resultCache, inProgressPromiseCache)
+      const fetchDispatcher = setupDispatcher(pypiFetch)
 
       const fetched = await fetchDispatcher.handle(new Request('licensee', 'cd:/pypi/pypi/-/test/revision'))
       expect(fetched.processControl).to.be.equal('skip')
@@ -178,6 +186,16 @@ describe('fetchDispatcher cache fetch result', () => {
   })
 
   describe('cache npm fetch result', () => {
+
+    const npmRegistryRequestStub = () => {
+      const version = '0.3.0'
+      return {
+        manifest: { version },
+        versions: { [version]: { test: true } },
+        time: { [version]: '42' }
+      }
+    }
+
     let fetchDispatcher
 
     beforeEach(() => {
@@ -188,16 +206,11 @@ describe('fetchDispatcher cache fetch result', () => {
       npmFetch._getPackage = sinon.stub().callsFake(async (spec, destination) =>
         await getPacakgeStub('test/fixtures/npm/redie-0.3.0.tgz', destination))
 
-      fetchDispatcher = setupDispatcher(npmFetch, resultCache, inProgressPromiseCache)
+      fetchDispatcher = setupDispatcher(npmFetch)
     })
 
     it('cached result same as fetched', async () => {
-      const fetched = await fetchDispatcher.handle(new Request('licensee', 'cd:/npm/npmjs/-/redie/0.3.0'))
-      verifyFetchSuccess()
-
-      fetchDispatcher._fetchPromise = sinon.stub().rejects('should not be called')
-      const resultFromCache = await fetchDispatcher.handle(new Request('licensee', 'cd:/npm/npmjs/-/redie/0.3.0'))
-      verifyFetchResult(fetched, resultFromCache)
+      await verifyFetchAndCache(fetchDispatcher, 'cd:/npm/npmjs/-/redie/0.3.0')
     })
   })
 
@@ -214,16 +227,11 @@ describe('fetchDispatcher cache fetch result', () => {
       rubyGemsFetch._getPackage = sinon.stub().callsFake(async (spec, registryData, destination) =>
         await getPacakgeStub('test/fixtures/ruby/small-0.5.1.gem', destination))
 
-      fetchDispatcher = setupDispatcher(rubyGemsFetch, resultCache, inProgressPromiseCache)
+      fetchDispatcher = setupDispatcher(rubyGemsFetch)
     })
 
     it('cached result same as fetched', async () => {
-      const fetched = await fetchDispatcher.handle(new Request('test', 'cd:/gem/rubygems/-/small/0.5.1'))
-      verifyFetchSuccess()
-
-      fetchDispatcher._fetchPromise = sinon.stub().rejects('should not be called')
-      const resultFromCache = await fetchDispatcher.handle(new Request('test', 'cd:/gem/rubygems/-/small/0.5.1'))
-      verifyFetchResult(fetched, resultFromCache)
+      await verifyFetchAndCache(fetchDispatcher, 'cd:/gem/rubygems/-/small/0.5.1')
     })
   })
 
@@ -237,15 +245,11 @@ describe('fetchDispatcher cache fetch result', () => {
       packagistFetch._getPackage = sinon.stub().callsFake(async (spec, registryData, destination) =>
         await getPacakgeStub('test/fixtures/composer/symfony-polyfill-mbstring-v1.11.0-0-gfe5e94c.zip', destination))
 
-      fetchDispatcher = setupDispatcher(packagistFetch, resultCache, inProgressPromiseCache)
+      fetchDispatcher = setupDispatcher(packagistFetch)
     })
-    it('cached result same as fetched', async () => {
-      const fetched = await fetchDispatcher.handle(new Request('test', 'cd:/composer/packagist/symfony/polyfill-mbstring/1.11.0'))
-      verifyFetchSuccess()
 
-      fetchDispatcher._fetchPromise = sinon.stub().rejects('should not be called')
-      const resultFromCache = await fetchDispatcher.handle(new Request('test', 'cd:/composer/packagist/symfony/polyfill-mbstring/1.11.0'))
-      verifyFetchResult(fetched, resultFromCache)
+    it('cached result same as fetched', async () => {
+      await verifyFetchAndCache(fetchDispatcher, 'cd:/composer/packagist/symfony/polyfill-mbstring/1.11.0')
     })
   })
 
@@ -267,15 +271,11 @@ describe('fetchDispatcher cache fetch result', () => {
         'request-promise-native': requestPromiseStub
       })
       const packagistFetch = CrateioFetch({ logger: { log: sinon.stub() } })
-      fetchDispatcher = setupDispatcher(packagistFetch, resultCache, inProgressPromiseCache)
+      fetchDispatcher = setupDispatcher(packagistFetch)
     })
-    it('cached result same as fetched', async () => {
-      const fetched = await fetchDispatcher.handle(new Request('test', 'cd:/crate/cratesio/-/bitflags/1.0.4'))
-      verifyFetchSuccess()
 
-      fetchDispatcher._fetchPromise = sinon.stub().rejects('should not be called')
-      const resultFromCache = await fetchDispatcher.handle(new Request('test', 'cd:/crate/cratesio/-/bitflags/1.0.4'))
-      verifyFetchResult(fetched, resultFromCache)
+    it('cached result same as fetched', async () => {
+      await verifyFetchAndCache(fetchDispatcher, 'cd:/crate/cratesio/-/bitflags/1.0.4')
     })
   })
 
@@ -293,15 +293,11 @@ describe('fetchDispatcher cache fetch result', () => {
       fetch._getDeclaredLicenses = async () => {
         return ['MIT', 'BSD-3-clause']
       }
-      fetchDispatcher = setupDispatcher(fetch, resultCache, inProgressPromiseCache)
+      fetchDispatcher = setupDispatcher(fetch)
     })
-    it('cached result same as fetched', async () => {
-      const fetched = await fetchDispatcher.handle(new Request('test', 'cd:/deb/debian/-/0ad/0.0.17-1_armhf'))
-      verifyFetchSuccess()
 
-      fetchDispatcher._fetchPromise = sinon.stub().rejects('should not be called')
-      const resultFromCache = await fetchDispatcher.handle(new Request('test', 'cd:/deb/debian/-/0ad/0.0.17-1_armhf'))
-      verifyFetchResult(fetched, resultFromCache)
+    it('cached result same as fetched', async () => {
+      await verifyFetchAndCache(fetchDispatcher, 'cd:/deb/debian/-/0ad/0.0.17-1_armhf')
     })
   })
 
@@ -319,15 +315,11 @@ describe('fetchDispatcher cache fetch result', () => {
         'request-promise-native': createRequestPromiseStub(fileSupplier)
       })
       const fetch = GoFetch({ logger: { info: sinon.stub() } })
-      fetchDispatcher = setupDispatcher(fetch, resultCache, inProgressPromiseCache)
+      fetchDispatcher = setupDispatcher(fetch)
     })
-    it('cached result same as fetched', async () => {
-      const fetched = await fetchDispatcher.handle(new Request('test', 'cd:/go/golang/rsc.io/quote/v1.3.0'))
-      verifyFetchSuccess()
 
-      fetchDispatcher._fetchPromise = sinon.stub().rejects('should not be called')
-      const resultFromCache = await fetchDispatcher.handle(new Request('test', 'cd:/go/golang/rsc.io/quote/v1.3.0'))
-      verifyFetchResult(fetched, resultFromCache)
+    it('cached result same as fetched', async () => {
+      await verifyFetchAndCache(fetchDispatcher, 'cd:/go/golang/rsc.io/quote/v1.3.0')
     })
   })
 
@@ -365,36 +357,34 @@ describe('fetchDispatcher cache fetch result', () => {
         }
       })
       const fetch = NugetFetch({ logger: { info: sinon.stub() } })
-      fetchDispatcher = setupDispatcher(fetch, resultCache, inProgressPromiseCache)
+      fetchDispatcher = setupDispatcher(fetch)
     })
     it('cached result same as fetched', async () => {
-      const fetched = await fetchDispatcher.handle(new Request('test', 'cd:/nuget/nuget/-/xunit.core/2.4.1'))
-      verifyFetchSuccess()
+      await verifyFetchAndCache(fetchDispatcher, 'cd:/nuget/nuget/-/xunit.core/2.4.1')
+    })
+  })
 
-      fetchDispatcher._fetchPromise = sinon.stub().rejects('should not be called')
-      const resultFromCache = await fetchDispatcher.handle(new Request('test', 'cd:/nuget/nuget/-/xunit.core/2.4.1'))
-      verifyFetchResult(fetched, resultFromCache)
+  describe('cache podFetch result', () => {
+    let fetchDispatcher
+
+    beforeEach(() => {
+      const PodFetch = proxyquire('../../../../providers/fetch/podFetch', {
+        requestretry: {
+          defaults: () => {
+            return { get: sinon.stub().resolves({ body: loadJson('pod/versions.json'), statusCode: 200 }) }
+          }
+        },
+        'request-promise-native': sinon.stub().resolves(loadJson('pod/registryData.json'))
+      })
+      const fetch = PodFetch({ logger: { info: sinon.stub() } })
+      fetchDispatcher = setupDispatcher(fetch)
+    })
+
+    it('cached result same as fetched', async () => {
+      await verifyFetchAndCache(fetchDispatcher, 'cd:/pod/cocoapods/-/SwiftLCS/1.0')
     })
   })
 })
-
-function setupMavenFetch() {
-  const pickArtifact = url => {
-    if (url.endsWith('.pom')) return 'swt-3.3.0-v3346.pom'
-    if (url.endsWith('-sources.jar')) return 'swt-3.3.0-v3346.jar'
-    if (url.endsWith('.jar')) return 'swt-3.3.0-v3346.jar'
-    return null
-  }
-  const fileSupplier = url => {
-    const fileName = url.includes('solrsearch') ? 'swt-3.3.0-v3346.json' : pickArtifact(url)
-    return `/maven/${fileName}`
-  }
-  return MavenFetch({
-    logger: { log: sinon.stub() },
-    requestPromise: createRequestPromiseStub(fileSupplier),
-    requestStream: createGetStub(fileSupplier)
-  })
-}
 
 const createRequestPromiseStub = fileSupplier => {
   return options => {
@@ -427,11 +417,6 @@ const getPacakgeStub = async (file, destination) => {
   await promisify(fs.copyFile)(file, destination)
 }
 
-const npmRegistryRequestStub = () => {
-  const version = '0.3.0'
-  return {
-    manifest: { version },
-    versions: { [version]: { test: true } },
-    time: { [version]: '42' }
-  }
+const loadJson = fileName => {
+  return JSON.parse(fs.readFileSync(`test/fixtures/${fileName}`))
 }
