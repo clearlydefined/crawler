@@ -40,6 +40,5 @@ describe('rubyGemsFetch', () => {
 })
 
 const getPacakgeStub = async (file, destination) => {
-  const content = await promisify(fs.readFile)(file)
-  await promisify(fs.writeFile)(destination, content)
+  await promisify(fs.copyFile)(file, destination)
 }

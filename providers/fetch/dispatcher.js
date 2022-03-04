@@ -64,12 +64,7 @@ class FetchDispatcher extends AbstractFetch {
 
   async _fetchResult(request, handler) {
     const cacheKey = this.toSpec(request).toUrlPath()
-    let fetchResult = this.fetched.get(cacheKey)
-    if (!fetchResult) {
-      fetchResult = await this._fetchPromise(handler, request, cacheKey)
-      if (fetchResult) this.fetched.set(cacheKey, fetchResult, (key, value) =>
-        value.cleanup(error => this.logger.info(`Cleanup  Problem cleaning up after ${key} ${error.message}`)))
-    }
+    const fetchResult = this.fetched.get(cacheKey) || await this._fetchPromise(handler, request, cacheKey)
     fetchResult?.copyTo(request)
   }
 
@@ -80,11 +75,13 @@ class FetchDispatcher extends AbstractFetch {
   }
 
   async _fetch(handler, request, cacheKey) {
-    this.logger.debug(`---Start Fetch: ${cacheKey}`)
+    this.logger.debug(`---Start Fetch: ${cacheKey} at ${new Date().toISOString()}`)
     await handler.handle(request)
     const fetchResult = request.fetchResult
     delete request.fetchResult
-    this.logger.debug(`---End Fetch: ${cacheKey}`)
+    if (fetchResult) this.fetched.set(cacheKey, fetchResult, (key, value) =>
+      value.cleanup(error => this.logger.info(`Cleanup  Problem cleaning up after ${key} ${error.message}`)))
+    this.logger.debug(`---End Fetch: ${cacheKey} at ${new Date().toISOString()}`)
     return fetchResult
   }
 
