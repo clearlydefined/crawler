@@ -28,7 +28,7 @@ class RubyGemsFetch extends AbstractFetch {
     request.url = spec.toUrl()
     super.handle(request)
     const file = this.createTempFile(request)
-    await this._getPackage(spec, registryData, file.name)
+    await this._getPackage(spec, file.name)
     const dir = this.createTempDir(request)
     await this.decompress(file.name, dir.name)
     await this._extractFiles(dir.name)
@@ -50,9 +50,9 @@ class RubyGemsFetch extends AbstractFetch {
     return statusCode === 200 && body ? body : null
   }
 
-  async _getPackage(spec, registryData, destination) {
+  async _getPackage(spec, destination) {
     const fullName = spec.namespace ? `${spec.namespace}/${spec.name}` : spec.name
-    const gemUrl = registryData.gem_uri || `${providerMap.rubyGems}/gems/${fullName}-${spec.revision}.gem`
+    const gemUrl = `${providerMap.rubyGems}/gems/${fullName}-${spec.revision}.gem`
     return new Promise((resolve, reject) => {
       nodeRequest
         .get(gemUrl, (error, response) => {
