@@ -104,7 +104,6 @@ describe('Request marking', () => {
   })
 })
 
-
 describe('clean up management', () => {
   let request
   beforeEach(() => {

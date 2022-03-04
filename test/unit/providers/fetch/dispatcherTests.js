@@ -49,18 +49,6 @@ describe('fetchDispatcher', () => {
 
 describe('fetchDispatcher cache fetch result', () => {
 
-  function mockResultCache(cache) {
-    return {
-      get: key => cache[key],
-      set: (key, value) => cache[key] = value,
-    }
-  }
-  function verifyFetchResult(fetched, resultFromCache) {
-    // eslint-disable-next-line no-unused-vars
-    const { cleanups, ...expected } = fetched
-    expect(resultFromCache).to.be.deep.equal(expected)
-  }
-
   let resultCache
   let inProgressPromiseCache
 
@@ -81,6 +69,13 @@ describe('fetchDispatcher cache fetch result', () => {
     return FetchDispatcher(options, storeStub, [fetcher], processorsStub, filterStub, mockResultCache(resultCache), inProgressPromiseCache)
   }
 
+  function mockResultCache(cache) {
+    return {
+      get: key => cache[key],
+      set: (key, value) => cache[key] = value,
+    }
+  }
+
   async function verifyFetchAndCache(fetchDispatcher, url) {
     const fetched = await fetchDispatcher.handle(new Request('test', url))
     verifyFetchSuccess()
@@ -98,6 +93,12 @@ describe('fetchDispatcher cache fetch result', () => {
   function verifyFetchFailure() {
     expect(Object.keys(resultCache).length).to.be.equal(0)
     expect(Object.keys(inProgressPromiseCache).length).to.be.equal(0)
+  }
+
+  function verifyFetchResult(fetched, resultFromCache) {
+    // eslint-disable-next-line no-unused-vars
+    const { cleanups, ...expected } = fetched
+    expect(resultFromCache).to.be.deep.equal(expected)
   }
 
   describe('cache maven fetch result', () => {
@@ -144,7 +145,7 @@ describe('fetchDispatcher cache fetch result', () => {
     })
   })
 
-  describe('cache gitClone fetch result', () => {
+  describe('cache GitCloner fetch result', () => {
     let fetchDispatcher
 
     beforeEach(() => {
@@ -160,7 +161,7 @@ describe('fetchDispatcher cache fetch result', () => {
     })
   })
 
-  describe('cache pypi fetch result', () => {
+  describe('cache PypiFetch result', () => {
     let pypiFetch
 
     beforeEach(() => {
@@ -185,7 +186,7 @@ describe('fetchDispatcher cache fetch result', () => {
     })
   })
 
-  describe('cache npm fetch result', () => {
+  describe('cache NpmFetch result', () => {
 
     const npmRegistryRequestStub = () => {
       const version = '0.3.0'
@@ -214,7 +215,7 @@ describe('fetchDispatcher cache fetch result', () => {
     })
   })
 
-  describe('cache rubyGems fetch result', () => {
+  describe('cache RubyGemsFetch result', () => {
     let fetchDispatcher
 
     beforeEach(() => {
@@ -235,7 +236,7 @@ describe('fetchDispatcher cache fetch result', () => {
     })
   })
 
-  describe('cache packagistFetch result', () => {
+  describe('cache PackagistFetch result', () => {
     let fetchDispatcher
 
     beforeEach(() => {
@@ -253,7 +254,7 @@ describe('fetchDispatcher cache fetch result', () => {
     })
   })
 
-  describe('cache crateioFetch result', () => {
+  describe('cache CrateioFetch result', () => {
     const requestPromiseStub = options => {
       const body = fs.readFileSync('test/fixtures/crates/bitflags.json')
       if (options && options.json) return JSON.parse(body)
@@ -279,7 +280,7 @@ describe('fetchDispatcher cache fetch result', () => {
     })
   })
 
-  describe('cache debianFetch result', () => {
+  describe('cache DebianFetch result', () => {
     const memCacheStub = { get: () => true }
     let fetchDispatcher
 
@@ -301,7 +302,7 @@ describe('fetchDispatcher cache fetch result', () => {
     })
   })
 
-  describe('cache goFetch result', () => {
+  describe('cache GoFetch result', () => {
     function fileSupplier(url) {
       const fileName = url.endsWith('.info') ? 'v1.3.0.info' : 'v1.3.0.zip'
       return `/go/${fileName}`
@@ -323,7 +324,7 @@ describe('fetchDispatcher cache fetch result', () => {
     })
   })
 
-  describe('cache nugetFetch result', () => {
+  describe('cache NugetFetch result', () => {
     const fileSupplier = (url) => {
       let fileName = null
       if (url.includes('catalog')) fileName = 'xunit.core.2.4.1.catalog.json'
@@ -364,7 +365,7 @@ describe('fetchDispatcher cache fetch result', () => {
     })
   })
 
-  describe('cache podFetch result', () => {
+  describe('cache PodFetch result', () => {
     let fetchDispatcher
 
     beforeEach(() => {
