@@ -25,7 +25,7 @@ class PodExtract extends AbstractClearlyDefinedProcessor {
     if (this.isProcessing(request)) {
       const location = request.document.location
       await super.handle(request, location)
-      await this._createDocument(request, request.document.registryData)
+      await this._createDocument(request, request.document.registryData, request.document.releaseDate)
     }
     this.linkAndQueueTool(request, 'licensee')
     this.linkAndQueueTool(request, 'scancode')
@@ -37,8 +37,8 @@ class PodExtract extends AbstractClearlyDefinedProcessor {
     return request
   }
 
-  async _createDocument(request, registryData) {
-    request.document = merge(this.clone(request.document), { registryData })
+  async _createDocument(request, registryData, releaseDate) {
+    request.document = merge(this.clone(request.document), { registryData, releaseDate })
     const sourceInfo = await this._discoverSource(registryData)
     if (sourceInfo) request.document.sourceInfo = sourceInfo
   }
