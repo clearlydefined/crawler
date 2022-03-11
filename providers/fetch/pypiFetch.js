@@ -26,7 +26,9 @@ class PyPiFetch extends AbstractFetch {
     request.url = spec.toUrl()
     super.handle(request)
     const file = this.createTempFile(request)
-    await this._getPackage(spec, registryData, file.name)
+    const downloaded = await this._getPackage(spec, registryData, file.name)
+    if (!downloaded) return request.markSkip('Missing  ')
+
     const dir = this.createTempDir(request)
     await this.decompress(file.name, dir.name)
     const hashes = await this.computeHashes(file.name)
@@ -83,17 +85,16 @@ class PyPiFetch extends AbstractFetch {
 
   async _getPackage(spec, registryData, destination) {
     const releaseTypes = get(registryData, ['releases', spec.revision])
-    const release = find(releaseTypes, entry => {
-      return entry.url && entry.url.length > 6 && entry.url.slice(-6) === 'tar.gz'
-    })
-    if (!release) return
+    const release = find(releaseTypes, entry => entry.url?.endsWith('tar.gz') || entry.url?.endsWith('zip'))
+    if (!release) return false
+
     return new Promise((resolve, reject) => {
       nodeRequest
         .get(release.url, (error, response) => {
           if (error) return reject(error)
           if (response.statusCode !== 200) reject(new Error(`${response.statusCode} ${response.statusMessage}`))
         })
-        .pipe(fs.createWriteStream(destination).on('finish', () => resolve(null)))
+        .pipe(fs.createWriteStream(destination).on('finish', () => resolve(true)))
     })
   }
 }
