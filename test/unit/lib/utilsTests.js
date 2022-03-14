@@ -73,4 +73,8 @@ describe('Util extractDate', () => {
     const parsed = extractDate('11-13-2010', ['MM-dd-yyyy', 'EEE MMM d yyyy'])
     expect(parsed.toISODate()).to.be.eq('2010-11-13')
   })
+  it('parseable date: SQL formats', () => {
+    const parsed = extractDate('2018-05-28 07:26:25 UTC')
+    expect(parsed.toISODate()).to.be.eq('2018-05-28')
+  })
 })

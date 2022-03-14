@@ -8,6 +8,8 @@ const { clone, get } = require('lodash')
 const { promisify } = require('util')
 const fs = require('fs')
 const exists = promisify(fs.exists)
+const readdir = promisify(fs.readdir)
+const lstat = promisify(fs.lstat)
 const path = require('path')
 const parseString = promisify(require('xml2js').parseString)
 const EntitySpec = require('../../lib/entitySpec')
@@ -157,6 +159,23 @@ class MavenBasedFetch extends AbstractFetch {
       const stats = await fs.promises.stat(manifest)
       return stats.mtime.toISOString()
     }
+
+    //For archives which do not contain the META-INF/MANIFEST.MF file, use mtime from any file
+    //in the decompressed directory to infer release date
+    const fileStat = await MavenBasedFetch._findAnyFileStat(dirName)
+    return fileStat?.mtime.toISOString()
+  }
+
+  static async _findAnyFileStat(location) {
+    const locationStat = await lstat(location)
+    if (locationStat.isSymbolicLink()) return
+    if (locationStat.isFile()) return locationStat
+
+    const subdirs = await readdir(location)
+    return subdirs.reduce((prev, subdir) => {
+      const entry = path.resolve(location, subdir)
+      return prev.then(result => result || MavenBasedFetch._findAnyFileStat(entry))
+    }, Promise.resolve())
   }
 
   async _requestPromise(options) {
