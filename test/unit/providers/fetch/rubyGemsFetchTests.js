@@ -14,7 +14,7 @@ describe('rubyGemsFetch', () => {
       version: '0.5.1',
       gem_uri: 'https://rubygems.org/gems/small-0.5.1.gem',
     })
-    fetch._getPackage = sinon.stub().callsFake((spec, registryData, destination) =>
+    fetch._getPackage = sinon.stub().callsFake((spec, destination) =>
       getPacakgeStub('test/fixtures/ruby/small-0.5.1.gem', destination))
   })
 

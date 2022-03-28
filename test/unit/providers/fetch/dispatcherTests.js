@@ -166,8 +166,10 @@ describe('fetchDispatcher cache fetch result', () => {
 
     beforeEach(() => {
       pypiFetch = PypiFetch({ logger: { log: sinon.stub() } })
-      pypiFetch._getPackage = sinon.stub().callsFake(async (spec, registryData, destination) =>
-        await getPacakgeStub('test/fixtures/maven/swt-3.3.0-v3346.jar', destination))
+      pypiFetch._getPackage = sinon.stub().callsFake(async (spec, registryData, destination) => {
+        await getPacakgeStub('test/fixtures/maven/swt-3.3.0-v3346.jar', destination)
+        return true
+      })
     })
 
     it('cached result same as fetched', async () => {
@@ -225,7 +227,7 @@ describe('fetchDispatcher cache fetch result', () => {
         version: '0.5.1',
         gem_uri: 'https://rubygems.org/gems/small-0.5.1.gem',
       })
-      rubyGemsFetch._getPackage = sinon.stub().callsFake(async (spec, registryData, destination) =>
+      rubyGemsFetch._getPackage = sinon.stub().callsFake(async (spec, destination) =>
         await getPacakgeStub('test/fixtures/ruby/small-0.5.1.gem', destination))
 
       fetchDispatcher = setupDispatcher(rubyGemsFetch)
