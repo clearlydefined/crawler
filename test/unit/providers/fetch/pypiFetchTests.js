@@ -9,7 +9,7 @@ const nodeRequest = require('request')
 const PypiFetch = require('../../../../providers/fetch/pypiFetch')
 const requestRetryWithDefaults = require('../../../../providers/fetch/requestRetryWithDefaults')
 const Request = require('../../../../ghcrawler/lib/request.js')
-const pypiFetchOptions = { logger: { info: sinon.stub() }, cdFileLocation: 'test/fixtures/debian/fragment' }
+const pypiFetchOptions = { logger: { info: sinon.stub() } }
 
 describe('pypiFetch handle function', () => {
   let sandbox = sinon.createSandbox()
@@ -53,6 +53,18 @@ describe('pypiFetch handle function', () => {
     })
   })
 
+  it('returns missing when failed to find download url', async () => {
+    // release information in the registry data is empty
+    requestGetStub.returns({
+      body: {
+        'releases': { '1.10.0': [] }
+      },
+      statusCode: 200
+    })
+
+    let result = await fetch.handle(new Request('pypi', 'cd:/pypi/pypi/-/dnspython/1.10.0'))
+    expect(result.outcome).to.be.equal('Missing  ')
+  })
 })
 
 const getCompressedFile = (url, callback) => {
