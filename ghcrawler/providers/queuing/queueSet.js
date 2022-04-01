@@ -38,7 +38,7 @@ class QueueSet {
     return this.getQueue(name).push(requests)
   }
 
-  repush(original, newRequest) {
+  repush(original, newRequest) { //Remove
     const queue = original._retryQueue ? this.getQueue(original._retryQueue) : original._originQueue
     return queue.push(newRequest)
   }
@@ -77,17 +77,17 @@ class QueueSet {
     return result
   }
 
-  done(request) {
+  done(request) {//Remove
     const acked = request.acked
     request.acked = true
     return !acked && request._originQueue ? request._originQueue.done(request) : Promise.resolve()
   }
 
-  defer(request) {
+  defer(request) {//Remove
     return request._originQueue ? request._originQueue.defer(request) : Promise.resolve()
   }
 
-  abandon(request) {
+  abandon(request) {//Remove
     const acked = request.acked
     request.acked = true
     return !acked && request._originQueue ? request._originQueue.abandon(request) : Promise.resolve()

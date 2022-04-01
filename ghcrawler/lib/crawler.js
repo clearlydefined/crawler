@@ -649,8 +649,8 @@ class Crawler {
     return deadDocument
   }
 
-  queue(requests, name = null) {
-    return this.queues.push(this._preFilter(requests), name || 'normal')
+  queue(requests, name = null, scope = null) {
+    return this.queues.push(this._preFilter(requests), name || 'normal', scope)
   }
 
   _preFilter(requests) {
