@@ -34,9 +34,7 @@ class NuGetExtract extends AbstractClearlyDefinedProcessor {
       const manifest = await this._getManifest(metadataLocation.manifest)
       await this._createDocument(request, manifest, request.document.registryData)
     }
-    this.linkAndQueueTool(request, 'licensee')
-    this.linkAndQueueTool(request, 'scancode')
-    this.linkAndQueueTool(request, 'reuse')
+    this.addLocalToolTasks(request)
     if (request.document.sourceInfo) {
       const sourceSpec = SourceSpec.fromObject(request.document.sourceInfo)
       this.linkAndQueue(request, 'source', sourceSpec.toEntitySpec())

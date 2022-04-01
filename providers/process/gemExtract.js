@@ -26,10 +26,7 @@ class GemExtract extends AbstractClearlyDefinedProcessor {
       await super.handle(request)
       await this._createDocument(request, request.document.registryData)
     }
-    this.linkAndQueueTool(request, 'licensee')
-    // this.linkAndQueueTool(request, 'fossology')
-    this.linkAndQueueTool(request, 'scancode')
-    this.linkAndQueueTool(request, 'reuse')
+    this.addLocalToolTasks(request)
     if (request.document.sourceInfo) {
       const sourceSpec = SourceSpec.fromObject(request.document.sourceInfo)
       this.linkAndQueue(request, 'source', sourceSpec.toEntitySpec())

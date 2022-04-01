@@ -37,10 +37,7 @@ class ComposerExtract extends AbstractClearlyDefinedProcessor {
       if (manifest) this.attachFiles(request.document, [manifestLocation], location)
       else this.logger.info('PHP package without composer.json', { url: request.url })
     }
-    this.linkAndQueueTool(request, 'licensee')
-    // this.linkAndQueueTool(request, 'fossology')
-    this.linkAndQueueTool(request, 'scancode')
-    this.linkAndQueueTool(request, 'reuse')
+    this.addLocalToolTasks(request)
     if (request.document.sourceInfo) {
       const sourceSpec = SourceSpec.fromObject(request.document.sourceInfo)
       this.linkAndQueue(request, 'source', sourceSpec.toEntitySpec())
