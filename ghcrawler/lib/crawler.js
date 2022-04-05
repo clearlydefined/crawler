@@ -674,6 +674,10 @@ class Crawler {
     }
     return false
   }
+
+  done() {
+    return this.queues.publish()
+  }
 }
 
 module.exports = Crawler

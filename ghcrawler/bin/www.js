@@ -35,6 +35,9 @@ function run(service, logger) {
 
   server.on('error', onError)
   server.on('listening', onListening)
+  server.on('close', () => {
+    service.stop()
+  })
 
   /**
    * Normalize a port into a number, string, or false.
