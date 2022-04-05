@@ -1,4 +1,5 @@
-const { get } = require('lodash')
+// (c) Copyright 2022, SAP SE and ClearlyDefined contributors. Licensed under the MIT license.
+// SPDX-License-Identifier: MIT
 
 class ScopedQueueSets {
   constructor(globalQueues, localQueues) {
@@ -18,6 +19,13 @@ class ScopedQueueSets {
 
   push(requests, name, scope) {
     return this.getQueue(name, scope).push(requests)
+  }
+
+  async repush(original, newRequest) {
+    //Always retry on the global queue
+    const queue = original._retryQueue ? this.getQueue(original._retryQueue, 'global') : original._originQueue
+    if (queue != original._originQueue) await original._originQueue.done(original)
+    return queue.push(newRequest)
   }
 
   subscribe() {
@@ -40,17 +48,12 @@ class ScopedQueueSets {
     return this._scopedQueues.local.pop()
       .then(request => {
         if (request) {
-          //retry on the global queue with the same name
-          request._retryQueue = get(request._originQueue, 'queue.name')
+          //mark to retry on the global queues
+          request._retryQueue = request._originQueue.getName()
           return request
         }
         return this._scopedQueues.global.pop()
       })
-  }
-
-  repush(original, newRequest) {
-    const queue = original._retryQueue ? this.getQueue(original._retryQueue) : original._originQueue
-    return queue.push(newRequest)
   }
 
   done(request) {
@@ -60,7 +63,6 @@ class ScopedQueueSets {
   }
 
   defer(request) {
-    //TODO: request.markDefer() not used?
     return request._originQueue ? request._originQueue.defer(request) : Promise.resolve()
   }
 
@@ -70,13 +72,29 @@ class ScopedQueueSets {
     return !acked && request._originQueue ? request._originQueue.abandon(request) : Promise.resolve()
   }
 
-  //TODO: check crawlerService, it is operating on the queue (flush, getInfo, getRequests)
-  //should avoid that exposing the queues.
-  //TODO: make this private
   getQueue(name, scope = null) {
     return this._getQueuesInScope(scope)?.getQueue(name)
   }
 
+  publish() {
+    const publishToGlobal = async localQueue => {
+      const localRequests = []
+      const info = await localQueue.getInfo()
+      for (let count = info.count; count > 0; count--) {
+        localRequests.push(
+          localQueue.pop()
+            .then(request => request && localQueue.done(request).then(() => request))
+            .then(request => this.push(request, localQueue.getName(), 'global')))
+      }
+      return Promise.all(localRequests)
+    }
+
+    return Promise.allSettled(this._scopedQueues.local.queues.map(publishToGlobal))
+      .then(results => {
+        const found = results.find(result => result.status === 'rejected')
+        if (found) throw new Error(found.reason)
+      })
+  }
 }
 
 module.exports = ScopedQueueSets

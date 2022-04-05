@@ -36,10 +36,10 @@ class CrawlerService {
     console.log(`Done loop ${loop.options.name}`)
   }
 
-  async ensureLoops() {
+  async ensureLoops(targetCount = this.options.crawler.count) {
     this.loops = this.loops.filter(loop => loop.running())
     const running = this.status()
-    const delta = this.options.crawler.count - running
+    const delta = targetCount - running
     if (delta < 0) {
       for (let i = 0; i < Math.abs(delta); i++) {
         const loop = this.loops.shift()
@@ -61,7 +61,8 @@ class CrawlerService {
   }
 
   stop() {
-    return this.ensureLoops()
+    return this.ensureLoops(0)
+      .then(() => this.crawler.done())
   }
 
   queues() {
@@ -72,24 +73,24 @@ class CrawlerService {
     return this.crawler.queue(requests, name)
   }
 
-  async flushQueue(name) {
-    const queue = this.crawler.queues.getQueue(name)
+  async flushQueue(name, scope = null) {
+    const queue = this.crawler.queues.getQueue(name, scope)
     if (!queue) {
       return null
     }
     return queue.flush()
   }
 
-  getQueueInfo(name) {
-    const queue = this.crawler.queues.getQueue(name)
+  getQueueInfo(name, scope = null) {
+    const queue = this.crawler.queues.getQueue(name, scope)
     if (!queue) {
       return Promise.reject(`No queue found: ${name}`)
     }
     return queue.getInfo()
   }
 
-  async getRequests(name, count, remove = false) {
-    const queue = this.crawler.queues.getQueue(name)
+  async getRequests(name, count, remove = false, scope = null) {
+    const queue = this.crawler.queues.getQueue(name, scope)
     if (!queue) {
       return null
     }

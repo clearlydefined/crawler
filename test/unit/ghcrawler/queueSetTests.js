@@ -82,87 +82,17 @@ describe('QueueSet pushing', () => {
 
     expect(() => queues.push(request, 'foo')).to.throw(Error)
   })
-
-  it('should repush into the same queue', async () => {
-    const priority = createBaseQueue('priority', {
-      pop: async () => new Request('test', 'http://test'),
-      push: () => null
-    })
-    const queues = createBaseQueues([priority])
-    sinon.spy(priority, 'push')
-
-    const request = await queues.pop()
-    await queues.repush(request, request)
-    expect(request._originQueue === priority).to.be.true
-    expect(priority.push.callCount).to.be.equal(1)
-    expect(priority.push.getCall(0).args[0].type).to.be.equal('test')
-  })
 })
 
 describe('QueueSet originQueue management', () => {
-  it('should call done and mark acked on done', async () => {
+  it('should set originQueue on pop', async () => {
     const priority = createBaseQueue('priority', {
       pop: async () => new Request('test', 'http://test'),
-      done: async () => null
     })
     const queues = createBaseQueues([priority])
-    sinon.spy(priority, 'done')
 
     const request = await queues.pop()
-    await queues.done(request)
-    expect(request.acked).to.be.true
-    expect(priority.done.callCount).to.be.equal(1)
-    expect(priority.done.getCall(0).args[0].type).to.be.equal('test')
-  })
-
-  it('should call done and mark acked on abandon', async () => {
-    const priority = createBaseQueue('priority', {
-      pop: async () => new Request('test', 'http://test'),
-      abandon: async () => null
-    })
-    const queues = createBaseQueues([priority])
-    sinon.spy(priority, 'abandon')
-
-    const request = await queues.pop()
-    await queues.abandon(request)
-    expect(request.acked).to.be.true
-    expect(priority.abandon.callCount).to.be.equal(1)
-    expect(priority.abandon.getCall(0).args[0].type).to.be.equal('test')
-  })
-
-  it('should not abandon twice', async () => {
-    const priority = createBaseQueue('priority', {
-      pop: async () => new Request('test', 'http://test'),
-      abandon: async () => null
-    })
-    const queues = createBaseQueues([priority])
-    sinon.spy(priority, 'abandon')
-
-    const request = await queues.pop()
-    await queues.abandon(request)
-    await queues.abandon(request)
-    expect(request.acked).to.be.true
-    expect(priority.abandon.callCount).to.be.equal(1)
-    expect(priority.abandon.getCall(0).args[0].type).to.be.equal('test')
-  })
-
-  it('should not done after abandon ', async () => {
-    const priority = createBaseQueue('priority', {
-      pop: async () => new Request('test', 'http://test'),
-      abandon: async () => null,
-      done: async () => null
-    })
-    const queues = createBaseQueues([priority])
-    sinon.spy(priority, 'abandon')
-    sinon.spy(priority, 'done')
-
-    const request = await queues.pop()
-    await queues.abandon(request)
-    await queues.done(request)
-    expect(request.acked).to.be.true
-    expect(priority.done.callCount).to.be.equal(0)
-    expect(priority.abandon.callCount).to.be.equal(1)
-    expect(priority.abandon.getCall(0).args[0].type).to.be.equal('test')
+    expect(request._originQueue).to.be.equal(priority)
   })
 })
 

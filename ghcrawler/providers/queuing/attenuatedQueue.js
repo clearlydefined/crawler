@@ -12,6 +12,15 @@ class AttenuatedQueue extends NestedQueue {
     this.logger = options.logger
   }
 
+  done(request) {
+    return super.done(request)
+      .then(() => {
+        const key = this._getCacheKey(request)
+        const deleted = memoryCache.del(key)
+        if (deleted) this.logger.verbose(`Deleted ${key}`)
+      })
+  }
+
   push(requests) {
     const self = this
     requests = Array.isArray(requests) ? requests : [requests]
@@ -27,7 +36,7 @@ class AttenuatedQueue extends NestedQueue {
   _pushOne(request) {
     // Include the attempt count in the key.  This allows for one concurrent requeue
     const attemptCount = request.attemptCount || 0
-    const key = `t:${attemptCount}:${request.toUniqueString()}`
+    const key = this._getCacheKey(request)
     let entry = memoryCache.get(key)
     if (entry) {
       // We've seen this request recently. The push is either in progress (and may fail) or is already done.
@@ -52,6 +61,11 @@ class AttenuatedQueue extends NestedQueue {
     const ttl = (this.options.attenuation && this.options.attenuation.ttl) || 1000
     memoryCache.put(key, entry, ttl)
     return entry.promise
+  }
+
+  _getCacheKey(request) {
+    const attemptCount = request.attemptCount || 0
+    return `t:${attemptCount}:${request.toUniqueString()}`
   }
 
   _log(message) {
