@@ -21,6 +21,13 @@ class ScopedQueueSets {
     return this.getQueue(name, scope).push(requests)
   }
 
+  async repush(original, newRequest) {
+    //Always retry on the global queue
+    const queue = original._retryQueue ? this.getQueue(original._retryQueue, 'global') : original._originQueue
+    if (queue != original._originQueue) await original._originQueue.done(original)
+    return queue.push(newRequest)
+  }
+
   subscribe() {
     return Promise.all(
       Object.values(this._scopedQueues).map(queues => {
@@ -49,13 +56,6 @@ class ScopedQueueSets {
       })
   }
 
-  async repush(original, newRequest) {
-    //Always retry on the global queue
-    const queue = original._retryQueue ? this.getQueue(original._retryQueue, 'global') : original._originQueue
-    if (queue != original._originQueue) await original._originQueue.done(original)
-    return queue.push(newRequest)
-  }
-
   done(request) {
     const acked = request.acked
     request.acked = true
@@ -63,7 +63,6 @@ class ScopedQueueSets {
   }
 
   defer(request) {
-    //TODO: request.markDefer() not used?
     return request._originQueue ? request._originQueue.defer(request) : Promise.resolve()
   }
 
