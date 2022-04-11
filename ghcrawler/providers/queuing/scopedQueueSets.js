@@ -83,14 +83,10 @@ class ScopedQueueSets {
       for (let count = info.count; count > 0; count--) {
         localRequests.push(
           localQueue.pop()
-            .then(request => request && localQueue.done(request).then(() => request)))
+            .then(request => request && localQueue.done(request).then(() => request))
+            .then(request => this.push(request, localQueue.getName(), 'global')))
       }
-
-      await Promise.all(localRequests).then(requests => {
-        const filtered = requests.filter(request => request)
-        if (!filtered.length) return
-        return this.push(filtered, localQueue.getName(), 'global')
-      })
+      return Promise.all(localRequests)
     }
 
     return Promise.allSettled(this._scopedQueues.local.queues.map(publishToGlobal))

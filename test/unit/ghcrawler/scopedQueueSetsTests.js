@@ -236,7 +236,19 @@ describe('scopedQueueSets', () => {
       expect(localQueue.pop.calledOnce).to.be.true
       expect(localQueue.done.calledOnce).to.be.true
       expect(globalQueue.push.calledOnce).to.be.true
-      expect(globalQueue.push.getCall(0).args[0][0].type).to.be.equal('test')
+      expect(globalQueue.push.getCall(0).args[0].type).to.be.equal('test')
+    })
+
+    it('success with 2 items', async () => {
+      localQueue.getInfo = sinon.stub().resolves({ count: 2 })
+
+      await scopedQueues.publish()
+
+      expect(localQueue.pop.callCount).to.be.equal(2)
+      expect(localQueue.done.callCount).to.be.equal(2)
+      expect(globalQueue.push.callCount).to.be.equal(2)
+      expect(globalQueue.push.getCall(0).args[0].type).to.be.equal('test')
+      expect(globalQueue.push.getCall(1).args[0].type).to.be.equal('test')
     })
 
     it('partial success', async () => {
@@ -255,7 +267,7 @@ describe('scopedQueueSets', () => {
       //The remaining queue is still processed.
       expect(localQueue.done.calledOnce).to.be.true
       expect(globalQueue.push.calledOnce).to.be.true
-      expect(globalQueue.push.getCall(0).args[0][0].type).to.be.equal('test')
+      expect(globalQueue.push.getCall(0).args[0].type).to.be.equal('test')
     })
   })
 })

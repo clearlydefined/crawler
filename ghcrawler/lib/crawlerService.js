@@ -63,7 +63,6 @@ class CrawlerService {
   stop() {
     return this.ensureLoops(0)
       .then(() => this.crawler.done())
-      .catch(error => console.log(`Stopping service: ${error}`))
   }
 
   queues() {
