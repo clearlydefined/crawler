@@ -13,10 +13,11 @@ describe('Debian processing', () => {
     await processor.handle(request)
 
     expect(request.document.sourceInfo.type).to.equal('debsrc')
-    expect(processor.linkAndQueueTool.callCount).to.be.equal(2)
+    expect(processor.linkAndQueueTool.callCount).to.be.equal(3)
     expect(processor.linkAndQueueTool.args.map(call => call[1])).to.have.members([
       'licensee',
-      'scancode' /*, 'fossology'*/
+      'scancode',
+      'reuse' /*, 'fossology'*/
     ])
     expect(processor.linkAndQueue.callCount).to.be.equal(1)
     expect(processor.linkAndQueue.args[0][1]).to.equal('source')
@@ -25,7 +26,7 @@ describe('Debian processing', () => {
 })
 
 async function setup() {
-  const processor = debianExtract({ logger: { info: () => {} } }, () => {})
+  const processor = debianExtract({ logger: { info: () => { } } }, () => { })
   processor.linkAndQueueTool = sinon.stub()
   const request = createRequest()
   const dir = processor.createTempDir(request)

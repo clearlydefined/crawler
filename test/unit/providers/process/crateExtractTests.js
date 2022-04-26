@@ -67,10 +67,11 @@ describe('Crate processing', () => {
       expect(file.hashes.sha1).to.be.equal(hashes['bitflags-1.0.4'][file.path].sha1)
       expect(file.hashes.sha256).to.be.equal(hashes['bitflags-1.0.4'][file.path].sha256)
     })
-    expect(processor.linkAndQueueTool.callCount).to.be.equal(2)
+    expect(processor.linkAndQueueTool.callCount).to.be.equal(3)
     expect(processor.linkAndQueueTool.args.map(call => call[1])).to.have.members([
       'licensee',
-      'scancode' /*, 'fossology'*/
+      'scancode',
+      'reuse' /*, 'fossology'*/
     ])
     expect(request.document.summaryInfo.count).to.be.equal(10)
     expect(processor.linkAndQueue.callCount).to.be.equal(1)
@@ -80,7 +81,7 @@ describe('Crate processing', () => {
 })
 
 async function setup() {
-  const processor = CrateExtract({ logger: {} }, () => {})
+  const processor = CrateExtract({ logger: {} }, () => { })
   processor._detectLicenses = () => 'MIT'
   processor.linkAndQueueTool = sinon.stub()
   const request = createRequest()

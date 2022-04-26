@@ -44,10 +44,11 @@ describe('NPM processing', () => {
       expect(file.hashes.sha1).to.be.equal(hashes['redie-0.3.0'][file.path].sha1)
       expect(file.hashes.sha256).to.be.equal(hashes['redie-0.3.0'][file.path].sha256)
     })
-    expect(processor.linkAndQueueTool.callCount).to.be.equal(2)
+    expect(processor.linkAndQueueTool.callCount).to.be.equal(3)
     expect(processor.linkAndQueueTool.args.map(call => call[1])).to.have.members([
       'licensee',
-      'scancode' /*, 'fossology'*/
+      'scancode',
+      'reuse' /*, 'fossology'*/
     ])
     expect(request.document.attachments.length).to.eq(2)
     expect(request.document._attachments.length).to.eq(2)
@@ -59,7 +60,7 @@ describe('NPM processing', () => {
 })
 
 async function setup() {
-  const processor = npmExtract({ logger: {} }, () => {})
+  const processor = npmExtract({ logger: {} }, () => { })
   processor._detectLicenses = () => 'MIT'
   processor.linkAndQueueTool = sinon.stub()
   const request = createRequest()
@@ -78,14 +79,14 @@ function createRequest() {
 
 describe('npmExtract source discovery', () => {
   it('discovers source candidates', async () => {
-    const processor = npmExtract({ logger: { info: () => {} } }, () => {})
+    const processor = npmExtract({ logger: { info: () => { } } }, () => { })
     const manifest = { repository: { url: 'one' }, url: 'two', homepage: 'three', bugs: 'http://four' }
     const candidates = processor._discoverCandidateSourceLocations(manifest)
     expect(candidates).to.have.members(['one', 'two', 'three', 'http://four'])
   })
 
   it('discovers source candidates with odd structures', async () => {
-    const processor = npmExtract({ logger: { info: () => {} } }, () => {})
+    const processor = npmExtract({ logger: { info: () => { } } }, () => { })
     const manifest = { repository: { url: 'one' }, url: 'two', homepage: ['three', 'four'], bugs: { url: 'five' } }
     const candidates = processor._discoverCandidateSourceLocations(manifest)
     expect(candidates).to.have.members(['one', 'two', 'three', 'five'])

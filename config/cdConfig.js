@@ -62,6 +62,7 @@ module.exports = {
     composer: { githubToken },
     pod: { githubToken },
     pypi: { githubToken },
+    reuse: {},
     scancode: {
       installDir: config.get('SCANCODE_HOME'),
       options: [
