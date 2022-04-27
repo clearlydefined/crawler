@@ -36,6 +36,10 @@ ENV SCANCODE_HOME=/usr/local/bin
 RUN gem install nokogiri:1.12.5 --no-rdoc --no-ri && \
   gem install licensee:9.12.0 --no-rdoc --no-ri
 
+# REUSE
+RUN pip3 install setuptools
+RUN pip3 install reuse
+
 # FOSSology
 # WORKDIR /opt
 # RUN git clone https://github.com/fossology/fossology.git

@@ -232,7 +232,7 @@ class AbstractProcessor extends BaseHandler {
     this.linkAndQueueTool(request, name, tool, 'local')
   }
 
-  addLocalToolTasks(request, tools = ['licensee', 'scancode']) {
+  addLocalToolTasks(request, tools = ['licensee', /*'fossology', */'scancode', 'reuse']) {
     tools.forEach(tool =>
       this.addLocalToolTask(request, tool))
   }
