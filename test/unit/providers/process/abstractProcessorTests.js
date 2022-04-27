@@ -147,6 +147,49 @@ describe('AbstractProcessor attach files', () => {
   })
 })
 
+describe('link and queue local tasks', () => {
+  let processor
+
+  beforeEach(() => {
+    processor = new AbstractProcessor({})
+    processor.linkAndQueueTool = sinon.stub()
+  })
+
+  it('link and queue one local task', () => {
+    const request = new Request('npm', 'cd:/npm/npmjs/-/redie/0.3.0')
+    processor.addLocalToolTasks(request, 'clearlydefined')
+    expect(processor.linkAndQueueTool.calledOnce).to.be.true
+    expect(processor.linkAndQueueTool.args[0][0].type).to.be.equal('npm')
+    expect(processor.linkAndQueueTool.args[0][1]).to.be.equal('clearlydefined')
+    expect(processor.linkAndQueueTool.args[0][3]).to.be.equal('local')
+  })
+
+  it('link and queue two local tasks', () => {
+    const request = new Request('npm', 'cd:/npm/npmjs/-/redie/0.3.0')
+    processor.addLocalToolTasks(request, 'clearlydefined', 'licensee')
+
+    expect(processor.linkAndQueueTool.callCount).to.be.equal(2)
+    expect(processor.linkAndQueueTool.args[0][0].type).to.be.equal('npm')
+    expect(processor.linkAndQueueTool.args[0][1]).to.be.equal('clearlydefined')
+    expect(processor.linkAndQueueTool.args[0][3]).to.be.equal('local')
+
+    expect(processor.linkAndQueueTool.args[1][0].type).to.be.equal('npm')
+    expect(processor.linkAndQueueTool.args[1][1]).to.be.equal('licensee')
+    expect(processor.linkAndQueueTool.args[1][3]).to.be.equal('local')
+  })
+
+  it('link and queue default local tasks', () => {
+    const request = new Request('npm', 'cd:/npm/npmjs/-/redie/0.3.0')
+    processor.addLocalToolTasks(request)
+    expect(processor.linkAndQueueTool.callCount).to.be.equal(3)
+    expect(processor.linkAndQueueTool.args.map(call => call[1])).to.have.members([
+      'licensee',
+      'scancode',
+      'reuse'
+    ])
+  })
+})
+
 describe('AbstractProcessor get interesting files', () => {
   it('filters out uninteresting files', async () => {
     const processor = new AbstractProcessor({})
