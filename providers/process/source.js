@@ -16,7 +16,8 @@ class SourceProcessor extends AbstractProcessor {
 
   handle(request) {
     super.handle(request)
-    this.addLocalToolTasks(request, ['clearlydefined', 'licensee', 'scancode', 'reuse'])
+    this.addLocalToolTasks(request, 'clearlydefined')
+    this.addLocalToolTasks(request)
     request.markNoSave()
     return request
   }

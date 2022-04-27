@@ -83,8 +83,8 @@ class ScopedQueueSets {
       for (let count = info.count; count > 0; count--) {
         localRequests.push(
           localQueue.pop()
-            .then(request => request && localQueue.done(request).then(() => request))
-            .then(request => this.push(request, localQueue.getName(), 'global')))
+            .then(request => request && localQueue.done(request)
+              .then(() => this.push(request, localQueue.getName(), 'global'))))
       }
       return Promise.all(localRequests)
     }

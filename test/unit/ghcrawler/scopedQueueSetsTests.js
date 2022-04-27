@@ -5,6 +5,9 @@ const { expect, should } = require('chai')
 const sinon = require('sinon')
 const Request = require('../../../ghcrawler/lib/request.js')
 const ScopedQueueSets = require('../../../ghcrawler/providers/queuing/scopedQueueSets.js')
+const AttenuatedQueue = require('../../../ghcrawler/providers/queuing/attenuatedQueue')
+const InMemoryCrawlQueue = require('../../../ghcrawler/providers/queuing/inmemorycrawlqueue')
+const QueueSet = require('../../../ghcrawler/providers/queuing/queueSet.js')
 
 describe('scopedQueueSets', () => {
 
@@ -271,6 +274,149 @@ describe('scopedQueueSets', () => {
     })
   })
 })
+
+describe('integration test with AttenuatedQueue and InMemoryCrawlQueue', () => {
+  const queueName = 'queue'
+  let scopedQueues
+
+  beforeEach(() => {
+    scopedQueues = createScopedQueueSets(queueName)
+  })
+
+  afterEach(async () => {
+    await cleanup(scopedQueues, queueName)
+  })
+
+  it('add to global by default and pop', async () => {
+    const mockRequest = new Request('test', 'http://test')
+    await scopedQueues.push(mockRequest, queueName)
+    let queueInfo = await getQueueInfos(scopedQueues, queueName)
+    expect(queueInfo.global.count).to.be.equal(1)
+    expect(queueInfo.local.count).to.be.equal(0)
+
+    const popped = await scopedQueues.pop()
+    expect(popped.type).to.be.equal('test')
+    queueInfo = await getQueueInfos(scopedQueues, queueName)
+    expect(queueInfo.global.count).to.be.equal(0)
+    expect(queueInfo.local.count).to.be.equal(0)
+
+    //ensure request is removed from the cache in the AttenuatedQueue
+    await scopedQueues.done(popped)
+  })
+
+  it('add to local and pop', async () => {
+    const mockRequest = new Request('test', 'http://test')
+    await scopedQueues.push(mockRequest, queueName, 'local')
+    let queueInfo = await getQueueInfos(scopedQueues, queueName)
+    expect(queueInfo.global.count).to.be.equal(0)
+    expect(queueInfo.local.count).to.be.equal(1)
+
+    const popped = await scopedQueues.pop()
+    expect(popped.type).to.be.equal('test')
+    queueInfo = await getQueueInfos(scopedQueues, queueName)
+    expect(queueInfo.global.count).to.be.equal(0)
+    expect(queueInfo.local.count).to.be.equal(0)
+
+    //ensure request is removed from the cache in the AttenuatedQueue
+    await scopedQueues.done(popped)
+  })
+
+  it('add to global, local and pop', async () => {
+    const mockRequestGlobal = new Request('testGlobal', 'http://test')
+    const mockRequestLocal = new Request('testLocal', 'http://test')
+    await scopedQueues.push(mockRequestGlobal, queueName)
+    await scopedQueues.push(mockRequestLocal, queueName, 'local')
+    let queueInfo = await getQueueInfos(scopedQueues, queueName)
+    expect(queueInfo.global.count).to.be.equal(1)
+    expect(queueInfo.local.count).to.be.equal(1)
+
+    const popped = await scopedQueues.pop()
+    expect(popped.type).to.be.equal('testLocal')
+    queueInfo = await getQueueInfos(scopedQueues, queueName)
+    expect(queueInfo.global.count).to.be.equal(1)
+    expect(queueInfo.local.count).to.be.equal(0)
+
+    //ensure request is removed from the cache in the AttenuatedQueue
+    await scopedQueues.done(popped)
+  })
+
+  it('local repushed to global', async () => {
+    const mockRequest = new Request('test', 'http://test')
+    await scopedQueues.push(mockRequest, queueName, 'local')
+    let queueInfo = await getQueueInfos(scopedQueues, queueName)
+    expect(queueInfo.global.count).to.be.equal(0)
+    expect(queueInfo.local.count).to.be.equal(1)
+
+    const popped = await scopedQueues.pop()
+    await scopedQueues.repush(popped, popped.createRequeuable())
+    queueInfo = await getQueueInfos(scopedQueues, queueName)
+    expect(queueInfo.global.count).to.be.equal(1)
+    expect(queueInfo.local.count).to.be.equal(0)
+  })
+
+  it('publish local to global', async () => {
+    const mockRequest = new Request('test', 'http://test')
+    await scopedQueues.push(mockRequest, queueName, 'local')
+    let queueInfo = await getQueueInfos(scopedQueues, queueName)
+    expect(queueInfo.global.count).to.be.equal(0)
+    expect(queueInfo.local.count).to.be.equal(1)
+
+    await scopedQueues.publish()
+    queueInfo = await getQueueInfos(scopedQueues, queueName)
+    expect(queueInfo.global.count).to.be.equal(1)
+    expect(queueInfo.local.count).to.be.equal(0)
+  })
+
+  it('publish two local requests to global', async () => {
+    const globalRequest = new Request('testGlobal', 'http://test')
+    const localRequest1 = new Request('testLocal-1', 'http://test')
+    const localRequest2 = new Request('testLocal-2', 'http://test')
+    await scopedQueues.push(globalRequest, queueName)
+    await scopedQueues.push(localRequest1, queueName, 'local')
+    await scopedQueues.push(localRequest2, queueName, 'local')
+    let queueInfo = await getQueueInfos(scopedQueues, queueName)
+    expect(queueInfo.global.count).to.be.equal(1)
+    expect(queueInfo.local.count).to.be.equal(2)
+
+    await scopedQueues.publish()
+    queueInfo = await getQueueInfos(scopedQueues, queueName)
+    expect(queueInfo.global.count).to.be.equal(3)
+    expect(queueInfo.local.count).to.be.equal(0)
+  })
+})
+
+function createScopedQueueSets(queueName) {
+  const options = {
+    _config: {
+      on: sinon.stub()
+    },
+    logger: {
+      verbose: sinon.stub()
+    }
+  }
+  const global = new AttenuatedQueue(new InMemoryCrawlQueue(queueName, options), options)
+  const local = new AttenuatedQueue(new InMemoryCrawlQueue(queueName, options), options)
+  return new ScopedQueueSets(
+    new QueueSet([global], options),
+    new QueueSet([local], options))
+}
+
+async function getQueueInfos(scopedQueues, queueName) {
+  let globalInfo = await scopedQueues.getQueue(queueName).getInfo()
+  let localQueueInfo = await scopedQueues.getQueue(queueName, 'local').getInfo()
+  return { global: globalInfo, local: localQueueInfo }
+}
+
+async function cleanup(scopedQueues, queueName) {
+  //remove request from the cache inside the AttenuatedQueue
+  let queueInfo = await getQueueInfos(scopedQueues, queueName)
+  let count = queueInfo.global.count + queueInfo.local.count
+  while (count) {
+    const popped = await scopedQueues.pop()
+    await scopedQueues.done(popped)
+    count--
+  }
+}
 
 function poppedRequest(fromQueue) {
   const request = new Request('test', 'http://test')
