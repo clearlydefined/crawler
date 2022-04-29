@@ -25,6 +25,7 @@ class GoExtract extends AbstractClearlyDefinedProcessor {
     }
     this.linkAndQueueTool(request, 'licensee')
     this.linkAndQueueTool(request, 'scancode')
+    this.linkAndQueueTool(request, 'reuse')
   }
 
   _createDocument(request) {
