@@ -60,6 +60,7 @@ const go = {
   source,
   clearlydefined,
   licensee,
+  reuse,
   scancode,
   fossology
 }
@@ -88,6 +89,7 @@ const pod = {
   source,
   clearlydefined,
   licensee,
+  reuse,
   scancode,
   fossology
 }
