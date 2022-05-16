@@ -11,7 +11,7 @@ class FetchDispatcher extends AbstractFetch {
     this.fetchers = fetchers
     this.processors = processors
     this.filter = filter
-    this.fetched = fetchResultCache || MemoryCache({ defaultTtlSeconds: 60 * 60 * 24 })
+    this.fetched = fetchResultCache || MemoryCache(options.fetched)
     this.inProgressFetches = inProgressFetchCache || {}
   }
 
