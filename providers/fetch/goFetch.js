@@ -71,7 +71,7 @@ class GoFetch extends AbstractFetch {
   }
 
   _replace_encodings(url) {
-    return `${url.replace(/%2f/g, '/')}`
+    return `${url.replace(/%2f/ig, '/')}`
   }
 
   async _getArtifact(spec, destination) {
