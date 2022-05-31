@@ -24,10 +24,12 @@ RUN pip3 install --upgrade pip setuptools wheel && \
 ENV SCANCODE_HOME=/usr/local/bin
 
 # Licensee
-# The latest version of nokogiri (1.13.1) is not working well
-# With this base image, so we pin to the previous version
-# of nokogiri for use with licensee
+# The latest version of nokogiri (1.13.1) and faraday (2.3.0) requires RubyGem 2.6.0 while
+# the current RubyGem is 2.5.1. However, after upgrading RubyGem to 3.1.2, licensee:9.12.0 starts
+# to have hard time to find license in LICENSE file, like component npm/npmjs/-/caniuse-lite/1.0.30001344.
+# So we pin to the previous version of nokogiri and faraday.
 RUN gem install nokogiri:1.12.5 --no-rdoc --no-ri && \
+  gem install faraday:1.10.0 --no-rdoc --no-ri && \
   gem install licensee:9.12.0 --no-rdoc --no-ri
 
 COPY package*.json /tmp/
