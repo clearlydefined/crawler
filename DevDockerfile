@@ -10,10 +10,10 @@ ENV CRAWLER_BUILD_NUMBER=$BUILD_NUMBER
 # Ruby and Python Dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends --no-install-suggests curl bzip2 build-essential libssl-dev libreadline-dev zlib1g-dev cmake python3 python3-dev python3-pip xz-utils libxml2-dev libxslt1-dev libpopt0 && \
   rm -rf /var/lib/apt/lists/* && \
-  curl -L https://github.com/rbenv/ruby-build/archive/v20220426.tar.gz | tar -zxvf - -C /tmp/ && \
+  curl -L https://github.com/rbenv/ruby-build/archive/v20180822.tar.gz | tar -zxvf - -C /tmp/ && \
   cd /tmp/ruby-build-* && ./install.sh && cd / && \
-  ruby-build -v 3.1.2 /usr/local && rm -rfv /tmp/ruby-build-* && \
-  gem install bundler --no-document
+  ruby-build -v 2.5.1 /usr/local && rm -rfv /tmp/ruby-build-* && \
+  gem install bundler --no-rdoc --no-ri
 
 # Scancode
 RUN pip3 install --upgrade pip setuptools wheel && \
@@ -24,7 +24,13 @@ RUN pip3 install --upgrade pip setuptools wheel && \
 ENV SCANCODE_HOME=/usr/local/bin
 
 # Licensee
-RUN gem install licensee:9.12.0 --no-document
+# The latest version of nokogiri (1.13.1) and faraday (2.3.0) requires RubyGem 2.6.0 while
+# the current RubyGem is 2.5.1. However, after upgrading RubyGem to 3.1.2, licensee:9.12.0 starts
+# to have hard time to find license in LICENSE file, like component npm/npmjs/-/caniuse-lite/1.0.30001344.
+# So we pin to the previous version of nokogiri and faraday.
+RUN gem install nokogiri:1.12.5 --no-rdoc --no-ri && \
+  gem install faraday:1.10.0 --no-rdoc --no-ri && \
+  gem install licensee:9.12.0 --no-rdoc --no-ri
 
 # REUSE
 RUN pip3 install setuptools
