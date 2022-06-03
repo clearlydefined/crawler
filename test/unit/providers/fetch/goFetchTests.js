@@ -17,6 +17,7 @@ describe('Go utility functions', () => {
     expect(fetch._buildUrl(spec('go', 'golang', 'cloud.google.com', 'go', 'v0.56.0'), '.mod')).to.equal(stub + 'cloud.google.com/go/@v/v0.56.0.mod')
     expect(fetch._buildUrl(spec('go', 'golang', '-', 'collectd.org', 'v0.5.0'))).to.equal(stub + 'collectd.org/@v/v0.5.0.zip')
     expect(fetch._buildUrl(spec('go', 'golang', 'github.com%2fAzure%2fazure-event-hubs-go', 'v3', 'v3.2.0'))).to.equal(stub + 'github.com/Azure/azure-event-hubs-go/v3/@v/v3.2.0.zip')
+    expect(fetch._buildUrl(spec('go', 'golang', 'github.com%2FAzure%2Fazure-event-hubs-go', 'v3', 'v3.2.0'))).to.equal(stub + 'github.com/Azure/azure-event-hubs-go/v3/@v/v3.2.0.zip')
   })
 })
 
