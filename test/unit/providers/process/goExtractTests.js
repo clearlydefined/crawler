@@ -33,6 +33,7 @@ describe('Go processing', () => {
       'scancode',
       'reuse'
     ])
+    expect(request.document.registryData.licenses).to.be.deep.equal(licenses)
   })
 })
 
@@ -55,6 +56,9 @@ function createRequest() {
       namespace: 'rsc.io',
       name: 'quote',
       revision: '1.5.2'
+    },
+    registryData: {
+      licenses
     }
   }
   request.processMode = 'process'
@@ -76,3 +80,5 @@ function createInvalidRequest() {
   request.processMode = 'process'
   return request
 }
+
+const licenses = ['Apache-2.0', 'BSD-2-Clause, BSD-3-Clause, HPND']
