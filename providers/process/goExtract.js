@@ -1,6 +1,6 @@
 const AbstractClearlyDefinedProcessor = require('./abstractClearlyDefinedProcessor')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
-const { merge } = require('lodash')
+const { pick, merge } = require('lodash')
 
 class GoExtract extends AbstractClearlyDefinedProcessor {
   constructor(options, sourceFinder) {
@@ -14,7 +14,7 @@ class GoExtract extends AbstractClearlyDefinedProcessor {
   }
 
   get toolVersion() {
-    return '1.0.0'
+    return '1.0.1'
   }
 
   async handle(request) {
@@ -29,7 +29,7 @@ class GoExtract extends AbstractClearlyDefinedProcessor {
   }
 
   _createDocument(request) {
-    request.document = merge(this.clone(request.document))
+    request.document = merge(this.clone(request.document), pick(request.document, ['registryData']))
   }
 }
 
