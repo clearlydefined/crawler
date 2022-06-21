@@ -7,6 +7,7 @@ const PassThrough = require('stream').PassThrough
 const proxyquire = require('proxyquire')
 const Request = require('../../../../ghcrawler').request
 const fs = require('fs')
+const { merge } = require('lodash')
 
 const stub = 'https://proxy.golang.org/'
 
@@ -41,6 +42,8 @@ function pickArtifact(url) {
 }
 
 describe('Go Proxy fetching', () => {
+  let successHttpStub
+
   beforeEach(() => {
     const requestPromiseStub = options => {
       if (options.url) {
@@ -66,9 +69,38 @@ describe('Go Proxy fetching', () => {
       response.end()
       return response
     }
+    successHttpStub = {
+      get: sinon.stub().returns({
+        status: 200,
+        data:
+          `<article>
+            <section class="License" id="lic-0">
+              <h2 class="go-textTitle">
+              <div id="#lic-0">Apache-2.0</div>
+              </h2>
+              <p>This is not legal advice. <a href="/license-policy">Read disclaimer.</a></p>
+              <pre class="License-contents">                                 Apache License
+                                Version 2.0, January 2004
+                              http://www.apache.org/licenses/
+              </pre>
+            </section>
+            <section class="License" id="lic-1">
+              <h2 class="go-textTitle">
+                <div id="#lic-1">BSD-2-Clause, BSD-3-Clause, HPND</div>
+              </h2>
+              <p>This is not legal advice. <a href="/license-policy">Read disclaimer.</a></p>
+              <pre class="License-contents">Copyright (c) 2013-2019 Tommi Virtanen.
+                Copyright (c) 2009, 2011, 2012 The Go Authors.
+                All rights reserved.
+              </pre>
+            </section>
+          </article>`
+      }
+      )
+    }
     Fetch = proxyquire('../../../../providers/fetch/goFetch', {
       request: { get: getStub },
-      'request-promise-native': requestPromiseStub
+      'request-promise-native': requestPromiseStub,
     })
   })
 
@@ -76,12 +108,13 @@ describe('Go Proxy fetching', () => {
     sinon.restore()
   })
 
-  it('succeeds in download, decompress, and hash', async () => {
-    const handler = Fetch({ logger: { log: sinon.stub() } })
+  it('succeeds in download, decompress, hash, and get registry licenses', async () => {
+    const handler = Fetch({ logger: { log: sinon.stub() }, http: successHttpStub })
     const request = await handler.handle(new Request('test', 'cd:/go/golang/rsc.io/quote/v1.3.0'))
     expect(request.document.hashes.sha1).to.be.equal(hashes['v1.3.0.zip']['sha1'])
     expect(request.document.hashes.sha256).to.be.equal(hashes['v1.3.0.zip']['sha256'])
     expect(request.document.releaseDate).to.equal('2018-02-14T00:54:53Z')
+    expect(request.document.registryData.licenses).to.be.deep.equal(['Apache-2.0', 'BSD-2-Clause, BSD-3-Clause, HPND'])
     expect(request.casedSpec.name).to.equal('quote')
     expect(request.casedSpec.namespace).to.equal('rsc.io')
     expect(request.contentOrigin).to.equal('origin')
@@ -91,7 +124,7 @@ describe('Go Proxy fetching', () => {
   it('queries for the latest version when coordinates are missing a revision', async () => {
     // Versions are listed in test/fixtures/go/list
 
-    const handler = Fetch({ logger: { log: sinon.stub() } })
+    const handler = Fetch({ logger: { log: sinon.stub() }, http: successHttpStub })
     const request = await handler.handle(new Request('test', 'cd:/go/golang/rsc.io/quote'))
     expect(request.casedSpec.revision).to.equal('v1.5.3-pre1')
   })
@@ -128,6 +161,42 @@ describe('Go Proxy fetching', () => {
     expect(request.outcome).to.eq('Missing  ')
     expect(request.document).to.be.undefined
     expect(request.casedSpec).to.be.undefined
+  })
+
+  it('marks the request for requeuing when pkg.go.dev return 429', async () => {
+    const handler = Fetch({
+      logger: {
+        log: sinon.spy(),
+        info: sinon.spy(),
+      },
+      http: {
+        get: sinon.stub().throws(merge(new Error(), {
+          response: {
+            status: 429
+          }
+        }))
+      }
+    })
+    const request = await handler.handle(new Request('test', 'cd:/go/golang/rsc.io/quote/v1.3.0'))
+    expect(request.processControl).to.equal('requeue')
+  })
+
+  it('should not throw error when pkg.go.dev return 404', async () => {
+    const handler = Fetch({
+      logger: {
+        log: sinon.spy(),
+        info: sinon.spy(),
+      },
+      http: {
+        get: sinon.stub().throws(merge(new Error(), {
+          response: {
+            status: 404
+          }
+        }))
+      }
+    })
+    const request = await handler.handle(new Request('test', 'cd:/go/golang/rsc.io/quote/v1.3.0'))
+    expect(request.document.registryData?.licenses).to.be.undefined
   })
 })
 
