@@ -24,7 +24,7 @@ class ScopedQueueSets {
   async repush(original, newRequest) {
     //Always retry on the global queue
     const queue = original._retryQueue ? this.getQueue(original._retryQueue, 'global') : original._originQueue
-    if (queue != original._originQueue) await original._originQueue.done(original)
+    if (queue !== original._originQueue) await original._originQueue.done(original)
     return queue.push(newRequest)
   }
 
