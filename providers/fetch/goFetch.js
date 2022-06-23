@@ -6,6 +6,7 @@ const fs = require('fs')
 const axios = require('axios')
 const { default: axiosRetry, exponentialDelay, isNetworkOrIdempotentRequestError } = require('axios-retry')
 const { parse: htmlParser } = require('node-html-parser')
+const { parse: spdxParser } = require('@clearlydefined/spdx')
 
 class GoFetch extends AbstractFetch {
   constructor(options) {
@@ -56,7 +57,6 @@ class GoFetch extends AbstractFetch {
       if (err instanceof DeferError) {
         return request.markRequeue('Throttled', err.message)
       }
-      throw err
     }
 
     request.document = this._createDocument(dir, releaseDate, hashes, registryData)
@@ -139,8 +139,12 @@ class GoFetch extends AbstractFetch {
       // Here is the license html template file.
       // https://github.com/golang/pkgsite/blob/master/static/frontend/unit/licenses/licenses.tmpl
       const licenses = root.querySelectorAll('[id^=#lic-]').map(ele => ele.textContent)
-      return {
-        licenses
+      if (this._validateLicenses(licenses)) {
+        return {
+          licenses
+        }
+      } else {
+        this.logger.info(`Licenses from html could not be parsed. The licenses are ${JSON.stringify(licenses)}.`)
       }
     } catch (err) {
       if (err.response?.status === 404) {
@@ -154,12 +158,24 @@ class GoFetch extends AbstractFetch {
         this.logger.info(msg)
         throw new DeferError(msg)
       }
-      throw err
+      this.logger.info(`Getting declared license from pkg.go.dev failed. ${JSON.stringify(err.response?.data || err.request || err.message)}`)
     }
   }
 
   _google_proxy_error_string(error) {
     return `Error encountered when querying proxy.golang.org. Please check whether the component has a valid go.mod file. ${error}`
+  }
+
+  _validateLicenses(licenses) {
+    for (const license of licenses) {
+      for (const part of license.split(', ')) {
+        const tmp = spdxParser(part)
+        if (tmp.noassertion) {
+          return false
+        }
+      }
+    }
+    return true
   }
 }
 

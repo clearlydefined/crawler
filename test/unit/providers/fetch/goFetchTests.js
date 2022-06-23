@@ -109,7 +109,7 @@ describe('Go Proxy fetching', () => {
   })
 
   it('succeeds in download, decompress, hash, and get registry licenses', async () => {
-    const handler = Fetch({ logger: { log: sinon.stub() }, http: successHttpStub })
+    const handler = Fetch({ logger: { log: sinon.stub(), info: sinon.stub() }, http: successHttpStub })
     const request = await handler.handle(new Request('test', 'cd:/go/golang/rsc.io/quote/v1.3.0'))
     expect(request.document.hashes.sha1).to.be.equal(hashes['v1.3.0.zip']['sha1'])
     expect(request.document.hashes.sha256).to.be.equal(hashes['v1.3.0.zip']['sha256'])
@@ -124,7 +124,7 @@ describe('Go Proxy fetching', () => {
   it('queries for the latest version when coordinates are missing a revision', async () => {
     // Versions are listed in test/fixtures/go/list
 
-    const handler = Fetch({ logger: { log: sinon.stub() }, http: successHttpStub })
+    const handler = Fetch({ logger: { log: sinon.stub(), info: sinon.stub() }, http: successHttpStub })
     const request = await handler.handle(new Request('test', 'cd:/go/golang/rsc.io/quote'))
     expect(request.casedSpec.revision).to.equal('v1.5.3-pre1')
   })
@@ -197,6 +197,33 @@ describe('Go Proxy fetching', () => {
     })
     const request = await handler.handle(new Request('test', 'cd:/go/golang/rsc.io/quote/v1.3.0'))
     expect(request.document.registryData?.licenses).to.be.undefined
+  })
+
+  it('should not pass invalid license if html changed', async () => {
+    const info = sinon.spy()
+    const handler = Fetch({
+      logger: {
+        log: sinon.spy(),
+        info,
+      },
+      http: {
+        get: sinon.stub().returns({
+          status: 200,
+          data:
+            `<article>
+                <section class="License" id="lic-0">
+                  <h2 class="go-textTitle">
+                    <div id="#lic-0">Apache-2.0</div>
+                    <div id="#lic-1">HTML has changed</div>
+                  </h2>
+                </section>
+              </article>`
+        })
+      }
+    })
+    const request = await handler.handle(new Request('test', 'cd:/go/golang/rsc.io/quote/v1.3.0'))
+    expect(request.document.registryData?.licenses).to.be.undefined
+    expect(info.called)
   })
 })
 
