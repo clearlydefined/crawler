@@ -54,8 +54,7 @@ class GoFetch extends AbstractFetch {
     try {
       registryData = await this._getRegistryData(spec)
     } catch (err) {
-      const maxRequeueCnt = 5
-      if (err instanceof RequeueError && (request.attemptCount === undefined || request.attemptCount < maxRequeueCnt)) {
+      if (err instanceof RequeueError && (request.attemptCount === undefined || request.attemptCount < this.options.maxRequeueAttemptCount)) {
         return request.markRequeue('Throttled', err.message)
       }
     }
