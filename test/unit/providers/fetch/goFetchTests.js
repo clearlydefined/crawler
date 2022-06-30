@@ -181,6 +181,26 @@ describe('Go Proxy fetching', () => {
     expect(request.processControl).to.equal('requeue')
   })
 
+  it('should not requeue after requeued 5 times', async () => {
+    const handler = Fetch({
+      logger: {
+        log: sinon.spy(),
+        info: sinon.spy(),
+      },
+      http: {
+        get: sinon.stub().throws(merge(new Error(), {
+          response: {
+            status: 429
+          }
+        }))
+      }
+    })
+    let request = new Request('test', 'cd:/go/golang/rsc.io/quote/v1.3.0')
+    request.attemptCount = 5
+    request = await handler.handle(request)
+    expect(request.processControl).to.be.undefined
+  })
+
   it('should not throw error when pkg.go.dev return 404', async () => {
     const handler = Fetch({
       logger: {

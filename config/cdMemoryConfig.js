@@ -3,7 +3,8 @@
 
 module.exports = {
   crawler: {
-    count: 1
+    count: 1,
+    maxRequeueAttemptCount: 5
   },
   fetch: {
     github: {}
