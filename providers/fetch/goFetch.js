@@ -54,7 +54,7 @@ class GoFetch extends AbstractFetch {
     try {
       registryData = await this._getRegistryData(spec)
     } catch (err) {
-      if (err instanceof DeferError) {
+      if (err instanceof RequeueError && (request.attemptCount === undefined || request.attemptCount < this.options.maxRequeueAttemptCount)) {
         return request.markRequeue('Throttled', err.message)
       }
     }
@@ -156,7 +156,7 @@ class GoFetch extends AbstractFetch {
       if (err.response?.status === 429) {
         const msg = `Too many calls to pkg.go.dev. Current call is ${registryLicenseUrl}`
         this.logger.info(msg)
-        throw new DeferError(msg)
+        throw new RequeueError(msg)
       }
       this.logger.info(`Getting declared license from pkg.go.dev failed. ${JSON.stringify(err.response?.data || err.request || err.message)}`)
     }
@@ -179,7 +179,7 @@ class GoFetch extends AbstractFetch {
   }
 }
 
-class DeferError extends Error {
+class RequeueError extends Error {
   constructor(message) {
     super(message)
   }

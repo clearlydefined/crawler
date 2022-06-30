@@ -280,8 +280,7 @@ class Crawler {
         result => {
           completedPromises++
           debug(
-            `_completeRequest(${loopName}:${request.toUniqueString()}): completed ${completedPromises} of ${
-            trackedPromises.length
+            `_completeRequest(${loopName}:${request.toUniqueString()}): completed ${completedPromises} of ${trackedPromises.length
             } promises (${failedPromises} failed)`
           )
           return result
@@ -290,8 +289,7 @@ class Crawler {
           completedPromises++
           failedPromises++
           debug(
-            `_completeRequest(${loopName}:${request.toUniqueString()}): completed ${completedPromises} of ${
-            trackedPromises.length
+            `_completeRequest(${loopName}:${request.toUniqueString()}): completed ${completedPromises} of ${trackedPromises.length
             } promises (${failedPromises} failed)`
           )
           throw error
@@ -334,7 +332,7 @@ class Crawler {
     const loopName = request.meta ? request.meta.loopName : ''
     debug(`_requeue(${loopName}:${request.toUniqueString()}): enter`)
     request.attemptCount = request.attemptCount || 0
-    if (++request.attemptCount > 5) {
+    if (++request.attemptCount > this.options.maxRequeueAttemptCount) {
       return this._storeDeadletter(request, `Exceeded attempt count for ${request.type}@${request.url}`)
     }
     request.addMeta({ attempt: request.attemptCount })

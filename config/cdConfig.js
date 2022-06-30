@@ -14,12 +14,14 @@ const cd_file = {
   location: config.get('FILE_STORE_LOCATION') || (process.platform === 'win32' ? 'c:/temp/cd' : '/tmp/cd')
 }
 const crawlerStoreProvider = config.get('CRAWLER_STORE_PROVIDER') || 'cd(file)'
+const maxRequeueAttemptCount = config.get('CRAWLER_MAX_REQUEUE_ATTEMPTS') || 5
 
 module.exports = {
   provider: 'memory', // change this to redis if/when we want distributed config
   searchPath: [module],
   crawler: {
-    count: 2
+    count: 2,
+    maxRequeueAttemptCount
   },
   filter: {
     provider: 'filter',
@@ -32,7 +34,7 @@ module.exports = {
     cratesio: {},
     debian: { cdFileLocation: cd_file.location },
     git: {},
-    go: {},
+    go: { maxRequeueAttemptCount },
     mavenCentral: {},
     mavenGoogle: {},
     gradlePlugin: {},
