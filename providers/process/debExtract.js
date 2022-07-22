@@ -29,10 +29,7 @@ class DebExtract extends AbstractClearlyDefinedProcessor {
       const spec = this.toSpec(request)
       this._createDocument(request, spec, request.document.registryData)
     }
-    this.linkAndQueueTool(request, 'licensee')
-    // this.linkAndQueueTool(request, 'fossology')
-    this.linkAndQueueTool(request, 'scancode')
-    this.linkAndQueueTool(request, 'reuse')
+    this.addLocalToolTasks(request)
     if (request.document.sourceInfo) {
       const sourceSpec = SourceSpec.fromObject(request.document.sourceInfo)
       this.linkAndQueue(request, 'source', sourceSpec.toEntitySpec())

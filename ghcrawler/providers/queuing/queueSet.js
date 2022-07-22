@@ -38,11 +38,6 @@ class QueueSet {
     return this.getQueue(name).push(requests)
   }
 
-  repush(original, newRequest) {
-    const queue = original._retryQueue ? this.getQueue(original._retryQueue) : original._originQueue
-    return queue.push(newRequest)
-  }
-
   subscribe() {
     return Promise.all(
       this.queues.map(queue => {
@@ -75,22 +70,6 @@ class QueueSet {
       result._originQueue = queue
     }
     return result
-  }
-
-  done(request) {
-    const acked = request.acked
-    request.acked = true
-    return !acked && request._originQueue ? request._originQueue.done(request) : Promise.resolve()
-  }
-
-  defer(request) {
-    return request._originQueue ? request._originQueue.defer(request) : Promise.resolve()
-  }
-
-  abandon(request) {
-    const acked = request.acked
-    request.acked = true
-    return !acked && request._originQueue ? request._originQueue.abandon(request) : Promise.resolve()
   }
 
   getQueue(name) {

@@ -59,10 +59,12 @@ describe('packagistFetch', () => {
     const handler = setup(createRegistryData())
     handler._getRegistryData = () => createRegistryData()
     const request = await handler.handle(new Request('test', 'cd:/composer/packagist/symfony/polyfill-mbstring/1.11.0'))
+    request.fetchResult.copyTo(request)
     expect(request.document.hashes.sha1).to.be.equal(hashes['symfony-polyfill-mbstring-v1.11.0-0-gfe5e94c.zip']['sha1'])
     expect(request.document.hashes.sha256).to.be.equal(
       hashes['symfony-polyfill-mbstring-v1.11.0-0-gfe5e94c.zip']['sha256']
     )
+    expect(request.document.dirRoot).to.be.equal('symfony-polyfill-mbstring-fe5e94c')
     expect(request.document.releaseDate).to.equal('2019-02-06T07:57:58+00:00')
   })
 
@@ -99,37 +101,7 @@ describe('packagistFetch', () => {
 })
 
 function createRegistryData() {
-  return {
-    manifest: {
-      name: 'symfony/polyfill-mbstring',
-      description: 'Symfony polyfill for the Mbstring extension',
-      keywords: ['mbstring', 'compatibility', 'portable', 'polyfill', 'shim'],
-      homepage: 'https://symfony.com',
-      version: 'v1.11.0',
-      version_normalized: '1.11.0.0',
-      license: ['MIT'],
-      authors: [[Object], [Object]],
-      source: {
-        type: 'git',
-        url: 'https://github.com/symfony/polyfill-mbstring.git',
-        reference: 'fe5e94c604826c35a32fa832f35bd036b6799609'
-      },
-      dist: {
-        type: 'zip',
-        url: 'https://api.github.com/repos/symfony/polyfill-mbstring/zipball/fe5e94c604826c35a32fa832f35bd036b6799609',
-        reference: 'fe5e94c604826c35a32fa832f35bd036b6799609',
-        shasum: ''
-      },
-      type: 'library',
-      time: '2019-02-06T07:57:58+00:00',
-      autoload: { 'psr-4': [Object], files: [Array] },
-      extra: { 'branch-alias': [Object] },
-      require: { php: '>=5.3.3' },
-      suggest: { 'ext-mbstring': 'For best performance' },
-      uid: 2850406
-    },
-    releaseDate: '2019-02-06T07:57:58+00:00'
-  }
+  return JSON.parse(fs.readFileSync('test/fixtures/packagist/registryData.json'))
 }
 
 function setup(registryData) {

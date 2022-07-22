@@ -23,7 +23,7 @@ function pickFile(url) {
   return 'bitflags.json'
 }
 
-describe('', () => {
+describe('crateFetch workflow', () => {
   beforeEach(() => {
     const requestPromiseStub = options => {
       if (options && options.url) {
@@ -50,6 +50,7 @@ describe('', () => {
   it('succeeds in download, decompress and hash', async () => {
     const handler = setup()
     const request = await handler.handle(new Request('test', 'cd:/crate/cratesio/-/bitflags/1.0.4'))
+    request.fetchResult.copyTo(request)
     expect(request.document.hashes.sha1).to.be.equal(hashes['bitflags-1.0.4.crate']['sha1'])
     expect(request.document.hashes.sha256).to.be.equal(hashes['bitflags-1.0.4.crate']['sha256'])
     expect(request.document.releaseDate).to.equal('2018-08-21T19:55:12.284583+00:00')
@@ -64,11 +65,13 @@ describe('', () => {
         version: { num: '1.0.4', dl_path: 'error' }
       }
     }
+    const request = new Request('test', 'cd:/crate/cratesio/-/bitflags/1.0.4')
     try {
-      await handler.handle(new Request('test', 'cd:/crate/cratesio/-/bitflags/1.0.4'))
+      await handler.handle(request)
       expect(false).to.be.true
     } catch (error) {
       expect(error.message).to.be.equal('yikes')
+      expect(request.getTrackedCleanups().length).to.be.greaterThan(0)
     }
   })
 
@@ -79,11 +82,13 @@ describe('', () => {
         version: { num: '1.0.4', dl_path: 'missing' }
       }
     }
+    const request = new Request('test', 'cd:/crate/cratesio/-/bitflags/1.0.4')
     try {
-      await handler.handle(new Request('test', 'cd:/crate/cratesio/-/bitflags/1.0.4'))
+      await handler.handle(request)
       expect(false).to.be.true
     } catch (error) {
       expect(error.statusCode).to.be.equal(404)
+      expect(request.getTrackedCleanups().length).to.be.greaterThan(0)
     }
   })
 
@@ -136,7 +141,8 @@ describe('crateFetch', () => {
         return { manifest: {}, version: { num: '0.5.0', crate: 'name' } }
       }
     })
-    const request = await crateFetch.handle({ url: 'cd:/crate/cratesio/-/name/0.1.0' })
+    const request = await crateFetch.handle(new Request('crate', 'cd:/crate/cratesio/-/name/0.1.0'))
+    request.fetchResult.copyTo(request)
     expect(request.url).to.eq('cd:/crate/cratesio/-/name/0.5.0')
   })
 
@@ -146,7 +152,8 @@ describe('crateFetch', () => {
         return { manifest: {}, version: { num: '0.1.0', crate: 'name' } }
       }
     })
-    const request = await crateFetch.handle({ url: 'cd:/crate/cratesio/-/naME/0.1.0' })
+    const request = await crateFetch.handle(new Request('crate', 'cd:/crate/cratesio/-/naME/0.1.0'))
+    request.fetchResult.copyTo(request)
     expect(request.casedSpec.name).to.eq('name')
   })
 })

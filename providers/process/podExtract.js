@@ -27,10 +27,7 @@ class PodExtract extends AbstractClearlyDefinedProcessor {
       await super.handle(request, location)
       await this._createDocument(request, request.document.registryData, request.document.releaseDate)
     }
-    this.linkAndQueueTool(request, 'licensee')
-    this.linkAndQueueTool(request, 'scancode')
-    this.linkAndQueueTool(request, 'reuse')
-    // this.linkAndQueueTool(request, 'fossology')
+    this.addLocalToolTasks(request)
     if (request.document.sourceInfo) {
       const sourceSpec = SourceSpec.fromObject(request.document.sourceInfo)
       this.linkAndQueue(request, 'source', sourceSpec.toEntitySpec())

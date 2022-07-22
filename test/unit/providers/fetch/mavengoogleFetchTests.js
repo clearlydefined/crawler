@@ -102,13 +102,13 @@ describe('MavenGoogle fetching', () => {
 
   it('succeeds in download, decompress and hash', async () => {
     const request = await handler.handle(new Request('test', 'cd:/maven/mavengoogle/org.eclipse/swt/3.3.0-v3344'))
-    expect(request.document.hashes.sha1).to.be.equal(hashes['swt-3.3.0-v3346.jar']['sha1'])
-    expect(request.document.hashes.sha256).to.be.equal(hashes['swt-3.3.0-v3346.jar']['sha256'])
+    expect(request.fetchResult.document.hashes.sha1).to.be.equal(hashes['swt-3.3.0-v3346.jar']['sha1'])
+    expect(request.fetchResult.document.hashes.sha256).to.be.equal(hashes['swt-3.3.0-v3346.jar']['sha256'])
     //date from manifest
-    expect(request.document.releaseDate.startsWith('2007-06-25')).to.be.true
-    expect(request.casedSpec.name).to.equal('swt')
-    expect(request.casedSpec.namespace).to.equal('org.eclipse')
-    expect(request.document.location).to.be.a('string')
+    expect(request.fetchResult.document.releaseDate.startsWith('2007-06-25')).to.be.true
+    expect(request.fetchResult.casedSpec.name).to.equal('swt')
+    expect(request.fetchResult.casedSpec.namespace).to.equal('org.eclipse')
+    expect(request.fetchResult.document.location).to.be.a('string')
   })
 
   it('handles download error', async () => {

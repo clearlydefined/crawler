@@ -4,6 +4,7 @@
 const Crawler = require('./lib/crawler')
 const CrawlerService = require('./lib/crawlerService')
 const QueueSet = require('./providers/queuing/queueSet')
+const ScopedQueueSets = require('./providers/queuing/scopedQueueSets')
 const RefreshingConfig = require('@microsoft/refreshing-config')
 
 let logger = null
@@ -58,7 +59,7 @@ class CrawlerFactory {
     } = {}
   ) {
     logger.info('creating crawler')
-    queues = queues || CrawlerFactory.createQueues(options.queue)
+    queues = queues || CrawlerFactory.createScopedQueueSets(options.queue)
     store = store || CrawlerFactory.createStore(options.store)
     deadletters = deadletters || CrawlerFactory.createDeadLetterStore(options.deadletter)
     locker = locker || CrawlerFactory.createLocker(options.lock)
@@ -215,6 +216,12 @@ class CrawlerFactory {
     const normal = manager.createQueueChain('normal', options)
     const later = manager.createQueueChain('later', options)
     return new QueueSet([immediate, soon, normal, later], options)
+  }
+
+  static createScopedQueueSets(queueOptions) {
+    const globalQueues = CrawlerFactory.createQueues(queueOptions)
+    const localQueues = CrawlerFactory.createQueues(queueOptions, 'memory')
+    return new ScopedQueueSets(globalQueues, localQueues)
   }
 }
 
