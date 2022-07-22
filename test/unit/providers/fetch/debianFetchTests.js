@@ -125,6 +125,7 @@ describe('Debian fetching', () => {
       return ['MIT', 'BSD-3-clause']
     }
     const request = await handler.handle(new Request('test', 'cd:/deb/debian/-/0ad/0.0.17-1_armhf'))
+    request.fetchResult.copyTo(request)
     expect(request.document.hashes.sha1).to.be.equal(hashes['0ad_0.0.17-1_armhf.deb']['sha1'])
     expect(request.document.hashes.sha256).to.be.equal(hashes['0ad_0.0.17-1_armhf.deb']['sha256'])
     expect(request.document.releaseDate.getFullYear()).to.be.equal(2014)
@@ -132,6 +133,21 @@ describe('Debian fetching', () => {
       'https://metadata.ftp-master.debian.org/changelogs/main/0/0ad/0ad_0.0.17-1_copyright'
     )
     expect(request.document.declaredLicenses).to.deep.equal(['MIT', 'BSD-3-clause'])
+  })
+
+  it('failed to get declared license', async () => {
+    const handler = DebianFetch(debianFetchOptions)
+    handler._download = async (downloadUrl, destination) => {
+      fs.copyFileSync('test/fixtures/debian/0ad_0.0.17-1_armhf.deb', destination)
+    }
+    handler._getDeclaredLicenses = sinon.stub().rejects('failed')
+    const request = new Request('test', 'cd:/deb/debian/-/0ad/0.0.17-1_armhf')
+    try {
+      await handler.handle(request)
+      expect(false).to.be.true
+    } catch (error) {
+      expect(request.getTrackedCleanups().length).to.be.equal(2)
+    }
   })
 })
 

@@ -126,6 +126,15 @@ class Request {
     return this
   }
 
+  removeCleanup(cleanups) {
+    if (!cleanups || !this.cleanups) {
+      return this
+    }
+    const toRemove = Array.isArray(cleanups) ? cleanups : [cleanups]
+    this.cleanups = this.cleanups.filter(item => !toRemove.includes(item))
+    return this
+  }
+
   addMeta(data) {
     this.meta = Object.assign({}, this.meta, data)
     return this
@@ -181,13 +190,13 @@ class Request {
     return this.policy.getNextPolicy(name)
   }
 
-  queueRequests(requests, name = null) {
+  queueRequests(requests, name = null, scope = null) {
     requests = Array.isArray(requests) ? requests : [requests]
     const toQueue = requests.filter(request => !this.hasSeen(request))
-    this.track(this.crawler.queue(toQueue, name))
+    this.track(this.crawler.queue(toQueue, name, scope))
   }
 
-  queue(type, url, policy, context = null, pruneRelation = true) {
+  queue(type, url, policy, context = null, pruneRelation = true, scope = null) {
     if (!policy) {
       return
     }
@@ -199,7 +208,7 @@ class Request {
     if (pruneRelation) {
       delete newRequest.context.relation
     }
-    this.queueRequests(newRequest, _.get(this._originQueue, 'queue.name'))
+    this.queueRequests(newRequest, _.get(this._originQueue, 'queue.name'), scope)
   }
 
   markDead(outcome, message) {

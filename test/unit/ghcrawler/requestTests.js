@@ -6,7 +6,7 @@ const expect = require('chai').expect
 const Request = require('../../../ghcrawler/lib/request.js')
 
 describe('Request context/qualifier', () => {
-  it('will not queueRoot if none transitivity', () => {})
+  it('will not queueRoot if none transitivity', () => { })
 })
 
 describe('Request link management', () => {
@@ -101,5 +101,50 @@ describe('Request marking', () => {
     expect(request.shouldRequeue()).to.be.true
     expect(request.outcome).to.be.undefined
     expect(request.message).to.be.undefined
+  })
+})
+
+describe('clean up management', () => {
+  let request
+  beforeEach(() => {
+    request = new Request('test', 'http://test')
+  })
+  it('will track single cleanup', () => {
+    request.trackCleanup('foo')
+    expect(request.getTrackedCleanups().length).to.be.equal(1)
+    expect(request.cleanups[0]).to.be.equal('foo')
+  })
+
+  it('will remove single cleanup', () => {
+    request.trackCleanup('foo')
+    request.removeCleanup('foo')
+    expect(request.getTrackedCleanups().length).to.be.equal(0)
+  })
+
+  it('will track multiple cleanups', () => {
+    request.trackCleanup(['foo', 'bar'])
+    expect(request.getTrackedCleanups().length).to.be.equal(2)
+    expect(request.getTrackedCleanups()).to.be.deep.equal(['foo', 'bar'])
+
+    request.trackCleanup(['x', 'y'])
+    expect(request.getTrackedCleanups().length).to.be.equal(4)
+    expect(request.getTrackedCleanups()).to.be.deep.equal(['foo', 'bar', 'x', 'y'])
+  })
+
+  it('will remove multiple cleanups', () => {
+    request.trackCleanup(['foo', 'bar', 'x'])
+    expect(request.getTrackedCleanups().length).to.be.equal(3)
+
+    request.removeCleanup('bar')
+    expect(request.getTrackedCleanups().length).to.be.equal(2)
+    expect(request.getTrackedCleanups()).to.be.deep.equal(['foo', 'x'])
+
+    request.trackCleanup('y')
+    expect(request.getTrackedCleanups().length).to.be.equal(3)
+    expect(request.getTrackedCleanups()).to.be.deep.equal(['foo', 'x', 'y'])
+
+    request.removeCleanup(['bar', 'y', 'x'])
+    expect(request.getTrackedCleanups().length).to.be.equal(1)
+    expect(request.getTrackedCleanups()).to.be.deep.equal(['foo'])
   })
 })

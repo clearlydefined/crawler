@@ -9,6 +9,7 @@ const path = require('path')
 const crypto = require('crypto')
 const { exec } = require('child_process')
 const requestRetry = require('requestretry').defaults({ maxAttempts: 3, fullResponse: true })
+const FetchResult = require('../../lib/fetchResult')
 
 const services = {
   trunk: 'https://trunk.cocoapods.org/api/v1',
@@ -38,19 +39,18 @@ class PodFetch extends AbstractFetch {
     const location = await this._getPackage(dir, registryData)
     if (!location) return request.markSkip('Missing  ')
 
-    request.url = spec.toUrl()
-    request.contentOrigin = 'origin'
-    request.document = {
+    const fetchResult = new FetchResult(spec.toUrl())
+    fetchResult.document = {
       location: location,
       registryData: registryData,
       releaseDate: version.created_at
     }
 
     if (registryData.name) {
-      request.casedSpec = clone(spec)
-      request.casedSpec.name = registryData.name
+      fetchResult.casedSpec = clone(spec)
+      fetchResult.casedSpec.name = registryData.name
     }
-
+    request.fetchResult = fetchResult.adoptCleanup(dir, request)
     return request
   }
 
@@ -155,7 +155,7 @@ class PodFetch extends AbstractFetch {
         .createHash('md5')
         .update(spec.name)
         .digest('hex')
-      prefixes = prefixLengths.map(function(length) {
+      prefixes = prefixLengths.map(function (length) {
         const prefix = hashedName.slice(0, length)
         hashedName = hashedName.substring(length)
         return prefix

@@ -29,7 +29,9 @@ module.exports = {
   },
   fetch: {
     dispatcher: 'cdDispatch',
-    cdDispatch: {},
+    cdDispatch: {
+      fetched: { defaultTtlSeconds: 60 * 60 * 8 }
+    },
     cocoapods: { githubToken },
     cratesio: {},
     debian: { cdFileLocation: cd_file.location },

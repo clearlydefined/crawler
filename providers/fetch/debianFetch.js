@@ -14,6 +14,7 @@ const { promisify } = require('util')
 const requestPromise = require('request-promise-native')
 const tmp = require('tmp')
 const unixArchive = require('ar-async')
+const FetchResult = require('../../lib/fetchResult')
 
 const exec = promisify(require('child_process').exec)
 const exists = promisify(fs.exists)
@@ -59,9 +60,11 @@ class DebianFetch extends AbstractFetch {
     const { dir, releaseDate, hashes } = await this._getPackage(request, binary, source, patches)
     const copyrightUrl = this._getCopyrightUrl(registryData)
     const declaredLicenses = await this._getDeclaredLicenses(copyrightUrl)
-    request.document = this._createDocument({ dir, registryData, releaseDate, copyrightUrl, declaredLicenses, hashes })
-    request.contentOrigin = 'origin'
-    request.casedSpec = clone(spec)
+
+    const fetchResult = new FetchResult(request.url)
+    fetchResult.document = this._createDocument({ dir, registryData, releaseDate, copyrightUrl, declaredLicenses, hashes })
+    fetchResult.casedSpec = clone(spec)
+    request.fetchResult = fetchResult.adoptCleanup(dir, request)
     return request
   }
 
