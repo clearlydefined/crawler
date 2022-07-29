@@ -220,7 +220,8 @@ class CrawlerFactory {
 
   static createScopedQueueSets(queueOptions) {
     const globalQueues = CrawlerFactory.createQueues(queueOptions)
-    const localQueues = CrawlerFactory.createQueues(queueOptions, 'memory')
+    const memoryOpts = { provider: 'memory', memory: queueOptions[queueOptions.provider] }
+    const localQueues = CrawlerFactory.createQueues(memoryOpts)
     return new ScopedQueueSets(globalQueues, localQueues)
   }
 }
