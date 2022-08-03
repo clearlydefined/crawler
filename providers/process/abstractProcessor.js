@@ -229,7 +229,7 @@ class AbstractProcessor extends BaseHandler {
   }
 
   addLocalToolTasks(request, ...tools) {
-    const toolList = tools.length ? tools : ['licensee', 'scancode', 'reuse'/*, 'fossology'*/]
+    const toolList = tools.length ? tools : ['scancode', /*'licensee', 'reuse', 'fossology'*/]
     toolList.forEach(tool => this.linkAndQueueTool(request, tool, undefined, 'local'))
   }
 }
