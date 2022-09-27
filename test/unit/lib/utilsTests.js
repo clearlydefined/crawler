@@ -77,4 +77,8 @@ describe('Util extractDate', () => {
     const parsed = extractDate('2018-05-28 07:26:25 UTC')
     expect(parsed.toISODate()).to.be.eq('2018-05-28')
   })
+  it('ignores parseable date in the future', () => {
+    const parsed = extractDate('2103-09-30 00:00:00.000000000 Z')
+    expect(parsed).not.to.be.ok
+  })
 })
