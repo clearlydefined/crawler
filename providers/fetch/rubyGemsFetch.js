@@ -9,6 +9,7 @@ const zlib = require('zlib')
 const path = require('path')
 const { clone, get } = require('lodash')
 const FetchResult = require('../../lib/fetchResult')
+const { extractDate } = require('../../lib/utils')
 
 const providerMap = {
   rubyGems: 'https://rubygems.org'
@@ -66,8 +67,8 @@ class RubyGemsFetch extends AbstractFetch {
     })
   }
 
-  _createDocument(dir, registryData, hashes) {
-    const releaseDate = this._extractReleaseDate(dir.name)
+  async _createDocument(dir, registryData, hashes) {
+    const releaseDate = await this._extractReleaseDate(dir.name)
     return { location: dir.name + '/data', registryData, releaseDate, hashes }
   }
 
@@ -88,13 +89,18 @@ class RubyGemsFetch extends AbstractFetch {
       await this.decompress(`${dirName}/data.tar.gz`, `${dirName}/data`)
   }
 
-  _extractReleaseDate(dirName) {
+  async _extractReleaseDate(dirName) {
     if (fs.existsSync(path.join(dirName, 'metadata.txt'))) {
       const file = fs.readFileSync(`${dirName}/metadata.txt`, 'utf8')
       const regexp = /date:\s\d{4}-\d{1,2}-\d{1,2}/
       const releaseDate = file.match(regexp)
-      if (!releaseDate) return null
-      return releaseDate[0] ? releaseDate[0].substring(5).trim() : null
+      const validReleaseDate = extractDate(releaseDate[0]?.substring(5).trim())
+      if (validReleaseDate) return validReleaseDate.toJSDate().toISOString()
+
+      //infer the release date from mTime of the decompressed metadata.gz
+      const metadata = path.join(dirName, 'metadata.gz')
+      const stats = await fs.promises.stat(metadata)
+      return stats.mtime.toISOString()
     }
   }
 }
