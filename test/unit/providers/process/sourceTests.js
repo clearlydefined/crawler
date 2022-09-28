@@ -16,12 +16,12 @@ describe('Source processing', () => {
     const request = mockRequest('cd:/sourcearchive/mavengoogle/android.arch.lifecycle/common/1.0.1')
     processor.handle(request)
 
-    expect(processor.linkAndQueueTool.callCount).to.be.equal(2)
+    expect(processor.linkAndQueueTool.callCount).to.be.equal(4)
     expect(processor.linkAndQueueTool.args.map(call => call[1])).to.have.members([
       'clearlydefined',
-      // 'licensee',
+      'licensee',
       'scancode',
-      // 'reuse'
+      'reuse'
     ])
   })
 })
