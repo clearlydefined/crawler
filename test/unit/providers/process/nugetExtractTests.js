@@ -64,11 +64,11 @@ describe('NuGet processing', () => {
       expect(file.hashes.sha1).to.be.equal(hashes['xunit.core.2.4.1'][file.path].sha1)
       expect(file.hashes.sha256).to.be.equal(hashes['xunit.core.2.4.1'][file.path].sha256)
     })
-    expect(processor.linkAndQueueTool.callCount).to.be.equal(1)
+    expect(processor.linkAndQueueTool.callCount).to.be.equal(3)
     expect(processor.linkAndQueueTool.args.map(call => call[1])).to.have.members([
-      //'licensee',
+      'licensee',
       'scancode',
-      //'reuse'
+      'reuse'
     ])
     expect(request.document.summaryInfo.count).to.be.equal(9)
     expect(processor.linkAndQueue.callCount).to.be.equal(1)
