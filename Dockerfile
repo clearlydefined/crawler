@@ -22,8 +22,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends --no-install-su
   gem install bundler --no-rdoc --no-ri
 
 # Scancode
+ARG SCANCODE_VERSION="30.1.0"
 RUN pip3 install --upgrade pip setuptools wheel && \
-  pip3 install scancode-toolkit==30.1.0 && \
+  curl -Os https://raw.githubusercontent.com/nexB/scancode-toolkit/v$SCANCODE_VERSION/requirements.txt && \
+  pip3 install --constraint requirements.txt scancode-toolkit==$SCANCODE_VERSION && \
+  rm requirements.txt && \
   scancode --reindex-licenses && \
   scancode --version
 
