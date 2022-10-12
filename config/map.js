@@ -55,6 +55,16 @@ const deb = {
   fossology
 }
 
+const rpm = {
+  _type: 'rpm',
+  source,
+  clearlydefined,
+  licensee,
+  reuse,
+  scancode,
+  fossology
+}
+
 const go = {
   _type: 'go',
   source,
@@ -135,7 +145,8 @@ const _package = {
   pod,
   pypi,
   composer,
-  gem
+  gem,
+  rpm
 }
 
 const component = {
@@ -164,7 +175,8 @@ const entities = {
   composer,
   pod,
   pypi,
-  gem
+  gem,
+  rpm
 }
 
 module.exports = {
