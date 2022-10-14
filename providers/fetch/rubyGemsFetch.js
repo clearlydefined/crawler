@@ -94,7 +94,7 @@ class RubyGemsFetch extends AbstractFetch {
       const file = fs.readFileSync(`${dirName}/metadata.txt`, 'utf8')
       const regexp = /date:\s\d{4}-\d{1,2}-\d{1,2}/
       const releaseDate = file.match(regexp)
-      const validReleaseDate = extractDate(releaseDate[0]?.substring(5).trim())
+      const validReleaseDate = releaseDate && extractDate(releaseDate[0]?.substring(5).trim())
       if (validReleaseDate) return validReleaseDate.toJSDate().toISOString()
 
       //infer the release date from mTime of the decompressed metadata.gz
