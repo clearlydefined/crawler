@@ -72,7 +72,7 @@ describe('fetchDispatcher cache fetch result', () => {
   function mockResultCache(cache) {
     return {
       get: key => cache[key],
-      set: (key, value) => cache[key] = value,
+      setWithConditionalExpiry : (key, value) => cache[key] = value,
     }
   }
 
@@ -98,7 +98,9 @@ describe('fetchDispatcher cache fetch result', () => {
   function verifyFetchResult(fetched, resultFromCache) {
     // eslint-disable-next-line no-unused-vars
     const { cleanups, ...expected } = fetched
-    expect(resultFromCache).to.be.deep.equal(expected)
+    // eslint-disable-next-line no-unused-vars
+    const { cleanups: cleanupsCached, ...actual } = resultFromCache
+    expect(actual).to.be.deep.equal(expected)
   }
 
   describe('cache maven fetch result', () => {
