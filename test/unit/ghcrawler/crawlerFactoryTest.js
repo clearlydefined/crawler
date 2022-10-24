@@ -30,6 +30,7 @@ describe('create scopedQueueSets', () => {
     }
     const queues = CrawlerFactory.createScopedQueueSets(queueOptions)
     expect(queues).to.be.ok
+    expect(queueOptions.memory._config.on.calledTwice).to.be.true
   })
 
   it('should create ok with non memory queue options', async () => {
@@ -43,5 +44,6 @@ describe('create scopedQueueSets', () => {
     }
     const queues = CrawlerFactory.createScopedQueueSets(queueOptions)
     expect(queues).to.be.ok
+    expect(queueOptions.storageQueue._config.on.calledTwice).to.be.true
   })
 })

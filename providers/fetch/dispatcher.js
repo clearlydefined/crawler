@@ -70,8 +70,12 @@ class FetchDispatcher extends AbstractFetch {
 
   _fetchPromise(handler, request, cacheKey) {
     return this.inProgressFetches[cacheKey] ||
-      (this.inProgressFetches[cacheKey] = this._fetch(handler, request, cacheKey)
-        .finally(() => delete this.inProgressFetches[cacheKey]))
+      (this.inProgressFetches[cacheKey] = this._createFetchPromise(handler, request, cacheKey))
+  }
+
+  _createFetchPromise(handler, request, cacheKey) {
+    return this._fetch(handler, request, cacheKey)
+      .finally(() => delete this.inProgressFetches[cacheKey])
   }
 
   async _fetch(handler, request, cacheKey) {
