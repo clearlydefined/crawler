@@ -8,6 +8,7 @@ const ScopedQueueSets = require('../../../ghcrawler/providers/queuing/scopedQueu
 const AttenuatedQueue = require('../../../ghcrawler/providers/queuing/attenuatedQueue')
 const InMemoryCrawlQueue = require('../../../ghcrawler/providers/queuing/inmemorycrawlqueue')
 const QueueSet = require('../../../ghcrawler/providers/queuing/queueSet.js')
+const EventEmitter = require('events')
 
 describe('scopedQueueSets', () => {
 
@@ -276,15 +277,40 @@ describe('scopedQueueSets', () => {
 })
 
 describe('integration test with AttenuatedQueue and InMemoryCrawlQueue', () => {
-  const queueName = 'queue'
+  const queueName = 'normal'
   let scopedQueues
+  let options
+  let queueSets
 
   beforeEach(() => {
-    scopedQueues = createScopedQueueSets(queueName)
+    options = {
+      _config: new EventEmitter(),
+      logger: {
+        verbose: sinon.stub(),
+      }
+    }
+    queueSets = createScopedQueueSets(queueName, options)
+    scopedQueues = new ScopedQueueSets(queueSets.global, queueSets.local)
   })
 
   afterEach(async () => {
     await cleanup(scopedQueues, queueName)
+  })
+
+  it('should subscribe all', async () => {
+    try {
+      await scopedQueues.subscribe()
+    } catch (err) {
+      expect(err).to.be.undefined
+    }
+  })
+
+  it('should unsubscribe all', async () => {
+    try {
+      await scopedQueues.unsubscribe()
+    } catch (err) {
+      expect(err).to.be.undefined
+    }
   })
 
   it('add to global by default and pop', async () => {
@@ -354,6 +380,40 @@ describe('integration test with AttenuatedQueue and InMemoryCrawlQueue', () => {
     expect(queueInfo.local.count).to.be.equal(0)
   })
 
+  it('should abandon local request to local queue', async () => {
+    const mockRequest = new Request('test', 'http://test')
+    await scopedQueues.push(mockRequest, queueName, 'local')
+    let queueInfo = await getQueueInfos(scopedQueues, queueName)
+    expect(queueInfo.global.count).to.be.equal(0)
+    expect(queueInfo.local.count).to.be.equal(1)
+
+    const popped = await scopedQueues.pop()
+    await scopedQueues.abandon(popped)
+    queueInfo = await getQueueInfos(scopedQueues, queueName)
+    expect(queueInfo.global.count).to.be.equal(0)
+    expect(queueInfo.local.count).to.be.equal(1)
+
+    //special clean up for acked request
+    await popped._originQueue.done(popped)
+  })
+
+  it('should abandon global request to global queue', async () => {
+    const mockRequest = new Request('test', 'http://test')
+    await scopedQueues.push(mockRequest, queueName, 'global')
+    let queueInfo = await getQueueInfos(scopedQueues, queueName)
+    expect(queueInfo.global.count).to.be.equal(1)
+    expect(queueInfo.local.count).to.be.equal(0)
+
+    const popped = await scopedQueues.pop()
+    await scopedQueues.abandon(popped)
+    queueInfo = await getQueueInfos(scopedQueues, queueName)
+    expect(queueInfo.global.count).to.be.equal(1)
+    expect(queueInfo.local.count).to.be.equal(0)
+
+    //special clean up for acked request
+    await popped._originQueue.done(popped)
+  })
+
   it('publish local to global', async () => {
     const mockRequest = new Request('test', 'http://test')
     await scopedQueues.push(mockRequest, queueName, 'local')
@@ -383,22 +443,25 @@ describe('integration test with AttenuatedQueue and InMemoryCrawlQueue', () => {
     expect(queueInfo.global.count).to.be.equal(3)
     expect(queueInfo.local.count).to.be.equal(0)
   })
+
+  it('should reconfigure contained queues', async () => {
+    sinon.stub(queueSets.global, '_createStartMap').callThrough()
+    sinon.stub(queueSets.local, '_createStartMap').callThrough()
+    options._config.emit('changed', undefined, [{ path: '/weights' }])
+
+    expect(queueSets.global._createStartMap.calledOnce).to.be.true
+    expect(queueSets.local._createStartMap.calledOnce).to.be.true
+  })
 })
 
-function createScopedQueueSets(queueName) {
-  const options = {
-    _config: {
-      on: sinon.stub()
-    },
-    logger: {
-      verbose: sinon.stub()
-    }
-  }
+function createScopedQueueSets(queueName, options) {
   const global = new AttenuatedQueue(new InMemoryCrawlQueue(queueName, options), options)
   const local = new AttenuatedQueue(new InMemoryCrawlQueue(queueName, options), options)
-  return new ScopedQueueSets(
-    new QueueSet([global], options),
-    new QueueSet([local], options))
+
+  return {
+    global: new QueueSet([global], options),
+    local: new QueueSet([local], options)
+  }
 }
 
 async function getQueueInfos(scopedQueues, queueName) {

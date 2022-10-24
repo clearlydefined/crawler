@@ -26,6 +26,10 @@ class InMemoryCrawlQueue {
     return
   }
 
+  async unsubscribe() {
+    return
+  }
+
   async pop() {
     const result = this.queue.shift()
     if (!result) {
