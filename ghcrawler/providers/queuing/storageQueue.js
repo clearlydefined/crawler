@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 const qlimit = require('qlimit')
+const { cloneDeep } = require('lodash')
 
 class StorageQueue {
   constructor(client, name, queueName, formatter, options) {
@@ -29,25 +30,31 @@ class StorageQueue {
     return
   }
 
-  async push(requests) {
+  async push(requests, option) {
     requests = Array.isArray(requests) ? requests : [requests]
     return Promise.all(
       requests.map(
         qlimit(this.options.parallelPush || 1)(request => {
           const body = JSON.stringify(request)
           return new Promise((resolve, reject) => {
-            this.client.createMessage(this.queueName, body, error => {
+            this.client.createMessage(this.queueName, body, option, (error, queueMessageResult) => {
               if (error) {
                 return reject(error)
               }
               this._log('Queued', request)
-              resolve()
+              resolve(this._buildMessageReceipt(queueMessageResult, request))
             })
           })
         })
       )
     )
   }
+
+  _buildMessageReceipt(queueMessageResult, requestBody) {
+    const _message = { ...queueMessageResult, body: cloneDeep(requestBody) }
+    return { _message }
+  }
+
 
   async pop() {
     const msgOptions = { numOfMessages: 1, visibilityTimeout: this.options.visibilityTimeout || 60 * 60 }
@@ -101,14 +108,18 @@ class StorageQueue {
     if (!request || !request._message) {
       return
     }
+    await this.updateVisibilityTimeout(request)
+  }
+
+  updateVisibilityTimeout(request, visibilityTimeout = 0) {
     return new Promise((resolve, reject) => {
       // visibilityTimeout is updated to 0 to unlock/unlease the message
-      this.client.updateMessage(this.queueName, request._message.messageId, request._message.popReceipt, 0, error => {
+      this.client.updateMessage(this.queueName, request._message.messageId, request._message.popReceipt, visibilityTimeout, (error, result) => {
         if (error) {
           return reject(error)
         }
         this._log('NAKed', request._message.body)
-        resolve()
+        resolve(this._buildMessageReceipt(result, request._message.body))
       })
     })
   }
@@ -143,6 +154,10 @@ class StorageQueue {
 
   _log(actionMessage, message) {
     this.logger.verbose(`${actionMessage} ${message.type} ${message.url}`)
+  }
+
+  isMessageNotFound(error) {
+    return error?.code === 'MessageNotFound'
   }
 }
 

@@ -9,7 +9,7 @@ const MemoryFactory = require('../../../ghcrawler/providers/queuing/memoryFactor
 describe('create scopedQueueSets', () => {
 
   before(() => {
-    sinon.stub(CrawlerFactory, 'createQueues').callsFake((options, provider = options.provider) => {
+    sinon.stub(CrawlerFactory, '_getProvider').callsFake((options, provider = options.provider) => {
       const opts = options[provider] || {}
       opts.logger = { info: sinon.stub() }
       return MemoryFactory(opts)
@@ -20,30 +20,17 @@ describe('create scopedQueueSets', () => {
     sinon.restore()
   })
 
-  it('should create ok with memory queue options', async () => {
+  it('should create with memory queue options', async () => {
     const queueOptions = {
       provider: 'memory',
       memory: {
         _config: { on: sinon.stub() },
-        weights: { immediate: 3, soon: 2, normal: 3, later: 2 },
+        weights: { immediate: 3, soon: 2, normal: 3, later: 2 }
       }
     }
-    const queues = CrawlerFactory.createScopedQueueSets(queueOptions)
+    const queues = CrawlerFactory.createQueues(queueOptions)
     expect(queues).to.be.ok
     expect(queueOptions.memory._config.on.calledTwice).to.be.true
   })
 
-  it('should create ok with non memory queue options', async () => {
-    const queueOptions = {
-      provider: 'storageQueue',
-      storageQueue: {
-        _config: { on: sinon.stub() },
-        weights: { immediate: 3, soon: 2, normal: 3, later: 2 },
-        queueName: 'cdcrawlerdev'
-      }
-    }
-    const queues = CrawlerFactory.createScopedQueueSets(queueOptions)
-    expect(queues).to.be.ok
-    expect(queueOptions.storageQueue._config.on.calledTwice).to.be.true
-  })
 })
