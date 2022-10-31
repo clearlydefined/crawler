@@ -3,11 +3,11 @@
 
 const { expect, should } = require('chai')
 const sinon = require('sinon')
-const Request = require('../../../ghcrawler/lib/request.js')
-const ScopedQueueSets = require('../../../ghcrawler/providers/queuing/scopedQueueSets.js')
-const AttenuatedQueue = require('../../../ghcrawler/providers/queuing/attenuatedQueue')
-const InMemoryCrawlQueue = require('../../../ghcrawler/providers/queuing/inmemorycrawlqueue')
-const QueueSet = require('../../../ghcrawler/providers/queuing/queueSet.js')
+const Request = require('../../../../ghcrawler/lib/request.js')
+const ScopedQueueSets = require('../../../../ghcrawler/providers/queuing/scopedQueueSets.js')
+const AttenuatedQueue = require('../../../../ghcrawler/providers/queuing/attenuatedQueue')
+const InMemoryCrawlQueue = require('../../../../ghcrawler/providers/queuing/inmemorycrawlqueue')
+const QueueSet = require('../../../../ghcrawler/providers/queuing/queueSet.js')
 const EventEmitter = require('events')
 
 describe('scopedQueueSets', () => {

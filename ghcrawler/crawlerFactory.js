@@ -59,7 +59,7 @@ class CrawlerFactory {
     } = {}
   ) {
     logger.info('creating crawler')
-    queues = queues || CrawlerFactory.createScopedQueueSets(options.queue)
+    queues = queues || CrawlerFactory.createQueues(options.queue)
     store = store || CrawlerFactory.createStore(options.store)
     deadletters = deadletters || CrawlerFactory.createDeadLetterStore(options.deadletter)
     locker = locker || CrawlerFactory.createLocker(options.lock)
@@ -218,10 +218,9 @@ class CrawlerFactory {
     return new QueueSet([immediate, soon, normal, later], options)
   }
 
-  static createScopedQueueSets(queueOptions) {
-    const globalQueues = CrawlerFactory.createQueues(queueOptions)
-    const memoryOpts = { provider: 'memory', memory: queueOptions[queueOptions.provider] }
-    const localQueues = CrawlerFactory.createQueues(memoryOpts)
+  static createScopedQueueSets({ globalManager, localManager }, queueOptions) {
+    const globalQueues = CrawlerFactory.createQueueSet(globalManager, queueOptions)
+    const localQueues = CrawlerFactory.createQueueSet(localManager, queueOptions)
     return new ScopedQueueSets(globalQueues, localQueues)
   }
 }

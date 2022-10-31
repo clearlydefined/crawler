@@ -17,13 +17,17 @@ class StorageQueueManager {
   }
 
   createQueueChain(name, options) {
+    const queue = this.createQueue(name, options)
+    return new AttenuatedQueue(queue, options)
+  }
+
+  createQueue(name, options) {
     const formatter = message => {
       // make sure the message/request object is copied to enable deferral scenarios (i.e., the request is modified
       // and then put back on the queue)
       return Request.adopt(Object.assign({}, message.body))
     }
-    const queue = this.createQueueClient(name, formatter, options)
-    return new AttenuatedQueue(queue, options)
+    return this.createQueueClient(name, formatter, options)
   }
 }
 

@@ -11,5 +11,5 @@ module.exports = options => {
       return new AttenuatedQueue(new InMemoryCrawlQueue(name, options), options)
     }
   }
-  return CrawlerFactory.createQueueSet(manager, options)
+  return CrawlerFactory.createScopedQueueSets({ globalManager: manager, localManager: manager }, options)
 }
