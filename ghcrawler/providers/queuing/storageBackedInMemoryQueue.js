@@ -12,7 +12,7 @@ class StorageBackedInMemoryQueue extends NestedQueue {
     super(memoryQueue)
     this.options = options
     this.logger = options.logger
-    this._storageQueue = storageQueue
+    this._sharedStorageQueue = storageQueue
   }
 
   async push(requests) {
@@ -23,7 +23,7 @@ class StorageBackedInMemoryQueue extends NestedQueue {
 
   async _pushToStorage(requests) {
     const visibilityTimeout = this.options.visibilityTimeout_remainLocal
-    const storageReceipts = await this._storageQueue.push(requests, { visibilityTimeout })
+    const storageReceipts = await this._sharedStorageQueue.push(requests, { visibilityTimeout })
     requests.map((request, index) => Object.assign(request, storageReceipts[index]))
   }
 
@@ -37,11 +37,11 @@ class StorageBackedInMemoryQueue extends NestedQueue {
 
   async _hideInStorage(request) {
     try {
-      const receipt = await this._storageQueue.updateVisibilityTimeout(request, this.options.visibilityTimeout)
+      const receipt = await this._sharedStorageQueue.updateVisibilityTimeout(request, this.options.visibilityTimeout)
       Object.assign(request, receipt)
       return true
     } catch (error) {
-      if (!this._storageQueue.isMessageNotFound(error)) throw error
+      if (!this._sharedStorageQueue.isMessageNotFound(error)) throw error
       // Message not found for the popReceipt and messageId stored in the request.  This means
       // that the message popReceipt (and possibly messageId) in the request is stale. This can
       // happen when the message visibility timeout expired and thus was visible and later
@@ -55,9 +55,9 @@ class StorageBackedInMemoryQueue extends NestedQueue {
   async done(request) {
     try {
       await super.done(request)
-      await this._storageQueue.done(request)
+      await this._sharedStorageQueue.done(request)
     } catch (error) {
-      if (!this._storageQueue.isMessageNotFound(error)) throw error
+      if (!this._sharedStorageQueue.isMessageNotFound(error)) throw error
       // Message not found for the popReceipt and messageId stored in the request.  This means
       // that the message popReceipt (and possibly messageId) in the request is stale. This can
       // happen when the message visibility timeout expired and thus was visible and later
@@ -69,12 +69,12 @@ class StorageBackedInMemoryQueue extends NestedQueue {
 
   async subscribe() {
     await super.subscribe()
-    await this._storageQueue.subscribe()
+    await this._sharedStorageQueue.subscribe()
   }
 
   async unsubscribe() {
     await super.unsubscribe()
-    await this._storageQueue.unsubscribe()
+    await this._sharedStorageQueue.unsubscribe()
   }
 
   async flush() {
