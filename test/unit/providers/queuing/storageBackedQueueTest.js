@@ -5,41 +5,71 @@ const chai = require('chai')
 const chaiAsPromised = require('chai-as-promised')
 const sinon = require('sinon')
 const Request = require('../../../../ghcrawler/lib/request.js')
-const StorageBackedInMemoryQueue = require('../../../../ghcrawler/providers/queuing/storageBackedInMemoryQueue')
+const StorageBackedQueue = require('../../../../ghcrawler/providers/queuing/storageBackedQueue')
 
 chai.use(chaiAsPromised)
 const expect = chai.expect
 
-describe('storageBackedInMemoryQueue', () => {
+describe('storageBackedQueue', () => {
   let memoryQueueStub, storageQueueStub, testQueue
 
-  const createTestQueue = (memoryQueue, storageQueueStub) => {
+  const createTestQueue = (memoryQueue, storageQueue) => {
     const options = {
       logger: {
         verbose: sinon.stub()
       }
     }
-    return new StorageBackedInMemoryQueue(memoryQueue, storageQueueStub, options)
+    return new StorageBackedQueue(memoryQueue, storageQueue, options)
   }
 
-  describe('subscription', async () => {
+  beforeEach(() => {
+    memoryQueueStub = createQueueStub()
+    storageQueueStub = createQueueStub()
+    storageQueueStub.updateVisibilityTimeout = sinon.stub()
+    storageQueueStub.isMessageNotFound = sinon.stub()
+    testQueue = createTestQueue(memoryQueueStub, storageQueueStub)
+  })
+
+  describe('subscribe', async () => {
+
+    beforeEach(() => {
+      memoryQueueStub.subscribe.resolves()
+      storageQueueStub.subscribe.resolves()
+    })
 
     it('should subscribe', async () => {
-      memoryQueueStub = { subscribe: sinon.stub() }
-      storageQueueStub = { subscribe: sinon.stub() }
-      testQueue = createTestQueue(memoryQueueStub, storageQueueStub)
       await testQueue.subscribe()
-
       expect(memoryQueueStub.subscribe.calledOnce).to.be.true
       expect(storageQueueStub.subscribe.calledOnce).to.be.true
     })
 
+    it('should throw if subscribe fails', async () => {
+      storageQueueStub.subscribe.rejects(new Error('test'))
+
+      await expect(testQueue.subscribe()).to.be.rejected
+      expect(memoryQueueStub.subscribe.calledOnce).to.be.true
+      expect(storageQueueStub.subscribe.calledOnce).to.be.true
+    })
+  })
+
+
+  describe('unsubscribe', async () => {
+    beforeEach(() => {
+      memoryQueueStub.unsubscribe.resolves()
+      storageQueueStub.unsubscribe.resolves()
+    })
+
     it('should unsubscribe', async () => {
-      memoryQueueStub = { unsubscribe: sinon.stub() }
-      const storageQueueStub = { unsubscribe: sinon.stub() }
-      const testQueue = createTestQueue(memoryQueueStub, storageQueueStub)
       await testQueue.unsubscribe()
 
+      expect(memoryQueueStub.unsubscribe.calledOnce).to.be.true
+      expect(storageQueueStub.unsubscribe.calledOnce).to.be.true
+    })
+
+    it('should throw if unsubscribe fails', async () => {
+      storageQueueStub.unsubscribe.rejects(new Error('test'))
+
+      await expect(testQueue.unsubscribe()).to.be.rejected
       expect(memoryQueueStub.unsubscribe.calledOnce).to.be.true
       expect(storageQueueStub.unsubscribe.calledOnce).to.be.true
     })
@@ -48,9 +78,8 @@ describe('storageBackedInMemoryQueue', () => {
   describe('push', async () => {
 
     beforeEach(() => {
-      memoryQueueStub = { push: sinon.stub().resolves() }
-      storageQueueStub = { push: sinon.stub().resolves([]) }
-      testQueue = createTestQueue(memoryQueueStub, storageQueueStub)
+      memoryQueueStub.push.resolves()
+      storageQueueStub.push.resolves([])
     })
 
     it('should push one request', async () => {
@@ -62,8 +91,9 @@ describe('storageBackedInMemoryQueue', () => {
     })
 
     it('should push request arrays', async () => {
-      const request = new Request('test', 'http://test')
-      await testQueue.push([request, request])
+      const request1 = new Request('test1', 'http://test1')
+      const request2 = new Request('test2', 'http://test2')
+      await testQueue.push([request1, request2])
 
       expect(memoryQueueStub.push.calledOnce).to.be.true
       expect(storageQueueStub.push.calledOnce).to.be.true
@@ -72,20 +102,12 @@ describe('storageBackedInMemoryQueue', () => {
 
   describe('pop', async () => {
 
-    beforeEach(() => {
-      memoryQueueStub = { pop: sinon.stub() }
-      storageQueueStub = {
-        updateVisibilityTimeout: sinon.stub(),
-        isMessageNotFound: sinon.stub()
-      }
-      testQueue = createTestQueue(memoryQueueStub, storageQueueStub)
-    })
-
     it('should be able pop empty', async () => {
       memoryQueueStub.pop.resolves(undefined)
       const popped = await testQueue.pop()
 
       expect(memoryQueueStub.pop.calledOnce).to.be.true
+      expect(storageQueueStub.updateVisibilityTimeout.called).to.be.false
       expect(popped).not.to.be.ok
     })
 
@@ -129,22 +151,17 @@ describe('storageBackedInMemoryQueue', () => {
   })
 
   describe('done', async () => {
+    let request
 
     beforeEach(() => {
-      memoryQueueStub = { done: sinon.stub().resolves() }
-      storageQueueStub = {
-        done: sinon.stub(),
-        isMessageNotFound: sinon.stub()
-      }
-      testQueue = createTestQueue(memoryQueueStub, storageQueueStub)
+      memoryQueueStub.done.resolves()
+      request = new Request('test', 'http://test')
     })
 
     it('should call done on a request', async () => {
       storageQueueStub.done.resolves()
 
-      const request = new Request('test', 'http://test')
       await expect(testQueue.done(request)).to.be.fulfilled
-
       expect(memoryQueueStub.done.calledOnce).to.be.true
       expect(storageQueueStub.done.calledOnce).to.be.true
       expect(storageQueueStub.isMessageNotFound.called).to.be.false
@@ -154,9 +171,7 @@ describe('storageBackedInMemoryQueue', () => {
       storageQueueStub.done.rejects(new Error('MessageNotFound'))
       storageQueueStub.isMessageNotFound.returns(true)
 
-      const request = new Request('test', 'http://test')
       await expect(testQueue.done(request)).to.be.fulfilled
-
       expect(memoryQueueStub.done.calledOnce).to.be.true
       expect(storageQueueStub.done.calledOnce).to.be.true
       expect(storageQueueStub.isMessageNotFound.called).to.be.true
@@ -166,9 +181,7 @@ describe('storageBackedInMemoryQueue', () => {
       storageQueueStub.done.rejects(new Error('test'))
       storageQueueStub.isMessageNotFound.returns(false)
 
-      const request = new Request('test', 'http://test')
       await expect(testQueue.done(request)).to.be.rejectedWith('test')
-
       expect(memoryQueueStub.done.calledOnce).to.be.true
       expect(storageQueueStub.done.calledOnce).to.be.true
       expect(storageQueueStub.isMessageNotFound.called).to.be.true
@@ -178,85 +191,48 @@ describe('storageBackedInMemoryQueue', () => {
   describe('flush', async () => {
 
     beforeEach(() => {
-      memoryQueueStub = {
-        getInfo: sinon.stub(),
-        pop: sinon.stub().resolves(new Request('test', 'http://test')),
-        done: sinon.stub().resolves()
-      }
-      storageQueueStub = {
-        updateVisibilityTimeout: sinon.stub(),
-        done: sinon.stub(),
-        isMessageNotFound: sinon.stub()
-      }
-      testQueue = createTestQueue(memoryQueueStub, storageQueueStub)
+      memoryQueueStub.getInfo.resolves({count: 1})
+      memoryQueueStub.pop.resolves(new Request('test', 'http://test'))
+      memoryQueueStub.done.resolves()
+      storageQueueStub.updateVisibilityTimeout.rejects('should not be called')
     })
 
     it('should flush with one request in queue', async () => {
-      memoryQueueStub.getInfo.resolves({count: 1})
-      memoryQueueStub.pop.resolves(new Request('test', 'http://test')),
-      storageQueueStub.updateVisibilityTimeout.resolves({})
       storageQueueStub.done.resolves()
 
       await expect(testQueue.flush()).to.be.fulfilled
       expect(memoryQueueStub.pop.calledOnce).to.be.true
-      expect(storageQueueStub.updateVisibilityTimeout.calledOnce).to.be.true
       expect(memoryQueueStub.done.calledOnce).to.be.true
       expect(storageQueueStub.done.calledOnce).to.be.true
       expect(storageQueueStub.isMessageNotFound.called).to.be.false
     })
 
-    it('should handle ok when storage update visibility fails with message not found', async () => {
-      memoryQueueStub.getInfo.resolves({ count: 1 })
-      memoryQueueStub.pop
-        .onFirstCall()
-        .resolves(new Request('test', 'http://test'))
-        .onSecondCall()
-        .resolves(undefined)
-      storageQueueStub.updateVisibilityTimeout.rejects(new Error('MessageNotFound'))
-      storageQueueStub.isMessageNotFound.returns(true)
-
-      await expect(testQueue.flush()).to.be.fulfilled
-      expect(memoryQueueStub.pop.calledTwice).to.be.true
-      expect(storageQueueStub.updateVisibilityTimeout.calledOnce).to.be.true
-      expect(storageQueueStub.isMessageNotFound.calledOnce).to.be.true
-      expect(memoryQueueStub.done.called).to.be.false
-      expect(storageQueueStub.done.called).to.be.false
-    })
-
     it('should handle ok when storage queue delete fails with message not found', async () => {
-      memoryQueueStub.getInfo.resolves({ count: 1 })
-      memoryQueueStub.pop.resolves(new Request('test', 'http://test'))
-      storageQueueStub.updateVisibilityTimeout.resolves({})
       storageQueueStub.done.rejects(new Error('MessageNotFound'))
       storageQueueStub.isMessageNotFound.returns(true)
 
       await expect(testQueue.flush()).to.be.fulfilled
       expect(memoryQueueStub.pop.calledOnce).to.be.true
-      expect(storageQueueStub.updateVisibilityTimeout.calledOnce).to.be.true
       expect(memoryQueueStub.done.calledOnce).to.be.true
       expect(storageQueueStub.done.calledOnce).to.be.true
       expect(storageQueueStub.isMessageNotFound.calledOnce).to.be.true
     })
 
     it('should reject on other exceptions', async () => {
-      memoryQueueStub.getInfo.resolves({ count: 1 })
-      memoryQueueStub.pop.resolves(new Request('test', 'http://test'))
-      storageQueueStub.updateVisibilityTimeout.rejects(new Error('test'))
+      storageQueueStub.done.rejects(new Error('test'))
       storageQueueStub.isMessageNotFound.returns(false)
 
-      await expect(testQueue.flush()).to.be.rejectedWith('test')
+      await expect(testQueue.flush()).to.be.rejectedWith('Failed to flush')
       expect(memoryQueueStub.pop.calledOnce).to.be.true
-      expect(storageQueueStub.updateVisibilityTimeout.calledOnce).to.be.true
     })
 
     it('should reject when one failed and the other is success. ', async () => {
       memoryQueueStub.getInfo.resolves({ count: 2 })
       memoryQueueStub.pop
-      .onFirstCall()
-      .resolves(new Request('test1', 'http://test'))
-      .onSecondCall()
-      .resolves(new Request('test2', 'http://test'))
-      storageQueueStub.updateVisibilityTimeout.resolves({})
+        .onFirstCall()
+        .resolves(new Request('test1', 'http://test'))
+        .onSecondCall()
+        .resolves(new Request('test2', 'http://test'))
       storageQueueStub.done
         .onFirstCall()
         .rejects(new Error('test'))
@@ -264,9 +240,8 @@ describe('storageBackedInMemoryQueue', () => {
         .resolves()
       storageQueueStub.isMessageNotFound.returns(false)
 
-      await expect(testQueue.flush()).to.be.rejectedWith('test')
+      await expect(testQueue.flush()).to.be.rejectedWith('Failed to flush')
       expect(memoryQueueStub.pop.calledTwice).to.be.true
-      expect(storageQueueStub.updateVisibilityTimeout.calledTwice).to.be.true
       expect(memoryQueueStub.done.calledTwice).to.be.true
       expect(storageQueueStub.done.calledTwice).to.be.true
       expect(storageQueueStub.isMessageNotFound.calledOnce).to.be.true
@@ -274,3 +249,11 @@ describe('storageBackedInMemoryQueue', () => {
   })
 })
 
+const createQueueStub = () => ({
+  subscribe: sinon.stub(),
+  unsubscribe: sinon.stub(),
+  push: sinon.stub(),
+  pop: sinon.stub(),
+  done: sinon.stub(),
+  getInfo: sinon.stub()
+})
