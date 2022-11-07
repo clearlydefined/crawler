@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 const AttenuatedQueue = require('./attenuatedQueue')
-const StorageBackedInMemoryQueue = require('./storageBackedInMemoryQueue')
+const StorageBackedQueue = require('./storageBackedQueue')
 const InMemoryCrawlQueue = require('./inmemorycrawlqueue')
 
 class StorageBackedInMemoryQueueManager {
@@ -12,7 +12,7 @@ class StorageBackedInMemoryQueueManager {
   createQueueChain(name, options) {
     const storageQueue = this._storageQueueManager.createQueue(name, options)
     const inMemoryQueue = new InMemoryCrawlQueue(name, options)
-    const queue = StorageBackedInMemoryQueue.create(inMemoryQueue, storageQueue, options)
+    const queue = StorageBackedQueue.create(inMemoryQueue, storageQueue, options)
     return new AttenuatedQueue(queue, options)
   }
 }

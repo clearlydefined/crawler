@@ -6,10 +6,10 @@ const NestedQueue = require('./nestedQueue')
 const VISIBILITY_TIMEOUT_TO_REMAIN_ON_LOCAL_QUEUE = 8 * 60 * 60 // 8 hours
 const VISIBILITY_TIMEOUT_FOR_PROCESSING = 1 * 60 * 60 // 1 hours, similar to storage queue pop visibility timeout
 
-class StorageBackedInMemoryQueue extends NestedQueue {
+class StorageBackedQueue extends NestedQueue {
 
-  constructor(memoryQueue, storageQueue, options) {
-    super(memoryQueue)
+  constructor(queue, storageQueue, options) {
+    super(queue)
     this.options = options
     this.logger = options.logger
     this._sharedStorageQueue = storageQueue
@@ -45,7 +45,7 @@ class StorageBackedInMemoryQueue extends NestedQueue {
       // Message not found for the popReceipt and messageId stored in the request.  This means
       // that the message popReceipt (and possibly messageId) in the request is stale. This can
       // happen when the message visibility timeout expired and thus was visible and later
-      // updated/processed by others.Because the request is picked up by others, just log and
+      // updated/processed by others. Because the request is picked up by others, just log and
       // continue to the next.
       this._log('Failed to update stale message', request)
       return false
@@ -53,55 +53,67 @@ class StorageBackedInMemoryQueue extends NestedQueue {
   }
 
   async done(request) {
+    await Promise.all([
+      super.done(request),
+      this._doneInStorage(request)])
+  }
+
+  async _doneInStorage(request) {
     try {
-      await super.done(request)
       await this._sharedStorageQueue.done(request)
     } catch (error) {
       if (!this._sharedStorageQueue.isMessageNotFound(error)) throw error
       // Message not found for the popReceipt and messageId stored in the request.  This means
       // that the message popReceipt (and possibly messageId) in the request is stale. This can
       // happen when the message visibility timeout expired and thus was visible and later
-      // updated by others.This is ok because the deletion of the request can be left to the
+      // updated by others. This is ok because the deletion of the request can be left to the
       // caller with the updated popReceipt. Log and continue.
       this._log('Failed to remove stale message', request)
     }
   }
 
   async subscribe() {
-    await super.subscribe()
-    await this._sharedStorageQueue.subscribe()
+    await Promise.all([
+      super.subscribe(),
+      this._sharedStorageQueue.subscribe()])
   }
 
   async unsubscribe() {
-    await super.unsubscribe()
-    await this._sharedStorageQueue.unsubscribe()
+    const results = await Promise.allSettled([
+      super.unsubscribe(),
+      this._sharedStorageQueue.unsubscribe()])
+    this._throwIfError(results, 'Failed to unsubscribe')
   }
 
   async flush() {
     const deleteRequests = []
     const info = await this.getInfo()
     for (let count = info.count; count > 0; count--) {
-      deleteRequests.push(this.pop().then(request => request && this.done(request)))
+      const deleteOne = super.pop().then(request => this.done(request))
+      deleteRequests.push(deleteOne)
     }
-    return Promise.allSettled(deleteRequests)
-      .then(results => {
-        const found = results.find(result => result.status === 'rejected')
-        if (found) throw new Error(found.reason)
-      })
+    const results = await Promise.allSettled(deleteRequests)
+    this._throwIfError(results, 'Failed to flush')
+  }
+
+  _throwIfError(results, message) {
+    const errors = results.filter(result => result.status === 'rejected')
+      .map(rejected => new Error(rejected.reason))
+    if (errors.length) throw new AggregateError(errors, message)
   }
 
   _log(actionMessage, request) {
     this.logger.verbose(`${actionMessage} ${request.type} ${request.url}`)
   }
 
-  static create(memoryQueue, storageQueue, options = {}) {
+  static create(queue, storageQueue, options = {}) {
     const defaultOptions = {
       visibilityTimeout_remainLocal: VISIBILITY_TIMEOUT_TO_REMAIN_ON_LOCAL_QUEUE,
       visibilityTimeout: VISIBILITY_TIMEOUT_FOR_PROCESSING
     }
     const optionsWithDefaults = { ...defaultOptions, ...options }
-    return new StorageBackedInMemoryQueue(memoryQueue, storageQueue, optionsWithDefaults)
+    return new StorageBackedQueue(queue, storageQueue, optionsWithDefaults)
   }
 }
 
-module.exports = StorageBackedInMemoryQueue
+module.exports = StorageBackedQueue
