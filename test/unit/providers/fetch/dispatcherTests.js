@@ -312,6 +312,14 @@ describe('fetchDispatcher cache fetch result', () => {
       return `/go/${fileName}`
     }
 
+    const httpContent = fs.readFileSync('test/fixtures/go/license.html')
+    const successHttpStub = {
+      get: sinon.stub().returns({
+        status: 200,
+        data: httpContent
+      })
+    }
+
     let fetchDispatcher
 
     beforeEach(() => {
@@ -319,7 +327,7 @@ describe('fetchDispatcher cache fetch result', () => {
         request: { get: createGetStub(fileSupplier) },
         'request-promise-native': createRequestPromiseStub(fileSupplier)
       })
-      const fetch = GoFetch({ logger: { info: sinon.stub() } })
+      const fetch = GoFetch({ logger: { info: sinon.stub() }, http: successHttpStub })
       fetchDispatcher = setupDispatcher(fetch)
     })
 
@@ -382,6 +390,7 @@ describe('fetchDispatcher cache fetch result', () => {
         'request-promise-native': sinon.stub().resolves(loadJson('pod/registryData.json'))
       })
       const fetch = PodFetch({ logger: { info: sinon.stub() } })
+      fetch._getPackage = sinon.stub().resolves('/tmp/cd-pYKk9q/SwiftLCS-1.0')
       fetchDispatcher = setupDispatcher(fetch)
     })
 
