@@ -5,7 +5,7 @@ const AbstractProcessor = require('./abstractProcessor')
 const { promisify } = require('util')
 const execFile = promisify(require('child_process').execFile)
 const { merge } = require('lodash')
-const { readdirSync } = require('fs')
+const { readdirSync, promises: { readFile } } = require('fs')
 
 class FsfeReuseProcessor extends AbstractProcessor {
   constructor(options) {
@@ -44,15 +44,16 @@ class FsfeReuseProcessor extends AbstractProcessor {
 
   async _run(request) {
     const root = request.document.location
-    const parameters = [('spdx')]
+    const { name: outFileName } =  this.createTempFile(request)
+    const parameters = [('spdx'), '-o',  outFileName]
     try {
-      // Default buffer of 1024x1024 (see https://nodejs.org/api/child_process.html#child_processexecfilefile-args-options-callback) doesn't seem to be enough sometimes
-      const { stdout } = await execFile('reuse', parameters, { cwd: root, maxBuffer: (2048 * 1024) })
-      if (!stdout) return
+      await execFile('reuse', parameters, { cwd: root })
+      const out = await readFile(outFileName, 'utf8')
+      if (!out) return
       const results = { metadata: {}, files: [], licenses: this._getLicenses(request) }
       // REUSE SPDX results are grouped in sections that are separated with two newlines
       // The first result group contains generic result metadata, the following ones represent a file each. We process both variants in a single loop...
-      stdout.trim().split(/\n\n/).forEach((spdxResult, entryIndex) => this._handleResultSection(spdxResult, entryIndex, results))
+      out.trim().split(/\n\n/).forEach((spdxResult, entryIndex) => this._handleResultSection(spdxResult, entryIndex, results))
       return results
     } catch (error) {
       request.markDead('Error', error ? error.message : 'REUSE run failed')
