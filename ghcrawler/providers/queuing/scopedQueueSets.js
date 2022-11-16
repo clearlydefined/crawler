@@ -1,5 +1,7 @@
 // (c) Copyright 2022, SAP SE and ClearlyDefined contributors. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
+const debug = require('debug')('crawler:scopedQueueSets')
+debug.log = console.info.bind(console)
 
 class ScopedQueueSets {
   constructor(globalQueues, localQueues) {
@@ -83,9 +85,10 @@ class ScopedQueueSets {
       for (let count = info.count; count > 0; count--) {
         localRequests.push(
           localQueue.pop()
-            .then(request => request && localQueue.done(request)
-              .then(() => this.push(request, localQueue.getName(), 'global'))))
+            .then(request => request && localQueue.done(request).then(() => request.createRequeuable()))
+            .then(request => request && this.push(request, localQueue.getName(), 'global')))
       }
+      debug(`publishing ${localRequests.length} to ${localQueue.getName()}`)
       return Promise.all(localRequests)
     }
 

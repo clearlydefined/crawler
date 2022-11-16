@@ -15,6 +15,7 @@ const cd_file = {
 }
 const crawlerStoreProvider = config.get('CRAWLER_STORE_PROVIDER') || 'cd(file)'
 const maxRequeueAttemptCount = config.get('CRAWLER_MAX_REQUEUE_ATTEMPTS') || 5
+const fetchedCacheTtlSeconds = config.get('CRAWLER_FETCHED_CACHE_TTL_SECONDS') || 60 * 60 * 8 //8 hours
 
 module.exports = {
   provider: 'memory', // change this to redis if/when we want distributed config
@@ -30,7 +31,7 @@ module.exports = {
   fetch: {
     dispatcher: 'cdDispatch',
     cdDispatch: {
-      fetched: { defaultTtlSeconds: 60 * 60 * 8 }
+      fetched: { defaultTtlSeconds: fetchedCacheTtlSeconds }
     },
     cocoapods: { githubToken },
     cratesio: {},
@@ -123,6 +124,7 @@ module.exports = {
       connectionString: cd_azblob.connection,
       queueName: config.get('CRAWLER_QUEUE_PREFIX') || 'cdcrawlerdev',
       visibilityTimeout: 8 * 60 * 60, // 8 hours
+      visibilityTimeout_remainLocal: fetchedCacheTtlSeconds,
       maxDequeueCount: 5,
       attenuation: {
         ttl: 3000

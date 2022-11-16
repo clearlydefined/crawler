@@ -11,7 +11,7 @@ class FetchDispatcher extends AbstractFetch {
     this.fetchers = fetchers
     this.processors = processors
     this.filter = filter
-    this.fetched = fetchResultCache || MemoryCache(options.fetched)
+    this.fetched = fetchResultCache || MemoryCache.create(options.fetched)
     this.inProgressFetches = inProgressFetchCache || {}
   }
 
@@ -65,13 +65,17 @@ class FetchDispatcher extends AbstractFetch {
   async _fetchResult(request, handler) {
     const cacheKey = this.toSpec(request).toUrlPath()
     const fetchResult = this.fetched.get(cacheKey) || await this._fetchPromise(handler, request, cacheKey)
-    fetchResult?.copyTo(request)
+    fetchResult?.decorate(request)
   }
 
-  async _fetchPromise(handler, request, cacheKey) {
+  _fetchPromise(handler, request, cacheKey) {
     return this.inProgressFetches[cacheKey] ||
-      (this.inProgressFetches[cacheKey] = this._fetch(handler, request, cacheKey)
-        .finally(() => delete this.inProgressFetches[cacheKey]))
+      (this.inProgressFetches[cacheKey] = this._createFetchPromise(handler, request, cacheKey))
+  }
+
+  _createFetchPromise(handler, request, cacheKey) {
+    return this._fetch(handler, request, cacheKey)
+      .finally(() => delete this.inProgressFetches[cacheKey])
   }
 
   async _fetch(handler, request, cacheKey) {
@@ -79,10 +83,22 @@ class FetchDispatcher extends AbstractFetch {
     await handler.handle(request)
     const fetchResult = request.fetchResult
     delete request.fetchResult
-    if (fetchResult) this.fetched.set(cacheKey, fetchResult, (key, value) =>
-      value.cleanup(error => this.logger.info(`Cleanup  Problem cleaning up after ${key} ${error.message}`)))
+    if (fetchResult) this._addToCache(cacheKey, fetchResult)
+
     this.logger.debug(`---End Fetch: ${cacheKey} at ${new Date().toISOString()}`)
     return fetchResult
+  }
+
+  _addToCache(cacheKey, fetchResult) {
+    this.fetched.setWithConditionalExpiry(
+      cacheKey,
+      fetchResult,
+      this._cleanupResult.bind(this),
+      (key, result) => !result.isInUse())
+  }
+
+  _cleanupResult(key, result) {
+    result.cleanup(error => this.logger.info(`Cleanup  Problem cleaning up after ${key} ${error.message}`))
   }
 
   // get all the handler that apply to this request from the given list of handlers

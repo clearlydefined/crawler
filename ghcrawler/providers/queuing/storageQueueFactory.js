@@ -3,9 +3,11 @@
 
 const StorageQueueManager = require('./storageQueueManager')
 const CrawlerFactory = require('../../crawlerFactory')
+const StorageBackedInMemoryQueueManager = require('./storageBackedInMemoryQueueManager')
 
 module.exports = options => {
   const { connectionString } = options
-  const manager = new StorageQueueManager(connectionString, options)
-  return CrawlerFactory.createQueueSet(manager, options)
+  const storageQueueManager = new StorageQueueManager(connectionString, options)
+  const localManager = new StorageBackedInMemoryQueueManager(storageQueueManager)
+  return CrawlerFactory.createScopedQueueSets({ globalManager: storageQueueManager, localManager}, options)
 }

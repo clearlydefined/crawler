@@ -69,34 +69,13 @@ describe('Go Proxy fetching', () => {
       response.end()
       return response
     }
+
+    const httpContent = fs.readFileSync('test/fixtures/go/license.html')
     successHttpStub = {
       get: sinon.stub().returns({
         status: 200,
-        data:
-          `<article>
-            <section class="License" id="lic-0">
-              <h2 class="go-textTitle">
-              <div id="#lic-0">Apache-2.0</div>
-              </h2>
-              <p>This is not legal advice. <a href="/license-policy">Read disclaimer.</a></p>
-              <pre class="License-contents">                                 Apache License
-                                Version 2.0, January 2004
-                              http://www.apache.org/licenses/
-              </pre>
-            </section>
-            <section class="License" id="lic-1">
-              <h2 class="go-textTitle">
-                <div id="#lic-1">BSD-2-Clause, BSD-3-Clause, HPND</div>
-              </h2>
-              <p>This is not legal advice. <a href="/license-policy">Read disclaimer.</a></p>
-              <pre class="License-contents">Copyright (c) 2013-2019 Tommi Virtanen.
-                Copyright (c) 2009, 2011, 2012 The Go Authors.
-                All rights reserved.
-              </pre>
-            </section>
-          </article>`
-      }
-      )
+        data: httpContent
+      })
     }
     Fetch = proxyquire('../../../../providers/fetch/goFetch', {
       request: { get: getStub },
