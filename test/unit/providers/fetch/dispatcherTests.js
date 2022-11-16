@@ -72,7 +72,7 @@ describe('fetchDispatcher cache fetch result', () => {
   function mockResultCache(cache) {
     return {
       get: key => cache[key],
-      set: (key, value) => cache[key] = value,
+      setWithConditionalExpiry : (key, value) => cache[key] = value,
     }
   }
 
@@ -98,7 +98,9 @@ describe('fetchDispatcher cache fetch result', () => {
   function verifyFetchResult(fetched, resultFromCache) {
     // eslint-disable-next-line no-unused-vars
     const { cleanups, ...expected } = fetched
-    expect(resultFromCache).to.be.deep.equal(expected)
+    // eslint-disable-next-line no-unused-vars
+    const { cleanups: cleanupsCached, ...actual } = resultFromCache
+    expect(actual).to.be.deep.equal(expected)
   }
 
   describe('cache maven fetch result', () => {
@@ -310,6 +312,14 @@ describe('fetchDispatcher cache fetch result', () => {
       return `/go/${fileName}`
     }
 
+    const httpContent = fs.readFileSync('test/fixtures/go/license.html')
+    const successHttpStub = {
+      get: sinon.stub().returns({
+        status: 200,
+        data: httpContent
+      })
+    }
+
     let fetchDispatcher
 
     beforeEach(() => {
@@ -317,7 +327,7 @@ describe('fetchDispatcher cache fetch result', () => {
         request: { get: createGetStub(fileSupplier) },
         'request-promise-native': createRequestPromiseStub(fileSupplier)
       })
-      const fetch = GoFetch({ logger: { info: sinon.stub() } })
+      const fetch = GoFetch({ logger: { info: sinon.stub() }, http: successHttpStub })
       fetchDispatcher = setupDispatcher(fetch)
     })
 
@@ -380,6 +390,7 @@ describe('fetchDispatcher cache fetch result', () => {
         'request-promise-native': sinon.stub().resolves(loadJson('pod/registryData.json'))
       })
       const fetch = PodFetch({ logger: { info: sinon.stub() } })
+      fetch._getPackage = sinon.stub().resolves('/tmp/cd-pYKk9q/SwiftLCS-1.0')
       fetchDispatcher = setupDispatcher(fetch)
     })
 

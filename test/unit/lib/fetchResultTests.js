@@ -114,4 +114,61 @@ describe('fetchResult', () => {
       expect(result.addMeta.calledWith({ gitSize: 532 })).to.be.true
     })
   })
+
+  describe('dependents management', () => {
+    let request, anotherRequest
+
+    beforeEach(() => {
+      request = {}
+      anotherRequest = {}
+    })
+
+    it('should track one dependent', () => {
+      fetchResult.trackDependents(request)
+      expect(fetchResult.isInUse()).to.be.true
+    })
+
+    it('should remove one dependent', () => {
+      fetchResult.trackDependents(request)
+      fetchResult.removeDependents(request)
+      expect(fetchResult.isInUse()).to.be.false
+    })
+
+    it('should track and remove two dependents', () => {
+      fetchResult.trackDependents(request, anotherRequest)
+      expect(fetchResult.isInUse()).to.be.true
+      fetchResult.removeDependents(request, anotherRequest)
+      expect(fetchResult.isInUse()).to.be.false
+    })
+
+    it('should track and remove two dependents sequentially', () => {
+      fetchResult.trackDependents(request, anotherRequest)
+      expect(fetchResult.isInUse()).to.be.true
+      fetchResult.removeDependents(request)
+      expect(fetchResult.isInUse()).to.be.true
+      fetchResult.removeDependents(anotherRequest)
+      expect(fetchResult.isInUse()).to.be.false
+    })
+  })
+
+  describe('decorate', () => {
+    it('should decorate a request', () => {
+      const request = { trackCleanup: sinon.stub() }
+      fetchResult.decorate(request)
+
+      expect(request.contentOrigin).to.be.equal('origin')
+      expect(fetchResult.isInUse()).to.be.true
+      expect(request.trackCleanup.calledOnce).to.be.true
+    })
+
+    it('should track a request and remove a request upon done', () => {
+      const request = new Request('test', 'http://test')
+      fetchResult.decorate(request)
+      expect(fetchResult.isInUse()).to.be.true
+      expect(request.getTrackedCleanups().length).to.be.equal(1)
+
+      request.getTrackedCleanups()[0]()
+      expect(fetchResult.isInUse()).to.be.false
+    })
+  })
 })
