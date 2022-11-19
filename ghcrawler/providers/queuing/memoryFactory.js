@@ -2,14 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 const CrawlerFactory = require('../../crawlerFactory')
-const AttenuatedQueue = require('./attenuatedQueue')
-const InMemoryCrawlQueue = require('./inmemorycrawlqueue')
+const InMemoryQueueManager = require('./inmemoryQueueManager')
 
 module.exports = options => {
-  const manager = {
-    createQueueChain: (name, options) => {
-      return new AttenuatedQueue(new InMemoryCrawlQueue(name, options), options)
-    }
-  }
+  const manager = new InMemoryQueueManager()
   return CrawlerFactory.createScopedQueueSets({ globalManager: manager, localManager: manager }, options)
 }
