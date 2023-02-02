@@ -54,11 +54,9 @@ describe('Licensee process', () => {
   beforeEach(function() {
     const resultBox = { error: null, versionResult: '1.2.0', versionError: null }
     const processStub = {
-      execFile: (command, parameters, callbackOrOptions, callback) => {
+      execFile: (command, parameters, callbackOrOptions) => {
         if (parameters.includes('version'))
           return callbackOrOptions(resultBox.versionError, { stdout: resultBox.versionResult })
-        const path = parameters.slice(-1)[0]
-        callback(resultBox.error, { stdout: fs.readFileSync(`${path}/output.json`).toString() })
       }
     }
     Handler = proxyquire('../../../../providers/process/licensee', { child_process: processStub })
@@ -78,6 +76,9 @@ function setup(fixture, error, versionError) {
   Handler._resultBox.error = error
   Handler._resultBox.versionError = versionError
   const processor = Handler(options)
+  processor._runLicensee = error ?
+    sinon.stub().rejects(error) :
+    (parameters, inputFolder) => Promise.resolve(fs.readFileSync(`${inputFolder}/output.json`).toString())
   processor.attachFiles = sinon.stub()
   return { request: testRequest, processor }
 }
