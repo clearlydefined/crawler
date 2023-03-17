@@ -81,6 +81,8 @@ ENV CRAWLER_STORE_PROVIDER=cdDispatch+cd(azblob)+azqueue
 ENV CRAWLER_WEBHOOK_URL=https://api.clearlydefined.io/webhook
 ENV CRAWLER_AZBLOB_CONTAINER_NAME=production
 
+RUN git config --global --add safe.directory '*'
+
 COPY package*.json /tmp/
 RUN cd /tmp && npm install --production
 RUN mkdir -p "${APPDIR}" && cp -a /tmp/node_modules "${APPDIR}"
