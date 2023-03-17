@@ -40,6 +40,8 @@ RUN gem install nokogiri:1.12.5 --no-document && \
 RUN pip3 install setuptools
 RUN pip3 install reuse
 
+RUN git config --global --add safe.directory '*'
+
 COPY package*.json /tmp/
 RUN cd /tmp && npm install
 RUN mkdir -p "${APPDIR}" && cp -a /tmp/node_modules "${APPDIR}"
