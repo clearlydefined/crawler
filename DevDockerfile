@@ -41,6 +41,7 @@ RUN pip3 install setuptools
 RUN pip3 install reuse
 
 COPY package*.json /tmp/
+COPY patches /tmp/patches
 RUN cd /tmp && npm install
 RUN mkdir -p "${APPDIR}" && cp -a /tmp/node_modules "${APPDIR}"
 

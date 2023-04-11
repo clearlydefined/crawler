@@ -82,6 +82,7 @@ ENV CRAWLER_WEBHOOK_URL=https://api.clearlydefined.io/webhook
 ENV CRAWLER_AZBLOB_CONTAINER_NAME=production
 
 COPY package*.json /tmp/
+COPY patches /tmp/patches
 RUN cd /tmp && npm install --production
 RUN mkdir -p "${APPDIR}" && cp -a /tmp/node_modules "${APPDIR}"
 
