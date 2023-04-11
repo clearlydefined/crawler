@@ -67,10 +67,16 @@ describe('pypiFetch handle function', () => {
     expect(result.outcome).to.be.equal('Missing  ')
   })
 
-  it('parses the correct license information from registry data', () => {
+  it('parses the correct license information from classifiers in registry data', () => {
     const registryData = JSON.parse(fs.readFileSync('test/fixtures/pypi/registryData_lgpl2.json'))
     const declared = fetch._extractDeclaredLicense(registryData)
     expect(declared).to.be.equal('LGPL-2.0-only')
+  })
+
+  it('parses the correct license information from info.license in registry data', () => {
+    const registryData = JSON.parse(fs.readFileSync('test/fixtures/pypi/registryData_dnspython.json'))
+    const declared = fetch._extractDeclaredLicense(registryData)
+    expect(declared).to.be.equal('ISC')
   })
 
   it('parses correct LGPL license information', () => {
