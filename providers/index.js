@@ -23,7 +23,8 @@ module.exports = {
     npmjs: require('./fetch/npmjsFetch'),
     nuget: require('./fetch/nugetFetch'),
     pypi: require('./fetch/pypiFetch'),
-    rubygems: require('./fetch/rubyGemsFetch')
+    rubygems: require('./fetch/rubyGemsFetch'),
+    mariner: require('./fetch/marinerFetch')
   },
   process: {
     cdsource: require('./process/sourceExtract'),
@@ -31,6 +32,7 @@ module.exports = {
     crate: require('./process/crateExtract'),
     deb: require('./process/debExtract'),
     debsrc: require('./process/debsrcExtract'),
+    rpm: require('./process/rpmExtract'),
     gem: require('./process/gemExtract'),
     go: require('./process/goExtract'),
     licensee: require('./process/licensee'),

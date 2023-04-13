@@ -9,6 +9,9 @@ const decompressTarbz2 = require('decompress-tarbz2')
 const decompressTargz = require('decompress-targz')
 const decompressTarxz = require('decompress-tarxz')
 const decompressUnzip = require('decompress-unzip')
+const domain = require('domain')
+const nodeRequest = require('request')
+const fs = require('fs')
 
 class AbstractFetch extends BaseHandler {
   /**
@@ -31,10 +34,28 @@ class AbstractFetch extends BaseHandler {
     )
   }
 
-  decompress(source, destination) {
+  decompress(source, destination, map) {
     return decompress(source, destination, {
       filter: file => !file.path.endsWith('/'),
+      map: map,
       plugins: [decompressTar(), decompressTarbz2(), decompressTargz(), decompressTarxz(), decompressUnzip({ validateEntrySizes: false })]
+    })
+  }
+
+  async _download(downloadUrl, destination) {
+    return new Promise((resolve, reject) => {
+      const dom = domain.create()
+      dom.on('error', error => reject(error))
+      dom.run(() => {
+        nodeRequest
+          .get(downloadUrl, (error, response) => {
+            if (error) return reject(error)
+            if (response.statusCode !== 200)
+              return reject(new Error(`${response.statusCode} ${response.statusMessage}`))
+          })
+          .pipe(fs.createWriteStream(destination))
+          .on('finish', () => resolve())
+      })
     })
   }
 }

@@ -202,23 +202,6 @@ class DebianFetch extends AbstractFetch {
     return { dir, releaseDate, hashes }
   }
 
-  async _download(downloadUrl, destination) {
-    return new Promise((resolve, reject) => {
-      const dom = domain.create()
-      dom.on('error', error => reject(error))
-      dom.run(() => {
-        nodeRequest
-          .get(downloadUrl, (error, response) => {
-            if (error) return reject(error)
-            if (response.statusCode !== 200)
-              return reject(new Error(`${response.statusCode} ${response.statusMessage}`))
-          })
-          .pipe(fs.createWriteStream(destination))
-          .on('finish', () => resolve())
-      })
-    })
-  }
-
   async _decompressUnixArchive(source, destination) {
     return new Promise((resolve, reject) => {
       const reader = new unixArchive.ArReader(source)

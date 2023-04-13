@@ -45,7 +45,8 @@ module.exports = {
     nuget: {},
     packagist: {},
     pypi: {},
-    rubygems: {}
+    rubygems: {},
+    mariner: { cdFileLocation: cd_file.location }
   },
   process: {
     cdsource: {},
@@ -93,7 +94,8 @@ module.exports = {
       format: '--json-pp'
     },
     source: {},
-    top: { githubToken }
+    top: { githubToken },
+    rpm: {},
   },
   store: {
     dispatcher: crawlerStoreProvider,
