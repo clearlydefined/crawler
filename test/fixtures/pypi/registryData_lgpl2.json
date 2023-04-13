@@ -1,0 +1,1477 @@
+{
+  "info": {
+    "author": "Christian Theune",
+    "author_email": "ct@flyingcircus.io",
+    "bugtrack_url": null,
+    "classifiers": [
+      "Development Status :: 5 - Production/Stable",
+      "Intended Audience :: Developers",
+      "Intended Audience :: Information Technology",
+      "License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)",
+      "Operating System :: OS Independent",
+      "Programming Language :: Python",
+      "Programming Language :: Python :: 3",
+      "Programming Language :: Python :: 3.6",
+      "Programming Language :: Python :: 3.7",
+      "Programming Language :: Python :: 3.8",
+      "Programming Language :: Python :: 3.9",
+      "Programming Language :: Python :: 3.10",
+      "Topic :: Software Development :: Internationalization",
+      "Topic :: Software Development :: Localization"
+    ],
+    "description": "pycountry\n=========\n\n.. image:g: https://travis-ci.org/flyingcircusio/pycountry.svg?branch=master\n\npycountry provides the ISO databases for the standards:\n\n* `639-3 <https://en.wikipedia.org/wiki/ISO_639-3>`_ Languages\n* `3166 <https://en.wikipedia.org/wiki/ISO_3166>`_ Countries\n* `3166-3 <https://en.wikipedia.org/wiki/ISO_3166-3>`_ Deleted countries\n* `3166-2 <https://en.wikipedia.org/wiki/ISO_3166-2>`_ Subdivisions of countries\n* `4217 <https://en.wikipedia.org/wiki/ISO_4217>`_ Currencies\n* `15924 <https://en.wikipedia.org/wiki/ISO_15924>`_ Scripts\n\nThe package includes a copy from Debian's `pkg-isocodes\n<https://salsa.debian.org/iso-codes-team/iso-codes>`_ and makes the data\naccessible through a Python API.\n\nTranslation files for the various strings are included as well.\n\nData update policy\n------------------\n\nNo changes to the data will be accepted into pycountry. This is a pure wrapper\naround the ISO standard using the `pkg-isocodes` database from Debian *as is*.\nIf you need changes to the political situation in the world, please talk to\nthe ISO or Debian people, not me.\n\nDonations / Monetary Support\n----------------------------\n\nThis is a small project that I maintain in my personal time. I am not\ninterested in personal financial gain. However, if you would like to support\nthe project then I would love if you would donate to `Feminist Frequency\n<https://feministfrequency.com/donate/>`_ instead. Also, let the world know you\ndid so, so that others can follow your path.\n\nContributions\n-------------\n\nThe code lives in a `git repository on GitHub\n<https://github.com/flyingcircusio/pycountry>`_, and issues must be reported in there as well.\n\nCountries (ISO 3166)\n--------------------\n\nCountries are accessible through a database object that is already configured\nupon import of pycountry and works as an iterable:\n\n.. code:: pycon\n\n  >>> import pycountry\n  >>> len(pycountry.countries)\n  249\n  >>> list(pycountry.countries)[0]\n  Country(alpha_2='AF', alpha_3='AFG', name='Afghanistan', numeric='004', official_name='Islamic Republic of Afghanistan')\n\nSpecific countries can be looked up by their various codes and provide the\ninformation included in the standard as attributes:\n\n.. code:: pycon\n\n  >>> germany = pycountry.countries.get(alpha_2='DE')\n  >>> germany\n  Country(alpha_2='DE', alpha_3='DEU', name='Germany', numeric='276', official_name='Federal Republic of Germany')\n  >>> germany.alpha_2\n  'DE'\n  >>> germany.alpha_3\n  'DEU'\n  >>> germany.numeric\n  '276'\n  >>> germany.name\n  'Germany'\n  >>> germany.official_name\n  'Federal Republic of Germany'\n\nThe `historic_countries` database contains former countries that have been\nremoved from the standard and are now included in ISO 3166-3, excluding\nexisting ones:\n\n.. code:: pycon\n\n >>> ussr = pycountry.historic_countries.get(alpha_3='SUN')\n >>> ussr\n Country(alpha_3='SUN', alpha_4='SUHH', withdrawal_date='1992-08-30', name='USSR, Union of Soviet Socialist Republics', numeric='810')\n >>> ussr.alpha_4\n 'SUHH'\n >>> ussr.alpha_3\n 'SUN'\n >>> ussr.name\n 'USSR, Union of Soviet Socialist Republics'\n >>> ussr.withdrawal_date\n '1992-08-30'\n\n\nThere's also a \"fuzzy\" search to help people discover \"proper\" countries for\nnames that might only actually be subdivisions. The fuzziness also includes\nnormalizing unicode accents. There's also a bit of prioritization included\nto prefer matches on country names before subdivision names and have countries\nwith more matches be listed before ones with fewer matches:\n\n.. code:: pycon\n\n  >>> pycountry.countries.search_fuzzy('England')\n  [Country(alpha_2='GB', alpha_3='GBR', name='United Kingdom', numeric='826', official_name='United Kingdom of Great Britain and Northern Ireland')]\n\n  >>> pycountry.countries.search_fuzzy('Cote')\n  [Country(alpha_2='CI', alpha_3='CIV', name=\"Côte d'Ivoire\", numeric='384', official_name=\"Republic of Côte d'Ivoire\"),\n   Country(alpha_2='FR', alpha_3='FRA', name='France', numeric='250', official_name='French Republic'),\n   Country(alpha_2='HN', alpha_3='HND', name='Honduras', numeric='340', official_name='Republic of Honduras')]\n\n\nCountry subdivisions (ISO 3166-2)\n---------------------------------\n\nThe country subdivisions are a little more complex than the countries itself\nbecause they provide a nested and typed structure.\n\nAll subdivisons can be accessed directly:\n\n.. code:: pycon\n\n  >>> len(pycountry.subdivisions)\n  4847\n  >>> list(pycountry.subdivisions)[0]\n  Subdivision(code='AD-07', country_code='AD', name='Andorra la Vella', parent_code=None, type='Parish')\n\nSubdivisions can be accessed using their unique code and provide at least\ntheir code, name and type:\n\n.. code:: pycon\n\n  >>> de_st = pycountry.subdivisions.get(code='DE-ST')\n  >>> de_st.code\n  'DE-ST'\n  >>> de_st.name\n  'Sachsen-Anhalt'\n  >>> de_st.type\n  'State'\n  >>> de_st.country\n  Country(alpha_2='DE', alpha_3='DEU', name='Germany', numeric='276', official_name='Federal Republic of Germany')\n\nSome subdivisions specify another subdivision as a parent:\n\n.. code:: pycon\n\n  >>> al_br = pycountry.subdivisions.get(code='AL-BU')\n  >>> al_br.code\n  'AL-BU'\n  >>> al_br.name\n  'Bulqiz\\xeb'\n  >>> al_br.type\n  'District'\n  >>> al_br.parent_code\n  'AL-09'\n  >>> al_br.parent\n  Subdivision(code='AL-09', country_code='AL', name='Dib\\xebr', parent_code=None, type='County')\n  >>> al_br.parent.name\n  'Dib\\xebr'\n\nThe divisions of a single country can be queried using the country_code index:\n\n.. code:: pycon\n\n  >>> len(pycountry.subdivisions.get(country_code='DE'))\n  16\n\n  >>> len(pycountry.subdivisions.get(country_code='US'))\n  57\n\n\nScripts (ISO 15924)\n-------------------\n\nScripts are available from a database similar to the countries:\n\n.. code:: pycon\n\n  >>> len(pycountry.scripts)\n  169\n  >>> list(pycountry.scripts)[0]\n  Script(alpha_4='Afak', name='Afaka', numeric='439')\n\n  >>> latin = pycountry.scripts.get(name='Latin')\n  >>> latin\n  Script(alpha_4='Latn', name='Latin', numeric='215')\n  >>> latin.alpha4\n  'Latn'\n  >>> latin.name\n  'Latin'\n  >>> latin.numeric\n  '215'\n\n\nCurrencies (ISO 4217)\n---------------------\n\nThe currencies database is, again, similar to the ones before:\n\n.. code:: pycon\n\n  >>> len(pycountry.currencies)\n  182\n  >>> list(pycountry.currencies)[0]\n  Currency(alpha_3='AED', name='UAE Dirham', numeric='784')\n  >>> argentine_peso = pycountry.currencies.get(alpha_3='ARS')\n  >>> argentine_peso\n  Currency(alpha_3='ARS', name='Argentine Peso', numeric='032')\n  >>> argentine_peso.alpha_3\n  'ARS'\n  >>> argentine_peso.name\n  'Argentine Peso'\n  >>> argentine_peso.numeric\n  '032'\n\n\nLanguages (ISO 639-3)\n---------------------\n\nThe languages database is similar too:\n\n.. code:: pycon\n\n  >>> len(pycountry.languages)\n  7874\n  >>> list(pycountry.languages)[0]\n  Language(alpha_3='aaa', name='Ghotuo', scope='I', type='L')\n\n  >>> aragonese = pycountry.languages.get(alpha_2='an')\n  >>> aragonese.alpha_2\n  'an'\n  >>> aragonese.alpha_3\n  'arg'\n  >>> aragonese.name\n  'Aragonese'\n\n  >>> bengali = pycountry.languages.get(alpha_2='bn')\n  >>> bengali.name\n  'Bengali'\n  >>> bengali.common_name\n  'Bangla'\n\nLocales\n-------\n\nLocales are available in the `pycountry.LOCALES_DIR` subdirectory of this\npackage. The translation domains are called `isoXXX` according to the standard\nthey provide translations for. The directory is structured in a way compatible\nto Python's gettext module.\n\nHere is an example translating language names:\n\n.. code:: pycon\n\n  >>> import gettext\n  >>> german = gettext.translation('iso3166', pycountry.LOCALES_DIR,\n  ...                              languages=['de'])\n  >>> german.install()\n  >>> _('Germany')\n  'Deutschland'\n\nLookups\n-------\n\nFor each database (countries, languages, scripts, etc.), you can also look up\nentities case insensitively without knowing which key the value may match.  For\nexample:\n\n.. code:: pycon\n\n  >>> pycountry.countries.lookup('de')\n  <pycountry.db.Country object at 0x...>\n\nThe search ends with the first match, which is returned.\n\nChanges\n=======\n\n22.3.5 (2022-03-05)\n-------------------\n\n- Update to iso-codes 4.9.0.\n\n\n22.1.10 (2022-01-10)\n--------------------\n\n- Update to iso-codes 4.8.0. (Thanks to llimeht!)\n\n\n20.7.3 (2020-07-03)\n-------------------\n\n- Fix bug #37: (accidental) unconditional pkg_resources import.\n  (thanks, crbunney)\n\n20.7.2 (2020-07-02)\n-------------------\n\n- Add (auto-generated) __version__ attribute to the main module.\n  (Fixes issue #4)\n\n- Add fuzzy search to historic countries. (Fixe issue #26)\n\n- Update to iso-codes 4.5.0.\n\n- PR 9: Clean up the normalization (lower casing) of values in indexes and searches.\n  See PR https://github.com/flyingcircusio/pycountry/pull/9 for detailed\n  discussion. This also fixed issue #8.\n\n- Smaller cleanups and build environment version bumps.\n\n- PR 35: Python 3-only cleanups and updated Python minor version compatibility\n  (thanks, Djailla)\n\n- PR 33: Remove defunct bugtracker link from README (thanks, jwilk)\n\n- P3 32: (Somewhat hilarious) Typo (thanks, jwilk)\n\n- Moved to Git/Github; switched from Bitbucket Pipelines to Travis builds.\n\n\n19.8.18 (2019-08-18)\n--------------------\n\n- Fix installation on systems that don't have UTF-8\n  as default encoding. (#13422)\n\n- Remove superfluous print debugging output. (#13424)\n\n\n19.7.15 (2019-07-15)\n--------------------\n\n- Update to iso-codes 4.3.\n\n- Add support for ISO 639-5 (Language Families and Groups).\n\n- Drop support for Python 2.\n\n- Add `search_fuzzy()` function to the countries database. This allows\n  for dealing with user searches that aren't really aware of ISO 3166 (so,\n  like, actual human beings). A bit of character normalization and prioritizing\n  matches between multiple criteria allows building somewhat reasonable\n  suggestion/autocompletion lists. (#13418)\n\n  Caveat emptor: no attention has been paid to performance in this feature.\n\n\n18.12.8 (2018-12-08)\n--------------------\n\nWARNING: This release contains a subtle but important API change that may break\nintegrations!\n\nLooking at #13416 I realized that I made a terrible API design choice with\nrespect to how the `get` function should behave in Python. Probably under the\ninfluence of either too little or too much whiskey I went and implemented `get`\nso that it raises a KeyError instead of doing the Pythonic thing and returning\nNone and allowing to customize the `default`. There was a bit of back-and-forth\naround this code in previous releases (specifically touching edge cases to\nhave the Subdivision API behave \"reasonably\", although there doesn't seem\nto be *one* right way there.)\n\nAnyway, when preparing this release and reviewing #13416 and the other related\nissues and changes from the past I noticed my mistake an decide to fix it\ngoing forward.\n\nSo, from now on `get` will behave as expected in Python and yes, this means\nyou will have to update your integration code carefully now checking for\n`None` returns instead of expecting KeyErrors. This is work, but I think it's\nworthwhile to uphold this convention within the Python community.\n\n- Switch API from \"get + KeyError\" to \" get + default=None\". This is\n  a subtle API-breaking change. Please update carefully. (#13416)\n\n- Update to iso-codes 4.1.\n\n\n18.5.26 (2018-05-26)\n--------------------\n\n- Fix #13394: incorrect KeyError shadowing in Subdivisions.get()\n- Fix #13398: make lazy loading thread-safe.\n\n18.5.20 (2018-05-20)\n--------------------\n\n- Update to iso-codes 3.79.\n\n\n18.2.23 (2018-02-23)\n--------------------\n\n- Update to iso-codes 3.78.\n\n\n17.9.23 (2017-09-23)\n--------------------\n\n- Update to iso-codes 3.76, which fixes #13398.\n\n\n17.5.14 (2017-05-14)\n--------------------\n\n- Update to iso-codes 3.75, which fixes #13389 again.\n  (bad parent codes for GB).\n\n- Switch from building on drone.io (discontinued service) to\n  bitbucket's Pipelines.\n\n- Update pytest dependencies to get rid of API warnings.\n\n17.01.08 (2017-01-08)\n---------------------\n\n- Update to iso-codes 3.73, which fixes #13389 (bad parent codes for CZ).\n\n\n17.01.02 (2017-01-02)\n---------------------\n\n- Return empty lists from the subdivision database if the country exists\n  but does not have any subdivisions. Fixes #13374.\n\n- Some typo fixes. Thanks to @VictorMireyev.\n\n- Update to iso-codes-3.72.\n\n\n16.11.27.1 (2016-11-27)\n-----------------------\n\n- 16.11.27 was a brown bag release. I merged the PRs online, but didn't\n  pull them. Well. This is what 16.11.27 actually should have been.\n\n\n16.11.27 (2016-11-27)\n---------------------\n\n- Fix encoding issue on Python 3 (which seems to have been limited to\n  some platforms.) Via PR17, fixes #13386.\n  Thanks to @masroore and @hiaselhans.\n\n- Documentation fix: iso639_1_code is not a valid key for languages any\n  more. Fixes #13387, thanks to @jmitzka.\n\n- Update to iso-codes-3.71.\n\n\n16.11.08 (2016-11-08)\n---------------------\n\nThis release was heavily supported by @zware who fixed some of the issues\nI overlooked in the last releases and a few enhancements.\n\n* All data objects now have a repr() that includes all values. (@zware)\n\n* All database objects now have a lookup method that takes a value and\n  returns the first data object that has an attribute that matches the value.\n  Note that searching is halted when the first match is found. (@zware)\n\n* Clean up historical countries: the deleted flag is gone and there is no\n  database that holds both historical and present countries any longer.\n  The record formats are too different to keep this facade up reasonably well.\n\n* Fix parent lookup for subdivisions.\n\n* Update README to correctly show the updated field names.\n\n* Update pins for the packages we depend on.\n\n* Reduce Python test coverage to Python 2.7 and 3.5 -- I can't sustain\n  running a bazillion Python versions all the time forever.\n\n* Fix Python 3 compatibility (@zware)\n\n\n\n16.10.23rc3 (2016-10-23)\n------------------------\n\n- Incorporate some typos and suggested README improvements from @Pander in #13375.\n\n\n16.10.23rc2 (2016-10-23)\n------------------------\n\n- Adapt README to the new attributes.\n\n\n16.10.23rc1 (2016-10-23)\n------------------------\n\nThis is a major change. The upstream packages have been revamped from the\nformer XML databases to use JSON. They adapted their schemata a bit and thus\nmade some of the structures in pycountry superfluous (yay!). Memory usage went\ndown when all databases are loaded (32.7 MiB down from 83.6 MiB) and\nperformance has gone up (not measured scientifically, but it's noticable when\nloading the DBs in an interactive session).\n\nTo mark this major change, I'm also switch from the existing (not useful)\nSemVer-based version numbers to CalVer-based numbers using YY.MM.DD.micro as\nthe pattern.\n\nTo avoid adding more complexity I have removed code that really only was\nnecessary because of the complexity of using the XML databases.\n\nHere's what you need to know:\n\n- I updated to iso-codes 3.70 which is a lot fresher than the\n  last release.\n\n- Attribute names have changed. There is no longer a mapping\n  going on between the sources and the object attributes. Take\n  a look at the JSON files (or inspect the objects) to see\n  which fields are supported.\n\n  You can also inspect the automatically build indexes (db.indices) to see all\n  keys in a database. Not every object supports every attribute - this depends\n  on the quality of the data from pkg-isocodes.\n\n  Attribute names are more coherent now, too. Note that \"alpha2\", \"alpha4\",\n  etc. are now using an underscore as that's the pattern in the upstream\n  packages. So it's \"alpha_2\" now.\n\n- HistoricCountries no longer includes countries that still\n  exist. I removed the computed fields that were meant to\n  make it easy to filter.\n\n\n",
+    "description_content_type": "",
+    "docs_url": null,
+    "download_url": "",
+    "downloads": {
+      "last_day": -1,
+      "last_month": -1,
+      "last_week": -1
+    },
+    "home_page": "https://github.com/flyingcircusio/pycountry",
+    "keywords": "country subdivision language currency iso 3166 639 4217 15924 3166-2",
+    "license": "LGPL 2.1",
+    "maintainer": "",
+    "maintainer_email": "",
+    "name": "pycountry",
+    "package_url": "https://pypi.org/project/pycountry/",
+    "platform": "",
+    "project_url": "https://pypi.org/project/pycountry/",
+    "project_urls": {
+      "Homepage": "https://github.com/flyingcircusio/pycountry"
+    },
+    "release_url": "https://pypi.org/project/pycountry/22.3.5/",
+    "requires_dist": null,
+    "requires_python": ">=3.6, <4",
+    "summary": "ISO country, subdivision, language, currency and script definitions and their translations",
+    "version": "22.3.5",
+    "yanked": false,
+    "yanked_reason": null
+  },
+  "last_serial": 13086785,
+  "releases": {
+    "0.10": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "9329f25a88573174130159b96ba8730a",
+          "sha256": "e0b61088ad733b58a46a5636a059623ab7eaf727178e616f8e1f8d9edd23ad6f"
+        },
+        "downloads": -1,
+        "filename": "pycountry-0.10.tar.gz",
+        "has_sig": false,
+        "md5_digest": "9329f25a88573174130159b96ba8730a",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 5142936,
+        "upload_time": "2008-05-26T05:21:51",
+        "upload_time_iso_8601": "2008-05-26T05:21:51Z",
+        "url": "https://files.pythonhosted.org/packages/71/b3/64e41cfa1392972e9991bbfa4b49d04138fb835587c21d4fcd987c8739e5/pycountry-0.10.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "0.11": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "71ea261ad651c31eab831cc9e99351b4",
+          "sha256": "c67992bfde17ff24438e9c154133d64ecf3034c349b6eed4055889a1032e49a9"
+        },
+        "downloads": -1,
+        "filename": "pycountry-0.11.tar.gz",
+        "has_sig": false,
+        "md5_digest": "71ea261ad651c31eab831cc9e99351b4",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 5562144,
+        "upload_time": "2009-03-03T09:21:26",
+        "upload_time_iso_8601": "2009-03-03T09:21:26.739563Z",
+        "url": "https://files.pythonhosted.org/packages/25/46/49d4cd109ac95bee71a93285236979c13aa6833d6ec834d812e034681bbd/pycountry-0.11.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "0.12": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "8535725e4f6e06f463e646630f251664",
+          "sha256": "01dac377fd1311563cb8f088e679cbbd80c003c589aa854f06f50cddf8204b59"
+        },
+        "downloads": -1,
+        "filename": "pycountry-0.12.tar.gz",
+        "has_sig": false,
+        "md5_digest": "8535725e4f6e06f463e646630f251664",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 15600,
+        "upload_time": "2010-04-20T20:23:55",
+        "upload_time_iso_8601": "2010-04-20T20:23:55.545815Z",
+        "url": "https://files.pythonhosted.org/packages/ac/3a/ec13a1480948137eec41063a0936185f432e65027d3a8aafb0fbe85021f7/pycountry-0.12.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "0.12.1": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "d593c50b446850ee40c4a342677100d5",
+          "sha256": "d46b5c910889bc1ab39fce4ed5bb39f6335e27449b54dd49161e23652d182f54"
+        },
+        "downloads": -1,
+        "filename": "pycountry-0.12.1.tar.gz",
+        "has_sig": false,
+        "md5_digest": "d593c50b446850ee40c4a342677100d5",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 6393186,
+        "upload_time": "2010-04-21T07:49:26",
+        "upload_time_iso_8601": "2010-04-21T07:49:26.832514Z",
+        "url": "https://files.pythonhosted.org/packages/c9/fb/e8ca30767cff146b1b56f817f97baaec63ecea3a3249175cf42f24853649/pycountry-0.12.1.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "0.14": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "ec4a793ade9bab76ae70c7d34e242757",
+          "sha256": "3d5d884ec42fd518945bbea6a7a17c7000d7540ef9e378dcbe9266aec4f9fbff"
+        },
+        "downloads": -1,
+        "filename": "pycountry-0.14.tar.gz",
+        "has_sig": false,
+        "md5_digest": "ec4a793ade9bab76ae70c7d34e242757",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 16005,
+        "upload_time": "2011-07-06T10:46:49",
+        "upload_time_iso_8601": "2011-07-06T10:46:49.223507Z",
+        "url": "https://files.pythonhosted.org/packages/e9/61/e46750a20de1ad31b43c91e7c8ad0cb0ef7d2ba5f5c3935aad2f2cac606a/pycountry-0.14.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "0.14.1": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "f33388b60eb4277f0eec2240dae2bfc0",
+          "sha256": "5af9e3896ac48e99acce79e4087d397823202f8a3aff65d38ec5d981bf93b42a"
+        },
+        "downloads": -1,
+        "filename": "pycountry-0.14.1.tar.gz",
+        "has_sig": false,
+        "md5_digest": "f33388b60eb4277f0eec2240dae2bfc0",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 7095782,
+        "upload_time": "2011-07-15T10:57:13",
+        "upload_time_iso_8601": "2011-07-15T10:57:13.157646Z",
+        "url": "https://files.pythonhosted.org/packages/06/35/2b710d4b8aacea2469b982484ec4a867697dc36b2d8287eb4746bf0ba135/pycountry-0.14.1.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "0.14.2": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "69b5b65479b27717e05f8a577cb9ae07",
+          "sha256": "468afb11dd1c9d0f8b28636ba8d2be0ae5d8df0e1e97ed585afa32421ab5580b"
+        },
+        "downloads": -1,
+        "filename": "pycountry-0.14.2.zip",
+        "has_sig": false,
+        "md5_digest": "69b5b65479b27717e05f8a577cb9ae07",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 7685867,
+        "upload_time": "2012-07-18T16:05:31",
+        "upload_time_iso_8601": "2012-07-18T16:05:31.419257Z",
+        "url": "https://files.pythonhosted.org/packages/c2/57/1856ba2fa41948578ab7badb50a97ce633cbb775eef967e6cdb59272a3d0/pycountry-0.14.2.zip",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "0.14.3": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "b235ca1e1f623b0b8925d26ad0eabe44",
+          "sha256": "60e46c4cf55e5d8925383af3ca1c48e5b808f824314fcbd57e751eb49a447660"
+        },
+        "downloads": -1,
+        "filename": "pycountry-0.14.3.tar.gz",
+        "has_sig": false,
+        "md5_digest": "b235ca1e1f623b0b8925d26ad0eabe44",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 7179222,
+        "upload_time": "2012-09-04T12:17:50",
+        "upload_time_iso_8601": "2012-09-04T12:17:50.704501Z",
+        "url": "https://files.pythonhosted.org/packages/2a/37/4ea55210ca9f4e2d48dcf68485ecd4b25d8d196226a0303f0111bc5e83ec/pycountry-0.14.3.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "0.14.4": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "3accbd4591bc79a610ef8bcc5759773f",
+          "sha256": "556dbe376dcb102fc251ffc6bbf35c206befd8f86e7954216c52608207f17d7e"
+        },
+        "downloads": -1,
+        "filename": "pycountry-0.14.4.zip",
+        "has_sig": false,
+        "md5_digest": "3accbd4591bc79a610ef8bcc5759773f",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 7697061,
+        "upload_time": "2012-09-14T10:44:55",
+        "upload_time_iso_8601": "2012-09-14T10:44:55.496084Z",
+        "url": "https://files.pythonhosted.org/packages/66/c0/4fdb750f80729aa4bbfdae980e35470c989f2bdf8c524dea0201abb3da79/pycountry-0.14.4.zip",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "0.14.5": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "1834b32f2b4ca3f1b6518388959f2bbc",
+          "sha256": "60854e30798d0ed87bdd9edf20511b89feba65a78ddc30d22744875da8afc33b"
+        },
+        "downloads": -1,
+        "filename": "pycountry-0.14.5.zip",
+        "has_sig": false,
+        "md5_digest": "1834b32f2b4ca3f1b6518388959f2bbc",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 7697239,
+        "upload_time": "2012-09-14T12:07:59",
+        "upload_time_iso_8601": "2012-09-14T12:07:59.595551Z",
+        "url": "https://files.pythonhosted.org/packages/f5/7e/a229e0a44c3d6a413835baf16798f7be020b12b0a03c1e6677aa12581408/pycountry-0.14.5.zip",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "0.14.6": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "e4729194a8028f0971f1da12f485f4c8",
+          "sha256": "b071c65ac288bc954b28583a11892b841c0f636c1444df450aa328d66569842c"
+        },
+        "downloads": -1,
+        "filename": "pycountry-0.14.6.zip",
+        "has_sig": false,
+        "md5_digest": "e4729194a8028f0971f1da12f485f4c8",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 7711307,
+        "upload_time": "2012-10-02T17:07:32",
+        "upload_time_iso_8601": "2012-10-02T17:07:32.003620Z",
+        "url": "https://files.pythonhosted.org/packages/dd/0b/fbfda79ea397f6d77ff459b0c8780a96223c36a9cd665a8c38813813c240/pycountry-0.14.6.zip",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "0.14.7": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "4ec2e54b05a93b86c1aeb1a28da318cf",
+          "sha256": "72c989c73881a09967e6b460b046c3d07134600ec4d689ae51fa39d0e1dcb93d"
+        },
+        "downloads": -1,
+        "filename": "pycountry-0.14.7.zip",
+        "has_sig": false,
+        "md5_digest": "4ec2e54b05a93b86c1aeb1a28da318cf",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 7738052,
+        "upload_time": "2012-11-03T08:46:55",
+        "upload_time_iso_8601": "2012-11-03T08:46:55.174888Z",
+        "url": "https://files.pythonhosted.org/packages/7b/b3/1e57aa0611be88bf93d0680ef3b5e811a40afef1538322c9981e9640165e/pycountry-0.14.7.zip",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "0.14.8": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "2c775e379ba5ca2363f4f595ac9304ba",
+          "sha256": "5252b5378ba6f1971aa718248d797fb1e2a33d0bdb975400e4b801549102e2fa"
+        },
+        "downloads": -1,
+        "filename": "pycountry-0.14.8.zip",
+        "has_sig": false,
+        "md5_digest": "2c775e379ba5ca2363f4f595ac9304ba",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 7781480,
+        "upload_time": "2013-02-25T07:38:51",
+        "upload_time_iso_8601": "2013-02-25T07:38:51.314684Z",
+        "url": "https://files.pythonhosted.org/packages/69/69/f68f24ff9c2c7290d6e4b3cc5b11e3c9242cc4f6688e1f06dea5810e0d56/pycountry-0.14.8.zip",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "0.15": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "96a709d1481f8e3ba51d2dd3d8bcf07d",
+          "sha256": "42003531fef65cf56ad35e32843a9b8c090127b0a5827f69fbea99f239d9ad73"
+        },
+        "downloads": -1,
+        "filename": "pycountry-0.15.zip",
+        "has_sig": false,
+        "md5_digest": "96a709d1481f8e3ba51d2dd3d8bcf07d",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 7796770,
+        "upload_time": "2013-06-22T13:05:41",
+        "upload_time_iso_8601": "2013-06-22T13:05:41.123710Z",
+        "url": "https://files.pythonhosted.org/packages/eb/34/5f9aabad8255caca6b42181090d7821c7619e33ef126a2f172b7ff881c08/pycountry-0.15.zip",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "0.16": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "8f040ee7ed0bd58363e52beed009e180",
+          "sha256": "dea598b6feccb82281d9e35bbf6bdb669eac4cf0a51be57c3a82ba166534acb6"
+        },
+        "downloads": -1,
+        "filename": "pycountry-0.16.zip",
+        "has_sig": false,
+        "md5_digest": "8f040ee7ed0bd58363e52beed009e180",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 7845174,
+        "upload_time": "2013-07-02T09:44:39",
+        "upload_time_iso_8601": "2013-07-02T09:44:39.339757Z",
+        "url": "https://files.pythonhosted.org/packages/cc/3d/bd18012213af9ab350f30a66056d54ac8629b208d977972595f45b3a6de0/pycountry-0.16.zip",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "0.17": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "194f8db4e31543c0b3b2efd3ff5c5396",
+          "sha256": "1d1781ae6c42b15c26f45da7f53200defe00b6b2cad0512f05fdd43e539dd539"
+        },
+        "downloads": -1,
+        "filename": "pycountry-0.17.zip",
+        "has_sig": false,
+        "md5_digest": "194f8db4e31543c0b3b2efd3ff5c5396",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 7845572,
+        "upload_time": "2013-07-10T13:46:19",
+        "upload_time_iso_8601": "2013-07-10T13:46:19.580789Z",
+        "url": "https://files.pythonhosted.org/packages/e8/86/28c9f59b55fce164490da9bc83d2962a214ca8b71e703977f970b72b6eb8/pycountry-0.17.zip",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "0.18": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "83a75d4008fa6981b047c01b3c6adab3",
+          "sha256": "fb8ee7552a52f9930c7df4032b8dff60e5175c63fdaaad2d649cab33708781b2"
+        },
+        "downloads": -1,
+        "filename": "pycountry-0.18.zip",
+        "has_sig": false,
+        "md5_digest": "83a75d4008fa6981b047c01b3c6adab3",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 7850782,
+        "upload_time": "2013-08-02T06:26:05",
+        "upload_time_iso_8601": "2013-08-02T06:26:05.138470Z",
+        "url": "https://files.pythonhosted.org/packages/43/ca/b45ab97dd8b6ab9d0cd387728006b63abceddd57ebe549d01ca1092c69dd/pycountry-0.18.zip",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "0.19": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "a210a8f3b7498d2b1da70cc1103dfa38",
+          "sha256": "31e119296f15d9aebeca68c60765cc9e99abb900afb42072810f918f05e34443"
+        },
+        "downloads": -1,
+        "filename": "pycountry-0.19.zip",
+        "has_sig": false,
+        "md5_digest": "a210a8f3b7498d2b1da70cc1103dfa38",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 7852327,
+        "upload_time": "2013-08-20T16:40:40",
+        "upload_time_iso_8601": "2013-08-20T16:40:40.923323Z",
+        "url": "https://files.pythonhosted.org/packages/a7/3c/a351f253f28ce6b2f9aab2b3518197c1b9eae27323a58d641dadb481630d/pycountry-0.19.zip",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "0.9": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "2d5540a49b37a658f990dc46039b5191",
+          "sha256": "5dd01fe5432cab39c62f4841963879d00d8e61555db907bb86440f2953b67f4a"
+        },
+        "downloads": -1,
+        "filename": "pycountry-0.9.tar.gz",
+        "has_sig": false,
+        "md5_digest": "2d5540a49b37a658f990dc46039b5191",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 2738257,
+        "upload_time": "2008-05-20T14:02:31",
+        "upload_time_iso_8601": "2008-05-20T14:02:31Z",
+        "url": "https://files.pythonhosted.org/packages/b7/2b/9da73d76d549e84d09e7002efc759563db0ff6d7d03f2130e1a4be503f02/pycountry-0.9.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "1.0": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "5e92360d9bb4df56eeda1b2cc79a7a1a",
+          "sha256": "a09616ec9c9f73be27de8087bc57c255dd80b4fbbac9b8dbdbbe50abbae33d27"
+        },
+        "downloads": -1,
+        "filename": "pycountry-1.0.zip",
+        "has_sig": false,
+        "md5_digest": "5e92360d9bb4df56eeda1b2cc79a7a1a",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 7866775,
+        "upload_time": "2013-09-02T09:10:43",
+        "upload_time_iso_8601": "2013-09-02T09:10:43.186269Z",
+        "url": "https://files.pythonhosted.org/packages/6b/1b/ba61b78ad78acd62a8bf46fa97aa520510cbc83d04f4c8a4a537174257d9/pycountry-1.0.zip",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "1.1": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "add6b7fcf64461902d3e0fb7d3a3682f",
+          "sha256": "d2e89057e6418d03128fb44faa11dd979c310baaaf0d4adea0e1af17a3ebef74"
+        },
+        "downloads": -1,
+        "filename": "pycountry-1.1.zip",
+        "has_sig": false,
+        "md5_digest": "add6b7fcf64461902d3e0fb7d3a3682f",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 7862246,
+        "upload_time": "2013-10-04T19:56:45",
+        "upload_time_iso_8601": "2013-10-04T19:56:45.932135Z",
+        "url": "https://files.pythonhosted.org/packages/0e/23/c346bb00a72bbcb160c78ef8837d9af8bb9a50220c33e7f90bb733cbb08b/pycountry-1.1.zip",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "1.10": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "617635a7e94dc3d18ebcb5382cd3c93f",
+          "sha256": "29bd07e5f0d0471c260cea14e2ca4b7d705228ebb024b4de139dc87795576e67"
+        },
+        "downloads": -1,
+        "filename": "pycountry-1.10.zip",
+        "has_sig": false,
+        "md5_digest": "617635a7e94dc3d18ebcb5382cd3c93f",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 8140587,
+        "upload_time": "2014-11-10T10:46:08",
+        "upload_time_iso_8601": "2014-11-10T10:46:08.461100Z",
+        "url": "https://files.pythonhosted.org/packages/a9/18/ea8885a4e09ae997d981d7cd55aa3c1828d079da34daddeaf53f74b3fbe2/pycountry-1.10.zip",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "1.11": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "3ba91e144d281beb5fbd22438389e583",
+          "sha256": "dfe2a4c17bb286df1f64f0a7a064ea86a6272f5f1d9aa2e61be2cfeef6affc30"
+        },
+        "downloads": -1,
+        "filename": "pycountry-1.11.tar.gz",
+        "has_sig": false,
+        "md5_digest": "3ba91e144d281beb5fbd22438389e583",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 19837780,
+        "upload_time": "2015-06-13T08:09:39",
+        "upload_time_iso_8601": "2015-06-13T08:09:39.112424Z",
+        "url": "https://files.pythonhosted.org/packages/7d/47/5a5bcb8842e67fbf2f41a8dbc70f493be562317f5f29e84a0c3e9832f548/pycountry-1.11.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "1.12": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "1c64c708bbe900df9662b8c09c26b27a",
+          "sha256": "dce2893ceac5d5264e7d0b6bf9f0421fb9ff87b7459d1c65a518fbcd826245e9"
+        },
+        "downloads": -1,
+        "filename": "pycountry-1.12.tar.gz",
+        "has_sig": false,
+        "md5_digest": "1c64c708bbe900df9662b8c09c26b27a",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 18606424,
+        "upload_time": "2015-06-13T08:32:40",
+        "upload_time_iso_8601": "2015-06-13T08:32:40.729953Z",
+        "url": "https://files.pythonhosted.org/packages/9e/0c/291782d7388ec98775a2fc345d68a1078ffcee2611268f3be15e3f8f8d46/pycountry-1.12.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "1.13": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "f1d79d0d9027122804eca99656c34bfc",
+          "sha256": "3b72f2c334e702d463205e510d8d9b3fc8364a2f647074f543a1da2602730918"
+        },
+        "downloads": -1,
+        "filename": "pycountry-1.13.tar.gz",
+        "has_sig": false,
+        "md5_digest": "f1d79d0d9027122804eca99656c34bfc",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 5007397,
+        "upload_time": "2015-07-19T10:49:06",
+        "upload_time_iso_8601": "2015-07-19T10:49:06.320780Z",
+        "url": "https://files.pythonhosted.org/packages/4a/a8/4a80c38e8fc8c22fb42cdc11510c6ef2eb288c5fbda7f3cebf4df266f750/pycountry-1.13.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "1.14": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "f601972df38b39f02247e218e81ecf71",
+          "sha256": "e5012671e4c1e0280574fff5bce50d892e8b56dea43e867661088c1bf91c2f0c"
+        },
+        "downloads": -1,
+        "filename": "pycountry-1.14.tar.gz",
+        "has_sig": false,
+        "md5_digest": "f601972df38b39f02247e218e81ecf71",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 5009511,
+        "upload_time": "2015-08-09T09:40:44",
+        "upload_time_iso_8601": "2015-08-09T09:40:44.886325Z",
+        "url": "https://files.pythonhosted.org/packages/ec/77/e798a2860d70b260cec62d5d5a6ace6c4b0d3d623d5b6e4e88436b43f36d/pycountry-1.14.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "1.15": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "aab287db70017fcaaefdabb6a95fa21d",
+          "sha256": "7808a46791650c6e8bf622d4016aa69474e54f134f758b06924dbb958852d3cb"
+        },
+        "downloads": -1,
+        "filename": "pycountry-1.15.tar.gz",
+        "has_sig": false,
+        "md5_digest": "aab287db70017fcaaefdabb6a95fa21d",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 5020820,
+        "upload_time": "2015-09-08T15:57:48",
+        "upload_time_iso_8601": "2015-09-08T15:57:48.727971Z",
+        "url": "https://files.pythonhosted.org/packages/8f/46/93addaefdcb168425051c665038941f71d24025342faeb1c470bb0112290/pycountry-1.15.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "1.16": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "03e534285fd71e96647a390da9993434",
+          "sha256": "62d604cb8d476c65a9f09367cfc27a58823b4c45a4171e027dd76408d61ccd34"
+        },
+        "downloads": -1,
+        "filename": "pycountry-1.16.tar.gz",
+        "has_sig": false,
+        "md5_digest": "03e534285fd71e96647a390da9993434",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 5020701,
+        "upload_time": "2015-10-06T15:18:02",
+        "upload_time_iso_8601": "2015-10-06T15:18:02.992450Z",
+        "url": "https://files.pythonhosted.org/packages/1d/c7/9477bd826c5e3ff7cd74a621bb1e8f38036bcccdf9aeceaba582938111cd/pycountry-1.16.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "1.17": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "78066a996d2705a4167f9a0a782598f9",
+          "sha256": "46304a0658d5bae64447196e49a685dc7643bf83576e76156906ea9e18c070e3"
+        },
+        "downloads": -1,
+        "filename": "pycountry-1.17.tar.gz",
+        "has_sig": false,
+        "md5_digest": "78066a996d2705a4167f9a0a782598f9",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 5020422,
+        "upload_time": "2015-10-07T04:52:00",
+        "upload_time_iso_8601": "2015-10-07T04:52:00.741137Z",
+        "url": "https://files.pythonhosted.org/packages/1c/0a/3dcba459ec3f29c578ab5db57d5ea5212a560d1741f0e4e0c393bf97207c/pycountry-1.17.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "1.18": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "652313cef084bf942240ecfe9f88b565",
+          "sha256": "23bb173d0281e98eb7b432d8dc6819e5fe6573e505454d228558f61e1f5ae1e6"
+        },
+        "downloads": -1,
+        "filename": "pycountry-1.18.tar.gz",
+        "has_sig": false,
+        "md5_digest": "652313cef084bf942240ecfe9f88b565",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 5020542,
+        "upload_time": "2015-11-04T16:53:06",
+        "upload_time_iso_8601": "2015-11-04T16:53:06.538612Z",
+        "url": "https://files.pythonhosted.org/packages/3b/9b/6055dd22e114fdf15b1702e9ccd70041792e953f3658c2aa88736f86485b/pycountry-1.18.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "1.19": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "08139798bf0b3f9dba1389d30c296569",
+          "sha256": "132ecf3343e4bde8fd0c48a4345a4a8a6144fbdcdaf190a43a7e34c99e91be4d"
+        },
+        "downloads": -1,
+        "filename": "pycountry-1.19.tar.gz",
+        "has_sig": false,
+        "md5_digest": "08139798bf0b3f9dba1389d30c296569",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 5022557,
+        "upload_time": "2016-01-06T09:49:39",
+        "upload_time_iso_8601": "2016-01-06T09:49:39.203012Z",
+        "url": "https://files.pythonhosted.org/packages/32/82/588ad79c81330250dc15c87bde2a9450b18c293d0f6c2c155890466860bb/pycountry-1.19.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "1.2": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "109a22ae4f4526a850ff2392a8de8842",
+          "sha256": "76ba499a441bc05b20c200b7b7347eb099b41f4e89cadacac4dbbad7059c871a"
+        },
+        "downloads": -1,
+        "filename": "pycountry-1.2.zip",
+        "has_sig": false,
+        "md5_digest": "109a22ae4f4526a850ff2392a8de8842",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 7856836,
+        "upload_time": "2013-11-06T09:51:06",
+        "upload_time_iso_8601": "2013-11-06T09:51:06.805642Z",
+        "url": "https://files.pythonhosted.org/packages/d8/06/ace90c30f7d19e10d12dc4ff7345103ac878f3471a16b9020c22da4a7557/pycountry-1.2.zip",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "1.20": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "efb021c3b42b40c324b80a85714515d6",
+          "sha256": "0588efa3171e1d5e4cc96fce569ac865964285fdc8dbdc0860844f74598d1f98"
+        },
+        "downloads": -1,
+        "filename": "pycountry-1.20.tar.gz",
+        "has_sig": false,
+        "md5_digest": "efb021c3b42b40c324b80a85714515d6",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 5024012,
+        "upload_time": "2016-02-03T10:07:24",
+        "upload_time_iso_8601": "2016-02-03T10:07:24.717538Z",
+        "url": "https://files.pythonhosted.org/packages/6c/40/13c8d2e66cc786dc8593b038c2c9df97631e5e31b4f155ef3f05ae3ccfc8/pycountry-1.20.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "1.3": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "da8b6adc076cc0e70fa395a2ddcb057c",
+          "sha256": "96392022f6bd036f3c5143af36ecfc62d62c99ded039378da18f89f9b2f383dc"
+        },
+        "downloads": -1,
+        "filename": "pycountry-1.3.zip",
+        "has_sig": false,
+        "md5_digest": "da8b6adc076cc0e70fa395a2ddcb057c",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 7895245,
+        "upload_time": "2013-12-11T07:20:47",
+        "upload_time_iso_8601": "2013-12-11T07:20:47.528136Z",
+        "url": "https://files.pythonhosted.org/packages/29/9c/06659ff69935b665f9a50bb97f3d9a692c51003a2c83aed9a794d1cf35f3/pycountry-1.3.zip",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "1.4": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "72f18d648215ababf1b82246a4fbe9d8",
+          "sha256": "c8e8dd244ad32bc1dbb55565b83f9277d0e0ad423c190844acd7e4b9831c3652"
+        },
+        "downloads": -1,
+        "filename": "pycountry-1.4.zip",
+        "has_sig": false,
+        "md5_digest": "72f18d648215ababf1b82246a4fbe9d8",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 7911812,
+        "upload_time": "2014-02-07T07:18:15",
+        "upload_time_iso_8601": "2014-02-07T07:18:15.529983Z",
+        "url": "https://files.pythonhosted.org/packages/6e/a8/09f890bee252f51d4029886650fe150f012a2c1aac7bf71c04eede720f22/pycountry-1.4.zip",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "1.5": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "c0acbfbdad5b4d044b459ec4f7a0e8b7",
+          "sha256": "11c014150120d51ebbb2a116698ad608c9e24e4f36c1aa64e94c1d5e0cbb799a"
+        },
+        "downloads": -1,
+        "filename": "pycountry-1.5.tar.gz",
+        "has_sig": false,
+        "md5_digest": "c0acbfbdad5b4d044b459ec4f7a0e8b7",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 7384714,
+        "upload_time": "2014-04-03T13:53:01",
+        "upload_time_iso_8601": "2014-04-03T13:53:01.025509Z",
+        "url": "https://files.pythonhosted.org/packages/88/9c/d136616ebadc5120ec1f177ba14103b6ff0b62d7fe441d293999fab9c303/pycountry-1.5.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "1.6": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "48ea816d68cc0491d31fdbc8a4f57d48",
+          "sha256": "160d49120bca85282f1ab841181d83d38f68331d113cef12d66708ff6b786262"
+        },
+        "downloads": -1,
+        "filename": "pycountry-1.6.zip",
+        "has_sig": false,
+        "md5_digest": "48ea816d68cc0491d31fdbc8a4f57d48",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 8014680,
+        "upload_time": "2014-05-02T05:48:05",
+        "upload_time_iso_8601": "2014-05-02T05:48:05.691535Z",
+        "url": "https://files.pythonhosted.org/packages/db/e9/7d878cc6ac0b832bcd637024302f4275be4c2c44a9ad429cf774871d0e99/pycountry-1.6.zip",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "1.7": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "5ac4f180bf37a4dcc5ef6cc0c787de5c",
+          "sha256": "b3ec33ddd8bbe437e53a01c59d1822b5e9b4e9b433083723a1e931830e8d3cc4"
+        },
+        "downloads": -1,
+        "filename": "pycountry-1.7.zip",
+        "has_sig": false,
+        "md5_digest": "5ac4f180bf37a4dcc5ef6cc0c787de5c",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 8050580,
+        "upload_time": "2014-06-24T06:36:58",
+        "upload_time_iso_8601": "2014-06-24T06:36:58.065762Z",
+        "url": "https://files.pythonhosted.org/packages/1f/52/04b73a11a37855b384a3f81fa86124db397d6e41fffd4a15d397206799e1/pycountry-1.7.zip",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "1.8": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "2250ce5bd4253cd77fff39df48022069",
+          "sha256": "ee2dbc157f21fc570e7a833180f8ae38ffbdee85af2c537b72d207af45dac5e1"
+        },
+        "downloads": -1,
+        "filename": "pycountry-1.8.zip",
+        "has_sig": false,
+        "md5_digest": "2250ce5bd4253cd77fff39df48022069",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 8138837,
+        "upload_time": "2014-07-06T14:33:47",
+        "upload_time_iso_8601": "2014-07-06T14:33:47.459825Z",
+        "url": "https://files.pythonhosted.org/packages/c8/7f/ffd3bfe868ac20ccdf03a03d425ab2a6bc47c286d3f57a030ec658914d45/pycountry-1.8.zip",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "1.9": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "1fa53872c78080d3da19b62aed86296f",
+          "sha256": "a3961d1f7bb4c3ebb6d04f9c4dc738ce438b9c1ea1fcb7f7220df18122448b6c"
+        },
+        "downloads": -1,
+        "filename": "pycountry-1.9.zip",
+        "has_sig": false,
+        "md5_digest": "1fa53872c78080d3da19b62aed86296f",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 8138933,
+        "upload_time": "2014-11-10T10:43:33",
+        "upload_time_iso_8601": "2014-11-10T10:43:33.204148Z",
+        "url": "https://files.pythonhosted.org/packages/48/bf/fa834e65db0bd4a8b0f7338afcf696b089591a881bedc002c99e2f26505f/pycountry-1.9.zip",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "16.10.23rc1": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "8d9401514206eb0f5df09832074f5abe",
+          "sha256": "d1eda0bc7c5ee51af3abeac992bb954e197fe9933c3557095c8c48245f637b3b"
+        },
+        "downloads": -1,
+        "filename": "pycountry-16.10.23rc1.tar.gz",
+        "has_sig": false,
+        "md5_digest": "8d9401514206eb0f5df09832074f5abe",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 9042062,
+        "upload_time": "2016-10-23T18:07:24",
+        "upload_time_iso_8601": "2016-10-23T18:07:24.959488Z",
+        "url": "https://files.pythonhosted.org/packages/e2/6f/9c7f7ed6c556dc6af46313fe29c604561201849bd118bf479ed755905cbb/pycountry-16.10.23rc1.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "16.10.23rc2": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "1dba2ca472e714819c3d83144bdc7471",
+          "sha256": "cf807139987c496bbbbd76f79b1b6c34ae926818f100d4a19f72561e2d94fada"
+        },
+        "downloads": -1,
+        "filename": "pycountry-16.10.23rc2.tar.gz",
+        "has_sig": false,
+        "md5_digest": "1dba2ca472e714819c3d83144bdc7471",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 9041964,
+        "upload_time": "2016-10-23T18:20:02",
+        "upload_time_iso_8601": "2016-10-23T18:20:02.081910Z",
+        "url": "https://files.pythonhosted.org/packages/34/b5/936ebdfdc635b5acab997333a6c8e60b9e827aaed78f423a260c67d198ab/pycountry-16.10.23rc2.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "16.10.23rc3": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "d16fd2cdde9292f93ba429f7c70ff0b3",
+          "sha256": "91264377aa190d64a99e1b604de9c6c3233e5cb27540c03cd6f6aabb9c37ad57"
+        },
+        "downloads": -1,
+        "filename": "pycountry-16.10.23rc3.tar.gz",
+        "has_sig": false,
+        "md5_digest": "d16fd2cdde9292f93ba429f7c70ff0b3",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 9042005,
+        "upload_time": "2016-10-24T06:28:26",
+        "upload_time_iso_8601": "2016-10-24T06:28:26.478063Z",
+        "url": "https://files.pythonhosted.org/packages/67/17/58941fb09fea9fb3659be86fe10e142814478e4e2af05126bcce04fb26b5/pycountry-16.10.23rc3.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "16.11.27": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "f9add009b3e2d644452331ee8ea66267",
+          "sha256": "187a70a12b360570d19bbcff2541b09bd2353863d21bf2fc5ddc29d1e2d65974"
+        },
+        "downloads": -1,
+        "filename": "pycountry-16.11.27.tar.gz",
+        "has_sig": false,
+        "md5_digest": "f9add009b3e2d644452331ee8ea66267",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 9041166,
+        "upload_time": "2016-11-27T14:42:42",
+        "upload_time_iso_8601": "2016-11-27T14:42:42.065896Z",
+        "url": "https://files.pythonhosted.org/packages/f8/80/553326570a5493967823113e87b76fdcb201a782da0bbd64bde6c108959a/pycountry-16.11.27.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "16.11.27.1": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "edf4f7cd4748a48e3a47ac50a61dc363",
+          "sha256": "08c17eec56bba50f8d66529ce90fc343d75d77280537141ee65e61b41936aa1d"
+        },
+        "downloads": -1,
+        "filename": "pycountry-16.11.27.1.tar.gz",
+        "has_sig": false,
+        "md5_digest": "edf4f7cd4748a48e3a47ac50a61dc363",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 9041645,
+        "upload_time": "2016-11-27T14:56:50",
+        "upload_time_iso_8601": "2016-11-27T14:56:50.179783Z",
+        "url": "https://files.pythonhosted.org/packages/e0/14/93d057e0dbe57a0b8398e1a824eb412759f42a0c9ed864e20190480ef512/pycountry-16.11.27.1.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "16.11.8": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "85e34e597553fd10dbc0f43ec59377fc",
+          "sha256": "c9a0536699dfb46fb43ae1449999a921a79361030773bc3d35e00abfecb437c2"
+        },
+        "downloads": -1,
+        "filename": "pycountry-16.11.8.tar.gz",
+        "has_sig": false,
+        "md5_digest": "85e34e597553fd10dbc0f43ec59377fc",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 9042735,
+        "upload_time": "2016-11-08T20:23:22",
+        "upload_time_iso_8601": "2016-11-08T20:23:22.892981Z",
+        "url": "https://files.pythonhosted.org/packages/65/d1/5f6cb3846907a696c4c02140855b9347f7af9d70b4417e55b4531f6eb1a2/pycountry-16.11.8.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "17.1.2": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "3d965b8f898d29cee031623cb2540597",
+          "sha256": "77d340df2508ed2a484c84ef13cb459e60679342f0ab3c09549a6295b37e5340"
+        },
+        "downloads": -1,
+        "filename": "pycountry-17.1.2.tar.gz",
+        "has_sig": false,
+        "md5_digest": "3d965b8f898d29cee031623cb2540597",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 9021954,
+        "upload_time": "2017-01-02T14:05:48",
+        "upload_time_iso_8601": "2017-01-02T14:05:48.424631Z",
+        "url": "https://files.pythonhosted.org/packages/6f/cb/8f002e3d324791889031b099f0277bd114b2bc2ad7eae5a5d394fd0b4521/pycountry-17.1.2.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "17.1.8": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "f81e41dbde1c3d730cc8232482df595d",
+          "sha256": "c5ccad49e47caee92779bf83da81565159b1fe3d8f48b063068ac118b73dd1f8"
+        },
+        "downloads": -1,
+        "filename": "pycountry-17.1.8.tar.gz",
+        "has_sig": false,
+        "md5_digest": "f81e41dbde1c3d730cc8232482df595d",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 9022247,
+        "upload_time": "2017-01-08T10:39:44",
+        "upload_time_iso_8601": "2017-01-08T10:39:44.128042Z",
+        "url": "https://files.pythonhosted.org/packages/4b/51/9155a48faed108db64a0ff45227c752fda8126f3585475cef30b7abaa536/pycountry-17.1.8.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "17.5.14": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "f65e60896d77bf8791e15259cd34709e",
+          "sha256": "d31321e59a134aac326ac07d4b2595d63f7e7f755bcb503bdecca2bd1b54ff2f"
+        },
+        "downloads": -1,
+        "filename": "pycountry-17.5.14.tar.gz",
+        "has_sig": false,
+        "md5_digest": "f65e60896d77bf8791e15259cd34709e",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 9203433,
+        "upload_time": "2017-05-14T08:41:50",
+        "upload_time_iso_8601": "2017-05-14T08:41:50.940974Z",
+        "url": "https://files.pythonhosted.org/packages/5c/91/0cf9157db4002dbc1ca91eb9e99f2542273ebc5b2a22c9d3eba2589e7b81/pycountry-17.5.14.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "17.9.23": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "4358fa11ae2db24c34c8ab09fb07a3d9",
+          "sha256": "173c5e3a8884c5616c6595078cc8f27e65ce59c6d9aa8864bace0c6b1281c57a"
+        },
+        "downloads": -1,
+        "filename": "pycountry-17.9.23.tar.gz",
+        "has_sig": false,
+        "md5_digest": "4358fa11ae2db24c34c8ab09fb07a3d9",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 9208478,
+        "upload_time": "2017-09-23T15:06:55",
+        "upload_time_iso_8601": "2017-09-23T15:06:55.643101Z",
+        "url": "https://files.pythonhosted.org/packages/59/30/7ac3f181cc5dd290caea6fb04b9c56c19f1886598c559bf1d0d90ced4b3c/pycountry-17.9.23.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "18.12.8": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "490caf6f353a69fbfc7793999fb52521",
+          "sha256": "104a8ca94c700898c42a0172da2eab5a5675c49637b729a11db9e1dac2d983cd"
+        },
+        "downloads": -1,
+        "filename": "pycountry-18.12.8-py2.py3-none-any.whl",
+        "has_sig": false,
+        "md5_digest": "490caf6f353a69fbfc7793999fb52521",
+        "packagetype": "bdist_wheel",
+        "python_version": "py2.py3",
+        "requires_python": null,
+        "size": 10518148,
+        "upload_time": "2018-12-08T14:50:46",
+        "upload_time_iso_8601": "2018-12-08T14:50:46.088657Z",
+        "url": "https://files.pythonhosted.org/packages/f8/39/04d8215fddd5b263beb36cc324e5656714a19081cacb2fc7c8e6afc2817d/pycountry-18.12.8-py2.py3-none-any.whl",
+        "yanked": false,
+        "yanked_reason": null
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "46223fa49c45c304083de7d5b1870fb7",
+          "sha256": "8ec4020b2b15cd410893d573820d42ee12fe50365332e58c0975c953b60a16de"
+        },
+        "downloads": -1,
+        "filename": "pycountry-18.12.8.tar.gz",
+        "has_sig": false,
+        "md5_digest": "46223fa49c45c304083de7d5b1870fb7",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 10026953,
+        "upload_time": "2018-12-08T14:50:54",
+        "upload_time_iso_8601": "2018-12-08T14:50:54.566436Z",
+        "url": "https://files.pythonhosted.org/packages/87/c7/c2c76c3ae4ac79c74c1871ae775ed97b70d475dd90d1e824b1d2fc0cd54f/pycountry-18.12.8.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "18.2.23": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "e4333565ed3910f1cecfb91dcea7aa12",
+          "sha256": "46e4b1a21516e41fe6f8c0ef7a9876da8ce9ac3f719e3fed79cf79fd9b6206ee"
+        },
+        "downloads": -1,
+        "filename": "pycountry-18.2.23.tar.gz",
+        "has_sig": false,
+        "md5_digest": "e4333565ed3910f1cecfb91dcea7aa12",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 9692841,
+        "upload_time": "2018-02-23T19:32:47",
+        "upload_time_iso_8601": "2018-02-23T19:32:47.588042Z",
+        "url": "https://files.pythonhosted.org/packages/c8/16/5206c40fca91a7b622d55c6497faf1c134872e518a26be7af6fa684c67a0/pycountry-18.2.23.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "18.5.20": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "88763ccae3563b61ba53c35192fce416",
+          "sha256": "8f12c22bcbaf1a344fc27471b32be65519173246f99c2f4c5221dbce7ab563bf"
+        },
+        "downloads": -1,
+        "filename": "pycountry-18.5.20-py3-none-any.whl",
+        "has_sig": false,
+        "md5_digest": "88763ccae3563b61ba53c35192fce416",
+        "packagetype": "bdist_wheel",
+        "python_version": "3.6",
+        "requires_python": null,
+        "size": 10269066,
+        "upload_time": "2018-05-20T09:08:14",
+        "upload_time_iso_8601": "2018-05-20T09:08:14.117563Z",
+        "url": "https://files.pythonhosted.org/packages/07/4a/03defae608b9eb62975a6e2592aad8cd95a689468f10ef6d12d186bd64df/pycountry-18.5.20-py3-none-any.whl",
+        "yanked": false,
+        "yanked_reason": null
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "8de4edfd143cf0ae19a59c1a0f3c964e",
+          "sha256": "d2da27a75d1fcf90e0f116dd5aabb6e7c9ae987f6e205e6ff9096fa8cd9bfccb"
+        },
+        "downloads": -1,
+        "filename": "pycountry-18.5.20.tar.gz",
+        "has_sig": false,
+        "md5_digest": "8de4edfd143cf0ae19a59c1a0f3c964e",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 9778372,
+        "upload_time": "2018-05-20T09:04:57",
+        "upload_time_iso_8601": "2018-05-20T09:04:57.810327Z",
+        "url": "https://files.pythonhosted.org/packages/11/39/feb0a3b1534c41088bd017eedeb7a8f617bffc1fbb97decb1207cccc326c/pycountry-18.5.20.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "18.5.26": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "bfd7614c90bf5c192d5b33e33bfe279d",
+          "sha256": "195d8174fd6f98f45622d2885826091fc8b2168184422dac574311073ab8386c"
+        },
+        "downloads": -1,
+        "filename": "pycountry-18.5.26-py2-none-any.whl",
+        "has_sig": false,
+        "md5_digest": "bfd7614c90bf5c192d5b33e33bfe279d",
+        "packagetype": "bdist_wheel",
+        "python_version": "py2",
+        "requires_python": null,
+        "size": 10274476,
+        "upload_time": "2018-05-26T06:47:33",
+        "upload_time_iso_8601": "2018-05-26T06:47:33.756210Z",
+        "url": "https://files.pythonhosted.org/packages/18/99/a81f1da10070c563450a4ef334622e72fb0b7b74c929fdbed711154d8416/pycountry-18.5.26-py2-none-any.whl",
+        "yanked": false,
+        "yanked_reason": null
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "7f6e4f02fb1d35d0fc815b2c6726ef35",
+          "sha256": "ea38f839e719be54dfae1b089cbf1917add6ff8f43a55533d8c7c5799656a848"
+        },
+        "downloads": -1,
+        "filename": "pycountry-18.5.26-py2.py3-none-any.whl",
+        "has_sig": false,
+        "md5_digest": "7f6e4f02fb1d35d0fc815b2c6726ef35",
+        "packagetype": "bdist_wheel",
+        "python_version": "2.7",
+        "requires_python": null,
+        "size": 10274484,
+        "upload_time": "2018-05-26T06:52:30",
+        "upload_time_iso_8601": "2018-05-26T06:52:30.267515Z",
+        "url": "https://files.pythonhosted.org/packages/c5/c0/8ce9d2b55347867900edbe4d18f790571130c16f882b4891a0f08627dcdc/pycountry-18.5.26-py2.py3-none-any.whl",
+        "yanked": false,
+        "yanked_reason": null
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "5a22e0237a3e6af727058fc69fa5d8d3",
+          "sha256": "7f2aa2529c60f6575af3cd644688b201b97016822ce0ce1c4bcc0f7d08900997"
+        },
+        "downloads": -1,
+        "filename": "pycountry-18.5.26.tar.gz",
+        "has_sig": false,
+        "md5_digest": "5a22e0237a3e6af727058fc69fa5d8d3",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 9779056,
+        "upload_time": "2018-05-26T06:48:06",
+        "upload_time_iso_8601": "2018-05-26T06:48:06.956013Z",
+        "url": "https://files.pythonhosted.org/packages/9e/a0/1ecb5593a5da69a44ae8fc5b8b831a08b6801f500aea1341ee3224f29ebb/pycountry-18.5.26.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "19.7.15": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "17e266360bd1ea3813152d063f13a342",
+          "sha256": "68e58bfd3bedeea49ba9d4b38f2bd5e042f9753628eba9a819fb03f551d89096"
+        },
+        "downloads": -1,
+        "filename": "pycountry-19.7.15.tar.gz",
+        "has_sig": false,
+        "md5_digest": "17e266360bd1ea3813152d063f13a342",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 10002566,
+        "upload_time": "2019-07-15T14:37:49",
+        "upload_time_iso_8601": "2019-07-15T14:37:49.683753Z",
+        "url": "https://files.pythonhosted.org/packages/eb/50/89454c228d540dd08f8a2bf694d84f671e8c893fffaa937037a1c4e562aa/pycountry-19.7.15.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "19.8.18": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "533d51dbd38ed4bd928f7f6e8ad923d0",
+          "sha256": "3c57aa40adcf293d59bebaffbe60d8c39976fba78d846a018dc0c2ec9c6cb3cb"
+        },
+        "downloads": -1,
+        "filename": "pycountry-19.8.18.tar.gz",
+        "has_sig": false,
+        "md5_digest": "533d51dbd38ed4bd928f7f6e8ad923d0",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 10003160,
+        "upload_time": "2019-08-18T14:24:59",
+        "upload_time_iso_8601": "2019-08-18T14:24:59.243357Z",
+        "url": "https://files.pythonhosted.org/packages/16/b6/154fe93072051d8ce7bf197690957b6d0ac9a21d51c9a1d05bd7c6fdb16f/pycountry-19.8.18.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "20.7.2": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "07fdcb20ebe78482dd3a334ec28da31d",
+          "sha256": "64404be51ce40a84bdbcce524fdd598d738733f0944039966857aad181e1b155"
+        },
+        "downloads": -1,
+        "filename": "pycountry-20.7.2.tar.gz",
+        "has_sig": false,
+        "md5_digest": "07fdcb20ebe78482dd3a334ec28da31d",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 10136711,
+        "upload_time": "2020-07-02T11:25:34",
+        "upload_time_iso_8601": "2020-07-02T11:25:34.504778Z",
+        "url": "https://files.pythonhosted.org/packages/58/e5/f4d609aeefa45ae62c8f3df17ee11df8e59ce53f3e8f51968dd37be6aaf3/pycountry-20.7.2.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "20.7.3": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "55b4727c4ba0219105289c1ce6c9cde0",
+          "sha256": "81084a53d3454344c0292deebc20fcd0a1488c136d4900312cbd465cf552cb42"
+        },
+        "downloads": -1,
+        "filename": "pycountry-20.7.3.tar.gz",
+        "has_sig": false,
+        "md5_digest": "55b4727c4ba0219105289c1ce6c9cde0",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 10137217,
+        "upload_time": "2020-07-03T06:05:11",
+        "upload_time_iso_8601": "2020-07-03T06:05:11.250777Z",
+        "url": "https://files.pythonhosted.org/packages/76/73/6f1a412f14f68c273feea29a6ea9b9f1e268177d32e0e69ad6790d306312/pycountry-20.7.3.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "22.1.10": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "8359f295f70c5fdd253029302e08f856",
+          "sha256": "b9a6d9cdbf53f81ccdf73f6f5de01b0d8493cab2213a230af3e34458de85ea32"
+        },
+        "downloads": -1,
+        "filename": "pycountry-22.1.10.tar.gz",
+        "has_sig": false,
+        "md5_digest": "8359f295f70c5fdd253029302e08f856",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": ">=3.5, <4",
+        "size": 10060795,
+        "upload_time": "2022-01-10T07:40:43",
+        "upload_time_iso_8601": "2022-01-10T07:40:43.133057Z",
+        "url": "https://files.pythonhosted.org/packages/03/c4/2db520ae518156a88b419b2865d4fdc85fe78573948358f79dbaf0cf2b30/pycountry-22.1.10.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "22.3.5": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "47a8668fc5d86fcd2c608c19846e2912",
+          "sha256": "b2163a246c585894d808f18783e19137cb70a0c18fb36748dc01fc6f109c1646"
+        },
+        "downloads": -1,
+        "filename": "pycountry-22.3.5.tar.gz",
+        "has_sig": false,
+        "md5_digest": "47a8668fc5d86fcd2c608c19846e2912",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": ">=3.6, <4",
+        "size": 10141551,
+        "upload_time": "2022-03-05T10:27:01",
+        "upload_time_iso_8601": "2022-03-05T10:27:01.153620Z",
+        "url": "https://files.pythonhosted.org/packages/33/24/033604d30f6cf82d661c0f9dfc2c71d52cafc2de516616f80d3b0600cb7c/pycountry-22.3.5.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ]
+  },
+  "urls": [
+    {
+      "comment_text": "",
+      "digests": {
+        "md5": "47a8668fc5d86fcd2c608c19846e2912",
+        "sha256": "b2163a246c585894d808f18783e19137cb70a0c18fb36748dc01fc6f109c1646"
+      },
+      "downloads": -1,
+      "filename": "pycountry-22.3.5.tar.gz",
+      "has_sig": false,
+      "md5_digest": "47a8668fc5d86fcd2c608c19846e2912",
+      "packagetype": "sdist",
+      "python_version": "source",
+      "requires_python": ">=3.6, <4",
+      "size": 10141551,
+      "upload_time": "2022-03-05T10:27:01",
+      "upload_time_iso_8601": "2022-03-05T10:27:01.153620Z",
+      "url": "https://files.pythonhosted.org/packages/33/24/033604d30f6cf82d661c0f9dfc2c71d52cafc2de516616f80d3b0600cb7c/pycountry-22.3.5.tar.gz",
+      "yanked": false,
+      "yanked_reason": null
+    }
+  ],
+  "vulnerabilities": []
+}
