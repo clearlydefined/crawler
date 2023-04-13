@@ -84,6 +84,7 @@ ENV CRAWLER_AZBLOB_CONTAINER_NAME=production
 RUN git config --global --add safe.directory '*'
 
 COPY package*.json /tmp/
+COPY patches /tmp/patches
 RUN cd /tmp && npm install --production
 RUN mkdir -p "${APPDIR}" && cp -a /tmp/node_modules "${APPDIR}"
 
