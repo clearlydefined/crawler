@@ -119,6 +119,8 @@ class ScanCodeProcessor extends AbstractProcessor {
           [this._schemaVersion, this.toolVersion, this.configVersion],
           'Invalid ScanCode version'
         )
+
+        this.logger.info('Using ScanCode version: ' + this._toolVersion)
         return this._schemaVersion
       })
       .catch(error => {
