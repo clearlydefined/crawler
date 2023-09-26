@@ -1,0 +1,60 @@
+name: Build clearlydefined/crawler Docker image
+
+ # This is executed automatically on a tag
+ #
+ # Summary of the steps:
+ # - Build a Docker image of clearlydefined/crawler based on the Dockerfile
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions: {}
+
+env:
+  TAG: $(date +%s)
+
+jobs:
+
+  setup-tag:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.set-tag.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set tag
+        id: set-tag
+        run: |
+          if [ ${{ github.ref_type }} != 'tag' ]; then
+            echo "tag=${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          else
+            full_ref=${{ github.ref }}
+            echo "tag=${full_ref#refs/tags/}" >> "$GITHUB_OUTPUT"
+          fi
+        shell: bash
+
+  build_crawler_docker_image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    needs: setup-tag
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build the Docker image
+        env:
+          TAG: ${{ needs.setup-tag.outputs.tag }}
+        run: |
+          echo "*****   logging in to Docker for ghcr.io"
+          docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+
+          echo "*****   building Docker image"
+          echo "*****   cmd: docker build . --tag ghcr.io/${{ github.repository }}:${{ env.TAG }}"
+          docker build . --tag ghcr.io/${{ github.repository }}:${{ env.TAG }}
+
+          echo "*****   pushing Docker image to ghcr.io"
+          echo "*****   cmd: docker push ghcr.io/${{ github.repository }}:${{ env.TAG }}"
+          docker push ghcr.io/${{ github.repository }}:${{ env.TAG }}
