@@ -75,7 +75,7 @@ class AbstractClearlyDefinedProcessor extends AbstractProcessor {
     let count = 0
     const bytes = await du(location, {
       filter: file => {
-        if (path.basename(file) === '.git') return false
+        if (!this.isValidExcludingGit(file)) return false
         count++
         return true
       }

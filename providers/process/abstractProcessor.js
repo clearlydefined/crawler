@@ -150,13 +150,19 @@ class AbstractProcessor extends BaseHandler {
    */
   async filterFiles(location) {
     const fullList = await this.getFiles(location)
-    const exclusions = ['.git']
-    const filteredList = fullList.filter(file => {
-      if (!file) return false
-      const segments = file.split(/[\\/]/g)
-      return !intersection(segments, exclusions).length
-    })
+    const filteredList = fullList.filter(file => this.isValidExcludingGit(file))
     return trimAllParents(filteredList, location).filter(x => x)
+  }
+
+  _isValid(file, exclusions) {
+    if (!file) return false
+    const segments = file.split(/[\\/]/g)
+    return !intersection(segments, exclusions).length
+  }
+
+  isValidExcludingGit(file) {
+    const exclusions = ['.git']
+    return this._isValid(file, exclusions)
   }
 
   shouldFetch() {
