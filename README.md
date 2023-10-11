@@ -80,6 +80,18 @@ Process the source, if any:
 
 The crawler's output is stored for use by the rest of the ClearlyDefined infrastructure -- it is not intended to be used directly by humans. Note that each tool's output is stored separately and the results of processing the component and the component source are also separated.
 
+### More on `type`...
+The `type` in the request object typically corresponds to a internal processor in CD.
+1. `component` is the most generic type.  Internally, it is converted to a `package` or `source` request by the component processor.
+2. `package` request is processed by the package processor and is further converted to a request with a specific type (crate, deb, gem, go, maven, npm, nuget, composer, pod, pypi).  For a `package` typed request, if the mentioned specific binary package type is known, the specific type (e.g. `npm`) can be used (instead of `package`) in the harvest request and skip the conversion step.  For example,
+```json
+{
+  "type": "npm",
+  "url": "cd:/npm/npmjs/-/redie/0.3.0"
+}
+```
+3. `source` requests are processed by the source processor, which subsequently dispatches a `clearlydefined` typed request for the supported source types and other requests (one for each scanning tool).  These are the more advanced scenarios where the request type and the coordinate type differ.
+
 # Configuration
 
 The crawler is quite configuable. Out of the box it is setup for demo-level use directly on your computer. In its full glory it can run with arbitrarily many distributed clients using an array of different queuing, caching and storage technologies.
