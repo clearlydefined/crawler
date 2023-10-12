@@ -52,7 +52,7 @@ Here are a few example request objects.
 }
 ```
 
-The request `type` describes the crawling activity being requested. For example, "do `package` crawling". It is typically the same as the `type` in the url (see below). There are some more advanced scenarios where the two values are different but for starters, treat them as the same. The general form of a request URL is (note: it is a URL because of the underlying crawling infrastructure, the `cd` scheme is not particularly relevant)
+The request `type` describes the crawling activity being requested. For example, "do `package` crawling" (see [More on type](#more-on-type) for a description of valid type values). It is typically the same as the `type` in the url (see segments description below). There are some more advanced scenarios where the two values are different but for starters, treat them as the same. The general form of a request URL is (note: it is a URL because of the underlying crawling infrastructure, the `cd` scheme is not particularly relevant)
 
 ```
 cd:/type/provider/namespace/name/revision
@@ -80,10 +80,10 @@ Process the source, if any:
 
 The crawler's output is stored for use by the rest of the ClearlyDefined infrastructure -- it is not intended to be used directly by humans. Note that each tool's output is stored separately and the results of processing the component and the component source are also separated.
 
-### More on `type`...
-The `type` in the request object typically corresponds to a internal processor in CD.
+### <a id="more-on-type"></a>More on `type`
+The `type` in the request object typically corresponds to an internal processor in CD.
 1. `component` is the most generic type.  Internally, it is converted to a `package` or `source` request by the component processor.
-2. `package` request is processed by the package processor and is further converted to a request with a specific type (crate, deb, gem, go, maven, npm, nuget, composer, pod, pypi).  For a `package` typed request, if the mentioned specific binary package type is known, the specific type (e.g. `npm`) can be used (instead of `package`) in the harvest request and skip the conversion step.  For example,
+2. `package` request is processed by the package processor and is further converted to a request with a specific type (`crate`, `deb`, `gem`, `go`, `maven`, `npm`, `nuget`, `composer`, `pod`, `pypi`).  For a `package` typed request, if the mentioned specific binary package type is known, the specific type (e.g. `npm`) can be used (instead of `package`) in the harvest request and skip the conversion step.  For example,
 ```json
 {
   "type": "npm",
