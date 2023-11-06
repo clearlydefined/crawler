@@ -17,7 +17,7 @@ class TopProcessor extends AbstractProcessor {
     return (
       request.type === 'top' &&
       spec &&
-      ['npmjs', 'cocoapods', 'cratesio', 'mavencentral', 'mavengoogle', 'nuget', 'github', 'pypi', 'composer', 'debian'].includes(
+      ['npmjs', 'cocoapods', 'conda', 'cratesio', 'mavencentral', 'mavengoogle', 'nuget', 'github', 'pypi', 'composer', 'debian'].includes(
         spec.provider
       )
     )
@@ -31,6 +31,8 @@ class TopProcessor extends AbstractProcessor {
         return this._processTopNpms(request)
       // case 'cocoapods':
       //   return this._processTopCocoapods(request)
+      case 'conda':
+        return this._processTopConda(request)
       case 'cratesio':
         return this._processTopCrates(request)
       case 'mavencentral':
@@ -143,6 +145,38 @@ class TopProcessor extends AbstractProcessor {
       )
       await request.queueRequests(requestsPage)
       console.log(`Queued ${requestsPage.length} Crate packages. Offset: ${offset}`)
+    }
+  }
+
+  /* Example:
+{
+  "type": "top",
+  "url":"cd:/conda/conda/-/pip",
+  "payload": {
+    "body": {
+      "start": 0,
+      "end": 100
+    }
+  }
+}
+*/
+  async _processTopConda(request) {
+
+    let { start, end } = request.document
+    if (!start || start < 0) start = 0
+    if (!end || end - start <= 0) end = start + 1000
+
+    const response = await requestRetry.get(
+      `https://repo.anaconda.com/pkgs/main/channeldata.json`
+    )
+
+    for (let offset = start; offset < end; offset += 100) {
+      const page = offset / 100 + 1
+      const requestsPage = response.packages.keys
+        .slice(offset, 100)
+        .map(p => new Request('package', `cd:/conda/conda/-/${p}/`))
+      await request.queueRequests(requestsPage)
+      console.log(`Queued ${requestsPage.length} conda packages. Offset: ${offset}`)
     }
   }
 

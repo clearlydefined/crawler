@@ -12,6 +12,7 @@ module.exports = {
   fetch: {
     cdDispatch: require('./fetch/dispatcher'),
     cocoapods: require('./fetch/podFetch'),
+    conda: require('./fetch/condaFetch'),
     packagist: require('./fetch/packagistFetch'),
     cratesio: require('./fetch/cratesioFetch'),
     debian: require('./fetch/debianFetch'),
@@ -28,6 +29,7 @@ module.exports = {
   process: {
     cdsource: require('./process/sourceExtract'),
     component: require('./process/component'),
+    conda: require('./process/condaExtract'),
     crate: require('./process/crateExtract'),
     deb: require('./process/debExtract'),
     debsrc: require('./process/debsrcExtract'),
