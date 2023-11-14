@@ -269,19 +269,20 @@ class TopProcessor extends AbstractProcessor {
     // https://docs.microsoft.com/en-us/nuget/api/search-query-service-resource
     // Example: https://api-v2v3search-0.nuget.org/query?prerelease=false&skip=5&take=10
     const pageSize = 20
-    let { start, end } = request.document
-    if (!start || start < 0) start = 0
-    if (!end || end - start <= 0) end = start + 1000
-    for (let offset = start; offset < end; offset += pageSize) {
-      const topComponents = await requestRetry.get(
-        `https://api-v2v3search-0.nuget.org/query?prerelease=false&skip=${offset}&take=${pageSize}`
-      )
-      const requests = topComponents.data.map(component => {
-        return new Request('package', `cd:/nuget/nuget/-/${component.id}`)
-      })
-      await request.queueRequests(requests)
-      console.log(`Queued ${requests.length} NuGet packages. Offset: ${offset}`)
-    }
+    // let { start, end } = request.document
+    // if (!start || start < 0) start = 0
+    // if (!end || end - start <= 0) end = start + 1000
+    // for (let offset = start; offset < end; offset += pageSize) {
+    //   const topComponents = await requestRetry.get(
+    //     `https://api-v2v3search-0.nuget.org/query?prerelease=false&skip=${offset}&take=${pageSize}`
+    //   )
+    //   const requests = topComponents.data.map(component => {
+    //     return new Request('package', `cd:/nuget/nuget/-/${component.id}`)
+    //   })
+    //   await request.queueRequests(requests)
+    //   console.log(`Queued ${requests.length} NuGet packages. Offset: ${offset}`)
+    // }
+    // TODO(lamarrr): implement
     return request.markNoSave()
   }
 

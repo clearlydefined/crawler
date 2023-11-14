@@ -25,7 +25,7 @@ class CondaExtract extends AbstractClearlyDefinedProcessor {
       registryData.channelData.doc_url,
       registryData.channelData.doc_source_url,
       registryData.channelData.source_url].filter(e => e)
-      const sourceInfo = await this.sourceFinder(spec.type == "conda" ? registryData.repoData.packageData.version
+      const sourceInfo = await this.sourceFinder(spec.type == 'conda' ? registryData.repoData.packageData.version
         : registryData.channelData.vesion
         , sourceCandidates, {
         githubToken: this.options.githubToken,
@@ -36,8 +36,7 @@ class CondaExtract extends AbstractClearlyDefinedProcessor {
       }
     }
 
-    ['licensee', 'scancode', 'reuse', 'fossology'].forEach(x => this.linkAndQueueTool(request, x))
-    toolList.forEach(tool => this.linkAndQueueTool(request, tool, undefined, 'local'))
+    ['licensee', 'scancode', 'reuse', 'fossology'].forEach(x => this.linkAndQueueTool(request, x, undefined, 'local'))
     if (request.document.sourceInfo) {
       const sourceSpec = SourceSpec.fromObject(request.document.sourceInfo)
       this.linkAndQueue(request, 'source', sourceSpec.toEntitySpec())
