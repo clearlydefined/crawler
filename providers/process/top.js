@@ -4,6 +4,7 @@
 const AbstractProcessor = require('./abstractProcessor')
 const config = require('painless-config')
 const DebianFetch = require('../fetch/debianFetch')
+const CondaFetch = require('../fetch/condaFetch')
 const fs = require('fs')
 const ghrequestor = require('ghrequestor')
 const linebyline = require('linebyline')
@@ -17,7 +18,7 @@ class TopProcessor extends AbstractProcessor {
     return (
       request.type === 'top' &&
       spec &&
-      ['npmjs', 'cocoapods', 'cratesio', 'mavencentral', 'mavengoogle', 'nuget', 'github', 'pypi', 'composer', 'debian'].includes(
+      ['anaconda-main', 'anaconda-r', 'npmjs', 'cocoapods', 'conda-forge', 'cratesio', 'mavencentral', 'mavengoogle', 'nuget', 'github', 'pypi', 'composer', 'debian'].includes(
         spec.provider
       )
     )
@@ -27,10 +28,16 @@ class TopProcessor extends AbstractProcessor {
     super.handle(request)
     const spec = this.toSpec(request)
     switch (spec.provider) {
+      case 'anaconda-main':
+        return this._processTopConda(request)
+      case 'anaconda-r':
+        return this._processTopConda(request)
       case 'npmjs':
         return this._processTopNpms(request)
       // case 'cocoapods':
       //   return this._processTopCocoapods(request)
+      case 'conda-forge':
+        return this._processTopConda(request)
       case 'cratesio':
         return this._processTopCrates(request)
       case 'mavencentral':
@@ -144,6 +151,64 @@ class TopProcessor extends AbstractProcessor {
       await request.queueRequests(requestsPage)
       console.log(`Queued ${requestsPage.length} Crate packages. Offset: ${offset}`)
     }
+  }
+
+  /* Example:
+{
+  "type": "top",
+  "url":"cd:/conda/conda-forge/-/test",
+  "payload": {
+    "body": {
+      "start": 0,
+      "end": 100
+    }
+  }
+}
+*/
+  async _processTopConda(request) {
+    const condaChannels = {
+      'anaconda-main': 'https://repo.anaconda.com/pkgs/main',
+      'anaconda-r': 'https://repo.anaconda.com/pkgs/r',
+      'conda-forge': 'https://conda.anaconda.org/conda-forge'
+    }
+
+    const spec = this.toSpec(request)
+
+    let { start, end } = request.document
+    if (!start || start < 0) start = 0
+    if (!end || end - start <= 0) end = start + 1000
+
+    if (!condaChannels[spec.provider]) return request.markSkip(`Unrecognized conda channel ${spec.provider}`)
+    let channelUrl = condaChannels[spec.provider]
+
+    const condaFetch = CondaFetch({
+      logger: this.logger,
+      cdFileLocation: config.get('FILE_STORE_LOCATION') || (process.platform === 'win32' ? 'c:/temp/cd' : '/tmp/cd')
+    })
+
+    let channelData = await condaFetch._getChannelData(channelUrl, spec.provider)
+
+    let packagesCoordinates = []
+
+    for (let subdir of channelData.subdirs) {
+      let repoData = await condaFetch._getRepoData(channelUrl, spec.provider, subdir)
+      let repoCoordinates = Object.entries(repoData.packages).
+        map(([, packageData]) => `cd:/conda/${spec.provider}/-/${packageData.name}/${packageData.version}_${subdir}/${packageData.build}`
+        )
+      packagesCoordinates = packagesCoordinates.concat(repoCoordinates)
+      if (start < packagesCoordinates.length && end <= packagesCoordinates.length) {
+        break
+      }
+    }
+
+    let slicedCoordinates = packagesCoordinates.slice(start, end)
+
+    this.logger.info(
+      `Conda top - coordinates: ${packagesCoordinates.length}, start: ${start}, end: ${end}, sliced: ${slicedCoordinates.length}`
+    )
+
+    await request.queueRequests(slicedCoordinates.map(coord => new Request('package', coord)))
+    return request.markNoSave()
   }
 
   /* Example:

@@ -34,6 +34,7 @@ module.exports = {
       fetched: { defaultTtlSeconds: fetchedCacheTtlSeconds }
     },
     cocoapods: { githubToken },
+    conda: {},
     cratesio: {},
     debian: { cdFileLocation: cd_file.location },
     git: {},
@@ -50,6 +51,8 @@ module.exports = {
   process: {
     cdsource: {},
     component: {},
+    conda: {},
+    condasource: {},
     crate: { githubToken },
     deb: {},
     debsrc: {},
