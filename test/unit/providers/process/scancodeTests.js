@@ -85,7 +85,7 @@ describe('ScanCode process', () => {
   })
 
   beforeEach(function () {
-    const resultBox = { error: null, versionResult: 'ScanCode version 1.2.0\n', versionError: null }
+    const resultBox = { error: null, versionResult: 'ScanCode version: 1.2.0\n', versionError: null }
     const processStub = {
       execFile: (command, parameters, callbackOrOptions, callback) => {
         if (parameters.includes('--version'))
