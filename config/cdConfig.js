@@ -72,20 +72,21 @@ module.exports = {
       installDir: config.get('SCANCODE_HOME'),
       options: [
         '--copyright',
-        '--license',
         '--info',
-        '--license-text',
-        '--is-license-text',
         '--package',
-        '--license-text-diagnostics',
         '--strip-root',
         '--email',
         '--url',
-        '--license-clarity-score',
         '--classify',
         '--generated',
+        '--license',
+        '--license-clarity-score',
+        '--license-references',
+        '--license-text',
+        '--license-text-diagnostics',
         '--summary',
-        '--summary-key-files'
+        '--tallies',
+        '--tallies-key-files'
         // '--quiet'
       ],
       timeout: 1000,
