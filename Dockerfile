@@ -22,12 +22,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends --no-install-su
   gem install bundler -v 2.3.26 --no-document
 
 # Scancode
-ARG SCANCODE_VERSION="30.1.0"
+ARG SCANCODE_VERSION="32.0.8"
 RUN pip3 install --upgrade pip setuptools wheel && \
   curl -Os https://raw.githubusercontent.com/nexB/scancode-toolkit/v$SCANCODE_VERSION/requirements.txt && \
   pip3 install --constraint requirements.txt scancode-toolkit==$SCANCODE_VERSION && \
   rm requirements.txt && \
-  scancode --reindex-licenses && \
+  scancode-reindex-licenses && \
   scancode --version
 
 ENV SCANCODE_HOME=/usr/local/bin
@@ -85,7 +85,7 @@ RUN git config --global --add safe.directory '*'
 
 COPY package*.json /tmp/
 COPY patches /tmp/patches
-RUN cd /tmp && npm install --production
+RUN cd /tmp && npm install --omit=dev
 RUN mkdir -p "${APPDIR}" && cp -a /tmp/node_modules "${APPDIR}"
 
 WORKDIR "${APPDIR}"
