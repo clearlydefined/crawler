@@ -60,7 +60,7 @@ describe('condaFetch', () => {
   })
 
   function verifyFetch(result) {
-    expect(result.url).to.be.contains('cd:/conda/conda-forge/-/21cmfast/3.0.2')
+    expect(result.url).to.be.contains('cd:/conda/conda-forge/-/21cmfast/linux-64:3.0.2')
     expect(result.document.hashes).to.be.deep.equal({
       sha1: '9b2f4958826956be03cf3793dbdb663a53a8a1f1',
       sha256: '1154fceeb5c4ee9bb97d245713ac21eb1910237c724d2b7103747215663273c2'
@@ -70,38 +70,38 @@ describe('condaFetch', () => {
     expect(result.document.declaredLicenses).to.equal('MIT')
   }
 
-  it('fetch sourcepackage without version and architecture', async () => {
+  it('fetch package without version and architecture', async () => {
     const result = await fetch.handle(new Request('test', 'cd:/conda/conda-forge/-/21cmfast/'))
     verifyFetch(result.fetchResult)
   })
 
-  it('fetch sourcepackage with version and architecture sentinel', async () => {
-    const result = await fetch.handle(new Request('test', 'cd:/conda/conda-forge/-/21cmfast/-_-'))
+  it('fetch package with version and architecture sentinel', async () => {
+    const result = await fetch.handle(new Request('test', 'cd:/conda/conda-forge/-/21cmfast/_-_'))
     verifyFetch(result.fetchResult)
   })
 
-  it('fetch sourcepackage with version and without architecture', async () => {
+  it('fetch package with version and without architecture', async () => {
     const result = await fetch.handle(new Request('test', 'cd:/conda/conda-forge/-/21cmfast/3.0.2'))
     verifyFetch(result.fetchResult)
   })
 
-  it('fetch sourcepackage with version and null architecture', async () => {
-    const result = await fetch.handle(new Request('test', 'cd:/conda/conda-forge/-/21cmfast/3.0.2_'))
+  it('fetch package with version and null architecture', async () => {
+    const result = await fetch.handle(new Request('test', 'cd:/conda/conda-forge/-/21cmfast/:3.0.2'))
     verifyFetch(result.fetchResult)
   })
 
-  it('fetch sourcepackage with version and architecture sentinel', async () => {
-    const result = await fetch.handle(new Request('test', 'cd:/conda/conda-forge/-/21cmfast/3.0.2_-'))
+  it('fetch package with version and architecture sentinel', async () => {
+    const result = await fetch.handle(new Request('test', 'cd:/conda/conda-forge/-/21cmfast/_:3.0.2'))
     verifyFetch(result.fetchResult)
   })
 
-  it('fetch sourcepackage with version and architecture', async () => {
-    const result = await fetch.handle(new Request('test', 'cd:/conda/conda-forge/-/21cmfast/3.0.2_linux-64'))
+  it('fetch package with version and architecture', async () => {
+    const result = await fetch.handle(new Request('test', 'cd:/conda/conda-forge/-/21cmfast/linux-64:3.0.2'))
     verifyFetch(result.fetchResult)
   })
 
-  it('fetch sourcepackage with version, architecture, and build version', async () => {
-    const result = await fetch.handle(new Request('test', 'cd:/conda/conda-forge/-/21cmfast/3.0.2_linux-64/py37hd45b216_1'))
+  it('fetch package with version, architecture, and build version', async () => {
+    const result = await fetch.handle(new Request('test', 'cd:/conda/conda-forge/-/21cmfast/linux-64:3.0.2-py37hd45b216_1'))
     verifyFetch(result.fetchResult)
   })
 

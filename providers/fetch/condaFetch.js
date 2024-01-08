@@ -25,13 +25,13 @@ class CondaFetch extends AbstractFetch {
     return spec && condaChannels[spec.provider]
   }
 
-  // (conda|condasource)/(conda-forge|anaconda-main|anaconda-r)/-/${package_name}/(((${version}|-)_(${architecture}|-))|-)/(${toolVersion}|-)
-  // i.e. conda/conda-forge/-/numpy/1.13.0_linux-aarch64/py36
-  //      conda/conda-forge/-/numpy/-/py36
-  //      conda/conda-forge/-/numpy/1.13.0_/py36
-  //      conda/conda-forge/-/numpy/_linux-aarch64/py36
-  //      conda/anaconda-main/-/numpy/_/py27
-  //      conda/anaconda-main/-/numpy/_/-
+  //      {type: conda|condasource}/{provider: anaconda-main|anaconda-r|conda-forge}/-/{package name}/[{archictecture | _}:][{version | _}]-[{build version | _}]/[{tool version}]
+  // i.e. conda/conda-forge/-/numpy/linux-aarch64:1.13.0-py36/
+  //      conda/conda-forge/-/numpy/-py36/
+  //      conda/conda-forge/-/numpy/1.13.0-py36/
+  //      conda/conda-forge/-/numpy/linux-aarch64:_-py36/
+  //      conda/conda-forge/-/numpy/
+  //      conda/conda-forge/-/numpy/_:_-_
   async handle(request) {
     const spec = this.toSpec(request)
     const specStr = {
@@ -48,26 +48,36 @@ class CondaFetch extends AbstractFetch {
       return request.markSkip(`Unrecognized conda provider: ${spec.provider}, must be either of: ${Object.keys(condaChannels)}`)
     }
     const channelData = await this._getChannelData(condaChannels[spec.provider], spec.provider)
-    let [version, architecture] = (spec.revision || '-_-').split('_')
-    if (channelData.packages[spec.name] == undefined) {
+    let [architecture, revision] = (spec.revision || '').split(':')
+
+    // both arch and revision or revision only
+    if (architecture && !revision) {
+      revision = architecture
+      architecture = null
+    }
+
+    let [version, buildVersion] = (revision || '').split('-')
+
+    if (channelData.packages[spec.name] === undefined) {
       return request.markSkip(`Missing package ${spec.name} in channelData`)
     }
     const packageChannelData = channelData.packages[spec.name]
-    if (spec.type != 'conda' && spec.type != 'condasource') {
+    if (spec.type !== 'conda' && spec.type !== 'condasource') {
       return request.markSkip('spec type must either be conda or condasource')
     }
     // unless otherwise specified, we fetch the architecture package
-    if (spec.type != 'conda' && packageChannelData.subdirs.length == 0) {
+    if (spec.type !== 'conda' && packageChannelData.subdirs.length === 0) {
       return request.markSkip('No architecture build in package channel data')
     }
 
-    if ((!architecture || architecture == '-') && spec.type == 'conda') {
-      architecture = packageChannelData.subdirs[0]
-      this.logger.info(`No binary architecture specified for ${spec.name}, using random architecture: ${architecture}`)
+    if ((!architecture || architecture === '_') && spec.type === 'conda') {
+      // prefer no-arch if available
+      architecture = packageChannelData.subdirs.includes('noarch') ? 'noarch' : packageChannelData.subdirs[0]
+      this.logger.info(`No binary architecture specified for ${spec.name}, using architecture: ${architecture}`)
     }
 
-    if (spec.type == 'condasource') {
-      if (version && version != '-' && packageChannelData.version != version) {
+    if (spec.type === 'condasource') {
+      if (version && version !== '_' && packageChannelData.version !== version) {
         return request.markSkip(`Missing source file version ${version} for package ${spec.name}`)
       }
       if (!packageChannelData.source_url) {
@@ -100,7 +110,7 @@ class CondaFetch extends AbstractFetch {
       return request
     } else {
       let repoData = undefined
-      if (!(packageChannelData.subdirs.find(x => x == architecture))) {
+      if (!(packageChannelData.subdirs.find(x => x === architecture))) {
         return request.markSkip(`Missing architecture ${architecture} in channel`)
       }
       repoData = await this._getRepoData(condaChannels[spec.provider], spec.provider, architecture)
@@ -109,16 +119,16 @@ class CondaFetch extends AbstractFetch {
 
       if (repoData['packages']) {
         packageRepoEntries = packageRepoEntries.concat(Object.entries(repoData['packages'])
-          .filter(([, packageData]) => packageData.name == spec.name && ((!version) || version == '-' || version == packageData.version)
-            && ((!spec.toolVersion) || packageData.build.startsWith(spec.toolVersion))
+          .filter(([, packageData]) => packageData.name === spec.name && ((!version) || version === '_' || version === packageData.version)
+            && ((!buildVersion) || buildVersion === '_' || packageData.build.startsWith(buildVersion))
           )
           .map(([packageFile, packageData]) => { return { packageFile, packageData } }))
       }
 
       if (repoData['packages.conda']) {
         packageRepoEntries = packageRepoEntries.concat(Object.entries(repoData['packages.conda'])
-          .filter(([, packageData]) => packageData.name == spec.name && ((!version) || version == '-' || version == packageData.version)
-            && ((!spec.toolVersion) || packageData.build.startsWith(spec.toolVersion))
+          .filter(([, packageData]) => packageData.name === spec.name && ((!version) || version === '_' || version === packageData.version)
+            && ((!buildVersion) || buildVersion === '_' || packageData.build.startsWith(buildVersion))
           )
           .map(([packageFile, packageData]) => { return { packageFile, packageData } }))
       }
@@ -126,7 +136,7 @@ class CondaFetch extends AbstractFetch {
       packageRepoEntries.sort((a, b) => {
         if (a.packageData.build < b.packageData.build) {
           return 1
-        } else if (a.packageData.build == b.packageData.build) {
+        } else if (a.packageData.build === b.packageData.build) {
           return 0
         }
         else {
@@ -136,13 +146,12 @@ class CondaFetch extends AbstractFetch {
 
       let packageRepoEntry = packageRepoEntries[0]
       if (!packageRepoEntry) {
-        return request.markSkip(`Missing package with matching spec (version: ${version}, toolVersion: ${spec.toolVersion}) in ${architecture} repository`)
+        return request.markSkip(`Missing package with matching spec (version: ${version}, buildVersion: ${buildVersion}) in ${architecture} repository`)
       }
 
       let downloadUrl = new URL(`${condaChannels[spec.provider]}/${architecture}/${packageRepoEntry.packageFile}`).href
 
-      spec.toolVersion = packageRepoEntry.packageData.build
-      spec.revision = packageRepoEntry.packageData.version + '_' + architecture
+      spec.revision = architecture + ':' + packageRepoEntry.packageData.version + '-' + packageRepoEntry.packageData.build
       request.url = spec.toUrl()
       super.handle(request)
 
