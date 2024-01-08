@@ -193,7 +193,7 @@ class TopProcessor extends AbstractProcessor {
     for (let subdir of channelData.subdirs) {
       let repoData = await condaFetch._getRepoData(channelUrl, spec.provider, subdir)
       let repoCoordinates = Object.entries(repoData.packages).
-        map(([, packageData]) => `cd:/conda/${spec.provider}/-/${packageData.name}/${subdir}:${packageData.version}-${packageData.build}/`
+        map(([, packageData]) => `cd:/conda/${spec.provider}/-/${packageData.name}/${subdir}--${packageData.version}-${packageData.build}/`
         )
       packagesCoordinates = packagesCoordinates.concat(repoCoordinates)
       if (start < packagesCoordinates.length && end <= packagesCoordinates.length) {

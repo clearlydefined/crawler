@@ -25,13 +25,13 @@ class CondaFetch extends AbstractFetch {
     return spec && condaChannels[spec.provider]
   }
 
-  //      {type: conda|condasource}/{provider: anaconda-main|anaconda-r|conda-forge}/-/{package name}/[{archictecture | _}:][{version | _}]-[{build version | _}]/[{tool version}]
-  // i.e. conda/conda-forge/-/numpy/linux-aarch64:1.13.0-py36/
+  //      {type: conda|condasource}/{provider: anaconda-main|anaconda-r|conda-forge}/-/{package name}/[{archictecture | _}--][{version | _}]-[{build version | _}]/[{tool version}]
+  // i.e. conda/conda-forge/-/numpy/linux-aarch64--1.13.0-py36/
   //      conda/conda-forge/-/numpy/-py36/
   //      conda/conda-forge/-/numpy/1.13.0-py36/
-  //      conda/conda-forge/-/numpy/linux-aarch64:_-py36/
+  //      conda/conda-forge/-/numpy/linux-aarch64--_-py36/
   //      conda/conda-forge/-/numpy/
-  //      conda/conda-forge/-/numpy/_:_-_
+  //      conda/conda-forge/-/numpy/_--_-_
   async handle(request) {
     const spec = this.toSpec(request)
     const specStr = {
@@ -48,7 +48,7 @@ class CondaFetch extends AbstractFetch {
       return request.markSkip(`Unrecognized conda provider: ${spec.provider}, must be either of: ${Object.keys(condaChannels)}`)
     }
     const channelData = await this._getChannelData(condaChannels[spec.provider], spec.provider)
-    let [architecture, revision] = (spec.revision || '').split(':')
+    let [architecture, revision] = (spec.revision || '').split('--')
 
     // both arch and revision or revision only
     if (architecture && !revision) {
@@ -151,7 +151,7 @@ class CondaFetch extends AbstractFetch {
 
       let downloadUrl = new URL(`${condaChannels[spec.provider]}/${architecture}/${packageRepoEntry.packageFile}`).href
 
-      spec.revision = architecture + ':' + packageRepoEntry.packageData.version + '-' + packageRepoEntry.packageData.build
+      spec.revision = architecture + '--' + packageRepoEntry.packageData.version + '-' + packageRepoEntry.packageData.build
       request.url = spec.toUrl()
       super.handle(request)
 

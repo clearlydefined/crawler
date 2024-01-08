@@ -37,7 +37,7 @@ async function setup() {
 }
 
 function createRequest() {
-  const request = new Request('conda', 'cd:/conda/conda-forge/-/21cmfast/linux-64:3.0.2')
+  const request = new Request('conda', 'cd:/conda/conda-forge/-/21cmfast/linux-64--3.0.2')
   request.document = {
     _metadata: { links: {} },
     sourceInfo: {
@@ -45,7 +45,7 @@ function createRequest() {
       provider: 'conda-forge',
       namespace: '-',
       name: '21cmfast',
-      revision: 'linux-64:3.0.2'
+      revision: 'linux-64--3.0.2'
     },
     registryData: {
       downloadUrl: '21cmfast',
