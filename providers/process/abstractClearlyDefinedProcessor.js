@@ -6,7 +6,7 @@ const throat = require('throat')
 const path = require('path')
 const { pick, merge } = require('lodash')
 const du = require('du')
-const { trimParents } = require('../../lib/utils')
+const { trimParents, isValidExcludingGit } = require('../../lib/utils')
 
 class AbstractClearlyDefinedProcessor extends AbstractProcessor {
   get toolVersion() {
@@ -75,7 +75,7 @@ class AbstractClearlyDefinedProcessor extends AbstractProcessor {
     let count = 0
     const bytes = await du(location, {
       filter: file => {
-        if (!this.isValidExcludingGit(file)) return false
+        if (!isValidExcludingGit(file)) return false
         count++
         return true
       }

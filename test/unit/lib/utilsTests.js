@@ -3,7 +3,7 @@
 
 const chai = require('chai')
 const chaiAsPromised = require('chai-as-promised')
-const { normalizePath, normalizePaths, trimParents, trimAllParents, extractDate, spawnPromisified } = require('../../../lib/utils')
+const { normalizePath, normalizePaths, trimParents, trimAllParents, extractDate, spawnPromisified, isValidExcludingGit } = require('../../../lib/utils')
 const { promisify } = require('util')
 const execFile = promisify(require('child_process').execFile)
 chai.use(chaiAsPromised)
@@ -53,6 +53,22 @@ describe('Utils path functions', () => {
     expect(trimAllParents('', '')).to.equal('')
     expect(trimAllParents(null, 'foo')).to.be.null
     expect(trimAllParents(undefined, 'foo')).to.be.undefined
+  })
+})
+
+describe('Util isValidExcludingGit', () => {
+  it('should exclude .git and its contents', () => {
+    const data = new Map([
+      [null, false],
+      ['/', true],
+      ['/tmp/tempX/package/src', true],
+      ['.git', false],
+      ['/tmp/tempX/package/.git', false],
+      ['/tmp/tempX/package/.git/hooks/pre-merge-commit.sample', false]
+    ])
+    data.forEach((expected, input) => {
+      expect(isValidExcludingGit(input)).to.eq(expected)
+    })
   })
 })
 
