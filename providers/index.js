@@ -30,7 +30,7 @@ module.exports = {
     cdsource: require('./process/sourceExtract'),
     component: require('./process/component'),
     conda: require('./process/condaExtract'),
-    condasource: require('./process/condaSrcExtract'),
+    condasrc: require('./process/condaSrcExtract'),
     crate: require('./process/crateExtract'),
     deb: require('./process/debExtract'),
     debsrc: require('./process/debsrcExtract'),

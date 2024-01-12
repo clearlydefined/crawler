@@ -166,39 +166,34 @@ class TopProcessor extends AbstractProcessor {
 }
 */
   async _processTopConda(request) {
-    const condaChannels = {
-      'anaconda-main': 'https://repo.anaconda.com/pkgs/main',
-      'anaconda-r': 'https://repo.anaconda.com/pkgs/r',
-      'conda-forge': 'https://conda.anaconda.org/conda-forge'
-    }
-
     const spec = this.toSpec(request)
-
     let { start, end } = request.document
     if (!start || start < 0) start = 0
     if (!end || end - start <= 0) end = start + 1000
-
-    if (!condaChannels[spec.provider]) return request.markSkip(`Unrecognized conda channel ${spec.provider}`)
-    let channelUrl = condaChannels[spec.provider]
 
     const condaFetch = CondaFetch({
       logger: this.logger,
       cdFileLocation: config.get('FILE_STORE_LOCATION') || (process.platform === 'win32' ? 'c:/temp/cd' : '/tmp/cd')
     })
 
-    let channelData = await condaFetch._getChannelData(channelUrl, spec.provider)
-
+    if (!condaFetch.channels[spec.provider]) return request.markSkip(`Unrecognized conda channel ${spec.provider}`)
+    let channelUrl = condaFetch.channels[spec.provider]
+    let channelData = await condaFetch.getChannelData(channelUrl, spec.provider)
     let packagesCoordinates = []
 
-    for (let subdir of channelData.subdirs) {
-      let repoData = await condaFetch._getRepoData(channelUrl, spec.provider, subdir)
-      let repoCoordinates = Object.entries(repoData.packages).
-        map(([, packageData]) => `cd:/conda/${spec.provider}/-/${packageData.name}/${subdir}--${packageData.version}-${packageData.build}/`
-        )
-      packagesCoordinates = packagesCoordinates.concat(repoCoordinates)
-      if (start < packagesCoordinates.length && end <= packagesCoordinates.length) {
-        break
+    if (spec.type === 'conda') {
+      for (let subdir of channelData.subdirs) {
+        let repoData = await condaFetch.getRepoData(channelUrl, spec.provider, subdir)
+        let repoCoordinates = Object.entries(repoData.packages).
+          map(([, packageData]) => `cd:/conda/${spec.provider}/${subdir}/${packageData.name}/${packageData.version}-${packageData.build}/`
+          )
+        packagesCoordinates = packagesCoordinates.concat(repoCoordinates)
+        if (start < packagesCoordinates.length && end <= packagesCoordinates.length) {
+          break
+        }
       }
+    } else {
+      packagesCoordinates = Object.entries(channelData.packages).map(([packageName, packageData]) => `cd:/condasrc/${spec.provider}/-/${packageName}/${packageData.version}/`)
     }
 
     let slicedCoordinates = packagesCoordinates.slice(start, end)
