@@ -12,7 +12,7 @@ describe('condaFetch', () => {
       logger: { info: sinon.stub() },
       cdFileLocation: 'test/fixtures/conda/fragment'
     })
-    fetch._getChannelData = sinon.stub().resolves(
+    fetch.getChannelData = sinon.stub().resolves(
       {
         'channeldata_version': 1,
         'packages': {
@@ -40,7 +40,7 @@ describe('condaFetch', () => {
       }
     )
 
-    fetch._getRepoData = sinon.stub().resolves(
+    fetch.getRepoData = sinon.stub().resolves(
       {
         'info': {
           'subdir': 'linux-64'
@@ -55,7 +55,7 @@ describe('condaFetch', () => {
       }
     )
 
-    fetch._downloadPackage = sinon.stub().callsFake((downloadUrl, destination) => {
+    fetch.downloadPackage = sinon.stub().callsFake((downloadUrl, destination) => {
       expect(downloadUrl).to.contains('https://conda.anaconda.org/conda-forge/')
       expect(downloadUrl).to.contains('21cmfast-3.0.2-py37hd45b216_1.tar.bz2')
       return downloadPackageStub('test/fixtures/conda/21cmfast-3.0.2-py37hd45b216_1.tar.bz2', destination)
