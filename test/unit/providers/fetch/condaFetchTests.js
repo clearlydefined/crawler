@@ -65,8 +65,8 @@ describe('condaFetch', () => {
   function verifyFetch(result) {
     expect(result.url).to.be.contains('cd:/conda/conda-forge/linux-64/21cmfast/3.0.2')
     expect(result.document.hashes).to.be.deep.equal({
-      sha1: '9b2f4958826956be03cf3793dbdb663a53a8a1f1',
-      sha256: '1154fceeb5c4ee9bb97d245713ac21eb1910237c724d2b7103747215663273c2'
+      sha1: 'ad24303a85f67461058752a8fa48d0831b41ce22',
+      sha256: 'b80028d25090843243d3a6c30bd195793545d593b7efc08f67b5f486babba396'
     })
     expect(result.document.location).to.be.a.string
     expect(result.document.releaseDate).to.contain('Wed, 11 Nov 2020 16:04:29 GM')
