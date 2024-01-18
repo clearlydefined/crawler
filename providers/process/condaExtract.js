@@ -1,6 +1,6 @@
 const AbstractClearlyDefinedProcessor = require('./abstractClearlyDefinedProcessor')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
-const { merge, uniq } = require('lodash')
+const { merge } = require('lodash')
 const SourceSpec = require('../../lib/sourceSpec')
 
 class CondaExtract extends AbstractClearlyDefinedProcessor {
@@ -24,25 +24,26 @@ class CondaExtract extends AbstractClearlyDefinedProcessor {
       const spec = this.toSpec(request)
       const { releaseDate, registryData, declaredLicenses } = request.document
       request.document = merge(this.clone(request.document), { releaseDate, registryData, declaredLicenses })
-      let sourceCandidates = uniq([
+      let sourceCandidates = [
         registryData.channelData.source_url,
+        registryData.channelData.source_git_url,
         registryData.channelData.home,
         registryData.channelData.dev_url,
         registryData.channelData.doc_url,
-        registryData.channelData.doc_source_url].filter(e => e))
-
+        registryData.channelData.doc_source_url].filter(e => e)
       let sourceInfo = undefined
       const githubSource = await this.sourceFinder(
         registryData.repoData.packageData.version, sourceCandidates, {
         githubToken: this.options.githubToken,
         logger: this.logger
       })
-
       if (githubSource) {
         sourceInfo = githubSource
       } else {
         sourceInfo = SourceSpec.fromObject(spec)
-        sourceInfo.type = 'sourcearchive'
+        sourceInfo.type = 'condasrc'
+        sourceInfo.namespace = null
+        sourceInfo.version = null
       }
       request.document.sourceInfo = sourceInfo
     }
