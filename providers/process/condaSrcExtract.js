@@ -21,7 +21,6 @@ class CondaSrcExtract extends AbstractClearlyDefinedProcessor {
   async handle(request) {
     if (this.isProcessing(request)) {
       await super.handle(request)
-      const spec = this.toSpec(request)
       const { releaseDate, registryData, declaredLicenses } = request.document
       request.document = merge(this.clone(request.document), { releaseDate, registryData, declaredLicenses })
       let sourceCandidates = [
