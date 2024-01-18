@@ -1,13 +1,12 @@
 {
   "env": {
     "browser": false,
-    "es2021": true,
+    "es2023": true,
     "node": true,
     "mocha": true
   },
   "extends": "eslint:recommended",
   "parserOptions": {
-    "ecmaVersion": 2020,
     "sourceType": "module"
   },
   "rules": {
