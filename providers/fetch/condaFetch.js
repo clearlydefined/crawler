@@ -36,6 +36,9 @@ class CondaFetch extends AbstractFetch {
     if (!this.channels[spec.provider]) {
       return request.markSkip(`Unrecognized conda provider: ${spec.provider}, must be either of: ${Object.keys(this.channels)}`)
     }
+    if (spec.type !== 'conda' && spec.type !== 'condasrc') {
+      return request.markSkip('spec type must either be conda or condasrc')
+    }
     const channelData = await this.getChannelData(this.channels[spec.provider], spec.provider)
     if (!channelData) {
       return request.markSkip('failed to fetch and parse channelData.json')
@@ -46,18 +49,6 @@ class CondaFetch extends AbstractFetch {
       return request.markSkip(`Missing package ${spec.name} in channel: ${spec.provider}`)
     }
     const packageChannelData = channelData.packages[spec.name]
-    if (spec.type !== 'conda' && spec.type !== 'condasrc') {
-      return request.markSkip('spec type must either be conda or condasrc')
-    }
-    // unless otherwise specified, we fetch the architecture package
-    if (spec.type === 'conda' && packageChannelData.subdirs.length === 0) {
-      return request.markSkip('No architecture build in package channel data')
-    }
-    if ((!architecture || architecture === '-') && spec.type === 'conda') {
-      // prefer no-arch if available
-      architecture = packageChannelData.subdirs.includes('noarch') ? 'noarch' : packageChannelData.subdirs[0]
-      this.logger.info(`No binary architecture specified for ${spec.name}, using architecture: ${architecture}`)
-    }
     if (spec.type === 'condasrc') {
       return this._downloadCondaSourcePackage(spec, request, version, packageChannelData)
     } else {
@@ -131,6 +122,14 @@ class CondaFetch extends AbstractFetch {
   }
 
   async _downloadCondaPackage(spec, request, version, buildVersion, architecture, packageChannelData) {
+    if (packageChannelData.subdirs.length === 0) {
+      return request.markSkip('No architecture build in package channel data')
+    }
+    if (!architecture || architecture === '-') {
+      // prefer no-arch if available
+      architecture = packageChannelData.subdirs.includes('noarch') ? 'noarch' : packageChannelData.subdirs[0]
+      this.logger.info(`No binary architecture specified for ${spec.name}, using architecture: ${architecture}`)
+    }
     let repoData = undefined
     if (!(packageChannelData.subdirs.find(x => x === architecture))) {
       return request.markSkip(`Missing architecture ${architecture} for package ${spec.name} in channel`)
