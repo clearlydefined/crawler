@@ -1,11 +1,9 @@
 const AbstractClearlyDefinedProcessor = require('./abstractClearlyDefinedProcessor')
-const sourceDiscovery = require('../../lib/sourceDiscovery')
 const { merge } = require('lodash')
 
 class CondaSrcExtract extends AbstractClearlyDefinedProcessor {
-  constructor(options, sourceFinder) {
+  constructor(options) {
     super(options)
-    this.sourceFinder = sourceFinder
   }
 
   get toolVersion() {
@@ -24,4 +22,4 @@ class CondaSrcExtract extends AbstractClearlyDefinedProcessor {
   }
 }
 
-module.exports = (options, sourceFinder) => new CondaSrcExtract(options, sourceFinder || sourceDiscovery)
+module.exports = (options) => new CondaSrcExtract(options)
