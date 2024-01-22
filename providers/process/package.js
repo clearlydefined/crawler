@@ -3,7 +3,7 @@
 
 const AbstractProcessor = require('./abstractProcessor')
 
-const supportedTypes = ['npm', 'conda', 'condasrc', 'crate', 'maven', 'nuget', 'gem', 'go', 'pod', 'pypi', 'composer', 'deb']
+const supportedTypes = ['npm', 'conda', 'crate', 'maven', 'nuget', 'gem', 'go', 'pod', 'pypi', 'composer', 'deb']
 
 class PackageProcessor extends AbstractProcessor {
   shouldFetch() {

@@ -202,7 +202,7 @@ class TopProcessor extends AbstractProcessor {
       `Conda top - coordinates: ${packagesCoordinates.length}, start: ${start}, end: ${end}, sliced: ${slicedCoordinates.length}`
     )
 
-    await request.queueRequests(slicedCoordinates.map(coord => new Request('package', coord)))
+    await request.queueRequests(slicedCoordinates.map(coord => new Request(spec.type == 'conda' ? 'package' : 'source', coord)))
     return request.markNoSave()
   }
 

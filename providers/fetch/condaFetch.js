@@ -17,11 +17,15 @@ class CondaFetch extends AbstractFetch {
       'anaconda-r': 'https://repo.anaconda.com/pkgs/r',
       'conda-forge': 'https://conda.anaconda.org/conda-forge'
     }
+    this.headers = {
+      'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)'
+    }
+    this.CACHE_DURATION = 8 * 60 * 60 * 1000 // 8 hours
   }
 
   canHandle(request) {
     const spec = this.toSpec(request)
-    return spec && this.channels[spec.provider]
+    return spec && !!(this.channels[spec.provider])
   }
 
   //      {type: conda|condasrc}/{provider: anaconda-main|anaconda-r|conda-forge}/{architecture|-}/{package name}/[{version | _}]-[{build version | _}]/
@@ -33,9 +37,6 @@ class CondaFetch extends AbstractFetch {
   //      conda/conda-forge/-/numpy/_-_
   async handle(request) {
     const spec = this.toSpec(request)
-    if (!this.channels[spec.provider]) {
-      return request.markSkip(`Unrecognized conda provider: ${spec.provider}, must be either of: ${Object.keys(this.channels)}`)
-    }
     if (spec.type !== 'conda' && spec.type !== 'condasrc') {
       return request.markSkip('spec type must either be conda or condasrc')
     }
@@ -92,10 +93,10 @@ class CondaFetch extends AbstractFetch {
     return request
   }
 
-  _matchPackage(spec, version, buildVersion, repoData) {
+  _matchPackage(name, version, buildVersion, repoData) {
     let packageRepoEntries = []
     let packageMatches = ([, packageData]) => {
-      return packageData.name === spec.name && ((!version) || version === '_' || version === packageData.version)
+      return packageData.name === name && ((!version) || version === '_' || version === packageData.version)
         && ((!buildVersion) || buildVersion === '_' || packageData.build.startsWith(buildVersion))
     }
     if (repoData['packages']) {
@@ -108,24 +109,12 @@ class CondaFetch extends AbstractFetch {
         .filter(packageMatches)
         .map(([packageFile, packageData]) => { return { packageFile, packageData } }))
     }
-    packageRepoEntries.sort((a, b) => {
-      if (a.packageData.build < b.packageData.build) {
-        return 1
-      } else if (a.packageData.build === b.packageData.build) {
-        return 0
-      }
-      else {
-        return -1
-      }
-    })
+    packageRepoEntries.sort((a, b) => b.packageData.build.localeCompare(a.packageData.build))
     return packageRepoEntries
   }
 
   async _downloadCondaPackage(spec, request, version, buildVersion, architecture, packageChannelData) {
-    if (packageChannelData.subdirs.length === 0) {
-      return request.markSkip('No architecture build in package channel data')
-    }
-    if (!architecture || architecture === '-') {
+    if (!architecture || architecture === '-' && packageChannelData.subdirs.length > 0) {
       // prefer no-arch if available
       architecture = packageChannelData.subdirs.includes('noarch') ? 'noarch' : packageChannelData.subdirs[0]
       this.logger.info(`No binary architecture specified for ${spec.name}, using architecture: ${architecture}`)
@@ -138,7 +127,7 @@ class CondaFetch extends AbstractFetch {
     if (!repoData) {
       return request.markSkip(`failed to fetch and parse repodata json file for channel ${spec.provider} in architecture ${architecture}`)
     }
-    let packageRepoEntries = this._matchPackage(spec, version, buildVersion, repoData)
+    let packageRepoEntries = this._matchPackage(spec.name, version, buildVersion, repoData)
     if (packageRepoEntries.length == 0) {
       return request.markSkip(`Missing package with matching spec (version: ${version}, buildVersion: ${buildVersion}) in ${architecture} repository`)
     }
@@ -167,91 +156,46 @@ class CondaFetch extends AbstractFetch {
   }
 
   async _downloadPackage(downloadUrl, destination) {
-    return new Promise(
-      (resolve, reject) => {
-        const options = {
-          url: downloadUrl,
-          headers: {
-            'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)'
-          }
-        }
-        nodeRequest.get(options, (error, response) => {
-          if (error) {
-            return reject(error)
-          }
-          if (response.statusCode !== 200) {
-            return reject(new Error(`${response.statusCode} ${response.statusMessage}`))
-          }
-        }).pipe(fs.createWriteStream(destination).on('finish', () =>
-          resolve()
-        ))
-      }
-    )
+    return new Promise((resolve, reject) => {
+      const options = { url: downloadUrl, headers: this.headers }
+      nodeRequest.get(options, (error, response) => {
+        if (error) return reject(error)
+        if (response.statusCode !== 200) return reject(new Error(`${response.statusCode} ${response.statusMessage}`))
+      }).pipe(fs.createWriteStream(destination).on('finish', () => resolve()))
+    })
   }
 
   async _cachedDownload(cacheKey, sourceUrl, cacheDuration, fileDstLocation) {
     if (!memCache.get(cacheKey)) {
-      return new Promise(
-        (resolve, reject) => {
-          const options = {
-            url: sourceUrl,
-            headers: {
-              'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)'
-            }
-          }
-          nodeRequest.get(options, (error, response) => {
-            if (error) {
-              return reject(error)
-            }
-            if (response.statusCode !== 200) {
-              return reject(new Error(`${response.statusCode} ${response.statusMessage}`))
-            }
-          }).pipe(fs.createWriteStream(fileDstLocation).on('finish', () => {
-            memCache.put(cacheKey, true, cacheDuration)
-            this.logger.info(
-              `Conda: retrieved ${sourceUrl}. Stored channel data file at ${fileDstLocation}`
-            )
-            return resolve()
-          }))
-        }
-      )
+      return new Promise((resolve, reject) => {
+        const options = { url: sourceUrl, headers: this.headers }
+        nodeRequest.get(options, (error, response) => {
+          if (error) return reject(error)
+          if (response.statusCode !== 200) return reject(new Error(`${response.statusCode} ${response.statusMessage}`))
+        }).pipe(fs.createWriteStream(fileDstLocation).on('finish', () => {
+          memCache.put(cacheKey, true, cacheDuration)
+          this.logger.info(`Conda: retrieved ${sourceUrl}. Stored data file at ${fileDstLocation}`)
+          return resolve()
+        }))
+      })
     }
+  }
+
+  async _fetchCachedJSONFile(cacheKey, url, cacheDuration, fileLocation) {
+    try {
+      await this._cachedDownload(cacheKey, url, cacheDuration, fileLocation)
+    } catch (error) {
+      return null
+    }
+    return JSON.parse(fs.readFileSync(fileLocation))
   }
 
   async getChannelData(condaChannelUrl, condaChannelID) {
-    // ~10MB file, needs to be cached
-    let channelDataFile = {
-      url: `${condaChannelUrl}/channeldata.json`,
-      cacheKey: `${condaChannelID}-channelDataFile`,
-      cacheDuration: 8 * 60 * 60 * 1000,// 8 hours
-      fileLocation: `${this.packageMapFolder}/${condaChannelID}-channelDataFile.json`
-    }
-    try {
-      await this._cachedDownload(channelDataFile.cacheKey, channelDataFile.url,
-        channelDataFile.cacheDuration, channelDataFile.fileLocation)
-    } catch (error) {
-      return null
-    }
-    let fileText = fs.readFileSync(channelDataFile.fileLocation)
-    return JSON.parse(fileText)
+    return await this._fetchCachedJSONFile(`${condaChannelID}-channelDataFile`, `${condaChannelUrl}/channeldata.json`, this.CACHE_DURATION, `${this.packageMapFolder}/${condaChannelID}-channelDataFile.json`)
   }
 
   async getRepoData(condaChannelUrl, condaChannelID, architecture) {
-    // ~30MB file, needs to be cached
-    let repoFile = {
-      url: `${condaChannelUrl}/${architecture}/repodata.json`,
-      cacheKey: `${condaChannelID}-repoDataFile-${architecture}`,
-      cacheDuration: 8 * 60 * 60 * 1000,// 8 hours
-      fileLocation: `${this.packageMapFolder}/${condaChannelID}-repoDataFile-${architecture}.json`
-    }
-    try {
-      await this._cachedDownload(repoFile.cacheKey, repoFile.url,
-        repoFile.cacheDuration, repoFile.fileLocation)
-    } catch (error) {
-      return null
-    }
-    let fileText = fs.readFileSync(repoFile.fileLocation)
-    return JSON.parse(fileText)
+    return await this._fetchCachedJSONFile(`${condaChannelID}-repoDataFile-${architecture}`, `${condaChannelUrl}/${architecture}/repodata.json`, this.CACHE_DURATION, `${this.packageMapFolder}/${condaChannelID}-repoDataFile-${architecture}.json`)
   }
 }
 

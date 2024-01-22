@@ -45,16 +45,6 @@ const conda = {
   fossology
 }
 
-const condasrc = {
-  _type: 'condasrc',
-  source,
-  clearlydefined,
-  licensee,
-  reuse,
-  scancode,
-  fossology
-}
-
 const crate = {
   _type: 'crate',
   source,
@@ -148,7 +138,6 @@ const _package = {
   _type: 'package',
   npm,
   conda,
-  condasrc,
   crate,
   deb,
   go,
@@ -179,7 +168,6 @@ const entities = {
   reuse,
   npm,
   conda,
-  condasrc,
   crate,
   deb,
   go,
