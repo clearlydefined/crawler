@@ -54,7 +54,7 @@ module.exports = {
     cdsource: {},
     component: {},
     conda: { githubToken },
-    condasrc: { githubToken },
+    condasrc: {},
     crate: { githubToken },
     deb: {},
     debsrc: {},

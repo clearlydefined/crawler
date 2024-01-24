@@ -24,28 +24,7 @@ class CondaExtract extends AbstractClearlyDefinedProcessor {
       const spec = this.toSpec(request)
       const { releaseDate, registryData, declaredLicenses } = request.document
       request.document = merge(this.clone(request.document), { releaseDate, registryData, declaredLicenses })
-      let sourceCandidates = [
-        registryData.channelData.source_url,
-        registryData.channelData.source_git_url,
-        registryData.channelData.home,
-        registryData.channelData.dev_url,
-        registryData.channelData.doc_url,
-        registryData.channelData.doc_source_url].filter(e => e)
-      let sourceInfo = undefined
-      const githubSource = await this.sourceFinder(
-        registryData.repoData.packageData.version, sourceCandidates, {
-        githubToken: this.options.githubToken,
-        logger: this.logger
-      })
-      if (githubSource) {
-        sourceInfo = githubSource
-      } else {
-        sourceInfo = SourceSpec.fromObject(spec)
-        sourceInfo.type = 'condasrc'
-        sourceInfo.namespace = null
-        sourceInfo.version = null
-      }
-      request.document.sourceInfo = sourceInfo
+      request.document.sourceInfo = await this._discoverSource(spec, registryData)
     }
     this.addLocalToolTasks(request)
     if (request.document.sourceInfo) {
@@ -53,6 +32,31 @@ class CondaExtract extends AbstractClearlyDefinedProcessor {
       this.linkAndQueue(request, 'source', sourceSpec.toEntitySpec())
     }
     return request
+  }
+
+  async _discoverSource(spec, registryData) {
+    let sourceCandidates = [
+      registryData.channelData.source_url,
+      registryData.channelData.source_git_url,
+      registryData.channelData.home,
+      registryData.channelData.dev_url,
+      registryData.channelData.doc_url,
+      registryData.channelData.doc_source_url].filter(e => e)
+    let sourceInfo = undefined
+    const githubSource = await this.sourceFinder(
+      registryData.repoData.packageData.version, sourceCandidates, {
+      githubToken: this.options.githubToken,
+      logger: this.logger
+    })
+    if (githubSource) {
+      sourceInfo = githubSource
+    } else {
+      sourceInfo = SourceSpec.fromObject(spec)
+      sourceInfo.type = 'condasrc'
+      sourceInfo.namespace = null
+      sourceInfo.revision = spec.revision.split('-')[0]
+    }
+    return sourceInfo
   }
 }
 

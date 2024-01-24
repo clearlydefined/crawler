@@ -51,7 +51,7 @@ describe('condaFetch', () => {
       sha256: '1154fceeb5c4ee9bb97d245713ac21eb1910237c724d2b7103747215663273c2'
     })
     expect(result.document.location).to.be.a.string
-    expect(result.document.releaseDate).to.contain('Wed, 11 Nov 2020 16:04:29 GMT')
+    expect(result.document.releaseDate).to.contain('2020-11-11T16:04:29.311Z')
     expect(result.document.declaredLicenses).to.equal('MIT')
   }
 
@@ -101,6 +101,11 @@ describe('condaFetch', () => {
     verifyFetch(result.fetchResult)
   })
 
+  it('fetch package with architecture and build version', async () => {
+    const result = await fetch.handle(new Request('test', 'cd:/conda/conda-forge/linux-64/21cmfast/-py37hd45b216_1'))
+    verifyFetch(result.fetchResult)
+  })
+
   it('reports failed package matching', async () => {
     const result = await fetch.handle(new Request('test', 'cd:/conda/conda-forge/linux-64/21cmfast/3.0.2-py9999_invalid'))
     expect(result.outcome).to.equal('Missing package with matching spec (version: 3.0.2, buildVersion: py9999_invalid) in linux-64 repository')
@@ -147,7 +152,7 @@ describe('condaSrcFetch', () => {
       sha256: '96f5809d111a8a137c25758fa3f41586ea44cecba7ae191518767895afc7b3c6'
     })
     expect(result.document.location).to.be.a.string
-    expect(result.document.releaseDate).to.contain('Tue, 20 Jan 1970 02:41:00 GMT')
+    expect(result.document.releaseDate).to.contain('1970-01-20T02:41:00.314Z')
     expect(result.document.declaredLicenses).to.equal('MIT')
   }
 

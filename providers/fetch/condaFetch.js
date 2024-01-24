@@ -28,13 +28,13 @@ class CondaFetch extends AbstractFetch {
     return spec && !!(this.channels[spec.provider])
   }
 
-  //      {type: conda|condasrc}/{provider: anaconda-main|anaconda-r|conda-forge}/{architecture|-}/{package name}/[{version | _}]-[{build version | _}]/
+  //      {type: conda|condasrc}/{provider: anaconda-main|anaconda-r|conda-forge}/{architecture|-}/{package name}/[{version | }]-[{build version | }]/
   // i.e. conda/conda-forge/linux-aarch64/numpy/1.13.0-py36/
   //      conda/conda-forge/-/numpy/-py36/
   //      conda/conda-forge/-/numpy/1.13.0-py36/
-  //      conda/conda-forge/linux-aarch64/numpy/_-py36/
+  //      conda/conda-forge/linux-aarch64/numpy/-py36/
   //      conda/conda-forge/-/numpy/
-  //      conda/conda-forge/-/numpy/_-_
+  //      conda/conda-forge/-/numpy/-
   async handle(request) {
     const spec = this.toSpec(request)
     if (spec.type !== 'conda' && spec.type !== 'condasrc') {
@@ -65,7 +65,7 @@ class CondaFetch extends AbstractFetch {
   }
 
   async _downloadCondaSourcePackage(spec, request, version, packageChannelData) {
-    if (version && version !== '_' && packageChannelData.version !== version) {
+    if (version && packageChannelData.version !== version) {
       return request.markSkip(`Missing source file version ${version} for package ${spec.name}`)
     }
     if (!packageChannelData.source_url) {
@@ -84,7 +84,7 @@ class CondaFetch extends AbstractFetch {
     fetchResult.document = {
       location: dir.name,
       registryData: { 'channelData': packageChannelData, downloadUrl },
-      releaseDate: new Date(packageChannelData.timestamp).toUTCString(),
+      releaseDate: new Date(packageChannelData.timestamp).toISOString(),
       declaredLicenses: packageChannelData.license,
       hashes
     }
@@ -96,8 +96,8 @@ class CondaFetch extends AbstractFetch {
   _matchPackage(name, version, buildVersion, repoData) {
     let packageRepoEntries = []
     let packageMatches = ([, packageData]) => {
-      return packageData.name === name && ((!version) || version === '_' || version === packageData.version)
-        && ((!buildVersion) || buildVersion === '_' || packageData.build.startsWith(buildVersion))
+      return packageData.name === name && ((!version) || version === packageData.version)
+        && ((!buildVersion) || packageData.build.startsWith(buildVersion))
     }
     if (repoData['packages']) {
       packageRepoEntries = packageRepoEntries.concat(Object.entries(repoData['packages'])
@@ -128,7 +128,7 @@ class CondaFetch extends AbstractFetch {
       return request.markSkip(`failed to fetch and parse repodata json file for channel ${spec.provider} in architecture ${architecture}`)
     }
     let packageRepoEntries = this._matchPackage(spec.name, version, buildVersion, repoData)
-    if (packageRepoEntries.length == 0) {
+    if (packageRepoEntries.length === 0) {
       return request.markSkip(`Missing package with matching spec (version: ${version}, buildVersion: ${buildVersion}) in ${architecture} repository`)
     }
     let packageRepoEntry = packageRepoEntries[0]
@@ -146,7 +146,7 @@ class CondaFetch extends AbstractFetch {
     fetchResult.document = {
       location: dir.name,
       registryData: { 'channelData': packageChannelData, 'repoData': packageRepoEntry, downloadUrl },
-      releaseDate: new Date(packageRepoEntry.packageData.timestamp).toUTCString(),
+      releaseDate: new Date(packageRepoEntry.packageData.timestamp).toISOString(),
       declaredLicenses: packageRepoEntry.packageData.license,
       hashes
     }
