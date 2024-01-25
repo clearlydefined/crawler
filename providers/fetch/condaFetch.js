@@ -109,8 +109,7 @@ class CondaFetch extends AbstractFetch {
         .filter(packageMatches)
         .map(([packageFile, packageData]) => { return { packageFile, packageData } }))
     }
-    packageRepoEntries.sort((a, b) => b.packageData.build.localeCompare(a.packageData.build))
-    packageRepoEntries.sort((a, b) => b.packageData.version.localeCompare(a.packageData.version))
+    packageRepoEntries.sort((a, b) => b.packageData.timestamp - a.packageData.timestamp)
     return packageRepoEntries
   }
 

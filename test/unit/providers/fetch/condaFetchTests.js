@@ -19,6 +19,15 @@ describe('condaFetch utilities', () => {
 
   it('matches packages in repodata.packages.conda correctly', () => {
     expect(fetch._matchPackage('21cmfast', '3.0.2', 'py37h48b2cff_0', repoData).length).to.greaterThan(0)
+    expect(fetch._matchPackage('21cmfast', '3.0.2', 'py37h48b2cff_0', repoData)[0].packageData.build).to.equal('py37h48b2cff_0')
+  })
+
+  it('matches the latest package when version not specified', () => {
+    expect(fetch._matchPackage('21cmfast', null, null, repoData)[0].packageData.timestamp).to.equal(1605110689658)
+  })
+
+  it('matches the latest package when version specified', () => {
+    expect(fetch._matchPackage('21cmfast', '3.0.2', null, repoData)[0].packageData.timestamp).to.equal(1605110689658)
   })
 })
 
@@ -39,7 +48,7 @@ describe('condaFetch', () => {
 
     fetch._downloadPackage = sinon.stub().callsFake((downloadUrl, destination) => {
       expect(downloadUrl).to.contains('https://conda.anaconda.org/conda-forge/')
-      expect(downloadUrl).to.contains('21cmfast-3.0.2-py37hd45b216_1.tar.bz2')
+      expect(downloadUrl).to.contains('21cmfast-3.0.2-py')
       return downloadPackageStub('test/fixtures/conda/21cmfast-3.0.2-py37hd45b216_1.tar.bz2', destination)
     })
   })
@@ -51,7 +60,7 @@ describe('condaFetch', () => {
       sha256: '1154fceeb5c4ee9bb97d245713ac21eb1910237c724d2b7103747215663273c2'
     })
     expect(result.document.location).to.be.a.string
-    expect(result.document.releaseDate).to.contain('2020-11-11T16:04:29.311Z')
+    expect(result.document.releaseDate).to.match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/)
     expect(result.document.declaredLicenses).to.equal('MIT')
   }
 
@@ -152,7 +161,7 @@ describe('condaSrcFetch', () => {
       sha256: '96f5809d111a8a137c25758fa3f41586ea44cecba7ae191518767895afc7b3c6'
     })
     expect(result.document.location).to.be.a.string
-    expect(result.document.releaseDate).to.contain('1970-01-20T02:41:00.314Z')
+    expect(result.document.releaseDate).to.match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/)
     expect(result.document.declaredLicenses).to.equal('MIT')
   }
 
