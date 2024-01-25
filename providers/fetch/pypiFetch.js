@@ -73,7 +73,7 @@ class PyPiFetch extends AbstractFetch {
     return release.upload_time
   }
 
-  _extractDeclaredLicense(registryData) {
+  _extractLicenseFromClassifiers(registryData) {
     const classifiers = get(registryData, 'info.classifiers')
     if (!classifiers) return null
     for (const classifier in classifiers) {
@@ -84,6 +84,13 @@ class PyPiFetch extends AbstractFetch {
       }
     }
     return null
+  }
+
+  _extractDeclaredLicense(registryData) {
+    const licenseFromClassifiers = this._extractLicenseFromClassifiers(registryData)
+    if (licenseFromClassifiers) return licenseFromClassifiers
+    const license = get(registryData, 'info.license')
+    return license && spdxCorrect(license)
   }
 
   async _getPackage(spec, registryData, destination) {
