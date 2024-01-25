@@ -120,7 +120,7 @@ class NuGetFetch extends AbstractFetch {
     // https://docs.microsoft.com/en-us/nuget/api/package-base-address-resource#download-package-manifest-nuspec
     // Example: https://api.nuget.org/v3-flatcontainer/newtonsoft.json/11.0.1/newtonsoft.json.nuspec
     const { body, statusCode } = await requestRetry.get(
-      `https://api.nuget.org/v3-flatcontainer/${spec.name}/${spec.revision}/${spec.name}.nuspec`
+      `https://api.nuget.org/v3-flatcontainer/${spec.name.toLowerCase()}/${spec.revision}/${spec.name.toLowerCase()}.nuspec`
     )
     if (statusCode !== 200) return null
     return body

@@ -1,0 +1,13 @@
+diff --git a/node_modules/spdx-correct/index.js b/node_modules/spdx-correct/index.js
+index 4d9037e..ce15795 100644
+--- a/node_modules/spdx-correct/index.js
++++ b/node_modules/spdx-correct/index.js
+@@ -266,6 +266,8 @@ var lastResorts = [
+   ['FUCK', 'WTFPL'],
+   ['GNU', 'GPL-3.0-or-later'],
+   ['LGPL', 'LGPL-3.0-or-later'],
++  ['LGPLV2', 'LGPL-2.0'],
++  ['LGPLV2+', 'LGPL-2.0-or-later'],
+   ['GPLV1', 'GPL-1.0-only'],
+   ['GPL-1', 'GPL-1.0-only'],
+   ['GPLV2', 'GPL-2.0-only'],
