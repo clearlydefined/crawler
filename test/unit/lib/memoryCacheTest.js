@@ -106,7 +106,7 @@ describe('cache timeout callback', () => {
           expect(false).to.be.true
           done()
       }
-      callCount ++
+      callCount++
     }
     cache.withVerify(verifyNotExpiredFirstThenExpired)
 

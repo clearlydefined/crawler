@@ -13,17 +13,17 @@ const hashes = {
   'symfony/polyfill-mbstring-1.11.0': {
     'symfony-polyfill-mbstring-fe5e94c/LICENSE': {
       sha1: '53a47cd3f3fee7cd8179a19d7741da412eed9de7',
-      sha256: 'a718d662afdccd5db0c47543119dfa62b2d8b0dfd2d6d44a5e14397cb574e52b'
+      sha256: 'a718d662afdccd5db0c47543119dfa62b2d8b0dfd2d6d44a5e14397cb574e52b',
     },
     'symfony-polyfill-mbstring-fe5e94c/README.md': {
       sha1: 'c20aaad7bd777b2c7839c363a7a8dfd15f6cca63',
-      sha256: '74a6cefb78dc6b1447f9686cc2a062112027c8d2a39c4da66fd43f0f2bf76c3f'
+      sha256: '74a6cefb78dc6b1447f9686cc2a062112027c8d2a39c4da66fd43f0f2bf76c3f',
     },
     'symfony-polyfill-mbstring-fe5e94c/composer.json': {
       sha1: '9005581bb58110bc5525c70693f9d79d8fe76616',
-      sha256: 'a81f24d2da5637b570ebb8999e48d6e145887c37109dd553d3c04f4e6d3980bf'
-    }
-  }
+      sha256: 'a81f24d2da5637b570ebb8999e48d6e145887c37109dd553d3c04f4e6d3980bf',
+    },
+  },
 }
 
 describe('PHP processing', () => {
@@ -37,7 +37,7 @@ describe('PHP processing', () => {
     const files = request.document.files
 
     expect(request.document).to.be.not.null
-    files.forEach(file => {
+    files.forEach((file) => {
       if (file.path.includes('LICENSE')) {
         expect(file.hashes.sha1).to.be.equal(hashes['symfony/polyfill-mbstring-1.11.0'][file.path].sha1)
         expect(file.hashes.sha256).to.be.equal(hashes['symfony/polyfill-mbstring-1.11.0'][file.path].sha256)
@@ -50,10 +50,10 @@ describe('PHP processing', () => {
       }
     })
     expect(processor.linkAndQueueTool.callCount).to.be.equal(3)
-    expect(processor.linkAndQueueTool.args.map(call => call[1])).to.have.members([
+    expect(processor.linkAndQueueTool.args.map((call) => call[1])).to.have.members([
       'licensee',
-      'scancode', /*, 'fossology'*/
-      'reuse'
+      'scancode' /*, 'fossology'*/,
+      'reuse',
     ])
     expect(request.document.attachments.length).to.eq(1)
     expect(request.document.summaryInfo.count).to.be.equal(8)
@@ -64,7 +64,7 @@ describe('PHP processing', () => {
 })
 
 async function setup() {
-  const processor = composerExtract({ logger: { info: () => { } } }, () => { })
+  const processor = composerExtract({ logger: { info: () => {} } }, () => {})
   processor._detectLicenses = () => 'MIT'
   processor.linkAndQueueTool = sinon.stub()
   const request = createRequest()
@@ -72,7 +72,7 @@ async function setup() {
   request.document.location = dir.name
   await new AbstractFetch({}).decompress(
     'test/fixtures/composer/symfony-polyfill-mbstring-v1.11.0-0-gfe5e94c.zip',
-    dir.name
+    dir.name,
   )
   return { processor, request }
 }
@@ -86,14 +86,14 @@ function createRequest() {
 
 describe('composerExtract source discovery', () => {
   it('discovers source candidates', async () => {
-    const processor = composerExtract({ logger: { info: () => { } } }, () => { })
+    const processor = composerExtract({ logger: { info: () => {} } }, () => {})
     const manifest = { source: { url: 'one' }, homepage: 'two', bugs: 'http://three' }
     const candidates = processor._discoverCandidateSourceLocations(manifest)
     expect(candidates).to.have.members(['one', 'two', 'http://three'])
   })
 
   it('discovers source candidates with odd structures', async () => {
-    const processor = composerExtract({ logger: { info: () => { } } }, () => { })
+    const processor = composerExtract({ logger: { info: () => {} } }, () => {})
     const manifest = { source: { url: 'one' }, homepage: ['two', 'three'], bugs: { url: 'four' } }
     const candidates = processor._discoverCandidateSourceLocations(manifest)
     expect(candidates.length).to.eq(3)
@@ -154,7 +154,7 @@ function sourceDiscovery() {
 const githubResults = {
   'http://repo': createSourceSpec('repo'),
   'http://url': createSourceSpec('url'),
-  'http://bugs': createSourceSpec('bugs')
+  'http://bugs': createSourceSpec('bugs'),
 }
 
 function createManifest(repo, url, homepage, bugs) {

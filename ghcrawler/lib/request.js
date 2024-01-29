@@ -131,7 +131,7 @@ class Request {
       return this
     }
     const toRemove = Array.isArray(cleanups) ? cleanups : [cleanups]
-    this.cleanups = this.cleanups.filter(item => !toRemove.includes(item))
+    this.cleanups = this.cleanups.filter((item) => !toRemove.includes(item))
     return this
   }
 
@@ -192,7 +192,7 @@ class Request {
 
   queueRequests(requests, name = null, scope = null) {
     requests = Array.isArray(requests) ? requests : [requests]
-    const toQueue = requests.filter(request => !this.hasSeen(request))
+    const toQueue = requests.filter((request) => !this.hasSeen(request))
     this.track(this.crawler.queue(toQueue, name, scope))
   }
 

@@ -10,7 +10,7 @@ const { findLastKey, get, find, clone } = require('lodash')
 const FetchResult = require('../../lib/fetchResult')
 
 const providerMap = {
-  pypi: 'https://pypi.python.org'
+  pypi: 'https://pypi.python.org',
 }
 
 class PyPiFetch extends AbstractFetch {
@@ -47,7 +47,7 @@ class PyPiFetch extends AbstractFetch {
   async _getRegistryData(spec) {
     const baseUrl = providerMap.pypi
     const { body, statusCode } = await requestRetry.get(`${baseUrl}/pypi/${spec.name}/json`, {
-      json: true
+      json: true,
     })
     if (statusCode !== 200 || !body) return null
     return body
@@ -66,7 +66,7 @@ class PyPiFetch extends AbstractFetch {
 
   _extractReleaseDate(spec, registryData) {
     const releaseTypes = get(registryData, ['releases', spec.revision])
-    const release = find(releaseTypes, entry => {
+    const release = find(releaseTypes, (entry) => {
       return entry.url && entry.url.length > 6 && entry.url.slice(-6) === 'tar.gz'
     })
     if (!release) return
@@ -95,7 +95,7 @@ class PyPiFetch extends AbstractFetch {
 
   async _getPackage(spec, registryData, destination) {
     const releaseTypes = get(registryData, ['releases', spec.revision])
-    const release = find(releaseTypes, entry => entry.url?.endsWith('tar.gz') || entry.url?.endsWith('zip'))
+    const release = find(releaseTypes, (entry) => entry.url?.endsWith('tar.gz') || entry.url?.endsWith('zip'))
     if (!release) return false
 
     return new Promise((resolve, reject) => {
@@ -109,4 +109,4 @@ class PyPiFetch extends AbstractFetch {
   }
 }
 
-module.exports = options => new PyPiFetch(options)
+module.exports = (options) => new PyPiFetch(options)

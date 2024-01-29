@@ -16,8 +16,8 @@ describe('storageBackedQueue', () => {
   const createTestQueue = (memoryQueue, storageQueue) => {
     const options = {
       logger: {
-        verbose: sinon.stub()
-      }
+        verbose: sinon.stub(),
+      },
     }
     return new StorageBackedQueue(memoryQueue, storageQueue, options)
   }
@@ -31,7 +31,6 @@ describe('storageBackedQueue', () => {
   })
 
   describe('subscribe', async () => {
-
     beforeEach(() => {
       memoryQueueStub.subscribe.resolves()
       storageQueueStub.subscribe.resolves()
@@ -51,7 +50,6 @@ describe('storageBackedQueue', () => {
       expect(storageQueueStub.subscribe.calledOnce).to.be.true
     })
   })
-
 
   describe('unsubscribe', async () => {
     beforeEach(() => {
@@ -76,7 +74,6 @@ describe('storageBackedQueue', () => {
   })
 
   describe('push', async () => {
-
     beforeEach(() => {
       memoryQueueStub.push.resolves()
       storageQueueStub.push.resolves([])
@@ -101,7 +98,6 @@ describe('storageBackedQueue', () => {
   })
 
   describe('pop', async () => {
-
     it('should be able pop empty', async () => {
       memoryQueueStub.pop.resolves(undefined)
       const popped = await testQueue.pop()
@@ -189,9 +185,8 @@ describe('storageBackedQueue', () => {
   })
 
   describe('flush', async () => {
-
     beforeEach(() => {
-      memoryQueueStub.getInfo.resolves({count: 1})
+      memoryQueueStub.getInfo.resolves({ count: 1 })
       memoryQueueStub.pop.resolves(new Request('test', 'http://test'))
       memoryQueueStub.done.resolves()
       storageQueueStub.updateVisibilityTimeout.rejects('should not be called')
@@ -233,11 +228,7 @@ describe('storageBackedQueue', () => {
         .resolves(new Request('test1', 'http://test'))
         .onSecondCall()
         .resolves(new Request('test2', 'http://test'))
-      storageQueueStub.done
-        .onFirstCall()
-        .rejects(new Error('test'))
-        .onSecondCall()
-        .resolves()
+      storageQueueStub.done.onFirstCall().rejects(new Error('test')).onSecondCall().resolves()
       storageQueueStub.isMessageNotFound.returns(false)
 
       await expect(testQueue.flush()).to.be.rejectedWith('Failed to flush')
@@ -255,5 +246,5 @@ const createQueueStub = () => ({
   push: sinon.stub(),
   pop: sinon.stub(),
   done: sinon.stub(),
-  getInfo: sinon.stub()
+  getInfo: sinon.stub(),
 })

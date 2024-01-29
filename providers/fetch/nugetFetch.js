@@ -11,7 +11,7 @@ const requestRetry = require('requestretry').defaults({ maxAttempts: 3, fullResp
 const FetchResult = require('../../lib/fetchResult')
 
 const providerMap = {
-  nuget: 'https://api.nuget.org'
+  nuget: 'https://api.nuget.org',
 }
 
 class NuGetFetch extends AbstractFetch {
@@ -50,7 +50,7 @@ class NuGetFetch extends AbstractFetch {
       location,
       metadataLocation,
       releaseDate: registryData ? new Date(registryData.published).toISOString() : null,
-      hashes: await this.computeHashes(zip)
+      hashes: await this.computeHashes(zip),
     }
     if (manifest.licenseUrl) {
       await this._downloadLicense({ dirName: location, licenseUrl: manifest.licenseUrl })
@@ -71,7 +71,7 @@ class NuGetFetch extends AbstractFetch {
     // https://api.nuget.org/v3/registration5-gz-semver2/microsoft.powershell.native/7.0.0-preview.1.json
     const { body, statusCode } = await requestRetry.get(
       `${baseUrl}/v3/registration5-gz-semver2/${spec.name.toLowerCase()}/${spec.revision}.json`,
-      { gzip: true }
+      { gzip: true },
     )
     return statusCode !== 200 || !body ? null : JSON.parse(body)
   }
@@ -79,8 +79,10 @@ class NuGetFetch extends AbstractFetch {
   // https://docs.microsoft.com/en-us/nuget/reference/package-versioning#normalized-version-numbers
   _normalizeVersion(version) {
     const parts = version.split('-')
-    const trimmed = parts[0].split('.').map(part => trimStart(part, '0') || '0')
-    return [(trimmed[3] === '0' ? trimmed.slice(0, 3) : trimmed).join('.'), ...parts.slice(1)].filter(x => x).join('-')
+    const trimmed = parts[0].split('.').map((part) => trimStart(part, '0') || '0')
+    return [(trimmed[3] === '0' ? trimmed.slice(0, 3) : trimmed).join('.'), ...parts.slice(1)]
+      .filter((x) => x)
+      .join('-')
   }
 
   async _getLatestVersion(name) {
@@ -88,11 +90,11 @@ class NuGetFetch extends AbstractFetch {
     // Example: https://api.nuget.org/v3-flatcontainer/moq/index.json
     const baseUrl = providerMap.nuget
     const { body, statusCode } = await requestRetry.get(`${baseUrl}/v3-flatcontainer/${name}/index.json`, {
-      json: true
+      json: true,
     })
     // If statusCode is not 200, XML may be returned
     if (statusCode === 200 && body.versions) {
-      const versions = body.versions.filter(version => !version.includes('build'))
+      const versions = body.versions.filter((version) => !version.includes('build'))
       return versions[versions.length - 1] // the versions are already sorted
     }
     return null
@@ -120,7 +122,7 @@ class NuGetFetch extends AbstractFetch {
     // https://docs.microsoft.com/en-us/nuget/api/package-base-address-resource#download-package-manifest-nuspec
     // Example: https://api.nuget.org/v3-flatcontainer/newtonsoft.json/11.0.1/newtonsoft.json.nuspec
     const { body, statusCode } = await requestRetry.get(
-      `https://api.nuget.org/v3-flatcontainer/${spec.name.toLowerCase()}/${spec.revision}/${spec.name.toLowerCase()}.nuspec`
+      `https://api.nuget.org/v3-flatcontainer/${spec.name.toLowerCase()}/${spec.revision}/${spec.name.toLowerCase()}.nuspec`,
     )
     if (statusCode !== 200) return null
     return body
@@ -130,11 +132,11 @@ class NuGetFetch extends AbstractFetch {
     const location = {
       manifest: path.join(dir.name, 'manifest.json'),
       nuspec: path.join(dir.name, 'nuspec.xml'),
-      latestNuspec: latestNuspec ? path.join(dir.name, 'latestNuspec.xml') : null
+      latestNuspec: latestNuspec ? path.join(dir.name, 'latestNuspec.xml') : null,
     }
     await Promise.all([
       promisify(fs.writeFile)(location.manifest, JSON.stringify(manifest)),
-      promisify(fs.writeFile)(location.nuspec, nuspec)
+      promisify(fs.writeFile)(location.nuspec, nuspec),
     ])
     if (latestNuspec) {
       await promisify(fs.writeFile)(location.latestNuspec, latestNuspec)
@@ -152,4 +154,4 @@ class NuGetFetch extends AbstractFetch {
   }
 }
 
-module.exports = options => new NuGetFetch(options)
+module.exports = (options) => new NuGetFetch(options)

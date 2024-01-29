@@ -14,8 +14,9 @@ describe('rubyGemsFetch', () => {
       version: '0.5.1',
       gem_uri: 'https://rubygems.org/gems/small-0.5.1.gem',
     })
-    fetch._getPackage = sinon.stub().callsFake((spec, destination) =>
-      getPacakgeStub('test/fixtures/ruby/small-0.5.1.gem', destination))
+    fetch._getPackage = sinon
+      .stub()
+      .callsFake((spec, destination) => getPacakgeStub('test/fixtures/ruby/small-0.5.1.gem', destination))
   })
 
   function verifyFetch(result) {
@@ -23,7 +24,7 @@ describe('rubyGemsFetch', () => {
     expect(result.casedSpec.toUrl()).to.be.equal('cd:/ruby/rubygems/-/small/0.5.1')
     expect(result.document.hashes).to.be.deep.equal({
       sha1: 'f343d34992fffa1e4abbb1a2bfae45fcf49123ba',
-      sha256: '2b5e4ba4e915e897d6fe9392c1cd1f5a21f8e7963679fb23f0a1953124772da0'
+      sha256: '2b5e4ba4e915e897d6fe9392c1cd1f5a21f8e7963679fb23f0a1953124772da0',
     })
     expect(result.document.releaseDate).to.contain('2012-05-21')
   }

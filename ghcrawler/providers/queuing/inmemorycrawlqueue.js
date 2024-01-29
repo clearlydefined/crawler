@@ -18,7 +18,7 @@ class InMemoryCrawlQueue {
 
   async push(requests) {
     requests = Array.isArray(requests) ? requests : [requests]
-    requests = requests.map(request => extend(true, {}, request))
+    requests = requests.map((request) => extend(true, {}, request))
     this.queue = this.queue.concat(requests)
   }
 
@@ -60,7 +60,7 @@ class InMemoryCrawlQueue {
   async getInfo() {
     return {
       count: this.queue.length,
-      metricsName: this.name
+      metricsName: this.name,
     }
   }
 }

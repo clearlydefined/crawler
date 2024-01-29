@@ -47,7 +47,7 @@ const githubResults = {
   'http://home': createSourceSpec('home'),
   'http://package': createSourceSpec('package'),
   'http://project': createSourceSpec('project'),
-  'http://release': createSourceSpec('release')
+  'http://release': createSourceSpec('release'),
 }
 
 function createManifest(bugtrack_url, docs_url, download_url, home_page, package_url, project_url, release_url) {

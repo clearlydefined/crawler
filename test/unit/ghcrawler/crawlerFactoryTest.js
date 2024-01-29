@@ -7,7 +7,6 @@ const CrawlerFactory = require('../../../ghcrawler/crawlerFactory')
 const MemoryFactory = require('../../../ghcrawler/providers/queuing/memoryFactory')
 
 describe('create scopedQueueSets', () => {
-
   before(() => {
     sinon.stub(CrawlerFactory, '_getProvider').callsFake((options, provider = options.provider) => {
       const opts = options[provider] || {}
@@ -25,12 +24,11 @@ describe('create scopedQueueSets', () => {
       provider: 'memory',
       memory: {
         _config: { on: sinon.stub() },
-        weights: { immediate: 3, soon: 2, normal: 3, later: 2 }
-      }
+        weights: { immediate: 3, soon: 2, normal: 3, later: 2 },
+      },
     }
     const queues = CrawlerFactory.createQueues(queueOptions)
     expect(queues).to.be.ok
     expect(queueOptions.memory._config.on.calledTwice).to.be.true
   })
-
 })

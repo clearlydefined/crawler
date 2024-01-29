@@ -24,14 +24,14 @@ class FileStore {
     const filePath = this._getPath(urn)
     mkdirp.sync(path.dirname(filePath))
     return new Promise((resolve, reject) =>
-      fs.writeFile(filePath, JSON.stringify(document, null, 2), error => (error ? reject(error) : resolve(document)))
+      fs.writeFile(filePath, JSON.stringify(document, null, 2), (error) => (error ? reject(error) : resolve(document))),
     )
   }
 
   async get(type, key) {
     const path = this._getPath(key)
     return new Promise((resolve, reject) =>
-      fs.readFile(path, (error, data) => (error ? reject(error) : resolve(JSON.parse(data))))
+      fs.readFile(path, (error, data) => (error ? reject(error) : resolve(JSON.parse(data)))),
     )
   }
 
@@ -42,7 +42,7 @@ class FileStore {
   }
 
   etag(type, key) {
-    return this.get(type, key).then(result => result._metadata.etag)
+    return this.get(type, key).then((result) => result._metadata.etag)
   }
 
   // list(type) {
@@ -57,7 +57,7 @@ class FileStore {
 
   count(type) {
     // TODO likewise wrt list. Not sure this is needed
-    return this.list(type).then(results => {
+    return this.list(type).then((results) => {
       return results.length
     })
   }
@@ -65,4 +65,4 @@ class FileStore {
   close() {}
 }
 
-module.exports = options => new FileStore(options)
+module.exports = (options) => new FileStore(options)

@@ -14,8 +14,8 @@ let Fetch
 const hashes = {
   'bitflags-1.0.4.crate': {
     sha1: 'fbc1ce9fa176ed7a7e15cfc6d1f6c2389f536361',
-    sha256: '228047a76f468627ca71776ecdebd732a3423081fcf5125585bcd7c49886ce12'
-  }
+    sha256: '228047a76f468627ca71776ecdebd732a3423081fcf5125585bcd7c49886ce12',
+  },
 }
 
 function pickFile(url) {
@@ -25,7 +25,7 @@ function pickFile(url) {
 
 describe('crateFetch workflow', () => {
   beforeEach(() => {
-    const requestPromiseStub = options => {
+    const requestPromiseStub = (options) => {
       if (options && options.url) {
         if (options.url.includes('error')) throw new Error('yikes')
         if (options.url.includes('missing')) throw { statusCode: 404 }
@@ -39,7 +39,7 @@ describe('crateFetch workflow', () => {
       return response
     }
     Fetch = proxyquire('../../../../providers/fetch/cratesioFetch', {
-      'request-promise-native': requestPromiseStub
+      'request-promise-native': requestPromiseStub,
     })
   })
 
@@ -62,7 +62,7 @@ describe('crateFetch workflow', () => {
     const handler = setup()
     handler._getRegistryData = () => {
       return {
-        version: { num: '1.0.4', dl_path: 'error' }
+        version: { num: '1.0.4', dl_path: 'error' },
       }
     }
     const request = new Request('test', 'cd:/crate/cratesio/-/bitflags/1.0.4')
@@ -79,7 +79,7 @@ describe('crateFetch workflow', () => {
     const handler = setup()
     handler._getRegistryData = () => {
       return {
-        version: { num: '1.0.4', dl_path: 'missing' }
+        version: { num: '1.0.4', dl_path: 'missing' },
       }
     }
     const request = new Request('test', 'cd:/crate/cratesio/-/bitflags/1.0.4')
@@ -125,7 +125,7 @@ describe('crateFetch', () => {
     const crateFetch = mockCrateFetch({
       registryData: () => {
         return { manifest: null, version: null }
-      }
+      },
     })
     const request = new Request('crate', 'cd:/crate/cratesio/-/name/0.1.0')
     await crateFetch.handle(request)
@@ -139,7 +139,7 @@ describe('crateFetch', () => {
     const crateFetch = mockCrateFetch({
       registryData: () => {
         return { manifest: {}, version: { num: '0.5.0', crate: 'name' } }
-      }
+      },
     })
     const request = await crateFetch.handle(new Request('crate', 'cd:/crate/cratesio/-/name/0.1.0'))
     request.fetchResult.copyTo(request)
@@ -150,7 +150,7 @@ describe('crateFetch', () => {
     const crateFetch = mockCrateFetch({
       registryData: () => {
         return { manifest: {}, version: { num: '0.1.0', crate: 'name' } }
-      }
+      },
     })
     const request = await crateFetch.handle(new Request('crate', 'cd:/crate/cratesio/-/naME/0.1.0'))
     request.fetchResult.copyTo(request)
@@ -165,7 +165,7 @@ function mockCrateFetch(options) {
     return { name: '/tmp' }
   }
   crateFetch._getPackage = () => '/tmp/crate'
-  crateFetch.decompress = () => { }
+  crateFetch.decompress = () => {}
   crateFetch.computeHashes = () => {
     return { sha1: '42' }
   }

@@ -78,7 +78,7 @@ class NuGetExtract extends AbstractClearlyDefinedProcessor {
     const candidates = [...nuspecCandidates, ...manifestCandidates, ...latestNuspecCandidates]
     return this.sourceFinder(manifest.version, candidates, {
       githubToken: this.options.githubToken,
-      logger: this.logger
+      logger: this.logger,
     })
   }
 

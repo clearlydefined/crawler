@@ -18,8 +18,13 @@ class DebSrcExtract extends AbstractClearlyDefinedProcessor {
     await super.handle(request)
     // Re-arrange these fields to be at the end
     const { releaseDate, registryData, copyrightUrl, declaredLicenses } = request.document
-    request.document = merge(this.clone(request.document), { releaseDate, registryData, copyrightUrl, declaredLicenses })
+    request.document = merge(this.clone(request.document), {
+      releaseDate,
+      registryData,
+      copyrightUrl,
+      declaredLicenses,
+    })
   }
 }
 
-module.exports = options => new DebSrcExtract(options)
+module.exports = (options) => new DebSrcExtract(options)

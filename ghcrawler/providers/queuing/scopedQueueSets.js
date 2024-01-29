@@ -7,7 +7,7 @@ class ScopedQueueSets {
   constructor(globalQueues, localQueues) {
     this._scopedQueues = {
       local: localQueues,
-      global: globalQueues
+      global: globalQueues,
     }
   }
 
@@ -32,30 +32,29 @@ class ScopedQueueSets {
 
   subscribe() {
     return Promise.all(
-      Object.values(this._scopedQueues).map(queues => {
+      Object.values(this._scopedQueues).map((queues) => {
         return queues.subscribe()
-      })
+      }),
     )
   }
 
   unsubscribe() {
     return Promise.all(
-      Object.values(this._scopedQueues).map(queues => {
+      Object.values(this._scopedQueues).map((queues) => {
         return queues.unsubscribe()
-      })
+      }),
     )
   }
 
   pop() {
-    return this._scopedQueues.local.pop()
-      .then(request => {
-        if (request) {
-          //mark to retry on the global queues
-          request._retryQueue = request._originQueue.getName()
-          return request
-        }
-        return this._scopedQueues.global.pop()
-      })
+    return this._scopedQueues.local.pop().then((request) => {
+      if (request) {
+        //mark to retry on the global queues
+        request._retryQueue = request._originQueue.getName()
+        return request
+      }
+      return this._scopedQueues.global.pop()
+    })
   }
 
   done(request) {
@@ -79,24 +78,25 @@ class ScopedQueueSets {
   }
 
   publish() {
-    const publishToGlobal = async localQueue => {
+    const publishToGlobal = async (localQueue) => {
       const localRequests = []
       const info = await localQueue.getInfo()
       for (let count = info.count; count > 0; count--) {
         localRequests.push(
-          localQueue.pop()
-            .then(request => request && localQueue.done(request).then(() => request.createRequeuable()))
-            .then(request => request && this.push(request, localQueue.getName(), 'global')))
+          localQueue
+            .pop()
+            .then((request) => request && localQueue.done(request).then(() => request.createRequeuable()))
+            .then((request) => request && this.push(request, localQueue.getName(), 'global')),
+        )
       }
       debug(`publishing ${localRequests.length} to ${localQueue.getName()}`)
       return Promise.all(localRequests)
     }
 
-    return Promise.allSettled(this._scopedQueues.local.queues.map(publishToGlobal))
-      .then(results => {
-        const found = results.find(result => result.status === 'rejected')
-        if (found) throw new Error(found.reason)
-      })
+    return Promise.allSettled(this._scopedQueues.local.queues.map(publishToGlobal)).then((results) => {
+      const found = results.find((result) => result.status === 'rejected')
+      if (found) throw new Error(found.reason)
+    })
   }
 }
 

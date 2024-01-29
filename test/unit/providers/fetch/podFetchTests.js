@@ -6,8 +6,7 @@ const proxyquire = require('proxyquire')
 const Request = require('../../../../ghcrawler/lib/request.js')
 
 describe('podFetch', () => {
-
-  const loadJson = fileName => {
+  const loadJson = (fileName) => {
     return JSON.parse(fs.readFileSync(`test/fixtures/pod/${fileName}`))
   }
 
@@ -15,11 +14,11 @@ describe('podFetch', () => {
     requestretry: {
       defaults: () => {
         return {
-          get: sinon.stub().resolves({ body: loadJson('versions.json'), statusCode: 200 })
+          get: sinon.stub().resolves({ body: loadJson('versions.json'), statusCode: 200 }),
         }
-      }
+      },
     },
-    'request-promise-native': sinon.stub().resolves(loadJson('registryData.json'))
+    'request-promise-native': sinon.stub().resolves(loadJson('registryData.json')),
   })
 
   let fetch

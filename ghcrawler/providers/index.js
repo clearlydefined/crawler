@@ -4,14 +4,14 @@
 module.exports = {
   queue: {
     storageQueue: require('./queuing/storageQueueFactory'),
-    memory: require('./queuing/memoryFactory')
+    memory: require('./queuing/memoryFactory'),
   },
   store: {
     memory: require('./storage/inmemoryDocStore'),
     file: require('./storage/file'),
-    azblob: require('./storage/azureBlobFactory')
+    azblob: require('./storage/azureBlobFactory'),
   },
   lock: {
-    memory: require('./locker/memory')
-  }
+    memory: require('./locker/memory'),
+  },
 }

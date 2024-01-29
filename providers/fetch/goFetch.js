@@ -18,7 +18,7 @@ class GoFetch extends AbstractFetch {
       retryDelay: exponentialDelay,
       retryCondition: (err) => {
         return isNetworkOrIdempotentRequestError(err) || err.response?.status == 429
-      }
+      },
     })
     this.options.http = options.http || axios
   }
@@ -55,7 +55,10 @@ class GoFetch extends AbstractFetch {
     try {
       registryData = await this._getRegistryData(spec)
     } catch (err) {
-      if (err instanceof RequeueError && (request.attemptCount === undefined || request.attemptCount < this.options.maxRequeueAttemptCount)) {
+      if (
+        err instanceof RequeueError &&
+        (request.attemptCount === undefined || request.attemptCount < this.options.maxRequeueAttemptCount)
+      ) {
         return request.markRequeue('Throttled', err.message)
       }
     }
@@ -98,13 +101,13 @@ class GoFetch extends AbstractFetch {
   }
 
   _replace_encodings(url) {
-    return `${url.replace(/%2f/ig, '/')}`
+    return `${url.replace(/%2f/gi, '/')}`
   }
 
   async _getArtifact(spec, destination) {
     const url = this._buildUrl(spec)
 
-    const status = await new Promise(resolve => {
+    const status = await new Promise((resolve) => {
       nodeRequest
         .get(url, (error, response) => {
           if (error) this.logger.error(this._google_proxy_error_string(error))
@@ -132,7 +135,7 @@ class GoFetch extends AbstractFetch {
 
   async _getRegistryData(spec) {
     const registryLicenseUrl = this._replace_encodings(
-      this._remove_blank_fields(`https://pkg.go.dev/${spec.namespace}/${spec.name}@${spec.revision}?tab=licenses`)
+      this._remove_blank_fields(`https://pkg.go.dev/${spec.namespace}/${spec.name}@${spec.revision}?tab=licenses`),
     )
     try {
       // Based on this discussion https://github.com/golang/go/issues/36785, there is no API for pkg.go.dev for now.
@@ -140,10 +143,10 @@ class GoFetch extends AbstractFetch {
       const root = htmlParser(response.data)
       // Here is the license html template file.
       // https://github.com/golang/pkgsite/blob/master/static/frontend/unit/licenses/licenses.tmpl
-      const licenses = root.querySelectorAll('[id^=#lic-]').map(ele => ele.textContent)
+      const licenses = root.querySelectorAll('[id^=#lic-]').map((ele) => ele.textContent)
       if (this._validateLicenses(licenses)) {
         return {
-          licenses
+          licenses,
         }
       } else {
         this.logger.info(`Licenses from html could not be parsed. The licenses are ${JSON.stringify(licenses)}.`)
@@ -160,7 +163,9 @@ class GoFetch extends AbstractFetch {
         this.logger.info(msg)
         throw new RequeueError(msg)
       }
-      this.logger.info(`Getting declared license from pkg.go.dev failed. ${JSON.stringify(err.response?.data || err.request || err.message)}`)
+      this.logger.info(
+        `Getting declared license from pkg.go.dev failed. ${JSON.stringify(err.response?.data || err.request || err.message)}`,
+      )
     }
   }
 
@@ -187,4 +192,4 @@ class RequeueError extends Error {
   }
 }
 
-module.exports = options => new GoFetch(options)
+module.exports = (options) => new GoFetch(options)

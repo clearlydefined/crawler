@@ -11,7 +11,10 @@ describe('AttachmentStore', () => {
     const { store } = setup()
     const document = {
       _metadata: { type: 'test', fetchedAt: 'now', processedAt: 'then', extra: 'value' },
-      _attachments: [{ token: '42', attachment: '42 attachment' }, { token: '13', attachment: '13 attachment' }]
+      _attachments: [
+        { token: '42', attachment: '42 attachment' },
+        { token: '13', attachment: '13 attachment' },
+      ],
     }
     await store.upsert(document)
     const baseStore = store.baseStore
@@ -48,7 +51,7 @@ describe('AttachmentStore', () => {
   it('works with no attachments', async () => {
     const { store } = setup()
     const document = {
-      _metadata: { type: 'test', fetchedAt: 'now', processedAt: 'then', extra: 'value' }
+      _metadata: { type: 'test', fetchedAt: 'now', processedAt: 'then', extra: 'value' },
     }
     await store.upsert(document)
     const baseStore = store.baseStore

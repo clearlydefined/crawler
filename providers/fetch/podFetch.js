@@ -13,7 +13,7 @@ const FetchResult = require('../../lib/fetchResult')
 
 const services = {
   trunk: 'https://trunk.cocoapods.org/api/v1',
-  specs: 'https://raw.githubusercontent.com/CocoaPods/Specs/master'
+  specs: 'https://raw.githubusercontent.com/CocoaPods/Specs/master',
 }
 
 class PodFetch extends AbstractFetch {
@@ -43,7 +43,7 @@ class PodFetch extends AbstractFetch {
     fetchResult.document = {
       location: location,
       registryData: registryData,
-      releaseDate: version.created_at
+      releaseDate: version.created_at,
     }
 
     if (registryData.name) {
@@ -60,9 +60,9 @@ class PodFetch extends AbstractFetch {
       registryData = await request({
         url: `${services.specs}/Specs/${this._masterRepoPathFragment(spec, [1, 1, 1])}/${spec.name}.podspec.json`,
         headers: {
-          Authorization: this.options.githubToken ? `token ${this.options.githubToken}` : ''
+          Authorization: this.options.githubToken ? `token ${this.options.githubToken}` : '',
         },
-        json: true
+        json: true,
       })
     } catch (exception) {
       if (exception.statusCode !== 404) throw exception
@@ -97,7 +97,7 @@ class PodFetch extends AbstractFetch {
             await this.decompress(archive, output)
             resolve(output)
           })
-          .on('error', reject)
+          .on('error', reject),
       )
     })
   }
@@ -120,25 +120,25 @@ class PodFetch extends AbstractFetch {
 
     const cloneCommands = [
       `git -C "${dir.name}" clone ${cloneOptions.join(' ')} ${repo} "${outputDirName}"`,
-      `git -C "${output}" reset --quiet --hard ${rev}`
+      `git -C "${output}" reset --quiet --hard ${rev}`,
     ]
 
     return new Promise((resolve, reject) => {
-      exec(cloneCommands.join(' && '), error => (error ? reject(error) : resolve(output)))
+      exec(cloneCommands.join(' && '), (error) => (error ? reject(error) : resolve(output)))
     })
   }
 
   async _getVersion(spec) {
     // Example: https://trunk.cocoapods.org/api/v1/pods/SwiftLCS
     const { body, statusCode } = await requestRetry.get(`${services.trunk}/pods/${spec.name}`, {
-      json: true
+      json: true,
     })
 
     if (statusCode === 200 && body.versions) {
       const versions = body.versions
 
       if (spec.revision) {
-        return versions.find(version => version.name === spec.revision)
+        return versions.find((version) => version.name === spec.revision)
       } else {
         return versions[versions.length - 1] // the versions are already sorted
       }
@@ -151,10 +151,7 @@ class PodFetch extends AbstractFetch {
     // Ported from: https://www.rubydoc.info/gems/cocoapods-core/Pod%2FSource%2FMetadata:path_fragment
     let prefixes
     if (prefixLengths.length > 0) {
-      let hashedName = crypto
-        .createHash('md5')
-        .update(spec.name)
-        .digest('hex')
+      let hashedName = crypto.createHash('md5').update(spec.name).digest('hex')
       prefixes = prefixLengths.map(function (length) {
         const prefix = hashedName.slice(0, length)
         hashedName = hashedName.substring(length)
@@ -174,4 +171,4 @@ class PodFetch extends AbstractFetch {
   }
 }
 
-module.exports = options => new PodFetch(options)
+module.exports = (options) => new PodFetch(options)

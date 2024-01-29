@@ -22,9 +22,9 @@ class WebhookDeltaStore {
       json: true,
       body: pick(document, '_metadata'),
       headers: {
-        'x-crawler': this.options.token || 'secret'
+        'x-crawler': this.options.token || 'secret',
       },
-      resolveWithFullResponse: true
+      resolveWithFullResponse: true,
     }
     try {
       const response = await request(options)
@@ -60,4 +60,4 @@ class WebhookDeltaStore {
   }
 }
 
-module.exports = options => new WebhookDeltaStore(options)
+module.exports = (options) => new WebhookDeltaStore(options)
