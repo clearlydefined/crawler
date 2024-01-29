@@ -87,10 +87,7 @@ class TraversalPolicy {
   }
 
   static _hasExpired(processedAt, expiration = 0, unit = 'hours') {
-    return (
-      !processedAt ||
-      DateTime.now().diff(DateTime.fromISO(processedAt), unit)[unit] > expiration
-    )
+    return !processedAt || DateTime.now().diff(DateTime.fromISO(processedAt), unit)[unit] > expiration
   }
   /**
    * A policy spec has the following form:  <policyName>[:<[scenario/]mapName[@path]].  That means a spec can be just
@@ -220,7 +217,7 @@ class TraversalPolicy {
       originMutable: 'storage',
       storageOriginIfMissing: 'storage',
       mutables: mutablesValue,
-      originOnly: 'origin'
+      originOnly: 'origin',
     }[this.fetch]
     if (!result) {
       throw new Error(`Fetch policy misconfigured ${this.fetch}`)
@@ -237,7 +234,7 @@ class TraversalPolicy {
       originStorage: 'origin',
       storageOriginIfMissing: 'origin',
       mutables: 'origin',
-      originOnly: null
+      originOnly: null,
     }[this.fetch]
     if (result === undefined) {
       throw new Error(`Fetch policy misconfigured ${this.fetch}`)

@@ -20,7 +20,7 @@ class AzureStorageDocStore {
 
   async _createContainer(name) {
     return new Promise((resolve, reject) => {
-      this.service.createContainerIfNotExists(name, error => {
+      this.service.createContainerIfNotExists(name, (error) => {
         if (error) {
           return reject(error)
         }
@@ -38,7 +38,7 @@ class AzureStorageDocStore {
       url: document._metadata.url,
       urn: document._metadata.links.self.href,
       fetchedat: document._metadata.fetchedAt,
-      processedat: document._metadata.processedAt
+      processedat: document._metadata.processedAt,
     }
     if (document._metadata.extra) {
       blobMetadata.extra = JSON.stringify(document._metadata.extra)
@@ -50,7 +50,7 @@ class AzureStorageDocStore {
     return new Promise((resolve, reject) => {
       dataStream
         .pipe(this.service.createWriteStreamToBlockBlob(this.name, blobName, options))
-        .on('error', error => {
+        .on('error', (error) => {
           return reject(error)
         })
         .on('finish', () => {
@@ -76,7 +76,7 @@ class AzureStorageDocStore {
   // TODO: Consistency on whether key is a URL or URN
   async etag(type, key) {
     const blobName = this._getBlobNameFromKey(type, key)
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       this.service.getBlobMetadata(this.name, blobName, (error, blob) => {
         resolve(error ? null : blob.metadata.etag)
       })
@@ -95,7 +95,7 @@ class AzureStorageDocStore {
           continuationToken,
           {
             include: azure.BlobUtilities.BlobListingDetails.METADATA,
-            location: azure.StorageUtilities.LocationMode.PRIMARY_THEN_SECONDARY
+            location: azure.StorageUtilities.LocationMode.PRIMARY_THEN_SECONDARY,
           },
           (error, response) => {
             if (error) {
@@ -103,10 +103,11 @@ class AzureStorageDocStore {
               reject(error)
             }
             return resolve(response)
-          })
+          },
+        )
       })
       entries = entries.concat(
-        result.entries.map(entry => {
+        result.entries.map((entry) => {
           const blobMetadata = entry.metadata
           return {
             version: blobMetadata.version,
@@ -116,9 +117,9 @@ class AzureStorageDocStore {
             urn: blobMetadata.urn,
             fetchedAt: blobMetadata.fetchedat,
             processedAt: blobMetadata.processedat,
-            extra: blobMetadata.extra ? JSON.parse(blobMetadata.extra) : undefined
+            extra: blobMetadata.extra ? JSON.parse(blobMetadata.extra) : undefined,
           }
-        })
+        }),
       )
     } while (continuationToken && entries.length < 10000)
     return entries
@@ -129,7 +130,7 @@ class AzureStorageDocStore {
     this._ensureDeadletter(type)
     const blobName = this._getBlobNameFromKey(type, key)
     return new Promise((resolve, reject) => {
-      this.service.deleteBlob(this.name, blobName, error => {
+      this.service.deleteBlob(this.name, blobName, (error) => {
         if (error) {
           return reject(error)
         }
@@ -162,7 +163,8 @@ class AzureStorageDocStore {
               reject(error)
             }
             return resolve(response)
-          })
+          },
+        )
       })
       entryCount += result.entries.length
     } while (continuationToken)

@@ -2,23 +2,12 @@
   "manifest": {
     "name": "symfony/polyfill-mbstring",
     "description": "Symfony polyfill for the Mbstring extension",
-    "keywords": [
-      "mbstring",
-      "compatibility",
-      "portable",
-      "polyfill",
-      "shim"
-    ],
+    "keywords": ["mbstring", "compatibility", "portable", "polyfill", "shim"],
     "homepage": "https://symfony.com",
     "version": "v1.11.0",
     "version_normalized": "1.11.0.0",
-    "license": [
-      "MIT"
-    ],
-    "authors": [
-      [],
-      []
-    ],
+    "license": ["MIT"],
+    "authors": [[], []],
     "source": {
       "type": "git",
       "url": "https://github.com/symfony/polyfill-mbstring.git",

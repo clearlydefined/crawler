@@ -21,14 +21,14 @@ class CrawlerFactory {
 
     const optionsProvider = defaults.provider || 'memory'
     const crawlerName = (defaults.crawler && defaults.crawler.name) || 'crawler'
-    searchPath.forEach(entry => providerSearchPath.push(entry))
+    searchPath.forEach((entry) => providerSearchPath.push(entry))
     const subsystemNames = ['crawler', 'filter', 'fetch', 'process', 'queue', 'store', 'deadletter', 'lock']
     const crawlerPromise = CrawlerFactory.createRefreshingOptions(
       crawlerName,
       subsystemNames,
       defaults,
-      optionsProvider
-    ).then(options => {
+      optionsProvider,
+    ).then((options) => {
       logger.info('created all refreshingOptions')
       finalOptions = options
       const crawler = CrawlerFactory.createCrawler(options)
@@ -55,8 +55,8 @@ class CrawlerFactory {
       locker = null,
       filter = null,
       fetchers = null,
-      processors = null
-    } = {}
+      processors = null,
+    } = {},
   ) {
     logger.info('creating crawler')
     queues = queues || CrawlerFactory.createQueues(options.queue)
@@ -84,7 +84,7 @@ class CrawlerFactory {
     const result = {}
     refreshingProvider = refreshingProvider.toLowerCase()
     await Promise.all(
-      subsystemNames.map(subsystemName => {
+      subsystemNames.map((subsystemName) => {
         // Any given subsytem may have a provider or may be a list of providers. If a particular provider is
         // identified then hook up just that set of options for refreshing.
         logger.info(`creating refreshing options ${subsystemName} with provider ${refreshingProvider}`)
@@ -97,7 +97,7 @@ class CrawlerFactory {
         } else {
           throw new Error(`Invalid refreshing provider setting ${refreshingProvider}`)
         }
-        return config.getAll().then(values => {
+        return config.getAll().then((values) => {
           logger.info(`got refreshingOption values for ${subsystemName}`)
           // grab the right defaults. May need to drill down a level if the subsystem has a provider
           const trueDefaults = subProvider ? subDefaults[subProvider] || {} : subDefaults
@@ -109,7 +109,7 @@ class CrawlerFactory {
             else result[subsystemName] = values
           })
         })
-      })
+      }),
     )
     return result
   }
@@ -119,9 +119,9 @@ class CrawlerFactory {
       return config
     }
     await Promise.all(
-      Object.getOwnPropertyNames(defaults).map(optionName => {
+      Object.getOwnPropertyNames(defaults).map((optionName) => {
         return config._config.set(optionName, defaults[optionName])
-      })
+      }),
     )
     return config._config.getAll()
   }
@@ -130,7 +130,7 @@ class CrawlerFactory {
     logger.info('creating in memory refreshing config')
     const configStore = new RefreshingConfig.InMemoryConfigStore(values)
     const config = new RefreshingConfig.RefreshingConfig(configStore).withExtension(
-      new RefreshingConfig.InMemoryPubSubRefreshPolicyAndChangePublisher()
+      new RefreshingConfig.InMemoryPubSubRefreshPolicyAndChangePublisher(),
     )
     return config
   }
@@ -164,8 +164,8 @@ class CrawlerFactory {
 
   static _getNamedProviders(options, namespace, names, ...params) {
     return names
-      .filter(key => !['_config', 'logger', 'dispatcher', options.dispatcher].includes(key))
-      .map(name => CrawlerFactory._getProvider(options, name, namespace, ...params))
+      .filter((key) => !['_config', 'logger', 'dispatcher', options.dispatcher].includes(key))
+      .map((name) => CrawlerFactory._getProvider(options, name, namespace, ...params))
   }
 
   static createFilter(options, processors) {
@@ -203,7 +203,7 @@ class CrawlerFactory {
   }
 
   static createNolock() {
-    return { lock: () => null, unlock: () => { } }
+    return { lock: () => null, unlock: () => {} }
   }
 
   static createQueues(options, provider = options.provider) {

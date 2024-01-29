@@ -44,14 +44,14 @@ class ScanCodeProcessor extends AbstractProcessor {
 
   async _runScancode(request, file) {
     this.logger.info(
-      `Analyzing ${request.toString()} using ScanCode. input: ${request.document.location} output: ${file.name}`
+      `Analyzing ${request.toString()} using ScanCode. input: ${request.document.location} output: ${file.name}`,
     )
     const { options, timeout, processes, format } = this.options
     const parameters = [...options, '--timeout', timeout.toString(), '-n', processes.toString(), format]
     try {
       await execFile(`${this.options.installDir}/scancode`, [...parameters, file.name, request.document.location], {
         cwd: this.options.installDir,
-        maxBuffer: 5 * 1024 * 1024
+        maxBuffer: 5 * 1024 * 1024,
       })
     } catch (error) {
       // TODO see if the new version of ScanCode has a better way of differentiating errors
@@ -66,13 +66,13 @@ class ScanCodeProcessor extends AbstractProcessor {
     const output = JSON.parse(fs.readFileSync(outputFile))
     // Pick files that are potentially whole licenses. We can be reasonably agressive here
     // and the summarizers etc will further refine what makes it into the final definitions
-    const licenses = output.files.filter(file => file.is_license_text).map(file => file.path)
+    const licenses = output.files.filter((file) => file.is_license_text).map((file) => file.path)
     this.attachFiles(document, licenses, root)
 
     // Pick files that represent whole packages. We can be reasonably agressive here
     // and the summarizers etc will further refine what makes it into the final definitions
     const packages = output.files.reduce((result, file) => {
-      file.packages.forEach(entry => {
+      file.packages.forEach((entry) => {
         // in this case the manifest_path contains a subpath pointing to the corresponding file
         if (file.type === 'directory' && entry.manifest_path)
           result.push(`${file.path ? file.path + '/' : ''}${entry.manifest_path}`)
@@ -93,23 +93,23 @@ class ScanCodeProcessor extends AbstractProcessor {
   _hasRealErrors(resultFile) {
     const results = JSON.parse(fs.readFileSync(resultFile))
     return results.files.some(
-      file =>
+      (file) =>
         file.scan_errors &&
-        file.scan_errors.some(error => {
+        file.scan_errors.some((error) => {
           return !(
             error.includes('ERROR: Processing interrupted: timeout after') ||
             error.includes('ValueError:') ||
             error.includes('package.json') ||
             error.includes('UnicodeDecodeError')
           )
-        })
+        }),
     )
   }
 
   _detectVersion() {
     if (this._versionPromise) return this._versionPromise
     this._versionPromise = execFile(`${this.options.installDir}/scancode`, ['--version'])
-      .then(result => {
+      .then((result) => {
         this.logger.info('Detecting ScanCode version')
 
         const raw_output = result.stdout
@@ -117,15 +117,15 @@ class ScanCodeProcessor extends AbstractProcessor {
         this._toolVersion = scancode_line.replace('ScanCode version ', '').trim()
         this._schemaVersion = this.aggregateVersions(
           [this._schemaVersion, this.toolVersion, this.configVersion],
-          'Invalid ScanCode version'
+          'Invalid ScanCode version',
         )
         return this._schemaVersion
       })
-      .catch(error => {
+      .catch((error) => {
         this.logger.log(`Could not detect version of ScanCode: ${error.message} `)
       })
     return this._versionPromise
   }
 }
 
-module.exports = options => new ScanCodeProcessor(options)
+module.exports = (options) => new ScanCodeProcessor(options)

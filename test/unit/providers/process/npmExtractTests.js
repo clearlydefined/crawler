@@ -13,21 +13,21 @@ const hashes = {
   'redie-0.3.0': {
     'package/LICENSE': {
       sha1: '6401e7f1f46654117270c4860a263d3c4d6df1eb',
-      sha256: '42c7def049b7ef692085ca9bdf5984d439d3291922e02cb112d5cd1287b3cc56'
+      sha256: '42c7def049b7ef692085ca9bdf5984d439d3291922e02cb112d5cd1287b3cc56',
     },
     'package/README.md': {
       sha1: 'f137a2544ac6b3589796fbd7dee87a35858f8d75',
-      sha256: 'df3005370ff27872f241341dd11089951e099786a2b7e949262ab2ed5b3e4237'
+      sha256: 'df3005370ff27872f241341dd11089951e099786a2b7e949262ab2ed5b3e4237',
     },
     'package/index.js': {
       sha1: '7561b32ffa21eeb8ca1c12a5e76ec28d718c3dfd',
-      sha256: 'b83c7eeef19b2f4be9a8947db0bedc4ef43a15746e9c9b6f14e491f68bd2db60'
+      sha256: 'b83c7eeef19b2f4be9a8947db0bedc4ef43a15746e9c9b6f14e491f68bd2db60',
     },
     'package/package.json': {
       sha1: '74c5c9c1de88406c3d08272bfb6fe57055625fc9',
-      sha256: '7bf06a09d2b1c79b2cad7820a97e3887749418e6c53da1f7fb7f1b7c430e386d'
-    }
-  }
+      sha256: '7bf06a09d2b1c79b2cad7820a97e3887749418e6c53da1f7fb7f1b7c430e386d',
+    },
+  },
 }
 
 describe('NPM processing', () => {
@@ -40,15 +40,15 @@ describe('NPM processing', () => {
     await processor.handle(request)
     const files = request.document.files
     expect(request.document).to.be.not.null
-    files.forEach(file => {
+    files.forEach((file) => {
       expect(file.hashes.sha1).to.be.equal(hashes['redie-0.3.0'][file.path].sha1)
       expect(file.hashes.sha256).to.be.equal(hashes['redie-0.3.0'][file.path].sha256)
     })
     expect(processor.linkAndQueueTool.callCount).to.be.equal(3)
-    expect(processor.linkAndQueueTool.args.map(call => call[1])).to.have.members([
+    expect(processor.linkAndQueueTool.args.map((call) => call[1])).to.have.members([
       'licensee',
       'scancode',
-      'reuse' /*, 'fossology'*/
+      'reuse' /*, 'fossology'*/,
     ])
     expect(request.document.attachments.length).to.eq(2)
     expect(request.document._attachments.length).to.eq(2)
@@ -60,7 +60,7 @@ describe('NPM processing', () => {
 })
 
 async function setup() {
-  const processor = npmExtract({ logger: {} }, () => { })
+  const processor = npmExtract({ logger: {} }, () => {})
   processor._detectLicenses = () => 'MIT'
   processor.linkAndQueueTool = sinon.stub()
   const request = createRequest()
@@ -79,14 +79,14 @@ function createRequest() {
 
 describe('npmExtract source discovery', () => {
   it('discovers source candidates', async () => {
-    const processor = npmExtract({ logger: { info: () => { } } }, () => { })
+    const processor = npmExtract({ logger: { info: () => {} } }, () => {})
     const manifest = { repository: { url: 'one' }, url: 'two', homepage: 'three', bugs: 'http://four' }
     const candidates = processor._discoverCandidateSourceLocations(manifest)
     expect(candidates).to.have.members(['one', 'two', 'three', 'http://four'])
   })
 
   it('discovers source candidates with odd structures', async () => {
-    const processor = npmExtract({ logger: { info: () => { } } }, () => { })
+    const processor = npmExtract({ logger: { info: () => {} } }, () => {})
     const manifest = { repository: { url: 'one' }, url: 'two', homepage: ['three', 'four'], bugs: { url: 'five' } }
     const candidates = processor._discoverCandidateSourceLocations(manifest)
     expect(candidates).to.have.members(['one', 'two', 'three', 'five'])
@@ -155,7 +155,7 @@ function sourceDiscovery() {
 const githubResults = {
   'http://repo': createSourceSpec('repo'),
   'http://url': createSourceSpec('url'),
-  'http://bugs': createSourceSpec('bugs')
+  'http://bugs': createSourceSpec('bugs'),
 }
 
 function createManifest(repo, url, homepage, bugs) {

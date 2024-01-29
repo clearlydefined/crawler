@@ -7,7 +7,6 @@ const VISIBILITY_TIMEOUT_TO_REMAIN_ON_LOCAL_QUEUE = 8 * 60 * 60 // 8 hours
 const VISIBILITY_TIMEOUT_FOR_PROCESSING = 1 * 60 * 60 // 1 hours, similar to storage queue pop visibility timeout
 
 class StorageBackedQueue extends NestedQueue {
-
   constructor(queue, storageQueue, options) {
     super(queue)
     this.options = options
@@ -53,9 +52,7 @@ class StorageBackedQueue extends NestedQueue {
   }
 
   async done(request) {
-    await Promise.all([
-      super.done(request),
-      this._doneInStorage(request)])
+    await Promise.all([super.done(request), this._doneInStorage(request)])
   }
 
   async _doneInStorage(request) {
@@ -73,15 +70,11 @@ class StorageBackedQueue extends NestedQueue {
   }
 
   async subscribe() {
-    await Promise.all([
-      super.subscribe(),
-      this._sharedStorageQueue.subscribe()])
+    await Promise.all([super.subscribe(), this._sharedStorageQueue.subscribe()])
   }
 
   async unsubscribe() {
-    const results = await Promise.allSettled([
-      super.unsubscribe(),
-      this._sharedStorageQueue.unsubscribe()])
+    const results = await Promise.allSettled([super.unsubscribe(), this._sharedStorageQueue.unsubscribe()])
     this._throwIfError(results, 'Failed to unsubscribe')
   }
 
@@ -89,7 +82,7 @@ class StorageBackedQueue extends NestedQueue {
     const deleteRequests = []
     const info = await this.getInfo()
     for (let count = info.count; count > 0; count--) {
-      const deleteOne = super.pop().then(request => this.done(request))
+      const deleteOne = super.pop().then((request) => this.done(request))
       deleteRequests.push(deleteOne)
     }
     const results = await Promise.allSettled(deleteRequests)
@@ -97,8 +90,9 @@ class StorageBackedQueue extends NestedQueue {
   }
 
   _throwIfError(results, message) {
-    const errors = results.filter(result => result.status === 'rejected')
-      .map(rejected => new Error(rejected.reason))
+    const errors = results
+      .filter((result) => result.status === 'rejected')
+      .map((rejected) => new Error(rejected.reason))
     if (errors.length) throw new AggregateError(errors, message)
   }
 
@@ -109,7 +103,7 @@ class StorageBackedQueue extends NestedQueue {
   static create(queue, storageQueue, options = {}) {
     const defaultOptions = {
       visibilityTimeout_remainLocal: VISIBILITY_TIMEOUT_TO_REMAIN_ON_LOCAL_QUEUE,
-      visibilityTimeout: VISIBILITY_TIMEOUT_FOR_PROCESSING
+      visibilityTimeout: VISIBILITY_TIMEOUT_FOR_PROCESSING,
     }
     const optionsWithDefaults = { ...defaultOptions, ...options }
     return new StorageBackedQueue(queue, storageQueue, optionsWithDefaults)

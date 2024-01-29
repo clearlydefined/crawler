@@ -33,8 +33,8 @@ let Fetch
 const hashes = {
   'xunit.core.2.4.1.nupkg': {
     sha1: '362ec34f3358c23e2effa87ecfc5de1c4292d60a',
-    sha256: '2a05200082483c7439550e05881fa2e6ed895d26319af30257ccd73f891ccbda'
-  }
+    sha256: '2a05200082483c7439550e05881fa2e6ed895d26319af30257ccd73f891ccbda',
+  },
 }
 
 function pickFile(url) {
@@ -66,7 +66,7 @@ describe('', () => {
     const requestRetryStub = {
       defaults: () => {
         return { get }
-      }
+      },
     }
     Fetch = proxyquire('../../../../providers/fetch/nugetFetch', { requestretry: requestRetryStub })
   })
@@ -128,8 +128,8 @@ describe('', () => {
     }
     handler._getManifest = () => '{}'
     handler._getNuspec = () => '{}'
-    handler._createTempDir = () => { }
-    handler._persistMetadata = () => { }
+    handler._createTempDir = () => {}
+    handler._persistMetadata = () => {}
     try {
       await handler.handle(new Request('test', 'cd:/nuget/nuget/-/xunit.core/2.4.1'))
       expect(false).to.be.true

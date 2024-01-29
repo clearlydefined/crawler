@@ -39,14 +39,19 @@ class DebExtract extends AbstractClearlyDefinedProcessor {
 
   _createDocument(request, spec, registryData) {
     const { releaseDate, copyrightUrl, declaredLicenses } = request.document
-    request.document = merge(this.clone(request.document), { registryData, releaseDate, copyrightUrl, declaredLicenses })
+    request.document = merge(this.clone(request.document), {
+      registryData,
+      releaseDate,
+      copyrightUrl,
+      declaredLicenses,
+    })
     const sourceInfo = this._discoverSource(spec, registryData)
     if (sourceInfo) request.document.sourceInfo = sourceInfo
   }
 
   _discoverSource(spec, registryData) {
     const [revision, architecture] = spec.revision.split('_')
-    const source = (registryData.find(entry => entry.Architecture === architecture) || {}).Source
+    const source = (registryData.find((entry) => entry.Architecture === architecture) || {}).Source
     if (source) {
       const result = SourceSpec.fromObject(spec)
       result.type = 'debsrc'

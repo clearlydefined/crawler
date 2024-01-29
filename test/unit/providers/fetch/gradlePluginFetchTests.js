@@ -9,19 +9,18 @@ const GradlePluginFetch = require('../../../../providers/fetch/gradlePluginFetch
 const Request = require('../../../../ghcrawler').request
 
 describe('Gradle plugin fetch', () => {
-
   describe('look up latest version in maven meta data', () => {
     const spec = {
       type: 'maven',
       provider: 'gradleplugin',
       namespace: 'io.github.lognet',
-      name: 'grpc-spring-boot-starter-gradle-plugin'
+      name: 'grpc-spring-boot-starter-gradle-plugin',
     }
 
     it('get latest version from maven meta data', async () => {
       const gradleFetch = GradlePluginFetch({
         logger: { log: sinon.stub() },
-        requestPromise: sinon.stub().resolves(fs.readFileSync('test/fixtures/maven/maven-metadata.xml'))
+        requestPromise: sinon.stub().resolves(fs.readFileSync('test/fixtures/maven/maven-metadata.xml')),
       })
       const latest = await gradleFetch._getLatestVersion(spec)
       expect(latest).to.be.eq('4.5.10')
@@ -30,7 +29,7 @@ describe('Gradle plugin fetch', () => {
     it('no latest version', async () => {
       const gradleFetch = GradlePluginFetch({
         logger: { log: sinon.stub() },
-        requestPromise: sinon.stub().resolves('')
+        requestPromise: sinon.stub().resolves(''),
       })
       const latest = await gradleFetch._getLatestVersion(spec)
       expect(latest).to.be.null
@@ -39,7 +38,7 @@ describe('Gradle plugin fetch', () => {
     it('no maven meta data found', async () => {
       const gradleFetch = GradlePluginFetch({
         logger: { log: sinon.stub() },
-        requestPromise: sinon.stub().rejects({ statusCode: 404 })
+        requestPromise: sinon.stub().rejects({ statusCode: 404 }),
       })
       const latest = await gradleFetch._getLatestVersion(spec)
       expect(latest).to.be.null
@@ -50,8 +49,8 @@ describe('Gradle plugin fetch', () => {
     const hashes = {
       'swt-3.3.0-v3346.jar': {
         sha1: 'd886a6db6b7195911516896feebe3a5d1dddfd46',
-        sha256: '18a3a53a27df164d4db56d0f7f5da2edd25995418d5538f40eb4018347fe1354'
-      }
+        sha256: '18a3a53a27df164d4db56d0f7f5da2edd25995418d5538f40eb4018347fe1354',
+      },
     }
 
     function pickArtifact(url) {
@@ -78,7 +77,7 @@ describe('Gradle plugin fetch', () => {
     let handler
 
     beforeEach(() => {
-      const requestPromiseStub = options => {
+      const requestPromiseStub = (options) => {
         const content = contentFromFile(options.url)
         return options.json ? JSON.parse(content) : content
       }
@@ -92,7 +91,7 @@ describe('Gradle plugin fetch', () => {
       handler = GradlePluginFetch({
         logger: { log: sinon.stub(), error: sinon.stub() },
         requestPromise: requestPromiseStub,
-        requestStream: getStub
+        requestStream: getStub,
       })
     })
 
@@ -100,7 +99,7 @@ describe('Gradle plugin fetch', () => {
       const url = handler._buildBaseUrl({
         type: 'maven',
         provider: 'gradleplugin',
-        name: 'grpc-spring-boot-starter-gradle-plugin'
+        name: 'grpc-spring-boot-starter-gradle-plugin',
       })
       //should not fail
       expect(url).not.to.be.undefined
@@ -127,7 +126,9 @@ describe('Gradle plugin fetch', () => {
     })
 
     it('test success with sourcearchive', async () => {
-      const request = await handler.handle(new Request('test', 'cd:/sourcearchive/gradleplugin/org.eclipse/swt/3.3.0-v3344'))
+      const request = await handler.handle(
+        new Request('test', 'cd:/sourcearchive/gradleplugin/org.eclipse/swt/3.3.0-v3344'),
+      )
       verifySuccess(request.fetchResult)
       expect(request.fetchResult.casedSpec.revision).to.equal('3.3.0-v3344')
       expect(request.fetchResult.document.location).to.be.a('string')
@@ -142,7 +143,9 @@ describe('Gradle plugin fetch', () => {
 
     it('handle no pom found', async () => {
       handler._handleRequestPromise = sinon.stub().rejects({ statusCode: 404 })
-      const request = await handler.handle(new Request('test', 'cd:/sourcearchive/gradleplugin/org.eclipse/swt/3.3.0-v3344'))
+      const request = await handler.handle(
+        new Request('test', 'cd:/sourcearchive/gradleplugin/org.eclipse/swt/3.3.0-v3344'),
+      )
       expect(request.processControl).to.be.equal('skip')
     })
 
@@ -153,7 +156,9 @@ describe('Gradle plugin fetch', () => {
         response.end()
         return response
       }
-      const request = await handler.handle(new Request('test', 'cd:/sourcearchive/gradleplugin/org.eclipse/swt/3.3.0-v3344'))
+      const request = await handler.handle(
+        new Request('test', 'cd:/sourcearchive/gradleplugin/org.eclipse/swt/3.3.0-v3344'),
+      )
       expect(request.processControl).to.be.equal('skip')
     })
   })

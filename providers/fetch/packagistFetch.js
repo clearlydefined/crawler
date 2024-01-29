@@ -11,7 +11,7 @@ const readdir = promisify(fs.readdir)
 const FetchResult = require('../../lib/fetchResult')
 
 const providerMap = {
-  packagist: 'https://repo.packagist.org/'
+  packagist: 'https://repo.packagist.org/',
 }
 
 class PackagistFetch extends AbstractFetch {
@@ -42,7 +42,7 @@ class PackagistFetch extends AbstractFetch {
     let registryData
     const baseUrl = providerMap.packagist
     const { body, statusCode } = await requestRetry.get(`${baseUrl}/p/${spec.namespace}/${spec.name}.json`, {
-      json: true
+      json: true,
     })
     if (statusCode !== 200 || !body) return null
     registryData = body
@@ -63,13 +63,14 @@ class PackagistFetch extends AbstractFetch {
       const options = {
         url: distUrl,
         headers: {
-          'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)'
-        }
+          'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)',
+        },
       }
-      nodeRequest.get(options, (error, response) => {
-        if (error) return reject(error)
-        if (response.statusCode !== 200) reject(new Error(`${response.statusCode} ${response.statusMessage}`))
-      })
+      nodeRequest
+        .get(options, (error, response) => {
+          if (error) return reject(error)
+          if (response.statusCode !== 200) reject(new Error(`${response.statusCode} ${response.statusMessage}`))
+        })
         .pipe(fs.createWriteStream(destination).on('finish', () => resolve(null)))
     })
   }
@@ -84,4 +85,4 @@ class PackagistFetch extends AbstractFetch {
   }
 }
 
-module.exports = options => new PackagistFetch(options)
+module.exports = (options) => new PackagistFetch(options)

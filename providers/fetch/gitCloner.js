@@ -9,7 +9,7 @@ const FetchResult = require('../../lib/fetchResult')
 
 const providerMap = {
   gitlab: 'https://gitlab.com',
-  github: 'https://github.com'
+  github: 'https://github.com',
 }
 
 class GitCloner extends AbstractFetch {
@@ -54,7 +54,7 @@ class GitCloner extends AbstractFetch {
     return new Promise((resolve, reject) => {
       exec(
         `cd ${dirName} && git clone ${sourceUrl} --quiet && cd ${specName} ${reset} && git count-objects -v`,
-        (error, stdout) => (error ? reject(error) : resolve(this._getRepoSize(stdout)))
+        (error, stdout) => (error ? reject(error) : resolve(this._getRepoSize(stdout))),
       )
     })
   }
@@ -62,7 +62,7 @@ class GitCloner extends AbstractFetch {
   _getDate(dirName, specName) {
     return new Promise((resolve, reject) => {
       exec(`cd ${dirName}/${specName} && git show -s --format=%ci`, (error, stdout) =>
-        error ? reject(error) : resolve(new Date(stdout.trim()))
+        error ? reject(error) : resolve(new Date(stdout.trim())),
       )
     })
   }
@@ -75,7 +75,7 @@ class GitCloner extends AbstractFetch {
   _getRevision(dirName, specName) {
     return new Promise((resolve, reject) => {
       exec(`cd ${dirName}/${specName} && git rev-parse HEAD`, (error, stdout) =>
-        error ? reject(error) : resolve(stdout.trim())
+        error ? reject(error) : resolve(stdout.trim()),
       )
     })
   }
@@ -87,7 +87,7 @@ class GitCloner extends AbstractFetch {
 
   _deleteGitDatabase(dirName, specName) {
     return new Promise((resolve, reject) => {
-      rimraf(`${dirName}/${specName}/.git`, error => {
+      rimraf(`${dirName}/${specName}/.git`, (error) => {
         error ? reject(error) : resolve()
       })
     })
@@ -99,4 +99,4 @@ class GitCloner extends AbstractFetch {
   }
 }
 
-module.exports = options => new GitCloner(options)
+module.exports = (options) => new GitCloner(options)

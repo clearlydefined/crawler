@@ -5,15 +5,15 @@
 const htmlencode = require('htmlencode').htmlEncode
 
 function create() {
-  return function(request, response, next) {
+  return function (request, response, next) {
     response.helpers = response.helpers || {}
     response.helpers.send = {
       context: {
         request: request,
-        response: response
+        response: response,
       },
       noContent: noContent,
-      partialHtml: partialHtml
+      partialHtml: partialHtml,
     }
     next()
   }

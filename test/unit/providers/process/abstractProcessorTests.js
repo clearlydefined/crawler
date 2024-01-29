@@ -64,13 +64,13 @@ describe('AbstractProcessor aggregateVersions', () => {
 describe('AbstractProcessor attach files', () => {
   beforeEach(() => {
     const fsStub = {
-      readFileSync: path => {
+      readFileSync: (path) => {
         path = path.replace(/\\/g, '/')
         return `${path.startsWith('/test') ? path.slice(6) : path} attachment`
-      }
+      },
     }
     const handlerClass = proxyquire('../../../../providers/process/abstractProcessor', {
-      fs: fsStub
+      fs: fsStub,
     })
     Handler = new handlerClass({})
   })
@@ -83,10 +83,10 @@ describe('AbstractProcessor attach files', () => {
     request.document = { _metadata: { links: {} } }
     request.crawler = { queue: sinon.stub() }
     request.track = sinon.stub()
-    Object.getOwnPropertyNames(map).forEach(name => VisitorMap.register(name, map[name]))
+    Object.getOwnPropertyNames(map).forEach((name) => VisitorMap.register(name, map[name]))
     new AbstractProcessor({}).linkAndQueueTool(request, 'licensee')
     expect(request.document._metadata.links.licensee.href).to.be.equal(
-      'urn:npm:npmjs:-:redie:revision:0.3.0:tool:licensee'
+      'urn:npm:npmjs:-:redie:revision:0.3.0:tool:licensee',
     )
     expect(request.document._metadata.links.licensee.type).to.be.equal('collection')
     expect(request.crawler.queue.calledOnce).to.be.true
@@ -99,7 +99,7 @@ describe('AbstractProcessor attach files', () => {
     request.document = { _metadata: { links: {} } }
     request.crawler = { queue: sinon.stub() }
     request.track = sinon.stub()
-    Object.getOwnPropertyNames(map).forEach(name => VisitorMap.register(name, map[name]))
+    Object.getOwnPropertyNames(map).forEach((name) => VisitorMap.register(name, map[name]))
     new AbstractProcessor({}).linkAndQueue(request, 'source')
     expect(request.document._metadata.links.source.href).to.be.equal('urn:npm:npmjs:-:redie:revision:0.3.0')
     expect(request.document._metadata.links.source.type).to.be.equal('resource')
@@ -113,7 +113,7 @@ describe('AbstractProcessor attach files', () => {
     request.document = { _metadata: { links: {} } }
     request.crawler = { queue: sinon.stub() }
     request.track = sinon.stub()
-    Object.getOwnPropertyNames(map).forEach(name => VisitorMap.register(name, map[name]))
+    Object.getOwnPropertyNames(map).forEach((name) => VisitorMap.register(name, map[name]))
     new AbstractProcessor({}).addSelfLink(request)
     expect(request.document._metadata.links.self.href).to.be.equal('urn:npm:npmjs:-:redie:revision:0.3.0')
     expect(request.document._metadata.links.self.type).to.be.equal('resource')
@@ -182,11 +182,7 @@ describe('link and queue local tasks', () => {
     const request = new Request('npm', 'cd:/npm/npmjs/-/redie/0.3.0')
     processor.addLocalToolTasks(request)
     expect(processor.linkAndQueueTool.callCount).to.be.equal(3)
-    expect(processor.linkAndQueueTool.args.map(call => call[1])).to.have.members([
-      'licensee',
-      'scancode',
-      'reuse'
-    ])
+    expect(processor.linkAndQueueTool.args.map((call) => call[1])).to.have.members(['licensee', 'scancode', 'reuse'])
   })
 })
 
@@ -228,7 +224,7 @@ describe('AbstractProcessor get interesting files', () => {
 function validateAttachedFile(name, list, checkContent = false) {
   const attachment = `${name} attachment`
   const token = Handler._computeToken(attachment)
-  const entry = find(list, entry => entry.path === name)
+  const entry = find(list, (entry) => entry.path === name)
   expect(!!entry).to.be.true
   expect(entry.token).to.eq(token)
   if (checkContent) expect(entry.attachment).to.eq(attachment)

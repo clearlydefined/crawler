@@ -44,7 +44,7 @@ class GemExtract extends AbstractClearlyDefinedProcessor {
     candidates.push(get(registryData, 'homepage_uri'))
     candidates.push(get(registryData, 'mailing_list_uri'))
     candidates.push(get(registryData, 'source_code_uri'))
-    const allCandidates = candidates.filter(e => e)
+    const allCandidates = candidates.filter((e) => e)
     return this.sourceFinder(version, allCandidates, { githubToken: this.options.githubToken, logger: this.logger })
   }
 

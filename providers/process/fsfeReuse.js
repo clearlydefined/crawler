@@ -5,7 +5,10 @@ const AbstractProcessor = require('./abstractProcessor')
 const { promisify } = require('util')
 const execFile = promisify(require('child_process').execFile)
 const { merge } = require('lodash')
-const { readdirSync, promises: { readFile } } = require('fs')
+const {
+  readdirSync,
+  promises: { readFile },
+} = require('fs')
 
 class FsfeReuseProcessor extends AbstractProcessor {
   constructor(options) {
@@ -39,13 +42,17 @@ class FsfeReuseProcessor extends AbstractProcessor {
     if (!record) return
     const location = request.document.location
     request.document = merge(this.clone(request.document), { reuse: record })
-    this.attachFiles(request.document, record.licenses.map(file => file.filePath), location)
+    this.attachFiles(
+      request.document,
+      record.licenses.map((file) => file.filePath),
+      location,
+    )
   }
 
   async _run(request) {
     const root = request.document.location
-    const { name: outFileName } =  this.createTempFile(request)
-    const parameters = [('spdx'), '-o',  outFileName]
+    const { name: outFileName } = this.createTempFile(request)
+    const parameters = ['spdx', '-o', outFileName]
     try {
       await execFile('reuse', parameters, { cwd: root })
       const out = await readFile(outFileName, 'utf8')
@@ -53,7 +60,10 @@ class FsfeReuseProcessor extends AbstractProcessor {
       const results = { metadata: {}, files: [], licenses: this._getLicenses(request) }
       // REUSE SPDX results are grouped in sections that are separated with two newlines
       // The first result group contains generic result metadata, the following ones represent a file each. We process both variants in a single loop...
-      out.trim().split(/\n\n/).forEach((spdxResult, entryIndex) => this._handleResultSection(spdxResult, entryIndex, results))
+      out
+        .trim()
+        .split(/\n\n/)
+        .forEach((spdxResult, entryIndex) => this._handleResultSection(spdxResult, entryIndex, results))
       return results
     } catch (error) {
       request.markDead('Error', error ? error.message : 'REUSE run failed')
@@ -64,7 +74,9 @@ class FsfeReuseProcessor extends AbstractProcessor {
     const spdxResultFile = {}
     const spdxRawValues = spdxResult.split(/\n/)
     // Each line represents a single result attribute
-    spdxRawValues.forEach(spdxRawValue => this._handleResultAttribute(spdxRawValue, entryIndex, results, spdxResultFile))
+    spdxRawValues.forEach((spdxRawValue) =>
+      this._handleResultAttribute(spdxRawValue, entryIndex, results, spdxResultFile),
+    )
     // Generic metadata was already added to results.metadata
     // In case we have file metadata, all attributes are read now and information can be added to the file results
     if (entryIndex > 0) {
@@ -75,7 +87,11 @@ class FsfeReuseProcessor extends AbstractProcessor {
   _handleResultAttribute(spdxRawValue, entryIndex, results, spdxResultFile) {
     const spdxMatchResult = spdxRawValue.match(/((?<first_key>\w+):\s)((?<second_key>\w+):\s)?(?<spdx_value>.+)/)
     if (spdxMatchResult !== null) {
-      const spdxResultValue = { key: spdxMatchResult.groups.first_key, secondaryKey: spdxMatchResult.groups.second_key, spdxValue: spdxMatchResult.groups.spdx_value.replace(/(<\/?([^>]+)>)/g, '') }
+      const spdxResultValue = {
+        key: spdxMatchResult.groups.first_key,
+        secondaryKey: spdxMatchResult.groups.second_key,
+        spdxValue: spdxMatchResult.groups.spdx_value.replace(/(<\/?([^>]+)>)/g, ''),
+      }
       // First result section contains generic metadata, any other section attributes for a particular file
       if (entryIndex === 0) {
         this._addMetadataAttribute(spdxResultValue, results)
@@ -88,7 +104,8 @@ class FsfeReuseProcessor extends AbstractProcessor {
   _addMetadataAttribute(spdxResultValue, results) {
     // Relationship attributes are ignored on purpose as they won't be used later and would only consume memory...
     if (spdxResultValue.key !== 'Relationship') {
-      results.metadata[spdxResultValue.key + (spdxResultValue.secondaryKey ? spdxResultValue.secondaryKey : '')] = spdxResultValue.spdxValue
+      results.metadata[spdxResultValue.key + (spdxResultValue.secondaryKey ? spdxResultValue.secondaryKey : '')] =
+        spdxResultValue.spdxValue
     }
   }
 
@@ -103,7 +120,8 @@ class FsfeReuseProcessor extends AbstractProcessor {
     if (spdxResultValue.key === 'FileCopyrightText' && attributeValue.startsWith('SPDX-FileCopyrightText: ')) {
       attributeValue = attributeValue.substring(24)
     }
-    spdxResultFile[spdxResultValue.key + (spdxResultValue.secondaryKey ? spdxResultValue.secondaryKey : '')] = attributeValue
+    spdxResultFile[spdxResultValue.key + (spdxResultValue.secondaryKey ? spdxResultValue.secondaryKey : '')] =
+      attributeValue
   }
 
   _getLicenses(request) {
@@ -111,9 +129,10 @@ class FsfeReuseProcessor extends AbstractProcessor {
     const licensesDir = 'LICENSES'
     try {
       const licenseFiles = readdirSync(request.document.location + '/' + licensesDir)
-      licenseFiles.forEach(file => {
+      licenseFiles.forEach((file) => {
         licenses.push({
-          filePath: licensesDir + '/' + file, spdxId: file.substring(0, file.indexOf('.txt'))
+          filePath: licensesDir + '/' + file,
+          spdxId: file.substring(0, file.indexOf('.txt')),
         })
       })
     } catch (error) {
@@ -125,20 +144,20 @@ class FsfeReuseProcessor extends AbstractProcessor {
   _detectVersion() {
     if (this._versionPromise !== undefined) return this._versionPromise
     this._versionPromise = execFile('reuse', ['--version'])
-      .then(result => {
+      .then((result) => {
         const reuseRegex = /reuse\s+(\d+\.\d+(\.\d+)?)/i
         this._toolVersion = result.stdout.trim().match(reuseRegex)[1]
         this._schemaVersion = this.aggregateVersions(
           [this._schemaVersion, this.toolVersion, this.configVersion],
-          'Invalid REUSE version'
+          'Invalid REUSE version',
         )
         return this._schemaVersion
       })
-      .catch(error => {
+      .catch((error) => {
         if (error) this.logger.log(`Could not detect version of REUSE: ${error.message}`)
       })
     return this._versionPromise
   }
 }
 
-module.exports = options => new FsfeReuseProcessor(options)
+module.exports = (options) => new FsfeReuseProcessor(options)

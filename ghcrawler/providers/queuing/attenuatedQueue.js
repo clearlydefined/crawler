@@ -13,12 +13,11 @@ class AttenuatedQueue extends NestedQueue {
   }
 
   done(request) {
-    return super.done(request)
-      .then(() => {
-        const key = this._getCacheKey(request)
-        const deleted = memoryCache.del(key)
-        if (deleted) this.logger.verbose(`Deleted ${key}`)
-      })
+    return super.done(request).then(() => {
+      const key = this._getCacheKey(request)
+      const deleted = memoryCache.del(key)
+      if (deleted) this.logger.verbose(`Deleted ${key}`)
+    })
   }
 
   push(requests) {
@@ -26,10 +25,10 @@ class AttenuatedQueue extends NestedQueue {
     requests = Array.isArray(requests) ? requests : [requests]
     return Promise.all(
       requests.map(
-        qlimit(this.options.parallelPush || 1)(request => {
+        qlimit(this.options.parallelPush || 1)((request) => {
           return self._pushOne(request)
-        })
-      )
+        }),
+      ),
     )
   }
 
@@ -56,7 +55,7 @@ class AttenuatedQueue extends NestedQueue {
     }
     entry = {
       timestamp: Date.now(),
-      promise: this.queue.push(request)
+      promise: this.queue.push(request),
     }
     const ttl = (this.options.attenuation && this.options.attenuation.ttl) || 1000
     memoryCache.put(key, entry, ttl)

@@ -8,35 +8,35 @@ class StoreDispatcher {
   }
 
   connect() {
-    return this._perform(store => store.connect())
+    return this._perform((store) => store.connect())
   }
 
   upsert(document) {
-    return this._perform(store => store.upsert(document))
+    return this._perform((store) => store.upsert(document))
   }
 
   get(type, key) {
-    return this._perform(store => store.get(type, key), true)
+    return this._perform((store) => store.get(type, key), true)
   }
 
   etag(type, key) {
-    return this._perform(store => store.etag(type, key), true)
+    return this._perform((store) => store.etag(type, key), true)
   }
 
   list(type) {
-    return this._perform(store => store.list(type), true)
+    return this._perform((store) => store.list(type), true)
   }
 
   count(type) {
-    return this._perform(store => store.count(type), true)
+    return this._perform((store) => store.count(type), true)
   }
 
   close() {
-    return this._perform(store => store.close())
+    return this._perform((store) => store.close())
   }
 
   delete(type, key) {
-    return this._perform(store => store.delete(type, key))
+    return this._perform((store) => store.delete(type, key))
   }
 
   async _perform(operation, first = false) {

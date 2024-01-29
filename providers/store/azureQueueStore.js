@@ -47,4 +47,4 @@ class AzureStorageQueue {
   }
 }
 
-module.exports = options => new AzureStorageQueue(options)
+module.exports = (options) => new AzureStorageQueue(options)

@@ -16,7 +16,7 @@ class AbstractProcessor extends BaseHandler {
   constructor(options) {
     super(options)
     this._schemaVersion = this.aggregateVersions(
-      this._collectClasses().map(entry => entry.schemaVersion || entry.toolVersion)
+      this._collectClasses().map((entry) => entry.schemaVersion || entry.toolVersion),
     )
   }
 
@@ -66,19 +66,17 @@ class AbstractProcessor extends BaseHandler {
           if (!version) return result
           if (typeof version !== 'string') throw new Error(`Invalid processor version ${version}`)
           const parts = version.split('.')
-          if (parts.length !== 3 || parts.some(part => isNaN(+part))) throw new Error(`${errorRoot}: ${version}`)
+          if (parts.length !== 3 || parts.some((part) => isNaN(+part))) throw new Error(`${errorRoot}: ${version}`)
           for (let i = 0; i < 3; i++) result[i] += +parts[i]
           return result
         },
-        [0, 0, 0]
+        [0, 0, 0],
       )
       .join('.')
   }
 
   _computeToken(content) {
-    return shajs('sha256')
-      .update(content)
-      .digest('hex')
+    return shajs('sha256').update(content).digest('hex')
   }
 
   /**
@@ -92,7 +90,7 @@ class AbstractProcessor extends BaseHandler {
     if (!files || !files.length) return
     if (!document._attachments) Object.defineProperty(document, '_attachments', { value: [], enumerable: false })
     document.attachments = document.attachments || []
-    files.forEach(file => {
+    files.forEach((file) => {
       const fullPath = path.join(location, file)
       const attachment = fs.readFileSync(fullPath, 'utf8')
       const token = this._computeToken(attachment)
@@ -114,12 +112,12 @@ class AbstractProcessor extends BaseHandler {
     if (!locationStat.isDirectory()) return [location]
     const subdirs = await readdir(location)
     const files = await Promise.all(
-      subdirs.map(subdir => {
+      subdirs.map((subdir) => {
         const entry = path.resolve(location, subdir)
         return this.getFiles(entry)
-      })
+      }),
     )
-    return flatten(files).filter(x => x)
+    return flatten(files).filter((x) => x)
   }
 
   /**
@@ -132,14 +130,14 @@ class AbstractProcessor extends BaseHandler {
   async getFolders(location, ignorePaths = []) {
     const subdirs = await readdir(location)
     const folders = await Promise.all(
-      subdirs.map(async subdir => {
+      subdirs.map(async (subdir) => {
         const entry = path.resolve(location, subdir)
         const entryStat = await lstat(entry)
         if (entryStat.isSymbolicLink() || !entryStat.isDirectory()) return []
         return [entry, ...(await this.getFolders(entry))]
-      })
+      }),
     )
-    return flatten(folders).filter(folder => folder && !ignorePaths.some(ignorePath => folder.includes(ignorePath)))
+    return flatten(folders).filter((folder) => folder && !ignorePaths.some((ignorePath) => folder.includes(ignorePath)))
   }
 
   /**
@@ -150,8 +148,8 @@ class AbstractProcessor extends BaseHandler {
    */
   async filterFiles(location) {
     const fullList = await this.getFiles(location)
-    const filteredList = fullList.filter(file => file && !isGitFile(file))
-    return trimAllParents(filteredList, location).filter(x => x)
+    const filteredList = fullList.filter((file) => file && !isGitFile(file))
+    return trimAllParents(filteredList, location).filter((x) => x)
   }
 
   shouldFetch() {
@@ -224,8 +222,8 @@ class AbstractProcessor extends BaseHandler {
   }
 
   addLocalToolTasks(request, ...tools) {
-    const toolList = tools.length ? tools : ['licensee', 'scancode', 'reuse'/*, 'fossology'*/]
-    toolList.forEach(tool => this.linkAndQueueTool(request, tool, undefined, 'local'))
+    const toolList = tools.length ? tools : ['licensee', 'scancode', 'reuse' /*, 'fossology'*/]
+    toolList.forEach((tool) => this.linkAndQueueTool(request, tool, undefined, 'local'))
   }
 }
 

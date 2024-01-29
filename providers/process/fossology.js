@@ -51,19 +51,19 @@ class FossologyProcessor extends AbstractProcessor {
 
   async _runNomos(request) {
     const parameters = []
-    const result = await new Promise(resolve => {
+    const result = await new Promise((resolve) => {
       let data = ''
       const nomos = spawn(`${this.options.installDir}/nomos/agent/nomossa`, [
         '-ld',
         request.document.location,
-        ...parameters
+        ...parameters,
       ])
-      nomos.stdout.on('data', chunk => {
+      nomos.stdout.on('data', (chunk) => {
         if (data) data += chunk
         else data = chunk
       })
       nomos
-        .on('error', error => {
+        .on('error', (error) => {
           this.logger.error(error)
           resolve(null)
         })
@@ -73,7 +73,7 @@ class FossologyProcessor extends AbstractProcessor {
     })
     const output = {
       contentType: 'text/plain',
-      content: result.replace(new RegExp(`${request.document.location}/`, 'g'), '')
+      content: result.replace(new RegExp(`${request.document.location}/`, 'g'), ''),
     }
     return { version: this._nomosVersion, parameters: parameters.join(' '), output }
   }
@@ -93,8 +93,8 @@ class FossologyProcessor extends AbstractProcessor {
 
   async _runCopyright(request, files, root) {
     const parameters = ['-J']
-    const output = await this._visitFiles(files, file =>
-      this._runCopyrightOnFile(request, path.join(root, file), parameters)
+    const output = await this._visitFiles(files, (file) =>
+      this._runCopyrightOnFile(request, path.join(root, file), parameters),
     )
     return { version: this._copyrightVersion, parameters, output }
   }
@@ -104,7 +104,7 @@ class FossologyProcessor extends AbstractProcessor {
       const { stdout } = await execFile(
         `${this.options.installDir}/copyright/agent/copyright`,
         ['--files', file, ...parameters],
-        { cwd: `${this.options.installDir}/copyright/agent` }
+        { cwd: `${this.options.installDir}/copyright/agent` },
       )
       return stdout
     } catch (error) {
@@ -120,21 +120,21 @@ class FossologyProcessor extends AbstractProcessor {
     const chunkSize = 500
     const output = {
       contentType: 'text/plain',
-      content: ''
+      content: '',
     }
     for (let i = 0; i < files.length; i += chunkSize) {
-      const fileArguments = files.slice(i, i + chunkSize).map(file => path.join(root, file))
-      const result = await new Promise(resolve => {
+      const fileArguments = files.slice(i, i + chunkSize).map((file) => path.join(root, file))
+      const result = await new Promise((resolve) => {
         let data = ''
         const monk = spawn(`${this.options.installDir}/monk/agent/monk`, [...parameters, ...fileArguments], {
-          cwd: `${this.options.installDir}/monk/agent`
+          cwd: `${this.options.installDir}/monk/agent`,
         })
-        monk.stdout.on('data', chunk => {
+        monk.stdout.on('data', (chunk) => {
           if (data) data += chunk
           else data = chunk
         })
         monk
-          .on('error', error => {
+          .on('error', (error) => {
             this.logger.error(error)
             resolve(null)
           })
@@ -193,4 +193,4 @@ class FossologyProcessor extends AbstractProcessor {
   }
 }
 
-module.exports = options => new FossologyProcessor(options)
+module.exports = (options) => new FossologyProcessor(options)

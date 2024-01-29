@@ -16,7 +16,7 @@ class AttachmentStore {
   upsert(document) {
     const documentPromise = this.baseStore.upsert(document)
     if (!document._attachments) return documentPromise
-    const attachmentPromises = document._attachments.map(entry => {
+    const attachmentPromises = document._attachments.map((entry) => {
       return this.baseStore.upsert({
         _metadata: {
           type: 'attachment',
@@ -24,14 +24,14 @@ class AttachmentStore {
           links: {
             self: {
               href: `urn:attachment:${entry.token}`,
-              type: 'resource'
-            }
+              type: 'resource',
+            },
           },
           fetchedAt: get(document, '_metadata.fetchedAt'),
           processedAt: get(document, '_metadata.processedAt'),
-          version: '1'
+          version: '1',
         },
-        attachment: Buffer.from(entry.attachment).toString()
+        attachment: Buffer.from(entry.attachment).toString(),
       })
     })
     attachmentPromises.push(documentPromise)
@@ -63,4 +63,4 @@ class AttachmentStore {
   }
 }
 
-module.exports = options => new AttachmentStore(options)
+module.exports = (options) => new AttachmentStore(options)

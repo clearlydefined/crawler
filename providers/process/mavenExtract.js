@@ -42,7 +42,7 @@ class MavenExtract extends AbstractClearlyDefinedProcessor {
   _discoverCandidateSourceLocations(manifest) {
     const candidateUrls = []
     candidateUrls.push(get(manifest, 'summary.scm.0.url.0'))
-    return candidateUrls.filter(e => e)
+    return candidateUrls.filter((e) => e)
   }
 
   async _discoverSource(spec, manifest) {
@@ -50,7 +50,7 @@ class MavenExtract extends AbstractClearlyDefinedProcessor {
     // TODO lookup source discovery in a set of services that have their own configuration
     const githubSource = await this.sourceFinder(spec.revision, manifestCandidates, {
       githubToken: this.options.githubToken,
-      logger: this.logger
+      logger: this.logger,
     })
     if (githubSource) return githubSource
     // didn't find any source in GitHub so make up a sources url to try if the registry thinks there is source

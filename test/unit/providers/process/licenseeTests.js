@@ -22,7 +22,7 @@ describe('Licensee process', () => {
       'LICENSE',
       'package.json',
       'subfolder/LICENSE.foo',
-      'subfolder/LICENSE.bar'
+      'subfolder/LICENSE.bar',
     ])
     expect(processor.attachFiles.args[0][2]).to.equal(path.resolve('test/fixtures/licensee/9.10.1/folder1'))
   })
@@ -51,19 +51,19 @@ describe('Licensee process', () => {
     expect(request.processControl).to.equal('skip')
   })
 
-  beforeEach(function() {
+  beforeEach(function () {
     const resultBox = { error: null, versionResult: '1.2.0', versionError: null }
     const processStub = {
       execFile: (command, parameters, callbackOrOptions) => {
         if (parameters.includes('version'))
           return callbackOrOptions(resultBox.versionError, { stdout: resultBox.versionResult })
-      }
+      },
     }
     Handler = proxyquire('../../../../providers/process/licensee', { child_process: processStub })
     Handler._resultBox = resultBox
   })
 
-  afterEach(function() {
+  afterEach(function () {
     sandbox.restore()
   })
 })
@@ -76,9 +76,9 @@ function setup(fixture, error, versionError) {
   Handler._resultBox.error = error
   Handler._resultBox.versionError = versionError
   const processor = Handler(options)
-  processor._runLicensee = error ?
-    sinon.stub().rejects(error) :
-    (parameters, inputFolder) => Promise.resolve(fs.readFileSync(`${inputFolder}/output.json`).toString())
+  processor._runLicensee = error
+    ? sinon.stub().rejects(error)
+    : (parameters, inputFolder) => Promise.resolve(fs.readFileSync(`${inputFolder}/output.json`).toString())
   processor.attachFiles = sinon.stub()
   return { request: testRequest, processor }
 }

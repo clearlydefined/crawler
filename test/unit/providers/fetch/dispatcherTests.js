@@ -31,7 +31,7 @@ describe('fetchDispatcher', () => {
     const processorsStub = [{ canHandle: () => true, shouldFetch: () => false }]
     const fetchDispatcher = FetchDispatcher({}, {}, {}, processorsStub)
     const request = {}
-    chai.spy.on(request, 'markNoSave', () => { })
+    chai.spy.on(request, 'markNoSave', () => {})
     await fetchDispatcher.handle(request)
     expect(request.markNoSave).to.have.been.called.once
   })
@@ -48,7 +48,6 @@ describe('fetchDispatcher', () => {
 })
 
 describe('fetchDispatcher cache fetch result', () => {
-
   let resultCache
   let inProgressPromiseCache
 
@@ -58,7 +57,7 @@ describe('fetchDispatcher cache fetch result', () => {
   })
 
   afterEach(() => {
-    Object.values(resultCache).forEach(fetched => fetched.cleanup())
+    Object.values(resultCache).forEach((fetched) => fetched.cleanup())
   })
 
   function setupDispatcher(fetcher) {
@@ -66,13 +65,21 @@ describe('fetchDispatcher cache fetch result', () => {
     const processorsStub = [{ canHandle: () => true, shouldFetch: () => true, getUrnFor: () => 'documentkey' }]
     const filterStub = { shouldFetchMissing: () => true, shouldFetch: () => true }
     const options = { logger: { info: sinon.stub(), debug: sinon.stub() } }
-    return FetchDispatcher(options, storeStub, [fetcher], processorsStub, filterStub, mockResultCache(resultCache), inProgressPromiseCache)
+    return FetchDispatcher(
+      options,
+      storeStub,
+      [fetcher],
+      processorsStub,
+      filterStub,
+      mockResultCache(resultCache),
+      inProgressPromiseCache,
+    )
   }
 
   function mockResultCache(cache) {
     return {
-      get: key => cache[key],
-      setWithConditionalExpiry : (key, value) => cache[key] = value,
+      get: (key) => cache[key],
+      setWithConditionalExpiry: (key, value) => (cache[key] = value),
     }
   }
 
@@ -105,7 +112,7 @@ describe('fetchDispatcher cache fetch result', () => {
 
   describe('cache maven fetch result', () => {
     function setupMavenFetch() {
-      const fileSupplier = url => {
+      const fileSupplier = (url) => {
         let fileName
         if (url.includes('solrsearch')) fileName = 'swt-3.3.0-v3346.json'
         if (url.endsWith('.pom')) fileName = 'swt-3.3.0-v3346.pom'
@@ -116,7 +123,7 @@ describe('fetchDispatcher cache fetch result', () => {
       return MavenFetch({
         logger: { log: sinon.stub() },
         requestPromise: createRequestPromiseStub(fileSupplier),
-        requestStream: createGetStub(fileSupplier)
+        requestStream: createGetStub(fileSupplier),
       })
     }
 
@@ -175,7 +182,9 @@ describe('fetchDispatcher cache fetch result', () => {
     })
 
     it('cached result same as fetched', async () => {
-      pypiFetch._getRegistryData = sinon.stub().resolves(JSON.parse(fs.readFileSync('test/fixtures/pypi/registryData.json')))
+      pypiFetch._getRegistryData = sinon
+        .stub()
+        .resolves(JSON.parse(fs.readFileSync('test/fixtures/pypi/registryData.json')))
       const fetchDispatcher = setupDispatcher(pypiFetch)
       await verifyFetchAndCache(fetchDispatcher, 'cd:/pypi/pypi/-/backports.ssl-match-hostname/3.7.0.1')
     })
@@ -191,13 +200,12 @@ describe('fetchDispatcher cache fetch result', () => {
   })
 
   describe('cache NpmFetch result', () => {
-
     const npmRegistryRequestStub = () => {
       const version = '0.3.0'
       return {
         manifest: { version },
         versions: { [version]: { test: true } },
-        time: { [version]: '42' }
+        time: { [version]: '42' },
       }
     }
 
@@ -205,11 +213,12 @@ describe('fetchDispatcher cache fetch result', () => {
 
     beforeEach(() => {
       const NpmFetch = proxyquire('../../../../providers/fetch/npmjsFetch', {
-        'request-promise-native': npmRegistryRequestStub
+        'request-promise-native': npmRegistryRequestStub,
       })
       const npmFetch = NpmFetch({ logger: { log: sinon.stub() } })
-      npmFetch._getPackage = sinon.stub().callsFake(async (spec, destination) =>
-        await getPacakgeStub('test/fixtures/npm/redie-0.3.0.tgz', destination))
+      npmFetch._getPackage = sinon
+        .stub()
+        .callsFake(async (spec, destination) => await getPacakgeStub('test/fixtures/npm/redie-0.3.0.tgz', destination))
 
       fetchDispatcher = setupDispatcher(npmFetch)
     })
@@ -229,8 +238,9 @@ describe('fetchDispatcher cache fetch result', () => {
         version: '0.5.1',
         gem_uri: 'https://rubygems.org/gems/small-0.5.1.gem',
       })
-      rubyGemsFetch._getPackage = sinon.stub().callsFake(async (spec, destination) =>
-        await getPacakgeStub('test/fixtures/ruby/small-0.5.1.gem', destination))
+      rubyGemsFetch._getPackage = sinon
+        .stub()
+        .callsFake(async (spec, destination) => await getPacakgeStub('test/fixtures/ruby/small-0.5.1.gem', destination))
 
       fetchDispatcher = setupDispatcher(rubyGemsFetch)
     })
@@ -245,10 +255,18 @@ describe('fetchDispatcher cache fetch result', () => {
 
     beforeEach(() => {
       const packagistFetch = PackagistFetch({ logger: { log: sinon.stub() } })
-      packagistFetch._getRegistryData = sinon.stub().resolves(
-        JSON.parse(fs.readFileSync('test/fixtures/packagist/registryData.json')))
-      packagistFetch._getPackage = sinon.stub().callsFake(async (spec, registryData, destination) =>
-        await getPacakgeStub('test/fixtures/composer/symfony-polyfill-mbstring-v1.11.0-0-gfe5e94c.zip', destination))
+      packagistFetch._getRegistryData = sinon
+        .stub()
+        .resolves(JSON.parse(fs.readFileSync('test/fixtures/packagist/registryData.json')))
+      packagistFetch._getPackage = sinon
+        .stub()
+        .callsFake(
+          async (spec, registryData, destination) =>
+            await getPacakgeStub(
+              'test/fixtures/composer/symfony-polyfill-mbstring-v1.11.0-0-gfe5e94c.zip',
+              destination,
+            ),
+        )
 
       fetchDispatcher = setupDispatcher(packagistFetch)
     })
@@ -259,7 +277,7 @@ describe('fetchDispatcher cache fetch result', () => {
   })
 
   describe('cache CrateioFetch result', () => {
-    const requestPromiseStub = options => {
+    const requestPromiseStub = (options) => {
       const body = fs.readFileSync('test/fixtures/crates/bitflags.json')
       if (options && options.json) return JSON.parse(body)
       const response = new PassThrough()
@@ -273,7 +291,7 @@ describe('fetchDispatcher cache fetch result', () => {
 
     beforeEach(() => {
       const CrateioFetch = proxyquire('../../../../providers/fetch/cratesioFetch', {
-        'request-promise-native': requestPromiseStub
+        'request-promise-native': requestPromiseStub,
       })
       const packagistFetch = CrateioFetch({ logger: { log: sinon.stub() } })
       fetchDispatcher = setupDispatcher(packagistFetch)
@@ -290,7 +308,7 @@ describe('fetchDispatcher cache fetch result', () => {
 
     beforeEach(() => {
       const DebianFetch = proxyquire('../../../../providers/fetch/debianFetch', {
-        'memory-cache': memCacheStub
+        'memory-cache': memCacheStub,
       })
       const fetch = DebianFetch({ logger: { info: sinon.stub() }, cdFileLocation: 'test/fixtures/debian/fragment' })
       fetch._download = async (downloadUrl, destination) =>
@@ -316,8 +334,8 @@ describe('fetchDispatcher cache fetch result', () => {
     const successHttpStub = {
       get: sinon.stub().returns({
         status: 200,
-        data: httpContent
-      })
+        data: httpContent,
+      }),
     }
 
     let fetchDispatcher
@@ -325,7 +343,7 @@ describe('fetchDispatcher cache fetch result', () => {
     beforeEach(() => {
       const GoFetch = proxyquire('../../../../providers/fetch/goFetch', {
         request: { get: createGetStub(fileSupplier) },
-        'request-promise-native': createRequestPromiseStub(fileSupplier)
+        'request-promise-native': createRequestPromiseStub(fileSupplier),
       })
       const fetch = GoFetch({ logger: { info: sinon.stub() }, http: successHttpStub })
       fetchDispatcher = setupDispatcher(fetch)
@@ -366,8 +384,8 @@ describe('fetchDispatcher cache fetch result', () => {
         requestretry: {
           defaults: () => {
             return { get: requestPromiseStub }
-          }
-        }
+          },
+        },
       })
       const fetch = NugetFetch({ logger: { info: sinon.stub() } })
       fetchDispatcher = setupDispatcher(fetch)
@@ -385,9 +403,9 @@ describe('fetchDispatcher cache fetch result', () => {
         requestretry: {
           defaults: () => {
             return { get: sinon.stub().resolves({ body: loadJson('pod/versions.json'), statusCode: 200 }) }
-          }
+          },
         },
-        'request-promise-native': sinon.stub().resolves(loadJson('pod/registryData.json'))
+        'request-promise-native': sinon.stub().resolves(loadJson('pod/registryData.json')),
       })
       const fetch = PodFetch({ logger: { info: sinon.stub() } })
       fetch._getPackage = sinon.stub().resolves('/tmp/cd-pYKk9q/SwiftLCS-1.0')
@@ -400,8 +418,8 @@ describe('fetchDispatcher cache fetch result', () => {
   })
 })
 
-const createRequestPromiseStub = fileSupplier => {
-  return options => {
+const createRequestPromiseStub = (fileSupplier) => {
+  return (options) => {
     if (options.url) {
       if (options.url.includes('error')) throw new Error('yikes')
       if (options.url.includes('code')) throw { statusCode: 500, message: 'Code' }
@@ -412,7 +430,7 @@ const createRequestPromiseStub = fileSupplier => {
   }
 }
 
-const createGetStub = fileSupplier => {
+const createGetStub = (fileSupplier) => {
   return (url, callback) => {
     const response = new PassThrough()
     const file = `test/fixtures/${fileSupplier(url)}`
@@ -431,6 +449,6 @@ const getPacakgeStub = async (file, destination) => {
   await promisify(fs.copyFile)(file, destination)
 }
 
-const loadJson = fileName => {
+const loadJson = (fileName) => {
   return JSON.parse(fs.readFileSync(`test/fixtures/${fileName}`))
 }

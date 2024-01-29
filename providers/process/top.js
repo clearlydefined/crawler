@@ -18,9 +18,21 @@ class TopProcessor extends AbstractProcessor {
     return (
       request.type === 'top' &&
       spec &&
-      ['anaconda-main', 'anaconda-r', 'npmjs', 'cocoapods', 'conda-forge', 'cratesio', 'mavencentral', 'mavengoogle', 'nuget', 'github', 'pypi', 'composer', 'debian'].includes(
-        spec.provider
-      )
+      [
+        'anaconda-main',
+        'anaconda-r',
+        'npmjs',
+        'cocoapods',
+        'conda-forge',
+        'cratesio',
+        'mavencentral',
+        'mavengoogle',
+        'nuget',
+        'github',
+        'pypi',
+        'composer',
+        'debian',
+      ].includes(spec.provider)
     )
   }
 
@@ -78,10 +90,10 @@ class TopProcessor extends AbstractProcessor {
     const initialOffset = Math.floor(start / 36) * 36
     for (let offset = initialOffset; offset < end; offset += 36) {
       const response = await requestRetry.get(`https://www.npmjs.com/browse/depended?offset=${offset}`, {
-        headers: { 'x-spiferack': 1 }
+        headers: { 'x-spiferack': 1 },
       })
       const packages = response.packages || []
-      const requestsPage = packages.map(pkg => {
+      const requestsPage = packages.map((pkg) => {
         let [namespace, name] = pkg.name.split('/')
         if (!name) {
           name = namespace
@@ -143,10 +155,10 @@ class TopProcessor extends AbstractProcessor {
     for (let offset = start; offset < end; offset += 100) {
       const page = offset / 100 + 1
       const response = await requestRetry.get(
-        `https://crates.io/api/v1/crates?page=${page}&per_page=100&sort=downloads`
+        `https://crates.io/api/v1/crates?page=${page}&per_page=100&sort=downloads`,
       )
       const requestsPage = response.crates.map(
-        x => new Request('package', `cd:/crate/cratesio/-/${x.name}/${x.max_version}`)
+        (x) => new Request('package', `cd:/crate/cratesio/-/${x.name}/${x.max_version}`),
       )
       await request.queueRequests(requestsPage)
       console.log(`Queued ${requestsPage.length} Crate packages. Offset: ${offset}`)
@@ -173,7 +185,7 @@ class TopProcessor extends AbstractProcessor {
 
     const condaFetch = CondaFetch({
       logger: this.logger,
-      cdFileLocation: config.get('FILE_STORE_LOCATION') || (process.platform === 'win32' ? 'c:/temp/cd' : '/tmp/cd')
+      cdFileLocation: config.get('FILE_STORE_LOCATION') || (process.platform === 'win32' ? 'c:/temp/cd' : '/tmp/cd'),
     })
 
     if (!condaFetch.channels[spec.provider]) return request.markSkip(`Unrecognized conda channel ${spec.provider}`)
@@ -184,25 +196,30 @@ class TopProcessor extends AbstractProcessor {
     if (spec.type === 'conda') {
       for (let subdir of channelData.subdirs) {
         let repoData = await condaFetch.getRepoData(channelUrl, spec.provider, subdir)
-        let repoCoordinates = Object.entries(repoData.packages).
-          map(([, packageData]) => `cd:/conda/${spec.provider}/${subdir}/${packageData.name}/${packageData.version}-${packageData.build}/`
-          )
+        let repoCoordinates = Object.entries(repoData.packages).map(
+          ([, packageData]) =>
+            `cd:/conda/${spec.provider}/${subdir}/${packageData.name}/${packageData.version}-${packageData.build}/`,
+        )
         packagesCoordinates = packagesCoordinates.concat(repoCoordinates)
         if (start < packagesCoordinates.length && end <= packagesCoordinates.length) {
           break
         }
       }
     } else {
-      packagesCoordinates = Object.entries(channelData.packages).map(([packageName, packageData]) => `cd:/condasrc/${spec.provider}/-/${packageName}/${packageData.version}/`)
+      packagesCoordinates = Object.entries(channelData.packages).map(
+        ([packageName, packageData]) => `cd:/condasrc/${spec.provider}/-/${packageName}/${packageData.version}/`,
+      )
     }
 
     let slicedCoordinates = packagesCoordinates.slice(start, end)
 
     this.logger.info(
-      `Conda top - coordinates: ${packagesCoordinates.length}, start: ${start}, end: ${end}, sliced: ${slicedCoordinates.length}`
+      `Conda top - coordinates: ${packagesCoordinates.length}, start: ${start}, end: ${end}, sliced: ${slicedCoordinates.length}`,
     )
 
-    await request.queueRequests(slicedCoordinates.map(coord => new Request(spec.type === 'conda' ? 'package' : 'source', coord)))
+    await request.queueRequests(
+      slicedCoordinates.map((coord) => new Request(spec.type === 'conda' ? 'package' : 'source', coord)),
+    )
     return request.markNoSave()
   }
 
@@ -252,7 +269,7 @@ class TopProcessor extends AbstractProcessor {
     start = start && start >= 0 ? ++start : 1 // Exclude header from CSV file
     end = end && end > 0 ? ++end : fileLines.length
     const lines = fileLines.slice(start, end)
-    const requests = lines.map(line => {
+    const requests = lines.map((line) => {
       let [, groupId, artifactId] = line.split(',')
       groupId = groupId.substring(1, groupId.length - 1) // Remove quotes
       artifactId = artifactId.substring(1, artifactId.length - 1)
@@ -269,7 +286,7 @@ class TopProcessor extends AbstractProcessor {
     start = start && start >= 0 ? ++start : 1 // Exclude header from CSV file
     end = end && end > 0 ? ++end : fileLines.length
     const lines = fileLines.slice(start, end)
-    const requests = lines.map(line => {
+    const requests = lines.map((line) => {
       let [, groupId, artifactId] = line.split(',')
       groupId = groupId.substring(1, groupId.length - 1) // Remove quotes
       artifactId = artifactId.substring(1, artifactId.length - 1)
@@ -300,9 +317,9 @@ class TopProcessor extends AbstractProcessor {
     if (!end || end - start <= 0) end = start + 1000
     for (let offset = start; offset < end; offset += pageSize) {
       const topComponents = await requestRetry.get(
-        `https://api-v2v3search-0.nuget.org/query?prerelease=false&skip=${offset}&take=${pageSize}`
+        `https://api-v2v3search-0.nuget.org/query?prerelease=false&skip=${offset}&take=${pageSize}`,
       )
-      const requests = topComponents.data.map(component => {
+      const requests = topComponents.data.map((component) => {
         return new Request('package', `cd:/nuget/nuget/-/${component.id}`)
       })
       await request.queueRequests(requests)
@@ -322,18 +339,18 @@ class TopProcessor extends AbstractProcessor {
   async _processAllGitHubOrgRepos(request) {
     const { namespace } = this.toSpec(request)
     const headers = {
-      'User-Agent': 'clearlydefined/scanning'
+      'User-Agent': 'clearlydefined/scanning',
     }
     const token = this.options.githubToken
     if (token) headers.Authorization = 'token ' + token
     const repos = await ghrequestor.getAll(`https://api.github.com/orgs/${namespace}/repos`, {
       headers,
-      tokenLowerBound: 10
+      tokenLowerBound: 10,
     })
     const requests = []
     for (let i = 0; i < repos.length; i++) {
       const commits = await requestRetry.get(`https://api.github.com/repos/${namespace}/${repos[i].name}/commits`, {
-        headers
+        headers,
       })
       if (commits.length > 0) {
         requests.push(new Request('source', `cd:/git/github/${namespace}/${repos[i].name}/${commits[0].sha}`))
@@ -361,15 +378,15 @@ class TopProcessor extends AbstractProcessor {
     if (!end || end - start <= 0) end = start + 100
     const debianFetch = DebianFetch({
       logger: this.logger,
-      cdFileLocation: config.get('FILE_STORE_LOCATION') || (process.platform === 'win32' ? 'c:/temp/cd' : '/tmp/cd')
+      cdFileLocation: config.get('FILE_STORE_LOCATION') || (process.platform === 'win32' ? 'c:/temp/cd' : '/tmp/cd'),
     })
     await debianFetch._getPackageMapFile()
     const packagesCoordinates = await this._getDebianPackagesCoordinates(debianFetch)
     const slicedCoordinates = packagesCoordinates.slice(start, end)
     this.logger.info(
-      `Debian top - coordinates: ${packagesCoordinates.length}, start: ${start}, end: ${end}, sliced: ${slicedCoordinates.length}`
+      `Debian top - coordinates: ${packagesCoordinates.length}, start: ${start}, end: ${end}, sliced: ${slicedCoordinates.length}`,
     )
-    const requests = slicedCoordinates.map(coordinate => new Request('package', coordinate))
+    const requests = slicedCoordinates.map((coordinate) => new Request('package', coordinate))
     await request.queueRequests(requests)
     return request.markNoSave()
   }
@@ -380,7 +397,7 @@ class TopProcessor extends AbstractProcessor {
       const lineReader = linebyline(debianFetch.packageMapFileLocation)
       let entry = {}
       lineReader
-        .on('line', line => {
+        .on('line', (line) => {
           if (line === '') {
             const architecture = entry.Architecture
             const binary = entry.Binary
@@ -397,11 +414,11 @@ class TopProcessor extends AbstractProcessor {
         .on('end', () => {
           return resolve(coordinates)
         })
-        .on('error', error => reject(error))
+        .on('error', (error) => reject(error))
     })
   }
 
   // TODO: Implement _processTopPackagists
 }
 
-module.exports = options => new TopProcessor(options)
+module.exports = (options) => new TopProcessor(options)

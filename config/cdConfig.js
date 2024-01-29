@@ -5,13 +5,13 @@ const config = require('painless-config')
 
 const cd_azblob = {
   connection: config.get('CRAWLER_AZBLOB_CONNECTION_STRING'),
-  container: config.get('CRAWLER_AZBLOB_CONTAINER_NAME')
+  container: config.get('CRAWLER_AZBLOB_CONTAINER_NAME'),
 }
 
 const githubToken = config.get('CRAWLER_GITHUB_TOKEN')
 
 const cd_file = {
-  location: config.get('FILE_STORE_LOCATION') || (process.platform === 'win32' ? 'c:/temp/cd' : '/tmp/cd')
+  location: config.get('FILE_STORE_LOCATION') || (process.platform === 'win32' ? 'c:/temp/cd' : '/tmp/cd'),
 }
 const crawlerStoreProvider = config.get('CRAWLER_STORE_PROVIDER') || 'cd(file)'
 const maxRequeueAttemptCount = config.get('CRAWLER_MAX_REQUEUE_ATTEMPTS') || 5
@@ -22,20 +22,20 @@ module.exports = {
   searchPath: [module],
   crawler: {
     count: 2,
-    maxRequeueAttemptCount
+    maxRequeueAttemptCount,
   },
   filter: {
     provider: 'filter',
-    filter: {}
+    filter: {},
   },
   fetch: {
     dispatcher: 'cdDispatch',
     cdDispatch: {
-      fetched: { defaultTtlSeconds: fetchedCacheTtlSeconds }
+      fetched: { defaultTtlSeconds: fetchedCacheTtlSeconds },
     },
     cocoapods: { githubToken },
     conda: {
-      cdFileLocation: cd_file.location
+      cdFileLocation: cd_file.location,
     },
     cratesio: {},
     debian: { cdFileLocation: cd_file.location },
@@ -48,7 +48,7 @@ module.exports = {
     nuget: {},
     packagist: {},
     pypi: {},
-    rubygems: {}
+    rubygems: {},
   },
   process: {
     cdsource: {},
@@ -60,7 +60,7 @@ module.exports = {
     debsrc: {},
     fossology: {
       disabled: true,
-      installDir: config.get('FOSSOLOGY_HOME') || '/mnt/c/git/fo/fossology/src/'
+      installDir: config.get('FOSSOLOGY_HOME') || '/mnt/c/git/fo/fossology/src/',
     },
     gem: { githubToken },
     go: { githubToken },
@@ -90,39 +90,39 @@ module.exports = {
         '--classify',
         '--generated',
         '--summary',
-        '--summary-key-files'
+        '--summary-key-files',
         // '--quiet'
       ],
       timeout: 1000,
       processes: 2,
-      format: '--json-pp'
+      format: '--json-pp',
     },
     source: {},
-    top: { githubToken }
+    top: { githubToken },
   },
   store: {
     dispatcher: crawlerStoreProvider,
     cdDispatch: {},
     webhook: {
       url: config.get('CRAWLER_WEBHOOK_URL') || 'http://localhost:4000/webhook',
-      token: config.get('CRAWLER_WEBHOOK_TOKEN')
+      token: config.get('CRAWLER_WEBHOOK_TOKEN'),
     },
     azqueue: {
       connectionString: cd_azblob.connection,
-      queueName: config.get('CRAWLER_HARVESTS_QUEUE_NAME') || 'harvests'
+      queueName: config.get('CRAWLER_HARVESTS_QUEUE_NAME') || 'harvests',
     },
     'cd(azblob)': cd_azblob,
-    'cd(file)': cd_file
+    'cd(file)': cd_file,
   },
   deadletter: {
     provider: config.get('CRAWLER_DEADLETTER_PROVIDER') || crawlerStoreProvider,
     'cd(azblob)': cd_azblob,
-    'cd(file)': cd_file
+    'cd(file)': cd_file,
   },
   queue: {
     provider: config.get('CRAWLER_QUEUE_PROVIDER') || 'memory',
     memory: {
-      weights: { immediate: 3, soon: 2, normal: 3, later: 2 }
+      weights: { immediate: 3, soon: 2, normal: 3, later: 2 },
     },
     storageQueue: {
       weights: { immediate: 3, soon: 2, normal: 3, later: 2 },
@@ -132,8 +132,8 @@ module.exports = {
       visibilityTimeout_remainLocal: fetchedCacheTtlSeconds,
       maxDequeueCount: 5,
       attenuation: {
-        ttl: 3000
-      }
-    }
-  }
+        ttl: 3000,
+      },
+    },
+  },
 }

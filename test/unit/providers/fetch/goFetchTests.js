@@ -14,26 +14,34 @@ const goBaseURL = 'https://proxy.golang.org/'
 describe('Go utility functions', () => {
   it('builds URLs', () => {
     const fetch = GoFetch({})
-    expect(fetch._buildUrl(spec('go', 'golang', 'cloud.google.com', 'go', 'v0.56.0'))).to.equal(goBaseURL + 'cloud.google.com/go/@v/v0.56.0.zip')
-    expect(fetch._buildUrl(spec('go', 'golang', 'cloud.google.com', 'go', 'v0.56.0'), '.mod')).to.equal(goBaseURL + 'cloud.google.com/go/@v/v0.56.0.mod')
-    expect(fetch._buildUrl(spec('go', 'golang', '-', 'collectd.org', 'v0.5.0'))).to.equal(goBaseURL + 'collectd.org/@v/v0.5.0.zip')
-    expect(fetch._buildUrl(spec('go', 'golang', 'github.com%2fAzure%2fazure-event-hubs-go', 'v3', 'v3.2.0'))).to.equal(goBaseURL + 'github.com/Azure/azure-event-hubs-go/v3/@v/v3.2.0.zip')
-    expect(fetch._buildUrl(spec('go', 'golang', 'github.com%2FAzure%2Fazure-event-hubs-go', 'v3', 'v3.2.0'))).to.equal(goBaseURL + 'github.com/Azure/azure-event-hubs-go/v3/@v/v3.2.0.zip')
+    expect(fetch._buildUrl(spec('go', 'golang', 'cloud.google.com', 'go', 'v0.56.0'))).to.equal(
+      goBaseURL + 'cloud.google.com/go/@v/v0.56.0.zip',
+    )
+    expect(fetch._buildUrl(spec('go', 'golang', 'cloud.google.com', 'go', 'v0.56.0'), '.mod')).to.equal(
+      goBaseURL + 'cloud.google.com/go/@v/v0.56.0.mod',
+    )
+    expect(fetch._buildUrl(spec('go', 'golang', '-', 'collectd.org', 'v0.5.0'))).to.equal(
+      goBaseURL + 'collectd.org/@v/v0.5.0.zip',
+    )
+    expect(fetch._buildUrl(spec('go', 'golang', 'github.com%2fAzure%2fazure-event-hubs-go', 'v3', 'v3.2.0'))).to.equal(
+      goBaseURL + 'github.com/Azure/azure-event-hubs-go/v3/@v/v3.2.0.zip',
+    )
+    expect(fetch._buildUrl(spec('go', 'golang', 'github.com%2FAzure%2Fazure-event-hubs-go', 'v3', 'v3.2.0'))).to.equal(
+      goBaseURL + 'github.com/Azure/azure-event-hubs-go/v3/@v/v3.2.0.zip',
+    )
   })
 })
-
 
 const hashes = {
   'v1.3.0.zip': {
     sha1: '270d80279fca2d21c401dd40b6fc6370c41bfd94',
-    sha256: '03872ee7d6747bc2ee0abadbd4eb09e60f6df17d0a6142264abe8a8a00af50e7'
-  }
+    sha256: '03872ee7d6747bc2ee0abadbd4eb09e60f6df17d0a6142264abe8a8a00af50e7',
+  },
 }
 
 let Fetch
 
 function pickArtifact(url) {
-
   if (url.endsWith('.mod')) return 'v1.3.0.mod'
   if (url.endsWith('.info')) return 'v1.3.0.info'
   if (url.endsWith('.zip')) return 'v1.3.0.zip'
@@ -45,7 +53,7 @@ describe('Go Proxy fetching', () => {
   let successHttpStub
 
   beforeEach(() => {
-    const requestPromiseStub = options => {
+    const requestPromiseStub = (options) => {
       if (options.url) {
         expect(options.url).to.contain(goBaseURL)
         if (options.url.includes('error')) throw new Error('yikes')
@@ -75,8 +83,8 @@ describe('Go Proxy fetching', () => {
     successHttpStub = {
       get: sinon.stub().returns({
         status: 200,
-        data: httpContent
-      })
+        data: httpContent,
+      }),
     }
     Fetch = proxyquire('../../../../providers/fetch/goFetch', {
       request: { get: getStub },
@@ -155,12 +163,14 @@ describe('Go Proxy fetching', () => {
         info: sinon.spy(),
       },
       http: {
-        get: sinon.stub().throws(merge(new Error(), {
-          response: {
-            status: 429
-          }
-        }))
-      }
+        get: sinon.stub().throws(
+          merge(new Error(), {
+            response: {
+              status: 429,
+            },
+          }),
+        ),
+      },
     })
     const request = await handler.handle(new Request('test', 'cd:/go/golang/rsc.io/quote/v1.3.0'))
     expect(request.processControl).to.equal('requeue')
@@ -173,12 +183,14 @@ describe('Go Proxy fetching', () => {
         info: sinon.spy(),
       },
       http: {
-        get: sinon.stub().throws(merge(new Error(), {
-          response: {
-            status: 429
-          }
-        }))
-      }
+        get: sinon.stub().throws(
+          merge(new Error(), {
+            response: {
+              status: 429,
+            },
+          }),
+        ),
+      },
     })
     let request = new Request('test', 'cd:/go/golang/rsc.io/quote/v1.3.0')
     request.attemptCount = 5
@@ -193,12 +205,14 @@ describe('Go Proxy fetching', () => {
         info: sinon.spy(),
       },
       http: {
-        get: sinon.stub().throws(merge(new Error(), {
-          response: {
-            status: 404
-          }
-        }))
-      }
+        get: sinon.stub().throws(
+          merge(new Error(), {
+            response: {
+              status: 404,
+            },
+          }),
+        ),
+      },
     })
     const request = await handler.handle(new Request('test', 'cd:/go/golang/rsc.io/quote/v1.3.0'))
     expect(request.fetchResult.document.registryData?.licenses).to.be.undefined
@@ -214,17 +228,16 @@ describe('Go Proxy fetching', () => {
       http: {
         get: sinon.stub().returns({
           status: 200,
-          data:
-            `<article>
+          data: `<article>
                 <section class="License" id="lic-0">
                   <h2 class="go-textTitle">
                     <div id="#lic-0">Apache-2.0</div>
                     <div id="#lic-1">HTML has changed</div>
                   </h2>
                 </section>
-              </article>`
-        })
-      }
+              </article>`,
+        }),
+      },
     })
     const request = await handler.handle(new Request('test', 'cd:/go/golang/rsc.io/quote/v1.3.0'))
     expect(request.fetchResult.document.registryData?.licenses).to.be.undefined

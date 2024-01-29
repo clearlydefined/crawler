@@ -7,7 +7,7 @@ const providers = require('../ghcrawler').providers
 module.exports = {
   filter: {
     provider: 'filter',
-    filter: require('./filter/filter')
+    filter: require('./filter/filter'),
   },
   fetch: {
     cdDispatch: require('./fetch/dispatcher'),
@@ -24,7 +24,7 @@ module.exports = {
     npmjs: require('./fetch/npmjsFetch'),
     nuget: require('./fetch/nugetFetch'),
     pypi: require('./fetch/pypiFetch'),
-    rubygems: require('./fetch/rubyGemsFetch')
+    rubygems: require('./fetch/rubyGemsFetch'),
   },
   process: {
     cdsource: require('./process/sourceExtract'),
@@ -48,13 +48,13 @@ module.exports = {
     scancode: require('./process/scancode'),
     fossology: require('./process/fossology'),
     source: require('./process/source').processor,
-    top: require('./process/top')
+    top: require('./process/top'),
   },
   store: {
     cdDispatch: require('./store/storeDispatcher'),
     webhook: require('./store/webhookDeltaStore'),
     azqueue: require('./store/azureQueueStore'),
     'cd(azblob)': AttachmentStoreFactory(providers.store.azblob),
-    'cd(file)': AttachmentStoreFactory(providers.store.file)
-  }
+    'cd(file)': AttachmentStoreFactory(providers.store.file),
+  },
 }
