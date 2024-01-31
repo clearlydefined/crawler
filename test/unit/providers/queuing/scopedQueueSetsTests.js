@@ -19,7 +19,7 @@ describe('scopedQueueSets', () => {
     function createQueues() {
       return {
         subscribe: sinon.stub(),
-        unsubscribe: sinon.stub(),
+        unsubscribe: sinon.stub()
       }
     }
 
@@ -130,7 +130,7 @@ describe('scopedQueueSets', () => {
 
     function mockPopReturn(fromQueue) {
       const queue = {
-        getName: sinon.stub().returns(fromQueue),
+        getName: sinon.stub().returns(fromQueue)
       }
       return poppedRequest(queue)
     }
@@ -171,11 +171,11 @@ describe('scopedQueueSets', () => {
       globalQueue = mockQueue('normal')
       globalQueues = {
         getQueue: sinon.stub().returns(globalQueue),
-        pop: sinon.stub().resolves(poppedRequest(globalQueue)),
+        pop: sinon.stub().resolves(poppedRequest(globalQueue))
       }
       localQueue = mockQueue('normal')
       localQueues = {
-        pop: sinon.stub(),
+        pop: sinon.stub()
       }
       scopedQueues = new ScopedQueueSets(globalQueues, localQueues)
     })
@@ -211,12 +211,12 @@ describe('scopedQueueSets', () => {
     beforeEach(() => {
       globalQueue = mockQueue('normal')
       globalQueues = {
-        getQueue: () => globalQueue,
+        getQueue: () => globalQueue
       }
       localQueue = mockQueue('normal')
       localQueue.pop.resolves(poppedRequest(localQueue))
       localQueues = {
-        queues: [localQueue],
+        queues: [localQueue]
       }
 
       scopedQueues = new ScopedQueueSets(globalQueues, localQueues)
@@ -285,8 +285,8 @@ describe('integration test with AttenuatedQueue and InMemoryCrawlQueue', () => {
     options = {
       _config: new EventEmitter(),
       logger: {
-        verbose: sinon.stub(),
-      },
+        verbose: sinon.stub()
+      }
     }
     queueSets = createScopedQueueSets(queueName, options)
     scopedQueues = new ScopedQueueSets(queueSets.global, queueSets.local)
@@ -459,7 +459,7 @@ function createScopedQueueSets(queueName, options) {
 
   return {
     global: new QueueSet([global], options),
-    local: new QueueSet([local], options),
+    local: new QueueSet([local], options)
   }
 }
 
@@ -491,6 +491,6 @@ function mockQueue(fromQueue) {
     getName: sinon.stub().returns(fromQueue),
     push: sinon.stub().resolves(),
     done: sinon.stub().resolves(),
-    pop: sinon.stub(),
+    pop: sinon.stub()
   }
 }

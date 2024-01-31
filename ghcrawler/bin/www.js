@@ -25,7 +25,7 @@ function run(service, logger) {
   const server = http.createServer(app)
 
   // initialize the apps (if they have async init functions) and start listening
-  init(app, (error) => {
+  init(app, error => {
     if (error) {
       console.log('Error initializing the Express app: ' + error)
       throw new Error(error)
@@ -105,10 +105,10 @@ function run(service, logger) {
         console.log('Server closed.')
         process.exit(0)
       },
-      (error) => {
+      error => {
         console.error(`Closing server: ${error}`)
         process.exit(1)
-      },
+      }
     )
   }
 

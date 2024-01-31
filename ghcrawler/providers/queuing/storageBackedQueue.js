@@ -82,7 +82,7 @@ class StorageBackedQueue extends NestedQueue {
     const deleteRequests = []
     const info = await this.getInfo()
     for (let count = info.count; count > 0; count--) {
-      const deleteOne = super.pop().then((request) => this.done(request))
+      const deleteOne = super.pop().then(request => this.done(request))
       deleteRequests.push(deleteOne)
     }
     const results = await Promise.allSettled(deleteRequests)
@@ -90,9 +90,7 @@ class StorageBackedQueue extends NestedQueue {
   }
 
   _throwIfError(results, message) {
-    const errors = results
-      .filter((result) => result.status === 'rejected')
-      .map((rejected) => new Error(rejected.reason))
+    const errors = results.filter(result => result.status === 'rejected').map(rejected => new Error(rejected.reason))
     if (errors.length) throw new AggregateError(errors, message)
   }
 
@@ -103,7 +101,7 @@ class StorageBackedQueue extends NestedQueue {
   static create(queue, storageQueue, options = {}) {
     const defaultOptions = {
       visibilityTimeout_remainLocal: VISIBILITY_TIMEOUT_TO_REMAIN_ON_LOCAL_QUEUE,
-      visibilityTimeout: VISIBILITY_TIMEOUT_FOR_PROCESSING,
+      visibilityTimeout: VISIBILITY_TIMEOUT_FOR_PROCESSING
     }
     const optionsWithDefaults = { ...defaultOptions, ...options }
     return new StorageBackedQueue(queue, storageQueue, optionsWithDefaults)

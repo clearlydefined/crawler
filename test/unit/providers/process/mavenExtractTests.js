@@ -66,7 +66,7 @@ function sourceDiscovery() {
 }
 
 const githubResults = {
-  'http://url': createSourceSpec('url'),
+  'http://url': createSourceSpec('url')
 }
 
 function createManifest(url) {

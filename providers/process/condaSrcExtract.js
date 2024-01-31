@@ -22,4 +22,4 @@ class CondaSrcExtract extends AbstractClearlyDefinedProcessor {
   }
 }
 
-module.exports = (options) => new CondaSrcExtract(options)
+module.exports = options => new CondaSrcExtract(options)

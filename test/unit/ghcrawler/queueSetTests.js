@@ -37,10 +37,10 @@ describe('QueueSet weighting', () => {
 
   it('should pop other queue if nothing available', async () => {
     const priority = createBaseQueue('priority', {
-      pop: async () => new Request('priority', 'http://test'),
+      pop: async () => new Request('priority', 'http://test')
     })
     const normal = createBaseQueue('normal', {
-      pop: async () => null,
+      pop: async () => null
     })
     const queues = createBaseQueues([priority, normal], null, [1, 1])
     queues.popCount = 1
@@ -57,7 +57,7 @@ describe('QueueSet weighting', () => {
 describe('QueueSet pushing', () => {
   it('should accept a simple request into a named queue', async () => {
     const priority = createBaseQueue('priority', {
-      push: async () => null,
+      push: async () => null
     })
     const normal = createBaseQueue('normal')
     const queues = createBaseQueues([priority, normal])
@@ -71,10 +71,10 @@ describe('QueueSet pushing', () => {
 
   it('should throw when pushing into an unknown queue', async () => {
     const priority = createBaseQueue('priority', {
-      push: async () => null,
+      push: async () => null
     })
     const normal = createBaseQueue('normal', {
-      push: async () => null,
+      push: async () => null
     })
     const queues = createBaseQueues([priority, normal])
     const request = new Request('test', 'http://test')
@@ -86,7 +86,7 @@ describe('QueueSet pushing', () => {
 describe('QueueSet originQueue management', () => {
   it('should set originQueue on pop', async () => {
     const priority = createBaseQueue('priority', {
-      pop: async () => new Request('test', 'http://test'),
+      pop: async () => new Request('test', 'http://test')
     })
     const queues = createBaseQueues([priority])
 
@@ -126,7 +126,7 @@ describe('QueueSet subscription management', () => {
 function createOptions(weights) {
   return {
     weights: weights,
-    _config: { on: () => {} },
+    _config: { on: () => {} }
   }
 }
 
@@ -136,7 +136,7 @@ function createBaseQueues(queues, weights = null) {
 
 function createBaseQueue(
   name,
-  { pop = null, push = null, done = null, abandon = null, subscribe = null, unsubscribe = null } = {},
+  { pop = null, push = null, done = null, abandon = null, subscribe = null, unsubscribe = null } = {}
 ) {
   const result = { name: name }
   result.getName = () => {

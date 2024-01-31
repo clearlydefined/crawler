@@ -4,7 +4,7 @@
 const AzureStorage = require('azure-storage')
 const AzureStorageDocStore = require('./storageDocStore')
 
-module.exports = (options) => {
+module.exports = options => {
   options.logger.info('creating azure storage store')
   const { account, key, connection, container } = options
   const retryOperations = new AzureStorage.ExponentialRetryPolicyFilter()

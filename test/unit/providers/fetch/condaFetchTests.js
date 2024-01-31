@@ -8,7 +8,7 @@ const Request = require('../../../../ghcrawler/lib/request.js')
 describe('condaFetch utilities', () => {
   let fetch = CondaFetch({
     logger: { info: sinon.stub() },
-    cdFileLocation: 'test/fixtures/conda/fragment',
+    cdFileLocation: 'test/fixtures/conda/fragment'
   })
 
   let repoData = JSON.parse(fs.readFileSync('test/fixtures/conda/repodata.json'))
@@ -20,7 +20,7 @@ describe('condaFetch utilities', () => {
   it('matches packages in repodata.packages.conda correctly', () => {
     expect(fetch._matchPackage('21cmfast', '3.0.2', 'py37h48b2cff_0', repoData).length).to.greaterThan(0)
     expect(fetch._matchPackage('21cmfast', '3.0.2', 'py37h48b2cff_0', repoData)[0].packageData.build).to.equal(
-      'py37h48b2cff_0',
+      'py37h48b2cff_0'
     )
   })
 
@@ -38,7 +38,7 @@ describe('condaFetch', () => {
   beforeEach(() => {
     fetch = CondaFetch({
       logger: { info: sinon.stub() },
-      cdFileLocation: 'test/fixtures/conda/fragment',
+      cdFileLocation: 'test/fixtures/conda/fragment'
     })
     fetch.getChannelData = sinon.stub().resolves(JSON.parse(fs.readFileSync('test/fixtures/conda/channeldata.json')))
 
@@ -55,7 +55,7 @@ describe('condaFetch', () => {
     expect(result.url).to.be.contains('cd:/conda/conda-forge/linux-64/21cmfast/3.0.2')
     expect(result.document.hashes).to.be.deep.equal({
       sha1: '9b2f4958826956be03cf3793dbdb663a53a8a1f1',
-      sha256: '1154fceeb5c4ee9bb97d245713ac21eb1910237c724d2b7103747215663273c2',
+      sha256: '1154fceeb5c4ee9bb97d245713ac21eb1910237c724d2b7103747215663273c2'
     })
     expect(result.document.location).to.be.a.string
     expect(result.document.releaseDate).to.match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/)
@@ -105,7 +105,7 @@ describe('condaFetch', () => {
 
   it('fetch package with version, architecture, and build version', async () => {
     const result = await fetch.handle(
-      new Request('test', 'cd:/conda/conda-forge/linux-64/21cmfast/3.0.2-py37hd45b216_1'),
+      new Request('test', 'cd:/conda/conda-forge/linux-64/21cmfast/3.0.2-py37hd45b216_1')
     )
     verifyFetch(result.fetchResult)
   })
@@ -117,10 +117,10 @@ describe('condaFetch', () => {
 
   it('reports failed package matching', async () => {
     const result = await fetch.handle(
-      new Request('test', 'cd:/conda/conda-forge/linux-64/21cmfast/3.0.2-py9999_invalid'),
+      new Request('test', 'cd:/conda/conda-forge/linux-64/21cmfast/3.0.2-py9999_invalid')
     )
     expect(result.outcome).to.equal(
-      'Missing package with matching spec (version: 3.0.2, buildVersion: py9999_invalid) in linux-64 repository',
+      'Missing package with matching spec (version: 3.0.2, buildVersion: py9999_invalid) in linux-64 repository'
     )
   })
 
@@ -128,7 +128,7 @@ describe('condaFetch', () => {
     fetch.getRepoData = sinon.stub().resolves(null)
     const result = await fetch.handle(new Request('test', 'cd:/conda/conda-forge/linux-64/21cmfast/3.0.2'))
     expect(result.outcome).to.equal(
-      'failed to fetch and parse repodata json file for channel conda-forge in architecture linux-64',
+      'failed to fetch and parse repodata json file for channel conda-forge in architecture linux-64'
     )
   })
 
@@ -144,7 +144,7 @@ describe('condaSrcFetch', () => {
   beforeEach(() => {
     fetch = CondaFetch({
       logger: { info: sinon.stub() },
-      cdFileLocation: 'test/fixtures/conda/fragment',
+      cdFileLocation: 'test/fixtures/conda/fragment'
     })
     fetch.getChannelData = sinon.stub().resolves(JSON.parse(fs.readFileSync('test/fixtures/conda/channeldata.json')))
 
@@ -160,7 +160,7 @@ describe('condaSrcFetch', () => {
     expect(result.url).to.be.contains('cd:/condasrc/conda-forge/-/21cmfast/3.3.1')
     expect(result.document.hashes).to.be.deep.equal({
       sha1: '92ec2a84d2377426ff51ad3b07a75921245c8881',
-      sha256: '96f5809d111a8a137c25758fa3f41586ea44cecba7ae191518767895afc7b3c6',
+      sha256: '96f5809d111a8a137c25758fa3f41586ea44cecba7ae191518767895afc7b3c6'
     })
     expect(result.document.location).to.be.a.string
     expect(result.document.releaseDate).to.match(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/)

@@ -45,14 +45,14 @@ class PyPiExtract extends AbstractClearlyDefinedProcessor {
     candidates.push(get(registryData, 'info.package_url'))
     candidates.push(get(registryData, 'info.project_url'))
     candidates.push(get(registryData, 'info.release_url'))
-    const allCandidates = candidates.filter((e) => e)
+    const allCandidates = candidates.filter(e => e)
     return this.sourceFinder(revision, allCandidates, { githubToken: this.options.githubToken, logger: this.logger })
   }
 
   async _createDocument(request, spec, registryData) {
     request.document = merge(this.clone(request.document), {
       registryData,
-      declaredLicense: request.document.declaredLicense,
+      declaredLicense: request.document.declaredLicense
     })
     const sourceInfo = await this._discoverSource(spec.revision, registryData)
     if (sourceInfo) request.document.sourceInfo = sourceInfo

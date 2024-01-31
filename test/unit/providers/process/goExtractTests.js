@@ -28,7 +28,7 @@ describe('Go processing', () => {
     await processor.handle(request)
 
     expect(processor.linkAndQueueTool.callCount).to.be.equal(3)
-    expect(processor.linkAndQueueTool.args.map((call) => call[1])).to.have.members(['licensee', 'scancode', 'reuse'])
+    expect(processor.linkAndQueueTool.args.map(call => call[1])).to.have.members(['licensee', 'scancode', 'reuse'])
     expect(request.document.registryData.licenses).to.be.deep.equal(licenses)
   })
 })
@@ -51,11 +51,11 @@ function createRequest() {
       provider: 'golang',
       namespace: 'rsc.io',
       name: 'quote',
-      revision: '1.5.2',
+      revision: '1.5.2'
     },
     registryData: {
-      licenses,
-    },
+      licenses
+    }
   }
   request.processMode = 'process'
   return request
@@ -70,8 +70,8 @@ function createInvalidRequest() {
       provider: 'golang',
       namespace: 'rsc.io',
       name: 'quote',
-      revision: '1.5.2',
-    },
+      revision: '1.5.2'
+    }
   }
   request.processMode = 'process'
   return request

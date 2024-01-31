@@ -23,7 +23,7 @@ class StandardFilter extends AbstractProcessor {
   }
 
   _getProcessor(request) {
-    return this.processors.filter((processor) => processor.canHandle(request))[0]
+    return this.processors.filter(processor => processor.canHandle(request))[0]
   }
 }
 

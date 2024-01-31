@@ -97,17 +97,17 @@ class FetchDispatcher extends AbstractFetch {
       cacheKey,
       fetchResult,
       this._cleanupResult.bind(this),
-      (key, result) => !result.isInUse(),
+      (key, result) => !result.isInUse()
     )
   }
 
   _cleanupResult(key, result) {
-    result.cleanup((error) => this.logger.info(`Cleanup  Problem cleaning up after ${key} ${error.message}`))
+    result.cleanup(error => this.logger.info(`Cleanup  Problem cleaning up after ${key} ${error.message}`))
   }
 
   // get all the handler that apply to this request from the given list of handlers
   _getHandler(request, list) {
-    return list.filter((element) => element.canHandle(request))[0]
+    return list.filter(element => element.canHandle(request))[0]
   }
 }
 

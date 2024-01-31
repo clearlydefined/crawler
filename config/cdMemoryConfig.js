@@ -4,26 +4,26 @@
 module.exports = {
   crawler: {
     count: 1,
-    maxRequeueAttemptCount: 5,
+    maxRequeueAttemptCount: 5
   },
   fetch: {
-    github: {},
+    github: {}
   },
   process: {
     scancode: {},
     licensee: {},
-    reuse: {},
+    reuse: {}
   },
   store: {
-    provider: 'memory',
+    provider: 'memory'
   },
   deadletter: {
-    provider: 'memory',
+    provider: 'memory'
   },
   queue: {
     provider: 'memory',
     memory: {
-      weights: { events: 10, immediate: 3, soon: 2, normal: 3, later: 2 },
-    },
-  },
+      weights: { events: 10, immediate: 3, soon: 2, normal: 3, later: 2 }
+    }
+  }
 }

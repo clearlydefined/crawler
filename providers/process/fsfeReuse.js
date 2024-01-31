@@ -7,7 +7,7 @@ const execFile = promisify(require('child_process').execFile)
 const { merge } = require('lodash')
 const {
   readdirSync,
-  promises: { readFile },
+  promises: { readFile }
 } = require('fs')
 
 class FsfeReuseProcessor extends AbstractProcessor {
@@ -44,8 +44,8 @@ class FsfeReuseProcessor extends AbstractProcessor {
     request.document = merge(this.clone(request.document), { reuse: record })
     this.attachFiles(
       request.document,
-      record.licenses.map((file) => file.filePath),
-      location,
+      record.licenses.map(file => file.filePath),
+      location
     )
   }
 
@@ -74,8 +74,8 @@ class FsfeReuseProcessor extends AbstractProcessor {
     const spdxResultFile = {}
     const spdxRawValues = spdxResult.split(/\n/)
     // Each line represents a single result attribute
-    spdxRawValues.forEach((spdxRawValue) =>
-      this._handleResultAttribute(spdxRawValue, entryIndex, results, spdxResultFile),
+    spdxRawValues.forEach(spdxRawValue =>
+      this._handleResultAttribute(spdxRawValue, entryIndex, results, spdxResultFile)
     )
     // Generic metadata was already added to results.metadata
     // In case we have file metadata, all attributes are read now and information can be added to the file results
@@ -90,7 +90,7 @@ class FsfeReuseProcessor extends AbstractProcessor {
       const spdxResultValue = {
         key: spdxMatchResult.groups.first_key,
         secondaryKey: spdxMatchResult.groups.second_key,
-        spdxValue: spdxMatchResult.groups.spdx_value.replace(/(<\/?([^>]+)>)/g, ''),
+        spdxValue: spdxMatchResult.groups.spdx_value.replace(/(<\/?([^>]+)>)/g, '')
       }
       // First result section contains generic metadata, any other section attributes for a particular file
       if (entryIndex === 0) {
@@ -129,10 +129,10 @@ class FsfeReuseProcessor extends AbstractProcessor {
     const licensesDir = 'LICENSES'
     try {
       const licenseFiles = readdirSync(request.document.location + '/' + licensesDir)
-      licenseFiles.forEach((file) => {
+      licenseFiles.forEach(file => {
         licenses.push({
           filePath: licensesDir + '/' + file,
-          spdxId: file.substring(0, file.indexOf('.txt')),
+          spdxId: file.substring(0, file.indexOf('.txt'))
         })
       })
     } catch (error) {
@@ -144,20 +144,20 @@ class FsfeReuseProcessor extends AbstractProcessor {
   _detectVersion() {
     if (this._versionPromise !== undefined) return this._versionPromise
     this._versionPromise = execFile('reuse', ['--version'])
-      .then((result) => {
+      .then(result => {
         const reuseRegex = /reuse\s+(\d+\.\d+(\.\d+)?)/i
         this._toolVersion = result.stdout.trim().match(reuseRegex)[1]
         this._schemaVersion = this.aggregateVersions(
           [this._schemaVersion, this.toolVersion, this.configVersion],
-          'Invalid REUSE version',
+          'Invalid REUSE version'
         )
         return this._schemaVersion
       })
-      .catch((error) => {
+      .catch(error => {
         if (error) this.logger.log(`Could not detect version of REUSE: ${error.message}`)
       })
     return this._versionPromise
   }
 }
 
-module.exports = (options) => new FsfeReuseProcessor(options)
+module.exports = options => new FsfeReuseProcessor(options)

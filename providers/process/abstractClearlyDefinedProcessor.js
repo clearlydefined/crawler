@@ -39,13 +39,13 @@ class AbstractClearlyDefinedProcessor extends AbstractProcessor {
     const fileList = await this.filterFiles(location)
     const files = await Promise.all(
       fileList.map(
-        throat(10, async (file) => {
+        throat(10, async file => {
           if (this._isInterestinglyNamed(file, interestingRoot))
             await this.attachFiles(request.document, [file], location)
           const hashes = await this.computeHashes(path.join(location, file))
           return { path: file, hashes }
-        }),
-      ),
+        })
+      )
     )
     request.document.files = files
   }
@@ -62,7 +62,7 @@ class AbstractClearlyDefinedProcessor extends AbstractProcessor {
       'NOTICE',
       'NOTICES',
       'CONTRIBUTORS',
-      'PATENTS',
+      'PATENTS'
     ]
     const extensions = ['.MD', '.HTML', '.TXT']
     const extension = path.extname(name)
@@ -74,11 +74,11 @@ class AbstractClearlyDefinedProcessor extends AbstractProcessor {
   async _computeSize(location) {
     let count = 0
     const bytes = await du(location, {
-      filter: (file) => {
+      filter: file => {
         if (isGitFile(file)) return false
         count++
         return true
-      },
+      }
     })
     return { k: Math.round(bytes / 1024), count }
   }

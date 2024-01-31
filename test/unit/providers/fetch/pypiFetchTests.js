@@ -50,7 +50,7 @@ describe('pypiFetch handle function', () => {
     expect(result.document.releaseDate).to.be.equal('2019-01-12T22:25:58')
     expect(result.document.hashes).to.be.deep.equal({
       sha1: 'd886a6db6b7195911516896feebe3a5d1dddfd46',
-      sha256: '18a3a53a27df164d4db56d0f7f5da2edd25995418d5538f40eb4018347fe1354',
+      sha256: '18a3a53a27df164d4db56d0f7f5da2edd25995418d5538f40eb4018347fe1354'
     })
   })
 
@@ -58,9 +58,9 @@ describe('pypiFetch handle function', () => {
     // release information in the registry data is empty
     requestGetStub.returns({
       body: {
-        releases: { '1.10.0': [] },
+        releases: { '1.10.0': [] }
       },
-      statusCode: 200,
+      statusCode: 200
     })
 
     let result = await fetch.handle(new Request('pypi', 'cd:/pypi/pypi/-/dnspython/1.10.0'))
@@ -115,7 +115,7 @@ describe('pypiFetch handle function', () => {
       'LGPLv3+': 'LGPL-3.0-or-later',
       'LGPL-2.0+': 'LGPL-2.0-or-later',
       'LGPL-2.1+': 'LGPL-2.1-or-later',
-      'LGPL-3.0+': 'LGPL-3.0-or-later',
+      'LGPL-3.0+': 'LGPL-3.0-or-later'
     }
     for (const [key, value] of Object.entries(conversions)) {
       expect(spdxCorrect(key)).to.be.equal(value)

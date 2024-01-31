@@ -12,7 +12,7 @@ const FetchResult = require('../../lib/fetchResult')
 const { extractDate } = require('../../lib/utils')
 
 const providerMap = {
-  rubyGems: 'https://rubygems.org',
+  rubyGems: 'https://rubygems.org'
 }
 
 class RubyGemsFetch extends AbstractFetch {
@@ -49,7 +49,7 @@ class RubyGemsFetch extends AbstractFetch {
   async _getRegistryData(spec) {
     const baseUrl = providerMap.rubyGems
     const { body, statusCode } = await requestRetry.get(`${baseUrl}/api/v1/gems/${spec.name}.json`, {
-      json: true,
+      json: true
     })
     return statusCode === 200 && body ? body : null
   }
@@ -77,8 +77,8 @@ class RubyGemsFetch extends AbstractFetch {
       await new Promise((resolve, reject) => {
         fs.createReadStream(`${dirName}/metadata.gz`)
           .pipe(zlib.createGunzip())
-          .on('data', (data) => {
-            fs.writeFile(`${dirName}/metadata.txt`, data, (error) => {
+          .on('data', data => {
+            fs.writeFile(`${dirName}/metadata.txt`, data, error => {
               if (error) return reject(error)
               return resolve()
             })
@@ -105,4 +105,4 @@ class RubyGemsFetch extends AbstractFetch {
   }
 }
 
-module.exports = (options) => new RubyGemsFetch(options)
+module.exports = options => new RubyGemsFetch(options)

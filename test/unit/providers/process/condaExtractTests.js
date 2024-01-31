@@ -16,10 +16,10 @@ describe('Conda processing', () => {
     await processor.handle(request)
 
     expect(processor.linkAndQueueTool.callCount).to.be.equal(3)
-    expect(processor.linkAndQueueTool.args.map((call) => call[1])).to.have.members([
+    expect(processor.linkAndQueueTool.args.map(call => call[1])).to.have.members([
       'licensee',
       'scancode',
-      'reuse' /*, 'fossology'*/,
+      'reuse' /*, 'fossology'*/
     ])
     expect(processor.linkAndQueue.callCount).to.be.equal(1)
     expect(processor.linkAndQueue.args[0][1]).to.equal('source')
@@ -45,17 +45,17 @@ function createRequest() {
       provider: 'conda-forge',
       namespace: '-',
       name: '21cmfast',
-      revision: 'linux-64--3.0.2',
+      revision: 'linux-64--3.0.2'
     },
     registryData: {
       downloadUrl: '21cmfast',
       channelData: {},
       repoData: {
         packageData: {
-          version: '3.0.2',
-        },
-      },
-    },
+          version: '3.0.2'
+        }
+      }
+    }
   }
   request.processMode = 'process'
   return request

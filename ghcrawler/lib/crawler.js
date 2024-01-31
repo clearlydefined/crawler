@@ -19,7 +19,7 @@ const defaultOptions = {
   processingTtl: 60 * 1000,
   promiseTrace: false,
   requeueDelay: 5000,
-  deadletterPolicy: 'always', // Another option: excludeNotFound
+  deadletterPolicy: 'always' // Another option: excludeNotFound
 }
 
 class Crawler {
@@ -262,7 +262,7 @@ class Crawler {
       return request
     }
 
-    request.getTrackedCleanups().forEach((cleanup) => {
+    request.getTrackedCleanups().forEach(cleanup => {
       try {
         cleanup()
       } catch (error) {
@@ -277,25 +277,25 @@ class Crawler {
       const originalPromise = trackedPromises[i]
 
       originalPromise.then(
-        (result) => {
+        result => {
           completedPromises++
           debug(
             `_completeRequest(${loopName}:${request.toUniqueString()}): completed ${completedPromises} of ${
               trackedPromises.length
-            } promises (${failedPromises} failed)`,
+            } promises (${failedPromises} failed)`
           )
           return result
         },
-        (error) => {
+        error => {
           completedPromises++
           failedPromises++
           debug(
             `_completeRequest(${loopName}:${request.toUniqueString()}): completed ${completedPromises} of ${
               trackedPromises.length
-            } promises (${failedPromises} failed)`,
+            } promises (${failedPromises} failed)`
           )
           throw error
-        },
+        }
       )
     }
     debug(`_completeRequest(${loopName}:${request.toUniqueString()}): ${trackedPromises.length} tracked promises`)
@@ -306,25 +306,25 @@ class Crawler {
           () => {
             return self._deleteFromQueue(request)
           },
-          (error) => {
+          error => {
             debug(`_completeRequest(${loopName}:${request.toUniqueString()}): catch release lock`)
             self.logger.error(error)
             return self._abandonInQueue(request)
-          },
+          }
         )
       },
-      (error) => {
+      error => {
         debug(`_completeRequest(${loopName}:${request.toUniqueString()}): catch tracked promises`)
         self.logger.error(error)
         return self._completeRequest(request, true)
-      },
+      }
     )
     return completeWork
       .then(() => {
         debug(`_completeRequest(${loopName}:${request.toUniqueString()}): exit (success)`)
         return request
       })
-      .catch((error) => {
+      .catch(error => {
         debug(`_completeRequest(${loopName}:${request.toUniqueString()}): catch completeWork`)
         throw error
       })
@@ -389,7 +389,7 @@ class Crawler {
         return request
       }
       return handler.handle(request)
-    }).then((request) => {
+    }).then(request => {
       debug(`_fetch(${loopName}:${request.toUniqueString()}): exit (success - fetched)`)
       return request
     })
@@ -422,7 +422,7 @@ class Crawler {
       type: request.type,
       url: request.url,
       fetchedAt: DateTime.utc().toISO(),
-      links: {},
+      links: {}
     }
     if (request.response) {
       if (request.response.headers) {
@@ -470,7 +470,7 @@ class Crawler {
       return request
     }
     return this._logStartEnd('processing', request, () => {
-      return this._process(request).then((result) => {
+      return this._process(request).then(result => {
         debug(`_processDocument(${loopName}:${request.toUniqueString()}): exit (success)`)
         return result
       })
@@ -549,7 +549,7 @@ class Crawler {
 
     const start = Date.now()
     const documentToStore = this._buildDocumentToStore(request.document)
-    return this.store.upsert(documentToStore).then((upsert) => {
+    return this.store.upsert(documentToStore).then(upsert => {
       request.upsert = upsert
       request.addMeta({ write: Date.now() - start })
       debug(`_storeDocument(${loopName}:${request.toUniqueString()}): exit (success)`)
@@ -620,7 +620,7 @@ class Crawler {
     debug(`storeDeadletter(${loopName}:${request.toUniqueString()}): enter`)
     if (this.options.deadletterPolicy === 'excludeNotFound' && reason && reason.toLowerCase().includes('status 404')) {
       this.logger.info(
-        `storeDeadletter(${loopName}:${request.toUniqueString()}): not storing due to configured deadletter policy`,
+        `storeDeadletter(${loopName}:${request.toUniqueString()}): not storing due to configured deadletter policy`
       )
       return request
     }
@@ -654,7 +654,7 @@ class Crawler {
 
   _preFilter(requests) {
     const list = Array.isArray(requests) ? requests : [requests]
-    return list.filter((request) => {
+    return list.filter(request => {
       if (!request.url || !request.type) {
         this._storeDeadletter(request, `Attempt to queue malformed request ${request.toString()}`)
         return false

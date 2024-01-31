@@ -22,9 +22,9 @@ class DebSrcExtract extends AbstractClearlyDefinedProcessor {
       releaseDate,
       registryData,
       copyrightUrl,
-      declaredLicenses,
+      declaredLicenses
     })
   }
 }
 
-module.exports = (options) => new DebSrcExtract(options)
+module.exports = options => new DebSrcExtract(options)

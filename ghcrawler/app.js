@@ -9,7 +9,7 @@ const morgan = require('morgan')
 const sendHelper = require('./middleware/sendHelper')
 
 function configureApp(service, logger) {
-  process.on('unhandledRejection', (exception) => logger.error('unhandledRejection', exception))
+  process.on('unhandledRejection', exception => logger.error('unhandledRejection', exception))
   auth.initialize(config.get('CRAWLER_SERVICE_AUTH_TOKEN') || 'secret', config.get('CRAWLER_SERVICE_FORCE_AUTH'))
 
   const app = express()
@@ -44,11 +44,11 @@ function configureApp(service, logger) {
         // call the callback but with no args.  An arg indicates an error.
         callback()
       },
-      (error) => {
+      error => {
         console.log(`Service initialization error: ${error.message}`)
         console.dir(error)
         callback(error)
-      },
+      }
     )
   }
 

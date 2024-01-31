@@ -23,13 +23,13 @@ const readdir = promisify(fs.readdir)
 const readFile = promisify(fs.readFile)
 
 const providerMap = {
-  debian: 'http://ftp.debian.org/debian/',
+  debian: 'http://ftp.debian.org/debian/'
 }
 
 const packageFileMap = {
   url: 'http://ftp.debian.org/debian/indices/package-file.map.bz2',
   cacheKey: 'packageFileMap',
-  cacheDuration: 8 * 60 * 60 * 1000, // 8 hours
+  cacheDuration: 8 * 60 * 60 * 1000 // 8 hours
 }
 
 const metadataChangelogsUrl = 'https://metadata.ftp-master.debian.org/changelogs/'
@@ -68,7 +68,7 @@ class DebianFetch extends AbstractFetch {
       releaseDate,
       copyrightUrl,
       declaredLicenses,
-      hashes,
+      hashes
     })
     fetchResult.casedSpec = clone(spec)
     request.fetchResult = fetchResult.adoptCleanup(dir, request)
@@ -99,7 +99,7 @@ class DebianFetch extends AbstractFetch {
       memCache.put(packageFileMap.cacheKey, true, packageFileMap.cacheDuration)
       return new Promise((resolve, reject) => {
         const dom = domain.create()
-        dom.on('error', (error) => {
+        dom.on('error', error => {
           memCache.del(packageFileMap.cacheKey)
           return reject(error)
         })
@@ -110,7 +110,7 @@ class DebianFetch extends AbstractFetch {
             .pipe(fs.createWriteStream(this.packageMapFileLocation))
             .on('finish', () => {
               this.logger.info(
-                `Debian: retrieved ${packageFileMap.url}. Stored map file at ${this.packageMapFileLocation}`,
+                `Debian: retrieved ${packageFileMap.url}. Stored map file at ${this.packageMapFileLocation}`
               )
               return resolve()
             })
@@ -128,7 +128,7 @@ class DebianFetch extends AbstractFetch {
       let entry = {}
       const lineReader = linebyline(this.packageMapFileLocation)
       lineReader
-        .on('line', (line) => {
+        .on('line', line => {
           if (line === '') {
             if (
               [entry.Source, entry.Binary].includes(name) &&
@@ -146,7 +146,7 @@ class DebianFetch extends AbstractFetch {
           this.logger.info(`Debian: got ${relevantEntries.length} entries for ${spec.toUrl()}`)
           return resolve(relevantEntries)
         })
-        .on('error', (error) => reject(error))
+        .on('error', error => reject(error))
     })
   }
 
@@ -159,7 +159,7 @@ class DebianFetch extends AbstractFetch {
   _ensureArchitecturePresenceForBinary(spec, registryData) {
     const { architecture } = this._fromSpec(spec)
     if (spec.type === 'deb' && !architecture) {
-      const randomBinaryArchitecture = (registryData.find((entry) => entry.Architecture) || {}).Architecture
+      const randomBinaryArchitecture = (registryData.find(entry => entry.Architecture) || {}).Architecture
       if (!randomBinaryArchitecture) return false
       spec.revision += '_' + randomBinaryArchitecture
     }
@@ -170,14 +170,14 @@ class DebianFetch extends AbstractFetch {
     const isSrc = spec.type === 'debsrc'
     const { architecture } = this._fromSpec(spec)
     if (isSrc) {
-      const sourceAndPatches = registryData.filter((entry) => !entry.Architecture && !entry.Path.endsWith('.dsc'))
-      const sourcePath = (sourceAndPatches.find((entry) => entry.Path.includes('.orig.tar.')) || {}).Path
+      const sourceAndPatches = registryData.filter(entry => !entry.Architecture && !entry.Path.endsWith('.dsc'))
+      const sourcePath = (sourceAndPatches.find(entry => entry.Path.includes('.orig.tar.')) || {}).Path
       const source = sourcePath ? new URL(providerMap.debian + sourcePath).href : null
-      const patchPath = (sourceAndPatches.find((entry) => !entry.Path.includes('.orig.tar.')) || {}).Path
+      const patchPath = (sourceAndPatches.find(entry => !entry.Path.includes('.orig.tar.')) || {}).Path
       const patches = patchPath ? new URL(providerMap.debian + patchPath).href : null
       return { source, patches }
     }
-    const binary = new URL(providerMap.debian + registryData.find((entry) => entry.Architecture === architecture).Path)
+    const binary = new URL(providerMap.debian + registryData.find(entry => entry.Architecture === architecture).Path)
       .href
     return { binary }
   }
@@ -212,7 +212,7 @@ class DebianFetch extends AbstractFetch {
   async _download(downloadUrl, destination) {
     return new Promise((resolve, reject) => {
       const dom = domain.create()
-      dom.on('error', (error) => reject(error))
+      dom.on('error', error => reject(error))
       dom.run(() => {
         nodeRequest
           .get(downloadUrl, (error, response) => {
@@ -234,7 +234,7 @@ class DebianFetch extends AbstractFetch {
         const fullName = path.join(destination, name)
         entry.fileData().pipe(fs.createWriteStream(fullName)).on('finish', next)
       })
-      reader.on('error', (error) => {
+      reader.on('error', error => {
         reject(error)
       })
       reader.on('end', () => {
@@ -267,12 +267,12 @@ class DebianFetch extends AbstractFetch {
     if (!locationStat.isDirectory()) return [location]
     const subdirs = await readdir(location)
     const files = await Promise.all(
-      subdirs.map((subdir) => {
+      subdirs.map(subdir => {
         const entry = path.resolve(location, subdir)
         return this._getFiles(entry)
-      }),
+      })
     )
-    return flatten(files).filter((x) => x)
+    return flatten(files).filter(x => x)
   }
 
   async _getSourceDirectoryName(location) {
@@ -286,7 +286,7 @@ class DebianFetch extends AbstractFetch {
       const orderedPatches = (await readFile(patchesSeriesLocation))
         .toString()
         .split('\n')
-        .filter((patch) => patch && !patch.trim().startsWith('#') && !patch.trim().startsWith('|'))
+        .filter(patch => patch && !patch.trim().startsWith('#') && !patch.trim().startsWith('|'))
       for (let patchFileName of orderedPatches) {
         const patchCommand = `patch -p01 -i ${path.join(patchesLocation, 'patches', patchFileName)}`
         try {
@@ -300,7 +300,7 @@ class DebianFetch extends AbstractFetch {
   }
 
   _getCopyrightUrl(registryData) {
-    const entry = registryData.find((entry) => entry.Source)
+    const entry = registryData.find(entry => entry.Source)
     if (!entry) return null
     // Example: ./pool/main/0/0ad/0ad_0.0.17-1.debian.tar.xz -> main/0
     const pathFragment = entry.Path.replace('./pool/', '').split('/').slice(0, 2).join('/')
@@ -328,15 +328,15 @@ class DebianFetch extends AbstractFetch {
     const licensesSet = new Set()
     const licenses = copyrightResponse
       .split('\n')
-      .filter((line) => line.startsWith('License: '))
-      .map((line) => line.replace('License:', '').trim())
-      .map((licenseId) => {
+      .filter(line => line.startsWith('License: '))
+      .map(line => line.replace('License:', '').trim())
+      .map(licenseId => {
         if (licenseId.includes('CPL') && !licenseId.includes('RSCPL')) licenseId = licenseId.replace('CPL', 'CPL-1.0')
         if (licenseId.toLowerCase().includes('expat')) licenseId = licenseId.replace(/expat/i, 'MIT')
         return licenseId
       })
     // Over-simplified parsing of edge cases:
-    licenses.forEach((licenseId) => {
+    licenses.forEach(licenseId => {
       if (licenseId.includes(' or ') && !licenseId.includes(',')) {
         // A or B and C => (A OR B AND C)
         licenseId = licenseId.replace(' or ', ' OR ')
@@ -345,7 +345,7 @@ class DebianFetch extends AbstractFetch {
       } else if (licenseId.includes(' or ') && licenseId.includes(',')) {
         // A or B, and C => (A OR B) AND C
         licenseId = licenseId.replace(' or ', ' OR ')
-        licenseId.split(' and ').forEach((part) => {
+        licenseId.split(' and ').forEach(part => {
           if (part.includes('OR') && part.endsWith(',')) {
             licensesSet.add('(' + part.replace(',', ')'))
           } else {
@@ -353,7 +353,7 @@ class DebianFetch extends AbstractFetch {
           }
         })
       } else if (licenseId.includes(' and ')) {
-        licenseId.split(' and ').forEach((part) => licensesSet.add(part))
+        licenseId.split(' and ').forEach(part => licensesSet.add(part))
       } else {
         licensesSet.add(licenseId)
       }
@@ -362,4 +362,4 @@ class DebianFetch extends AbstractFetch {
   }
 }
 
-module.exports = (options) => new DebianFetch(options)
+module.exports = options => new DebianFetch(options)

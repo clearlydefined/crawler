@@ -16,7 +16,7 @@ class StorageQueue {
 
   async subscribe() {
     return new Promise((resolve, reject) => {
-      this.client.createQueueIfNotExists(this.queueName, (error) => {
+      this.client.createQueueIfNotExists(this.queueName, error => {
         if (error) {
           return reject(error)
         }
@@ -34,7 +34,7 @@ class StorageQueue {
     requests = Array.isArray(requests) ? requests : [requests]
     return Promise.all(
       requests.map(
-        qlimit(this.options.parallelPush || 1)((request) => {
+        qlimit(this.options.parallelPush || 1)(request => {
           const body = JSON.stringify(request)
           return new Promise((resolve, reject) => {
             this.client.createMessage(this.queueName, body, option, (error, queueMessageResult) => {
@@ -45,8 +45,8 @@ class StorageQueue {
               resolve(this._buildMessageReceipt(queueMessageResult, request))
             })
           })
-        }),
-      ),
+        })
+      )
     )
   }
 
@@ -69,7 +69,7 @@ class StorageQueue {
         }
         if (this.options.maxDequeueCount && message.dequeueCount > this.options.maxDequeueCount) {
           this.logger.verbose('maxDequeueCount exceeded')
-          this.client.deleteMessage(this.queueName, message.messageId, message.popReceipt, (error) => {
+          this.client.deleteMessage(this.queueName, message.messageId, message.popReceipt, error => {
             if (error) return reject(error)
             resolve(null)
           })
@@ -89,7 +89,7 @@ class StorageQueue {
       return
     }
     return new Promise((resolve, reject) => {
-      this.client.deleteMessage(this.queueName, request._message.messageId, request._message.popReceipt, (error) => {
+      this.client.deleteMessage(this.queueName, request._message.messageId, request._message.popReceipt, error => {
         if (error) {
           return reject(error)
         }
@@ -124,16 +124,16 @@ class StorageQueue {
           }
           this._log('NAKed', request._message.body)
           resolve(this._buildMessageReceipt(result, request._message.body))
-        },
+        }
       )
     })
   }
 
   async flush() {
     return new Promise((resolve, reject) => {
-      this.client.deleteQueue(this.queueName, (error) => {
+      this.client.deleteQueue(this.queueName, error => {
         if (error) return reject(error)
-        this.client.createQueueIfNotExists(this.queueName, (error) => {
+        this.client.createQueueIfNotExists(this.queueName, error => {
           if (error) return reject(error)
           resolve()
         })
@@ -142,7 +142,7 @@ class StorageQueue {
   }
 
   async getInfo() {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       this.client.getQueueMetadata(this.queueName, (result, error) => {
         if (error) {
           this.logger.error(error)

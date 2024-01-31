@@ -8,9 +8,9 @@ class MavenCentralFetch extends MavenBasedFetch {
   constructor(options) {
     super(
       {
-        mavencentral: 'https://search.maven.org/remotecontent?filepath=',
+        mavencentral: 'https://search.maven.org/remotecontent?filepath='
       },
-      options,
+      options
     )
   }
   // query maven to get the latest version if we don't already have that.
@@ -32,4 +32,4 @@ class MavenCentralFetch extends MavenBasedFetch {
   }
 }
 
-module.exports = (options) => new MavenCentralFetch(options)
+module.exports = options => new MavenCentralFetch(options)

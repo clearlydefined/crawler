@@ -27,20 +27,20 @@ class AbstractFetch extends BaseHandler {
 
   unzip(source, destination) {
     return new Promise((resolve, reject) =>
-      extract(source, { dir: destination }, (error) => (error ? reject(error) : resolve())),
+      extract(source, { dir: destination }, error => (error ? reject(error) : resolve()))
     )
   }
 
   decompress(source, destination) {
     return decompress(source, destination, {
-      filter: (file) => !file.path.endsWith('/'),
+      filter: file => !file.path.endsWith('/'),
       plugins: [
         decompressTar(),
         decompressTarbz2(),
         decompressTargz(),
         decompressTarxz(),
-        decompressUnzip({ validateEntrySizes: false }),
-      ],
+        decompressUnzip({ validateEntrySizes: false })
+      ]
     })
   }
 }

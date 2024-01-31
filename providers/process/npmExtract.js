@@ -62,7 +62,7 @@ class NpmExtract extends AbstractClearlyDefinedProcessor {
       if (typeof manifest.bugs === 'string' && manifest.bugs.startsWith('http')) candidateUrls.push(manifest.bugs)
       else candidateUrls.push(manifest.bugs.url)
     }
-    return candidateUrls.filter((e) => e)
+    return candidateUrls.filter(e => e)
   }
 
   async _discoverSource(manifest, registryManifest) {
@@ -73,7 +73,7 @@ class NpmExtract extends AbstractClearlyDefinedProcessor {
     // TODO lookup source discovery in a set of services that have their own configuration
     return this.sourceFinder(registryManifest.version, candidates, {
       githubToken: this.options.githubToken,
-      logger: this.logger,
+      logger: this.logger
     })
   }
 

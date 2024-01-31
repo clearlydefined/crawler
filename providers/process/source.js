@@ -23,4 +23,4 @@ class SourceProcessor extends AbstractProcessor {
   }
 }
 
-module.exports = { processor: (options) => new SourceProcessor(options), supportedTypes }
+module.exports = { processor: options => new SourceProcessor(options), supportedTypes }

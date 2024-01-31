@@ -62,7 +62,7 @@ describe('fetchResult', () => {
       const request = new Request('test', 'http://test').trackCleanup([
         dir1.removeCallback,
         dir2.removeCallback,
-        { removeCallback: sinon.stub() },
+        { removeCallback: sinon.stub() }
       ])
       expect(request.getTrackedCleanups().length).to.be.equal(3)
 

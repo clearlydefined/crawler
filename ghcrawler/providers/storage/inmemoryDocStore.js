@@ -48,10 +48,10 @@ class InmemoryDocStore {
       collection = {}
     }
     return Object.keys(collection)
-      .filter((key) => {
+      .filter(key => {
         return key.startsWith('urn:') ? true : false
       })
-      .map((key) => {
+      .map(key => {
         const metadata = collection[key]._metadata
         return {
           version: metadata.version,
@@ -61,7 +61,7 @@ class InmemoryDocStore {
           urn: metadata.links.self.href,
           fetchedAt: metadata.fetchedAt,
           processedAt: metadata.processedAt,
-          extra: metadata.extra,
+          extra: metadata.extra
         }
       })
   }
@@ -90,4 +90,4 @@ class InmemoryDocStore {
   }
 }
 
-module.exports = (options) => new InmemoryDocStore(options)
+module.exports = options => new InmemoryDocStore(options)

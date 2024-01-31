@@ -9,7 +9,7 @@ const { clone, get } = require('lodash')
 const FetchResult = require('../../lib/fetchResult')
 
 const providerMap = {
-  npmjs: 'https://registry.npmjs.com',
+  npmjs: 'https://registry.npmjs.com'
 }
 
 class NpmFetch extends AbstractFetch {
@@ -63,7 +63,7 @@ class NpmFetch extends AbstractFetch {
     try {
       registryData = await requestPromise({
         url: `${baseUrl}/${encodeURIComponent(fullName).replace('%40', '@')}`, // npmjs doesn't handle the escaped version
-        json: true,
+        json: true
       })
     } catch (exception) {
       if (exception.statusCode !== 404) throw exception
@@ -109,4 +109,4 @@ class NpmFetch extends AbstractFetch {
   }
 }
 
-module.exports = (options) => new NpmFetch(options)
+module.exports = options => new NpmFetch(options)

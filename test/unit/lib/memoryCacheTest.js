@@ -38,21 +38,21 @@ describe('cache timeout callback', () => {
     done()
   }
 
-  it('should expire', (done) => {
+  it('should expire', done => {
     cache.withVerify(verifyExpired.bind(undefined, done))
 
     cache.set('a', 'A')
     expect(cache.get('a')).to.be.equal('A')
   })
 
-  it('should expire with no condition', (done) => {
+  it('should expire with no condition', done => {
     cache.withVerify(verifyExpired.bind(undefined, done))
 
     cache.setWithConditionalExpiry('a', 'A')
     expect(cache.get('a')).to.be.equal('A')
   })
 
-  it('should trigger callback after expiry', (done) => {
+  it('should trigger callback after expiry', done => {
     const afterExpire = sinon.stub()
     cache.withVerify(verifyExpired.bind(undefined, done, afterExpire))
 
@@ -60,7 +60,7 @@ describe('cache timeout callback', () => {
     expect(cache.get('a')).to.be.equal('A')
   })
 
-  it('should expire from condition', (done) => {
+  it('should expire from condition', done => {
     const afterExpire = sinon.stub()
     cache.withVerify(verifyExpired.bind(undefined, done, afterExpire))
 
@@ -68,7 +68,7 @@ describe('cache timeout callback', () => {
     expect(cache.get('a')).to.be.equal('A')
   })
 
-  it('should not expire from condition', (done) => {
+  it('should not expire from condition', done => {
     const afterExpire = sinon.stub()
     const verifyNotExpired = () => {
       expect(afterExpire.called).to.be.false
@@ -84,7 +84,7 @@ describe('cache timeout callback', () => {
     expect(cache.get('a')).to.be.equal('A')
   })
 
-  it('should not expire 1st time and then expire 2nd time', (done) => {
+  it('should not expire 1st time and then expire 2nd time', done => {
     const afterExpire = sinon.stub()
 
     let callCount = 0

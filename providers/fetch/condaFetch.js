@@ -15,10 +15,10 @@ class CondaFetch extends AbstractFetch {
     this.channels = {
       'anaconda-main': 'https://repo.anaconda.com/pkgs/main',
       'anaconda-r': 'https://repo.anaconda.com/pkgs/r',
-      'conda-forge': 'https://conda.anaconda.org/conda-forge',
+      'conda-forge': 'https://conda.anaconda.org/conda-forge'
     }
     this.headers = {
-      'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)',
+      'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)'
     }
     this.CACHE_DURATION = 8 * 60 * 60 * 1000 // 8 hours
   }
@@ -79,7 +79,7 @@ class CondaFetch extends AbstractFetch {
       registryData: { channelData: packageChannelData, downloadUrl },
       releaseDate: new Date(packageChannelData.timestamp || 0).toISOString(),
       declaredLicenses: packageChannelData.license,
-      hashes,
+      hashes
     }
     fetchResult.casedSpec = clone(spec)
     request.fetchResult = fetchResult.adoptCleanup(dir, request)
@@ -101,7 +101,7 @@ class CondaFetch extends AbstractFetch {
           .filter(packageMatches)
           .map(([packageFile, packageData]) => {
             return { packageFile, packageData }
-          }),
+          })
       )
     }
     if (repoData['packages.conda']) {
@@ -110,7 +110,7 @@ class CondaFetch extends AbstractFetch {
           .filter(packageMatches)
           .map(([packageFile, packageData]) => {
             return { packageFile, packageData }
-          }),
+          })
       )
     }
     packageRepoEntries.sort((a, b) => (b.packageData.timestamp || 0) - (a.packageData.timestamp || 0))
@@ -124,19 +124,19 @@ class CondaFetch extends AbstractFetch {
       this.logger.info(`No binary architecture specified for ${spec.name}, using architecture: ${architecture}`)
     }
     let repoData = undefined
-    if (!packageChannelData.subdirs.find((x) => x === architecture)) {
+    if (!packageChannelData.subdirs.find(x => x === architecture)) {
       return request.markSkip(`Missing architecture ${architecture} for package ${spec.name} in channel`)
     }
     repoData = await this.getRepoData(this.channels[spec.provider], spec.provider, architecture)
     if (!repoData) {
       return request.markSkip(
-        `failed to fetch and parse repodata json file for channel ${spec.provider} in architecture ${architecture}`,
+        `failed to fetch and parse repodata json file for channel ${spec.provider} in architecture ${architecture}`
       )
     }
     let packageRepoEntries = this._matchPackage(spec.name, version, buildVersion, repoData)
     if (packageRepoEntries.length === 0) {
       return request.markSkip(
-        `Missing package with matching spec (version: ${version}, buildVersion: ${buildVersion}) in ${architecture} repository`,
+        `Missing package with matching spec (version: ${version}, buildVersion: ${buildVersion}) in ${architecture} repository`
       )
     }
     let packageRepoEntry = packageRepoEntries[0]
@@ -156,7 +156,7 @@ class CondaFetch extends AbstractFetch {
       registryData: { channelData: packageChannelData, repoData: packageRepoEntry, downloadUrl },
       releaseDate: new Date(packageRepoEntry.packageData.timestamp || 0).toISOString(),
       declaredLicenses: packageRepoEntry.packageData.license,
-      hashes,
+      hashes
     }
     fetchResult.casedSpec = clone(spec)
     request.fetchResult = fetchResult.adoptCleanup(dir, request)
@@ -190,7 +190,7 @@ class CondaFetch extends AbstractFetch {
               memCache.put(cacheKey, true, cacheDuration)
               this.logger.info(`Conda: retrieved ${sourceUrl}. Stored data file at ${fileDstLocation}`)
               return resolve()
-            }),
+            })
           )
       })
     }
@@ -210,7 +210,7 @@ class CondaFetch extends AbstractFetch {
       `${condaChannelID}-channelDataFile`,
       `${condaChannelUrl}/channeldata.json`,
       this.CACHE_DURATION,
-      `${this.packageMapFolder}/${condaChannelID}-channelDataFile.json`,
+      `${this.packageMapFolder}/${condaChannelID}-channelDataFile.json`
     )
   }
 
@@ -219,9 +219,9 @@ class CondaFetch extends AbstractFetch {
       `${condaChannelID}-repoDataFile-${architecture}`,
       `${condaChannelUrl}/${architecture}/repodata.json`,
       this.CACHE_DURATION,
-      `${this.packageMapFolder}/${condaChannelID}-repoDataFile-${architecture}.json`,
+      `${this.packageMapFolder}/${condaChannelID}-repoDataFile-${architecture}.json`
     )
   }
 }
 
-module.exports = (options) => new CondaFetch(options)
+module.exports = options => new CondaFetch(options)

@@ -8,17 +8,17 @@ module.exports = [
     languageOptions: {
       globals: {
         ...globals.node,
-        ...globals.mocha,
+        ...globals.mocha
       },
       parserOptions: {
-        sourceType: 'module',
-      },
+        sourceType: 'module'
+      }
     },
     rules: {
       quotes: ['error', 'single'],
       semi: ['error', 'never'],
-      'no-console': 'off',
-    },
+      'no-console': 'off'
+    }
   },
-  eslintConfigPrettier,
+  eslintConfigPrettier
 ]

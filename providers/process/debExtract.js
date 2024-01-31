@@ -43,7 +43,7 @@ class DebExtract extends AbstractClearlyDefinedProcessor {
       registryData,
       releaseDate,
       copyrightUrl,
-      declaredLicenses,
+      declaredLicenses
     })
     const sourceInfo = this._discoverSource(spec, registryData)
     if (sourceInfo) request.document.sourceInfo = sourceInfo
@@ -51,7 +51,7 @@ class DebExtract extends AbstractClearlyDefinedProcessor {
 
   _discoverSource(spec, registryData) {
     const [revision, architecture] = spec.revision.split('_')
-    const source = (registryData.find((entry) => entry.Architecture === architecture) || {}).Source
+    const source = (registryData.find(entry => entry.Architecture === architecture) || {}).Source
     if (source) {
       const result = SourceSpec.fromObject(spec)
       result.type = 'debsrc'

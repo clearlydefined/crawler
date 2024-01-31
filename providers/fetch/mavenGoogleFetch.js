@@ -7,9 +7,9 @@ class MavenGoogleFetch extends MavenBasedFetch {
   constructor(options) {
     super(
       {
-        mavengoogle: 'https://dl.google.com/android/maven2/',
+        mavengoogle: 'https://dl.google.com/android/maven2/'
       },
-      options,
+      options
     )
   }
   //The format for source url is: https://dl.google.com/android/maven2/groudId1/groupdId2/artifactId/revision/artifactId-revision-sources.jar
@@ -23,4 +23,4 @@ class MavenGoogleFetch extends MavenBasedFetch {
   }
 }
 
-module.exports = (options) => new MavenGoogleFetch(options)
+module.exports = options => new MavenGoogleFetch(options)
