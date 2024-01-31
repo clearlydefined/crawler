@@ -10,13 +10,13 @@ describe('AbstractClearlyDefinedProcessor interesting file identification', () =
   it('finds files it should', () => {
     const files = ['license', 'License.md', 'LICENSE.HTML', 'LICENSE.txt']
     const processor = new AbstractCDProcessor({})
-    files.forEach((file) => expect(processor._isInterestinglyNamed(file)).to.be.true)
+    files.forEach(file => expect(processor._isInterestinglyNamed(file)).to.be.true)
   })
 
   it('does not fine files it should not', () => {
     const files = ['licenser', 'Licenset.md', 'test.HTML', 'LICENSE.doc']
     const processor = new AbstractCDProcessor({})
-    files.forEach((file) => expect(processor._isInterestinglyNamed(file)).to.be.false)
+    files.forEach(file => expect(processor._isInterestinglyNamed(file)).to.be.false)
   })
 })
 
@@ -31,8 +31,8 @@ describe('AbstractClearlyDefinedProcessor add files', () => {
     const document = { location: '/test' }
     await processor._addFiles({ document })
     expect(document.files.length).to.be.equal(2)
-    expect(document.files.map((file) => file.path)).to.have.members(['license', 'package/notice.txt'])
-    expect(document.files.every((file) => file.hashes.sha1 === '42')).to.be.true
+    expect(document.files.map(file => file.path)).to.have.members(['license', 'package/notice.txt'])
+    expect(document.files.every(file => file.hashes.sha1 === '42')).to.be.true
     expect(processor.attachFiles.callCount).to.be.equal(2)
   })
 
@@ -43,7 +43,7 @@ describe('AbstractClearlyDefinedProcessor add files', () => {
     processor.computeHashes = sinon.stub()
     const document = { location: 'c:\\test' }
     await processor._addFiles({ document })
-    expect(document.files.map((file) => file.path)).to.have.members(['license', 'package/notice.txt'])
+    expect(document.files.map(file => file.path)).to.have.members(['license', 'package/notice.txt'])
   })
 
   it('handles no files', async () => {

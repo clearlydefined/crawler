@@ -29,4 +29,4 @@ class SourceExtract extends AbstractClearlyDefinedProcessor {
   }
 }
 
-module.exports = (options) => new SourceExtract(options)
+module.exports = options => new SourceExtract(options)

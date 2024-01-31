@@ -7,9 +7,9 @@ class GradlePluginFetch extends MavenBasedFetch {
   constructor(options) {
     super(
       {
-        gradleplugin: 'https://plugins.gradle.org/m2/',
+        gradleplugin: 'https://plugins.gradle.org/m2/'
       },
-      options,
+      options
     )
   }
 
@@ -20,4 +20,4 @@ class GradlePluginFetch extends MavenBasedFetch {
   }
 }
 
-module.exports = (options) => new GradlePluginFetch(options)
+module.exports = options => new GradlePluginFetch(options)

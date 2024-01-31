@@ -28,7 +28,7 @@ class QueueSet {
   }
 
   _reconfigure(current, changes) {
-    if (changes.some((patch) => patch.path.includes('/weights'))) {
+    if (changes.some(patch => patch.path.includes('/weights'))) {
       this._startMap = this._createStartMap(this.options.weights)
     }
     return Promise.resolve()
@@ -40,17 +40,17 @@ class QueueSet {
 
   subscribe() {
     return Promise.all(
-      this.queues.map((queue) => {
+      this.queues.map(queue => {
         return queue.subscribe()
-      }),
+      })
     )
   }
 
   unsubscribe() {
     return Promise.all(
-      this.queues.map((queue) => {
+      this.queues.map(queue => {
         return queue.unsubscribe()
-      }),
+      })
     )
   }
 

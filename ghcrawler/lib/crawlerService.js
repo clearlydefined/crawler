@@ -37,7 +37,7 @@ class CrawlerService {
   }
 
   async ensureLoops(targetCount = this.options.crawler.count) {
-    this.loops = this.loops.filter((loop) => loop.running())
+    this.loops = this.loops.filter(loop => loop.running())
     const running = this.status()
     const delta = targetCount - running
     if (delta < 0) {
@@ -98,10 +98,10 @@ class CrawlerService {
     for (let i = 0; i < count; i++) {
       result.push(queue.pop())
     }
-    return Promise.all(result).then((requests) => {
-      const filtered = requests.filter((request) => request)
-      return Promise.all(filtered.map((request) => (remove ? queue.done(request) : queue.abandon(request)))).then(
-        filtered,
+    return Promise.all(result).then(requests => {
+      const filtered = requests.filter(request => request)
+      return Promise.all(filtered.map(request => (remove ? queue.done(request) : queue.abandon(request)))).then(
+        filtered
       )
     })
   }
@@ -121,7 +121,7 @@ class CrawlerService {
   requeueDeadletter(url, queue) {
     const self = this
     return this.getDeadletter(url)
-      .then((document) => {
+      .then(document => {
         const request = Request.adopt(document).createRequeuable()
         request.attemptCount = 0
         return self.crawler.queues.push([request], queue)
@@ -137,7 +137,7 @@ class CrawlerService {
 
   _reconfigure(current, changes) {
     // if the loop count changed, make it so
-    if (changes.some((patch) => patch.path === '/count')) {
+    if (changes.some(patch => patch.path === '/count')) {
       return this.options.crawler.count.value > 0 ? this.run() : this.stop()
     }
     return null
@@ -162,8 +162,8 @@ class CrawlerLoop {
     }
     this.state = 'running'
     // Create callback that when run, resolves a promise and completes this loop
-    const donePromise = new Promise((resolve) => {
-      this.done = (value) => resolve(value)
+    const donePromise = new Promise(resolve => {
+      this.done = value => resolve(value)
       this.options.done = this.done
     })
     donePromise.finally(() => {

@@ -24,8 +24,8 @@ describe('create scopedQueueSets', () => {
       provider: 'memory',
       memory: {
         _config: { on: sinon.stub() },
-        weights: { immediate: 3, soon: 2, normal: 3, later: 2 },
-      },
+        weights: { immediate: 3, soon: 2, normal: 3, later: 2 }
+      }
     }
     const queues = CrawlerFactory.createQueues(queueOptions)
     expect(queues).to.be.ok

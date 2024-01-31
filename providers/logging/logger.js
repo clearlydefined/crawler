@@ -14,7 +14,7 @@ function factory(tattoos) {
     insights: appInsights,
     treatErrorsAsExceptions: true,
     exitOnError: false,
-    level: 'info',
+    level: 'info'
   })
   return result
 }

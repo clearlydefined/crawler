@@ -20,7 +20,7 @@ const extensionMap = {
   sourcesJar: '-sources.jar',
   pom: '.pom',
   aar: '.aar',
-  jar: '.jar',
+  jar: '.jar'
 }
 
 const defaultHeaders = { headers: { 'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)' } }
@@ -94,7 +94,7 @@ class MavenBasedFetch extends AbstractFetch {
     const extensions = spec.type === 'sourcearchive' ? [extensionMap.sourcesJar] : [extensionMap.jar, extensionMap.aar]
     for (let extension of extensions) {
       const url = this._buildUrl(spec, extension)
-      const status = await new Promise((resolve) => {
+      const status = await new Promise(resolve => {
         this._handleRequestStream(url, (error, response) => {
           if (error) this.logger.error(error)
           if (response.statusCode !== 200) return resolve(false)
@@ -135,7 +135,7 @@ class MavenBasedFetch extends AbstractFetch {
       spec.provider,
       parent.groupId[0].trim(),
       parent.artifactId[0].trim(),
-      parent.version[0].trim(),
+      parent.version[0].trim()
     )
   }
 
@@ -176,7 +176,7 @@ class MavenBasedFetch extends AbstractFetch {
     const subdirs = await readdir(location)
     return subdirs.reduce((prev, subdir) => {
       const entry = path.resolve(location, subdir)
-      return prev.then((result) => result || MavenBasedFetch._findAnyFileStat(entry))
+      return prev.then(result => result || MavenBasedFetch._findAnyFileStat(entry))
     }, Promise.resolve())
   }
 

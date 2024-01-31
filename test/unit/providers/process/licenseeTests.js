@@ -22,7 +22,7 @@ describe('Licensee process', () => {
       'LICENSE',
       'package.json',
       'subfolder/LICENSE.foo',
-      'subfolder/LICENSE.bar',
+      'subfolder/LICENSE.bar'
     ])
     expect(processor.attachFiles.args[0][2]).to.equal(path.resolve('test/fixtures/licensee/9.10.1/folder1'))
   })
@@ -57,7 +57,7 @@ describe('Licensee process', () => {
       execFile: (command, parameters, callbackOrOptions) => {
         if (parameters.includes('version'))
           return callbackOrOptions(resultBox.versionError, { stdout: resultBox.versionResult })
-      },
+      }
     }
     Handler = proxyquire('../../../../providers/process/licensee', { child_process: processStub })
     Handler._resultBox = resultBox

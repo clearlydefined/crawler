@@ -10,10 +10,10 @@ function create() {
     response.helpers.send = {
       context: {
         request: request,
-        response: response,
+        response: response
       },
       noContent: noContent,
-      partialHtml: partialHtml,
+      partialHtml: partialHtml
     }
     next()
   }

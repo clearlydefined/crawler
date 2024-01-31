@@ -18,12 +18,12 @@ router.post(
       return response.sendStatus(404)
     }
     response.sendStatus(201)
-  }),
+  })
 )
 
 async function queueRequests(requestSpecs, queueName) {
   requestSpecs = Array.isArray(requestSpecs) ? requestSpecs : [requestSpecs]
-  const requests = requestSpecs.map((spec) => rationalizeRequest(spec))
+  const requests = requestSpecs.map(spec => rationalizeRequest(spec))
   try {
     return crawlerService.queue(requests, queueName)
   } catch (error) {

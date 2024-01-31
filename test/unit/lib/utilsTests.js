@@ -9,7 +9,7 @@ const {
   trimParents,
   trimAllParents,
   extractDate,
-  spawnPromisified,
+  spawnPromisified
 } = require('../../../lib/utils')
 const { promisify } = require('util')
 const execFile = promisify(require('child_process').execFile)
@@ -119,7 +119,7 @@ describe('test spawnPromisified ', () => {
   it('should handle output more than 5MB', async () => {
     const largeFile = 'test/fixtures/debian/0ad_0.0.17-1_armhf.deb'
     const execFilePromise = execFile('cat', [largeFile, largeFile], {
-      maxBuffer: 5 * 1024 * 1024,
+      maxBuffer: 5 * 1024 * 1024
     })
     await expect(execFilePromise).to.be.rejectedWith('stdout maxBuffer length exceeded')
 

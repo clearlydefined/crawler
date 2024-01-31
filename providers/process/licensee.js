@@ -41,7 +41,7 @@ class LicenseeProcessor extends AbstractProcessor {
     if (!record) return
     const location = request.document.location
     request.document = merge(this.clone(request.document), { licensee: record })
-    const toAttach = record.output.content.matched_files.map((file) => file.filename)
+    const toAttach = record.output.content.matched_files.map(file => file.filename)
     this.attachFiles(request.document, toAttach, location)
   }
 
@@ -52,17 +52,17 @@ class LicenseeProcessor extends AbstractProcessor {
     const paths = ['', ...trimAllParents(subfolders, root)]
     try {
       const results = (
-        await Promise.all(paths.map(throat(10, (path) => this._runOnFolder(path, root, parameters))))
-      ).filter((x) => x)
-      const licenses = uniqBy(flatten(results.map((result) => result.licenses)), 'spdx_id')
-      const matched_files = flatten(results.map((result) => result.matched_files))
+        await Promise.all(paths.map(throat(10, path => this._runOnFolder(path, root, parameters))))
+      ).filter(x => x)
+      const licenses = uniqBy(flatten(results.map(result => result.licenses)), 'spdx_id')
+      const matched_files = flatten(results.map(result => result.matched_files))
       return {
         version: this.toolVersion,
         parameters: parameters,
         output: {
           contentType: 'application/json',
-          content: { licenses, matched_files },
-        },
+          content: { licenses, matched_files }
+        }
       }
     } catch (exception) {
       request.markDead('Error', exception ? exception.message : 'Licensee run failed')
@@ -75,7 +75,7 @@ class LicenseeProcessor extends AbstractProcessor {
       const stdout = await this._runLicensee(parameters, path.join(root, folder))
       if (!stdout.trim()) return
       const result = JSON.parse(stdout)
-      result.matched_files.forEach((file) => (file.filename = `${folder ? folder + '/' : ''}${file.filename}`))
+      result.matched_files.forEach(file => (file.filename = `${folder ? folder + '/' : ''}${file.filename}`))
       return result
     } catch (error) {
       // Licensee fails with code = 1 if there are no license files found in the given folder.
@@ -93,19 +93,19 @@ class LicenseeProcessor extends AbstractProcessor {
   _detectVersion() {
     if (this._versionPromise !== undefined) return this._versionPromise
     this._versionPromise = execFile('licensee', ['version'])
-      .then((result) => {
+      .then(result => {
         this._toolVersion = result.stdout.trim()
         this._schemaVersion = this.aggregateVersions(
           [this._schemaVersion, this.toolVersion, this.configVersion],
-          'Invalid Licensee version',
+          'Invalid Licensee version'
         )
         return this._schemaVersion
       })
-      .catch((error) => {
+      .catch(error => {
         if (error) this.logger.log(`Could not detect version of Licensee: ${error.message}`)
       })
     return this._versionPromise
   }
 }
 
-module.exports = (options) => new LicenseeProcessor(options)
+module.exports = options => new LicenseeProcessor(options)

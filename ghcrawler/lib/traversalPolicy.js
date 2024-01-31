@@ -217,7 +217,7 @@ class TraversalPolicy {
       originMutable: 'storage',
       storageOriginIfMissing: 'storage',
       mutables: mutablesValue,
-      originOnly: 'origin',
+      originOnly: 'origin'
     }[this.fetch]
     if (!result) {
       throw new Error(`Fetch policy misconfigured ${this.fetch}`)
@@ -234,7 +234,7 @@ class TraversalPolicy {
       originStorage: 'origin',
       storageOriginIfMissing: 'origin',
       mutables: 'origin',
-      originOnly: null,
+      originOnly: null
     }[this.fetch]
     if (result === undefined) {
       throw new Error(`Fetch policy misconfigured ${this.fetch}`)

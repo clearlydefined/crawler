@@ -14,19 +14,19 @@ let Handler
 describe('ScanCode misc', () => {
   it('differentiates real errors', () => {
     Handler._resultBox.result = {
-      files: [{ scan_errors: ['ValueError: this is a test'] }, { scan_errors: ['bogus package.json'] }],
+      files: [{ scan_errors: ['ValueError: this is a test'] }, { scan_errors: ['bogus package.json'] }]
     }
     expect(Handler._hasRealErrors()).to.be.false
     Handler._resultBox.result = {
-      files: [{ scan_errors: ['Yikes. Tragedy has struck'] }, { scan_errors: ['Panic'] }],
+      files: [{ scan_errors: ['Yikes. Tragedy has struck'] }, { scan_errors: ['Panic'] }]
     }
     expect(Handler._hasRealErrors()).to.be.true
     Handler._resultBox.result = {
-      files: [],
+      files: []
     }
     expect(Handler._hasRealErrors()).to.be.false
     Handler._resultBox.result = {
-      files: [{}],
+      files: [{}]
     }
     expect(Handler._hasRealErrors()).to.be.false
   })
@@ -34,10 +34,10 @@ describe('ScanCode misc', () => {
   beforeEach(() => {
     const resultBox = {}
     const fsStub = {
-      readFileSync: () => JSON.stringify(resultBox.result),
+      readFileSync: () => JSON.stringify(resultBox.result)
     }
     const handlerFactory = proxyquire('../../../../providers/process/scancode', {
-      fs: fsStub,
+      fs: fsStub
     })
     Handler = handlerFactory({ logger: { log: () => {} } })
     Handler._resultBox = resultBox
@@ -53,19 +53,19 @@ describe('ScanCode process', () => {
     const { request, processor } = setup('2.9.8/gem.json')
     await processor.handle(request)
     expect(request.document._metadata.toolVersion).to.equal('1.2.0')
-    expect(flatten(processor.attachFiles.args.map((x) => x[1]))).to.have.members([])
+    expect(flatten(processor.attachFiles.args.map(x => x[1]))).to.have.members([])
   })
 
   it('should handle simple npms', async () => {
     const { request, processor } = setup('2.9.8/npm-basic.json')
     await processor.handle(request)
-    expect(flatten(processor.attachFiles.args.map((x) => x[1]))).to.have.members(['package/package.json'])
+    expect(flatten(processor.attachFiles.args.map(x => x[1]))).to.have.members(['package/package.json'])
   })
 
   it('should handle large npms', async () => {
     const { request, processor } = setup('2.9.8/npm-large.json')
     await processor.handle(request)
-    expect(flatten(processor.attachFiles.args.map((x) => x[1]))).to.have.members(['package/package.json'])
+    expect(flatten(processor.attachFiles.args.map(x => x[1]))).to.have.members(['package/package.json'])
   })
 
   it('should skip if ScanCode not found', async () => {
@@ -91,7 +91,7 @@ describe('ScanCode process', () => {
         if (parameters.includes('--version'))
           return callbackOrOptions(resultBox.versionError, { stdout: resultBox.versionResult })
         callback(resultBox.error)
-      },
+      }
     }
     Handler = proxyquire('../../../../providers/process/scancode', { child_process: processStub })
     Handler._resultBox = resultBox
@@ -108,7 +108,7 @@ function setup(fixture, error, versionError) {
     timeout: 200,
     processes: 2,
     format: 'json',
-    logger: { log: sinon.stub(), info: sinon.stub() },
+    logger: { log: sinon.stub(), info: sinon.stub() }
   }
   const testRequest = new request('npm', 'cd:/npm/npmjs/-/test/1.1')
   testRequest.document = { _metadata: { links: {} }, location: '/test' }

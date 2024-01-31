@@ -16,8 +16,8 @@ describe('storageBackedQueue', () => {
   const createTestQueue = (memoryQueue, storageQueue) => {
     const options = {
       logger: {
-        verbose: sinon.stub(),
-      },
+        verbose: sinon.stub()
+      }
     }
     return new StorageBackedQueue(memoryQueue, storageQueue, options)
   }
@@ -246,5 +246,5 @@ const createQueueStub = () => ({
   push: sinon.stub(),
   pop: sinon.stub(),
   done: sinon.stub(),
-  getInfo: sinon.stub(),
+  getInfo: sinon.stub()
 })

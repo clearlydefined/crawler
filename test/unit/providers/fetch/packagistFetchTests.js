@@ -14,14 +14,14 @@ let Fetch
 const hashes = {
   'symfony-polyfill-mbstring-v1.11.0-0-gfe5e94c.zip': {
     sha1: '8d24c52e593042529ba86549d9920eb4d9649763',
-    sha256: '797a607b7ea7dad62f78a56f3687f2b2108d221b0682d0ea1386db61714dc8a2',
-  },
+    sha256: '797a607b7ea7dad62f78a56f3687f2b2108d221b0682d0ea1386db61714dc8a2'
+  }
 }
 
 describe('packagistFetch', () => {
   beforeEach(() => {
     const resultBox = {}
-    const requestPromiseStub = (options) => {
+    const requestPromiseStub = options => {
       if (options.url) {
         if (options.url.includes('regError')) throw new Error('Invalid url')
         if (options.url.includes('missing')) throw { statusCode: 404 }
@@ -41,7 +41,7 @@ describe('packagistFetch', () => {
     }
     Fetch = proxyquire('../../../../providers/fetch/packagistFetch', {
       request: { get: getStub },
-      'request-promise-native': requestPromiseStub,
+      'request-promise-native': requestPromiseStub
     })
     Fetch._resultBox = resultBox
   })
@@ -62,7 +62,7 @@ describe('packagistFetch', () => {
     request.fetchResult.copyTo(request)
     expect(request.document.hashes.sha1).to.be.equal(hashes['symfony-polyfill-mbstring-v1.11.0-0-gfe5e94c.zip']['sha1'])
     expect(request.document.hashes.sha256).to.be.equal(
-      hashes['symfony-polyfill-mbstring-v1.11.0-0-gfe5e94c.zip']['sha256'],
+      hashes['symfony-polyfill-mbstring-v1.11.0-0-gfe5e94c.zip']['sha256']
     )
     expect(request.document.dirRoot).to.be.equal('symfony-polyfill-mbstring-fe5e94c')
     expect(request.document.releaseDate).to.equal('2019-02-06T07:57:58+00:00')

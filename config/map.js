@@ -22,7 +22,7 @@ const source = {
   licensee,
   reuse,
   scancode,
-  fossology,
+  fossology
 }
 
 const npm = {
@@ -32,7 +32,7 @@ const npm = {
   licensee,
   reuse,
   scancode,
-  fossology,
+  fossology
 }
 
 const crate = {
@@ -42,7 +42,7 @@ const crate = {
   licensee,
   reuse,
   scancode,
-  fossology,
+  fossology
 }
 
 const deb = {
@@ -52,7 +52,7 @@ const deb = {
   licensee,
   reuse,
   scancode,
-  fossology,
+  fossology
 }
 
 const go = {
@@ -62,7 +62,7 @@ const go = {
   licensee,
   reuse,
   scancode,
-  fossology,
+  fossology
 }
 
 const maven = {
@@ -72,7 +72,7 @@ const maven = {
   licensee,
   reuse,
   scancode,
-  fossology,
+  fossology
 }
 
 const nuget = {
@@ -81,7 +81,7 @@ const nuget = {
   clearlydefined,
   licensee,
   scancode,
-  reuse,
+  reuse
 }
 
 const pod = {
@@ -91,7 +91,7 @@ const pod = {
   licensee,
   reuse,
   scancode,
-  fossology,
+  fossology
 }
 
 const pypi = {
@@ -101,7 +101,7 @@ const pypi = {
   licensee,
   reuse,
   scancode,
-  fossology,
+  fossology
 }
 
 const composer = {
@@ -111,7 +111,7 @@ const composer = {
   licensee,
   reuse,
   scancode,
-  fossology,
+  fossology
 }
 
 const gem = {
@@ -121,7 +121,7 @@ const gem = {
   licensee,
   reuse,
   scancode,
-  fossology,
+  fossology
 }
 
 const _package = {
@@ -135,13 +135,13 @@ const _package = {
   pod,
   pypi,
   composer,
-  gem,
+  gem
 }
 
 const component = {
   _type: 'component',
   source,
-  package: _package,
+  package: _package
 }
 
 const entities = {
@@ -164,9 +164,9 @@ const entities = {
   composer,
   pod,
   pypi,
-  gem,
+  gem
 }
 
 module.exports = {
-  default: entities,
+  default: entities
 }

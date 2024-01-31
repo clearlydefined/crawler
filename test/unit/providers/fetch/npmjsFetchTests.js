@@ -46,14 +46,14 @@ let Fetch
 const hashes = {
   'redie-0.3.0.tgz': {
     sha1: '48581317ac174ac269c398ff946d6c4779145374',
-    sha256: '66185c319680ee41268217c2467e314019e8ba4ea4d8374335fbe29e64a8d19f',
-  },
+    sha256: '66185c319680ee41268217c2467e314019e8ba4ea4d8374335fbe29e64a8d19f'
+  }
 }
 
 describe('', () => {
   beforeEach(() => {
     const resultBox = {}
-    const requestPromiseStub = (options) => {
+    const requestPromiseStub = options => {
       if (options.url) {
         if (options.url.includes('regError')) throw new Error('yikes')
         if (options.url.includes('missing')) throw { statusCode: 404 }
@@ -73,7 +73,7 @@ describe('', () => {
     }
     Fetch = proxyquire('../../../../providers/fetch/npmjsFetch', {
       request: { get: getStub },
-      'request-promise-native': requestPromiseStub,
+      'request-promise-native': requestPromiseStub
     })
     Fetch._resultBox = resultBox
   })
@@ -133,7 +133,7 @@ function createRegistryData(version) {
   return {
     manifest: { version },
     versions: { [version]: { test: true } },
-    time: { [version]: '42' },
+    time: { [version]: '42' }
   }
 }
 

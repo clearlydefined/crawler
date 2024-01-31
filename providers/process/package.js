@@ -24,4 +24,4 @@ class PackageProcessor extends AbstractProcessor {
   }
 }
 
-module.exports = { processor: (options) => new PackageProcessor(options), supportedTypes }
+module.exports = { processor: options => new PackageProcessor(options), supportedTypes }

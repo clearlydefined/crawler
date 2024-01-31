@@ -3,23 +3,23 @@
 
 module.exports = {
   crawler: {
-    count: 1,
+    count: 1
   },
   fetch: {},
   process: {},
   store: {
-    provider: 'memory',
+    provider: 'memory'
   },
   deadletter: {
-    provider: 'memory',
+    provider: 'memory'
   },
   lock: {
-    provider: 'memory',
+    provider: 'memory'
   },
   queue: {
     provider: 'memory',
     memory: {
-      weights: { immediate: 3, soon: 2, normal: 3, later: 2 },
-    },
-  },
+      weights: { immediate: 3, soon: 2, normal: 3, later: 2 }
+    }
+  }
 }

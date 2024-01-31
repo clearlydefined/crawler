@@ -47,7 +47,7 @@ const githubResults = {
   'http://gem': createSourceSpec('gem'),
   'http://home': createSourceSpec('home'),
   'http://mail': createSourceSpec('mail'),
-  'http://source': createSourceSpec('source'),
+  'http://source': createSourceSpec('source')
 }
 
 function createManifest(
@@ -57,7 +57,7 @@ function createManifest(
   gem_uri,
   homepage_uri,
   mailing_list_uri,
-  source_code_uri,
+  source_code_uri
 ) {
   return { bug_tracker_uri, changelog_uri, documentation_uri, gem_uri, homepage_uri, mailing_list_uri, source_code_uri }
 }

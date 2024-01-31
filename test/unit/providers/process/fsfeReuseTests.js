@@ -23,7 +23,7 @@ describe('FSFE REUSE software process', () => {
     expect(document.attachments.length).to.equal(2)
     expect(document.reuse.licenses).to.eql([
       { filePath: 'LICENSES/Apache-2.0.txt', spdxId: 'Apache-2.0' },
-      { filePath: 'LICENSES/CC-BY-3.0.txt', spdxId: 'CC-BY-3.0' },
+      { filePath: 'LICENSES/CC-BY-3.0.txt', spdxId: 'CC-BY-3.0' }
     ])
     let readmeFound = false
     let securityFound = false
@@ -35,7 +35,7 @@ describe('FSFE REUSE software process', () => {
         expect(document.reuse.files[i].LicenseConcluded).to.equal('NOASSERTION')
         expect(document.reuse.files[i].LicenseInfoInFile).to.equal('Apache-2.0')
         expect(document.reuse.files[i].FileCopyrightText).to.equal(
-          '1982-2021 SAP SE or an SAP affiliate company and ospo-reuse contributors',
+          '1982-2021 SAP SE or an SAP affiliate company and ospo-reuse contributors'
         )
       }
       if (document.reuse.files[i].FileName === 'SECURITY.md') {
@@ -43,7 +43,7 @@ describe('FSFE REUSE software process', () => {
         expect(document.reuse.files[i].LicenseConcluded).to.equal('NOASSERTION')
         expect(document.reuse.files[i].LicenseInfoInFile).to.equal('Beerware')
         expect(document.reuse.files[i].FileCopyrightText).to.equal(
-          '2013-2017 SAP SE or an SAP affiliate company and ospo-reuse contributors',
+          '2013-2017 SAP SE or an SAP affiliate company and ospo-reuse contributors'
         )
       }
       if (document.reuse.files[i].FileName === 'ospo-reuse/src/main/java/com/sap/ospo-reuse/HelloWorld.java') {
@@ -51,7 +51,7 @@ describe('FSFE REUSE software process', () => {
         expect(document.reuse.files[i].LicenseConcluded).to.equal('NOASSERTION')
         expect(document.reuse.files[i].LicenseInfoInFile).to.equal('GPL-3.0-or-later')
         expect(document.reuse.files[i].FileCopyrightText).to.equal(
-          '2019-2021 SAP SE or an SAP affiliate company and ospo-reuse contributors',
+          '2019-2021 SAP SE or an SAP affiliate company and ospo-reuse contributors'
         )
       }
       if (document.reuse.files[i].FileName === 'ospo-reuse/src/test/java/com/sap/ospo-reuse/TestsHelloWorld.java') {
@@ -99,7 +99,7 @@ describe('FSFE REUSE software process', () => {
           return callbackOrOptions(resultBox.versionError, { stdout: resultBox.versionResult })
         }
         callback(resultBox.error, {})
-      },
+      }
     }
     const fsStub = { readdirSync: () => resultBox.licensesDirectory }
     Handler = proxyquire('../../../../providers/process/fsfeReuse', { child_process: processStub, fs: fsStub })

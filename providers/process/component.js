@@ -24,4 +24,4 @@ class ComponentProcessor extends AbstractProcessor {
   }
 }
 
-module.exports = (options) => new ComponentProcessor(options)
+module.exports = options => new ComponentProcessor(options)

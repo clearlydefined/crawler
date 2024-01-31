@@ -17,11 +17,11 @@ describe('Source processing', () => {
     processor.handle(request)
 
     expect(processor.linkAndQueueTool.callCount).to.be.equal(4)
-    expect(processor.linkAndQueueTool.args.map((call) => call[1])).to.have.members([
+    expect(processor.linkAndQueueTool.args.map(call => call[1])).to.have.members([
       'clearlydefined',
       'licensee',
       'scancode',
-      'reuse',
+      'reuse'
     ])
   })
 })
@@ -29,7 +29,7 @@ describe('Source processing', () => {
 function mockRequest(url) {
   const request = new Request('source', url)
   request.document = {
-    _metadata: { links: {} },
+    _metadata: { links: {} }
   }
   return request
 }
