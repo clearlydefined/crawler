@@ -28,7 +28,8 @@ ENV SCANCODE_HOME=/usr/local/bin
 
 # Licensee
 # Licensee and its dependencies pinned to its latest version which helped to update the ruby to its recent version,
-# component npm/npmjs/-/caniuse-lite/1.0.30001344 is getting identified by its correct license but the matcher is dice.
+# Component npm/npmjs/-/caniuse-lite/1.0.30001344 is getting identified by its correct license but the matcher is dice.
+# The match is not an exact match and hence not adopted by CD licensee summarizer.
 RUN gem install nokogiri:1.16.0 --no-document && \
   gem install faraday:2.9.0 --no-document && \
   gem install public_suffix:5.0.4 --no-document && \
