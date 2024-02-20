@@ -145,7 +145,7 @@ See `local.env.list`, `dev.env.list` and `prod.env.list` tempate files.
 
 ## Build and run Docker image locally
 
-`docker build -t cdcrawler:latest .`
+`docker build --platform linux/amd64 -t cdcrawler:latest .`
 
 `docker run --rm --env-file ../dev.env.list -p 5000:5000 -p 9229:9229 cdcrawler:latest`
 
