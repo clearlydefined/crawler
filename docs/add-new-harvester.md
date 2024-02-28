@@ -3,7 +3,7 @@
 This is a document in progress detailing the steps necessary to add a new harvest source.
 
 ## Community Engagement
-When adding a new harvest source, the points to be considered are located at https://github.com/clearlydefined/clearlydefined/blob/master/docs/adding-sources.md#adding-a-new-harvest-source. Please include these considerations and document them in your GitHub issue, similar to https://github.com/clearlydefined/service/issues/882.
+When adding a new harvest source, the points to be considered are located  at https://docs.clearlydefined.io/adding-sources#adding-a-new-harvest-source.  Please include these considerations and document them in your GitHub issue, similar to https://github.com/clearlydefined/service/issues/882.
 
 ## Crawler
 Need to implement:
