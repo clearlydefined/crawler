@@ -13,12 +13,11 @@ class AttenuatedQueue extends NestedQueue {
   }
 
   done(request) {
-    return super.done(request)
-      .then(() => {
-        const key = this._getCacheKey(request)
-        const deleted = memoryCache.del(key)
-        if (deleted) this.logger.verbose(`Deleted ${key}`)
-      })
+    return super.done(request).then(() => {
+      const key = this._getCacheKey(request)
+      const deleted = memoryCache.del(key)
+      if (deleted) this.logger.verbose(`Deleted ${key}`)
+    })
   }
 
   push(requests) {

@@ -62,7 +62,14 @@ class DebianFetch extends AbstractFetch {
     const declaredLicenses = await this._getDeclaredLicenses(copyrightUrl)
 
     const fetchResult = new FetchResult(request.url)
-    fetchResult.document = this._createDocument({ dir, registryData, releaseDate, copyrightUrl, declaredLicenses, hashes })
+    fetchResult.document = this._createDocument({
+      dir,
+      registryData,
+      releaseDate,
+      copyrightUrl,
+      declaredLicenses,
+      hashes
+    })
     fetchResult.casedSpec = clone(spec)
     request.fetchResult = fetchResult.adoptCleanup(dir, request)
     return request
@@ -225,10 +232,7 @@ class DebianFetch extends AbstractFetch {
       reader.on('entry', (entry, next) => {
         const name = entry.fileName()
         const fullName = path.join(destination, name)
-        entry
-          .fileData()
-          .pipe(fs.createWriteStream(fullName))
-          .on('finish', next)
+        entry.fileData().pipe(fs.createWriteStream(fullName)).on('finish', next)
       })
       reader.on('error', error => {
         reject(error)
@@ -322,7 +326,8 @@ class DebianFetch extends AbstractFetch {
   // https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/#spdx
   _parseDeclaredLicenses(copyrightResponse) {
     const licensesSet = new Set()
-    const licenses = copyrightResponse.split('\n')
+    const licenses = copyrightResponse
+      .split('\n')
       .filter(line => line.startsWith('License: '))
       .map(line => line.replace('License:', '').trim())
       .map(licenseId => {
@@ -332,11 +337,13 @@ class DebianFetch extends AbstractFetch {
       })
     // Over-simplified parsing of edge cases:
     licenses.forEach(licenseId => {
-      if (licenseId.includes(' or ') && !licenseId.includes(',')) { // A or B and C => (A OR B AND C)
+      if (licenseId.includes(' or ') && !licenseId.includes(',')) {
+        // A or B and C => (A OR B AND C)
         licenseId = licenseId.replace(' or ', ' OR ')
         licenseId = licenseId.replace(' and ', ' AND ')
         licensesSet.add('(' + licenseId + ')')
-      } else if (licenseId.includes(' or ') && licenseId.includes(',')) { // A or B, and C => (A OR B) AND C
+      } else if (licenseId.includes(' or ') && licenseId.includes(',')) {
+        // A or B, and C => (A OR B) AND C
         licenseId = licenseId.replace(' or ', ' OR ')
         licenseId.split(' and ').forEach(part => {
           if (part.includes('OR') && part.endsWith(',')) {

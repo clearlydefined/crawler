@@ -31,7 +31,7 @@ describe('fetchDispatcher', () => {
     const processorsStub = [{ canHandle: () => true, shouldFetch: () => false }]
     const fetchDispatcher = FetchDispatcher({}, {}, {}, processorsStub)
     const request = {}
-    chai.spy.on(request, 'markNoSave', () => { })
+    chai.spy.on(request, 'markNoSave', () => {})
     await fetchDispatcher.handle(request)
     expect(request.markNoSave).to.have.been.called.once
   })
@@ -48,7 +48,6 @@ describe('fetchDispatcher', () => {
 })
 
 describe('fetchDispatcher cache fetch result', () => {
-
   let resultCache
   let inProgressPromiseCache
 
@@ -66,13 +65,21 @@ describe('fetchDispatcher cache fetch result', () => {
     const processorsStub = [{ canHandle: () => true, shouldFetch: () => true, getUrnFor: () => 'documentkey' }]
     const filterStub = { shouldFetchMissing: () => true, shouldFetch: () => true }
     const options = { logger: { info: sinon.stub(), debug: sinon.stub() } }
-    return FetchDispatcher(options, storeStub, [fetcher], processorsStub, filterStub, mockResultCache(resultCache), inProgressPromiseCache)
+    return FetchDispatcher(
+      options,
+      storeStub,
+      [fetcher],
+      processorsStub,
+      filterStub,
+      mockResultCache(resultCache),
+      inProgressPromiseCache
+    )
   }
 
   function mockResultCache(cache) {
     return {
       get: key => cache[key],
-      setWithConditionalExpiry : (key, value) => cache[key] = value,
+      setWithConditionalExpiry: (key, value) => (cache[key] = value)
     }
   }
 
@@ -175,7 +182,9 @@ describe('fetchDispatcher cache fetch result', () => {
     })
 
     it('cached result same as fetched', async () => {
-      pypiFetch._getRegistryData = sinon.stub().resolves(JSON.parse(fs.readFileSync('test/fixtures/pypi/registryData.json')))
+      pypiFetch._getRegistryData = sinon
+        .stub()
+        .resolves(JSON.parse(fs.readFileSync('test/fixtures/pypi/registryData.json')))
       const fetchDispatcher = setupDispatcher(pypiFetch)
       await verifyFetchAndCache(fetchDispatcher, 'cd:/pypi/pypi/-/backports.ssl-match-hostname/3.7.0.1')
     })
@@ -191,7 +200,6 @@ describe('fetchDispatcher cache fetch result', () => {
   })
 
   describe('cache NpmFetch result', () => {
-
     const npmRegistryRequestStub = () => {
       const version = '0.3.0'
       return {
@@ -208,8 +216,9 @@ describe('fetchDispatcher cache fetch result', () => {
         'request-promise-native': npmRegistryRequestStub
       })
       const npmFetch = NpmFetch({ logger: { log: sinon.stub() } })
-      npmFetch._getPackage = sinon.stub().callsFake(async (spec, destination) =>
-        await getPacakgeStub('test/fixtures/npm/redie-0.3.0.tgz', destination))
+      npmFetch._getPackage = sinon
+        .stub()
+        .callsFake(async (spec, destination) => await getPacakgeStub('test/fixtures/npm/redie-0.3.0.tgz', destination))
 
       fetchDispatcher = setupDispatcher(npmFetch)
     })
@@ -227,10 +236,11 @@ describe('fetchDispatcher cache fetch result', () => {
       rubyGemsFetch._getRegistryData = sinon.stub().resolves({
         name: 'small',
         version: '0.5.1',
-        gem_uri: 'https://rubygems.org/gems/small-0.5.1.gem',
+        gem_uri: 'https://rubygems.org/gems/small-0.5.1.gem'
       })
-      rubyGemsFetch._getPackage = sinon.stub().callsFake(async (spec, destination) =>
-        await getPacakgeStub('test/fixtures/ruby/small-0.5.1.gem', destination))
+      rubyGemsFetch._getPackage = sinon
+        .stub()
+        .callsFake(async (spec, destination) => await getPacakgeStub('test/fixtures/ruby/small-0.5.1.gem', destination))
 
       fetchDispatcher = setupDispatcher(rubyGemsFetch)
     })
@@ -245,10 +255,15 @@ describe('fetchDispatcher cache fetch result', () => {
 
     beforeEach(() => {
       const packagistFetch = PackagistFetch({ logger: { log: sinon.stub() } })
-      packagistFetch._getRegistryData = sinon.stub().resolves(
-        JSON.parse(fs.readFileSync('test/fixtures/packagist/registryData.json')))
-      packagistFetch._getPackage = sinon.stub().callsFake(async (spec, registryData, destination) =>
-        await getPacakgeStub('test/fixtures/composer/symfony-polyfill-mbstring-v1.11.0-0-gfe5e94c.zip', destination))
+      packagistFetch._getRegistryData = sinon
+        .stub()
+        .resolves(JSON.parse(fs.readFileSync('test/fixtures/packagist/registryData.json')))
+      packagistFetch._getPackage = sinon
+        .stub()
+        .callsFake(
+          async (spec, registryData, destination) =>
+            await getPacakgeStub('test/fixtures/composer/symfony-polyfill-mbstring-v1.11.0-0-gfe5e94c.zip', destination)
+        )
 
       fetchDispatcher = setupDispatcher(packagistFetch)
     })
@@ -337,7 +352,7 @@ describe('fetchDispatcher cache fetch result', () => {
   })
 
   describe('cache NugetFetch result', () => {
-    const fileSupplier = (url) => {
+    const fileSupplier = url => {
       let fileName = null
       if (url.includes('catalog')) fileName = 'xunit.core.2.4.1.catalog.json'
       if (url.endsWith('index.json')) fileName = 'xunit.core.index.json'

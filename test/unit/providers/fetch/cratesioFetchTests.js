@@ -165,7 +165,7 @@ function mockCrateFetch(options) {
     return { name: '/tmp' }
   }
   crateFetch._getPackage = () => '/tmp/crate'
-  crateFetch.decompress = () => { }
+  crateFetch.decompress = () => {}
   crateFetch.computeHashes = () => {
     return { sha1: '42' }
   }

@@ -6,7 +6,7 @@ const expect = require('chai').expect
 const Request = require('../../../ghcrawler/lib/request.js')
 
 describe('Request context/qualifier', () => {
-  it('will not queueRoot if none transitivity', () => { })
+  it('will not queueRoot if none transitivity', () => {})
 })
 
 describe('Request link management', () => {

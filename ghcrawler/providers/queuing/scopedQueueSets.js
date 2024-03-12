@@ -47,15 +47,14 @@ class ScopedQueueSets {
   }
 
   pop() {
-    return this._scopedQueues.local.pop()
-      .then(request => {
-        if (request) {
-          //mark to retry on the global queues
-          request._retryQueue = request._originQueue.getName()
-          return request
-        }
-        return this._scopedQueues.global.pop()
-      })
+    return this._scopedQueues.local.pop().then(request => {
+      if (request) {
+        //mark to retry on the global queues
+        request._retryQueue = request._originQueue.getName()
+        return request
+      }
+      return this._scopedQueues.global.pop()
+    })
   }
 
   done(request) {
@@ -84,19 +83,20 @@ class ScopedQueueSets {
       const info = await localQueue.getInfo()
       for (let count = info.count; count > 0; count--) {
         localRequests.push(
-          localQueue.pop()
+          localQueue
+            .pop()
             .then(request => request && localQueue.done(request).then(() => request.createRequeuable()))
-            .then(request => request && this.push(request, localQueue.getName(), 'global')))
+            .then(request => request && this.push(request, localQueue.getName(), 'global'))
+        )
       }
       debug(`publishing ${localRequests.length} to ${localQueue.getName()}`)
       return Promise.all(localRequests)
     }
 
-    return Promise.allSettled(this._scopedQueues.local.queues.map(publishToGlobal))
-      .then(results => {
-        const found = results.find(result => result.status === 'rejected')
-        if (found) throw new Error(found.reason)
-      })
+    return Promise.allSettled(this._scopedQueues.local.queues.map(publishToGlobal)).then(results => {
+      const found = results.find(result => result.status === 'rejected')
+      if (found) throw new Error(found.reason)
+    })
   }
 }
 

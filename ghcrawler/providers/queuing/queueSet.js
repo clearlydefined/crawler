@@ -65,7 +65,7 @@ class QueueSet {
   }
 
   async _pop(queue, request = null) {
-    const result = request || await queue.pop()
+    const result = request || (await queue.pop())
     if (result && !result._originQueue) {
       result._originQueue = queue
     }

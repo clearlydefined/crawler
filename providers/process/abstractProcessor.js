@@ -76,9 +76,7 @@ class AbstractProcessor extends BaseHandler {
   }
 
   _computeToken(content) {
-    return shajs('sha256')
-      .update(content)
-      .digest('hex')
+    return shajs('sha256').update(content).digest('hex')
   }
 
   /**
@@ -229,7 +227,7 @@ class AbstractProcessor extends BaseHandler {
   }
 
   addLocalToolTasks(request, ...tools) {
-    const toolList = tools.length ? tools : ['licensee', 'scancode', 'reuse'/*, 'fossology'*/]
+    const toolList = tools.length ? tools : ['licensee', 'scancode', 'reuse' /*, 'fossology'*/]
     toolList.forEach(tool => this.linkAndQueueTool(request, tool, undefined, 'local'))
   }
 }

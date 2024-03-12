@@ -3,7 +3,14 @@
 
 const chai = require('chai')
 const chaiAsPromised = require('chai-as-promised')
-const { normalizePath, normalizePaths, trimParents, trimAllParents, extractDate, spawnPromisified } = require('../../../lib/utils')
+const {
+  normalizePath,
+  normalizePaths,
+  trimParents,
+  trimAllParents,
+  extractDate,
+  spawnPromisified
+} = require('../../../lib/utils')
 const { promisify } = require('util')
 const execFile = promisify(require('child_process').execFile)
 chai.use(chaiAsPromised)
@@ -89,9 +96,8 @@ describe('Util extractDate', () => {
 })
 
 describe('test spawnPromisified ', () => {
-
   it('should handle spawn + command successfully', async () => {
-    const { stdout: expected} = await execFile('ls', ['-l'])
+    const { stdout: expected } = await execFile('ls', ['-l'])
     const actual = await spawnPromisified('ls', ['-l'])
     expect(actual).to.be.equal(expected)
   })
@@ -129,4 +135,3 @@ async function getError(promise) {
     return error
   }
 }
-

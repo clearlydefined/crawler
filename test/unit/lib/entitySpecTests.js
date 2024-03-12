@@ -16,7 +16,9 @@ describe('entitySpec', () => {
   })
 
   it('creates an EntitySpec from a Maven url', () => {
-    const entityFromUrl = EntitySpec.fromUrl('cd:/maven/mavencentral/org.eclipse.xtext/org.eclipse.xtext.common.types/2.25.0')
+    const entityFromUrl = EntitySpec.fromUrl(
+      'cd:/maven/mavencentral/org.eclipse.xtext/org.eclipse.xtext.common.types/2.25.0'
+    )
 
     expect(entityFromUrl.namespace).to.eq('org.eclipse.xtext')
     expect(entityFromUrl.name).to.eq('org.eclipse.xtext.common.types')

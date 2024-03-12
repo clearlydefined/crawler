@@ -9,5 +9,5 @@ module.exports = options => {
   const { connectionString } = options
   const storageQueueManager = new StorageQueueManager(connectionString, options)
   const localManager = new StorageBackedInMemoryQueueManager(storageQueueManager)
-  return CrawlerFactory.createScopedQueueSets({ globalManager: storageQueueManager, localManager}, options)
+  return CrawlerFactory.createScopedQueueSets({ globalManager: storageQueueManager, localManager }, options)
 }

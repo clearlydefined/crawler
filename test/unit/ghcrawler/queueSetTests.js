@@ -15,7 +15,7 @@ describe('QueueSet construction', () => {
 
 describe('QueueSet weighting', () => {
   it('should create a simple startMap', () => {
-    const set = new QueueSet([createBaseQueue('1'), createBaseQueue('2')], createOptions({ '1': 3, '2': 2 }))
+    const set = new QueueSet([createBaseQueue('1'), createBaseQueue('2')], createOptions({ 1: 3, 2: 2 }))
     expect(set.startMap.length).to.be.equal(5)
     expect(set.startMap[0]).to.be.equal(0)
     expect(set.startMap[1]).to.be.equal(0)
@@ -25,7 +25,7 @@ describe('QueueSet weighting', () => {
   })
 
   it('should create a default startMap if no weights given', () => {
-    const set = new QueueSet([createBaseQueue('1'), createBaseQueue('2')], { _config: { on: () => { } } })
+    const set = new QueueSet([createBaseQueue('1'), createBaseQueue('2')], { _config: { on: () => {} } })
     expect(set.startMap.length).to.be.equal(2)
     expect(set.startMap[0]).to.be.equal(0)
     expect(set.startMap[1]).to.be.equal(1)
@@ -58,7 +58,6 @@ describe('QueueSet pushing', () => {
   it('should accept a simple request into a named queue', async () => {
     const priority = createBaseQueue('priority', {
       push: async () => null
-
     })
     const normal = createBaseQueue('normal')
     const queues = createBaseQueues([priority, normal])
@@ -87,7 +86,7 @@ describe('QueueSet pushing', () => {
 describe('QueueSet originQueue management', () => {
   it('should set originQueue on pop', async () => {
     const priority = createBaseQueue('priority', {
-      pop: async () => new Request('test', 'http://test'),
+      pop: async () => new Request('test', 'http://test')
     })
     const queues = createBaseQueues([priority])
 
@@ -98,8 +97,8 @@ describe('QueueSet originQueue management', () => {
 
 describe('QueueSet subscription management', () => {
   it('should subscribe all', () => {
-    const priority = createBaseQueue('priority', { subscribe: () => { } })
-    const normal = createBaseQueue('normal', { subscribe: () => { } })
+    const priority = createBaseQueue('priority', { subscribe: () => {} })
+    const normal = createBaseQueue('normal', { subscribe: () => {} })
     const queues = createBaseQueues([priority, normal])
     sinon.spy(priority, 'subscribe')
     sinon.spy(normal, 'subscribe')
@@ -111,8 +110,8 @@ describe('QueueSet subscription management', () => {
   })
 
   it('should unsubscribe all', () => {
-    const priority = createBaseQueue('priority', { unsubscribe: () => { } })
-    const normal = createBaseQueue('normal', { unsubscribe: () => { } })
+    const priority = createBaseQueue('priority', { unsubscribe: () => {} })
+    const normal = createBaseQueue('normal', { unsubscribe: () => {} })
     const queues = createBaseQueues([priority, normal])
     sinon.spy(priority, 'unsubscribe')
     sinon.spy(normal, 'unsubscribe')
@@ -127,7 +126,7 @@ describe('QueueSet subscription management', () => {
 function createOptions(weights) {
   return {
     weights: weights,
-    _config: { on: () => { } }
+    _config: { on: () => {} }
   }
 }
 

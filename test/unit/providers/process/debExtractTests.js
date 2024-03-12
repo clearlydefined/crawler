@@ -26,7 +26,7 @@ describe('Debian processing', () => {
 })
 
 async function setup() {
-  const processor = debianExtract({ logger: { info: () => { } } }, () => { })
+  const processor = debianExtract({ logger: { info: () => {} } }, () => {})
   processor.linkAndQueueTool = sinon.stub()
   const request = createRequest()
   const dir = processor.createTempDir(request)

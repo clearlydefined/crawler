@@ -4,11 +4,13 @@
 const MavenBasedFetch = require('./mavenBasedFetch')
 
 class GradlePluginFetch extends MavenBasedFetch {
-
   constructor(options) {
-    super({
-      'gradleplugin': 'https://plugins.gradle.org/m2/'
-    }, options)
+    super(
+      {
+        gradleplugin: 'https://plugins.gradle.org/m2/'
+      },
+      options
+    )
   }
 
   async _getPoms(spec, result = []) {
@@ -16,7 +18,6 @@ class GradlePluginFetch extends MavenBasedFetch {
     //See https://docs.gradle.org/current/userguide/publishing_gradle_module_metadata.html
     return super._getPoms(spec, result)
   }
-
 }
 
 module.exports = options => new GradlePluginFetch(options)

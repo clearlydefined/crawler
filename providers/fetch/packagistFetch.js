@@ -66,10 +66,11 @@ class PackagistFetch extends AbstractFetch {
           'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)'
         }
       }
-      nodeRequest.get(options, (error, response) => {
-        if (error) return reject(error)
-        if (response.statusCode !== 200) reject(new Error(`${response.statusCode} ${response.statusMessage}`))
-      })
+      nodeRequest
+        .get(options, (error, response) => {
+          if (error) return reject(error)
+          if (response.statusCode !== 200) reject(new Error(`${response.statusCode} ${response.statusMessage}`))
+        })
         .pipe(fs.createWriteStream(destination).on('finish', () => resolve(null)))
     })
   }

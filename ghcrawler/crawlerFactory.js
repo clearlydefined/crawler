@@ -203,7 +203,7 @@ class CrawlerFactory {
   }
 
   static createNolock() {
-    return { lock: () => null, unlock: () => { } }
+    return { lock: () => null, unlock: () => {} }
   }
 
   static createQueues(options, provider = options.provider) {

@@ -1,10 +1,8 @@
 // Place your settings in this file to overwrite default and user settings.
 {
-  "jshint.options": {
-    "esnext": true
-  },
   "editor.folding": false,
   "editor.tabSize": 2,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.detectIndentation": false,
   "editor.formatOnSave": false,
   "editor.formatOnType": true,

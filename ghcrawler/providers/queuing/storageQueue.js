@@ -55,7 +55,6 @@ class StorageQueue {
     return { _message }
   }
 
-
   async pop() {
     const msgOptions = { numOfMessages: 1, visibilityTimeout: this.options.visibilityTimeout || 60 * 60 }
     return new Promise((resolve, reject) => {
@@ -114,13 +113,19 @@ class StorageQueue {
   updateVisibilityTimeout(request, visibilityTimeout = 0) {
     return new Promise((resolve, reject) => {
       // visibilityTimeout is updated to 0 to unlock/unlease the message
-      this.client.updateMessage(this.queueName, request._message.messageId, request._message.popReceipt, visibilityTimeout, (error, result) => {
-        if (error) {
-          return reject(error)
+      this.client.updateMessage(
+        this.queueName,
+        request._message.messageId,
+        request._message.popReceipt,
+        visibilityTimeout,
+        (error, result) => {
+          if (error) {
+            return reject(error)
+          }
+          this._log('NAKed', request._message.body)
+          resolve(this._buildMessageReceipt(result, request._message.body))
         }
-        this._log('NAKed', request._message.body)
-        resolve(this._buildMessageReceipt(result, request._message.body))
-      })
+      )
     })
   }
 

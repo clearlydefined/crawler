@@ -98,8 +98,7 @@ class MavenBasedFetch extends AbstractFetch {
         this._handleRequestStream(url, (error, response) => {
           if (error) this.logger.error(error)
           if (response.statusCode !== 200) return resolve(false)
-        })
-          .pipe(fs.createWriteStream(destination).on('finish', () => resolve(true)))
+        }).pipe(fs.createWriteStream(destination).on('finish', () => resolve(true)))
       })
       if (status) return true
     }

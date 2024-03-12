@@ -34,7 +34,13 @@ class AbstractFetch extends BaseHandler {
   decompress(source, destination) {
     return decompress(source, destination, {
       filter: file => !file.path.endsWith('/'),
-      plugins: [decompressTar(), decompressTarbz2(), decompressTargz(), decompressTarxz(), decompressUnzip({ validateEntrySizes: false })]
+      plugins: [
+        decompressTar(),
+        decompressTarbz2(),
+        decompressTargz(),
+        decompressTarxz(),
+        decompressUnzip({ validateEntrySizes: false })
+      ]
     })
   }
 }
