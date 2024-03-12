@@ -133,7 +133,7 @@ If a CRAWLER_ID is specified, then each instance must have this setting globally
 ## Run Docker image from Docker Hub
 
 You can run the image as is from docker (this is w/o any port forwarding, which means the only way you can interact with the crawler locally is through the queue. See below for examples of how to run with ports exposed to do curl based testing).
-`docker run --env-file ../<env_name>.env.list clearlydefined/crawler`
+`docker run --platform linux/amd64 --env-file ../<env_name>.env.list clearlydefined/crawler`
 
 See `local.env.list`, `dev.env.list` and `prod.env.list` tempate files.
 
@@ -145,13 +145,13 @@ See `local.env.list`, `dev.env.list` and `prod.env.list` tempate files.
 
 ## Build and run Docker image locally
 
-`docker build -t cdcrawler:latest .`
+`docker build --platform linux/amd64 -t cdcrawler:latest .`
 
-`docker run --rm --env-file ../dev.env.list -p 5000:5000 -p 9229:9229 cdcrawler:latest`
+`docker run --platform linux/amd64 --rm --env-file ../dev.env.list -p 5000:5000 -p 9229:9229 cdcrawler:latest`
 
 With a debugger:
 
-`docker run --rm -d --env-file ../dev.env.list -p 9229:9229 -p 5000:5000 --entrypoint node cdcrawler:latest --inspect-brk=0.0.0.0:9229 index.js`
+`docker run --platform linux/amd64 --rm -d --env-file ../dev.env.list -p 9229:9229 -p 5000:5000 --entrypoint node cdcrawler:latest --inspect-brk=0.0.0.0:9229 index.js`
 
 At this point you can attach VS Code with the built in debugging profile (see .vscode/launch.json)
 
