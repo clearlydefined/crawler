@@ -3,7 +3,7 @@
 
 const chai = require('chai')
 const chaiAsPromised = require('chai-as-promised')
-const { normalizePath, normalizePaths, trimParents, trimAllParents, extractDate, spawnPromisified, isValidExcludingGit } = require('../../../lib/utils')
+const { normalizePath, normalizePaths, trimParents, trimAllParents, extractDate, spawnPromisified, isGitFile } = require('../../../lib/utils')
 const { promisify } = require('util')
 const execFile = promisify(require('child_process').execFile)
 chai.use(chaiAsPromised)
@@ -56,20 +56,20 @@ describe('Utils path functions', () => {
   })
 })
 
-describe('Util isValidExcludingGit', () => {
-  it('should exclude .git and its contents', () => {
-    const data = new Map([
-      [null, false],
-      ['/', true],
-      ['/tmp/tempX/package/src', true],
-      ['.git', false],
-      ['/tmp/tempX/package/.git', false],
-      ['/tmp/tempX/package/.git/hooks/pre-merge-commit.sample', false]
-    ])
-    data.forEach((expected, input) => {
-      expect(isValidExcludingGit(input)).to.eq(expected)
-    })
+describe('Util isGitFile', () => {
+  const entries = new Map([
+    [null, false],
+    ['/', false],
+    ['/tmp/tempX/package/src', false],
+    ['.git', true],
+    ['/tmp/tempX/package/.git', true],
+    ['/tmp/tempX/package/.git/hooks/pre-merge-commit.sample', true]
+  ])
+
+  entries.forEach((expected, file) => {
+    it(`should return ${expected} for isGitFile given '${file}'`, () => expect(isGitFile(file)).to.eq(expected))
   })
+
 })
 
 describe('Util extractDate', () => {
