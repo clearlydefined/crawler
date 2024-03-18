@@ -1,0 +1,1101 @@
+{
+  "headers": [
+    {
+      "tool_name": "scancode-toolkit",
+      "tool_version": "32.0.8",
+      "options": {
+        "input": [
+          "/tmp/cd-sc95Qo"
+        ],
+        "--classify": true,
+        "--copyright": true,
+        "--email": true,
+        "--generated": true,
+        "--info": true,
+        "--json-pp": "/tmp/cd-FMpnfO",
+        "--license": true,
+        "--license-clarity-score": true,
+        "--license-text": true,
+        "--license-text-diagnostics": true,
+        "--package": true,
+        "--processes": "2",
+        "--strip-root": true,
+        "--summary": true,
+        "--tallies": true,
+        "--tallies-key-files": true,
+        "--timeout": "1000.0",
+        "--url": true
+      },
+      "notice": "Generated with ScanCode and provided on an \"AS IS\" BASIS, WITHOUT WARRANTIES\nOR CONDITIONS OF ANY KIND, either express or implied. No content created from\nScanCode should be considered or used as legal advice. Consult an Attorney\nfor any legal advice.\nScanCode is a free software code scanning tool from nexB Inc. and others.\nVisit https://github.com/nexB/scancode-toolkit/ for support and download.",
+      "start_timestamp": "2023-12-08T190727.262712",
+      "end_timestamp": "2023-12-08T190731.702379",
+      "output_format_version": "3.0.0",
+      "duration": 4.43967866897583,
+      "message": null,
+      "errors": [],
+      "warnings": [],
+      "extra_data": {
+        "system_environment": {
+          "operating_system": "linux",
+          "cpu_architecture": "64",
+          "platform": "Linux-6.2.0-1016-azure-x86_64-with-glibc2.31",
+          "platform_version": "#16~22.04.1-Ubuntu SMP Tue Oct 10 17:11:51 UTC 2023",
+          "python_version": "3.9.2 (default, Feb 28 2021, 17:03:44) \n[GCC 10.2.1 20210110]"
+        },
+        "spdx_license_list_version": "3.21",
+        "files_count": 7
+      }
+    }
+  ],
+  "summary": {
+    "declared_license_expression": "isc",
+    "license_clarity_score": {
+      "score": 100,
+      "declared_license": true,
+      "identification_precision": true,
+      "has_license_text": true,
+      "declared_copyrights": true,
+      "conflicting_license_categories": false,
+      "ambiguous_compound_licensing": false
+    },
+    "declared_holder": "Isaac Z. Schlueter and Contributors",
+    "primary_language": "JavaScript",
+    "other_license_expressions": [
+      {
+        "value": null,
+        "count": 4
+      },
+      {
+        "value": "mit AND isc",
+        "count": 1
+      }
+    ],
+    "other_holders": [
+      {
+        "value": null,
+        "count": 6
+      }
+    ],
+    "other_languages": []
+  },
+  "packages": [
+    {
+      "type": "npm",
+      "namespace": null,
+      "name": "glob",
+      "version": "7.1.2",
+      "qualifiers": {},
+      "subpath": null,
+      "primary_language": "JavaScript",
+      "description": "a little globber",
+      "release_date": null,
+      "parties": [
+        {
+          "type": "person",
+          "role": "author",
+          "name": "Isaac Z. Schlueter",
+          "email": "i@izs.me",
+          "url": "http://blog.izs.me/"
+        }
+      ],
+      "keywords": [],
+      "homepage_url": null,
+      "download_url": "https://registry.npmjs.org/glob/-/glob-7.1.2.tgz",
+      "size": null,
+      "sha1": null,
+      "md5": null,
+      "sha256": null,
+      "sha512": null,
+      "bug_tracking_url": null,
+      "code_view_url": null,
+      "vcs_url": "git://github.com/isaacs/node-glob.git",
+      "copyright": null,
+      "holder": null,
+      "declared_license_expression": "isc",
+      "declared_license_expression_spdx": "ISC",
+      "license_detections": [
+        {
+          "license_expression": "isc",
+          "matches": [
+            {
+              "score": 100,
+              "start_line": 1,
+              "end_line": 1,
+              "matched_length": 1,
+              "match_coverage": 100,
+              "matcher": "1-spdx-id",
+              "license_expression": "isc",
+              "rule_identifier": "spdx-license-identifier-isc-9931cb7ad33c2eb18f322c94660b670a84186baa",
+              "rule_relevance": 100,
+              "rule_url": null,
+              "matched_text": "ISC"
+            }
+          ],
+          "identifier": "isc-6c4320cc-eb5b-3792-8c56-b8565fff1119"
+        }
+      ],
+      "other_license_expression": null,
+      "other_license_expression_spdx": null,
+      "other_license_detections": [],
+      "extracted_license_statement": "- ISC\n",
+      "notice_text": null,
+      "source_packages": [],
+      "extra_data": {},
+      "repository_homepage_url": "https://www.npmjs.com/package/glob",
+      "repository_download_url": "https://registry.npmjs.org/glob/-/glob-7.1.2.tgz",
+      "api_data_url": "https://registry.npmjs.org/glob/7.1.2",
+      "package_uid": "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d",
+      "datafile_paths": [
+        "package/package.json"
+      ],
+      "datasource_ids": [
+        "npm_package_json"
+      ],
+      "purl": "pkg:npm/glob@7.1.2"
+    }
+  ],
+  "dependencies": [
+    {
+      "purl": "pkg:npm/fs.realpath",
+      "extracted_requirement": "^1.0.0",
+      "scope": "dependencies",
+      "is_runtime": true,
+      "is_optional": false,
+      "is_resolved": false,
+      "resolved_package": {},
+      "extra_data": {},
+      "dependency_uid": "pkg:npm/fs.realpath?uuid=93dd21b8-4539-41d0-8e49-a94201794308",
+      "for_package_uid": "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d",
+      "datafile_path": "package/package.json",
+      "datasource_id": "npm_package_json"
+    },
+    {
+      "purl": "pkg:npm/inflight",
+      "extracted_requirement": "^1.0.4",
+      "scope": "dependencies",
+      "is_runtime": true,
+      "is_optional": false,
+      "is_resolved": false,
+      "resolved_package": {},
+      "extra_data": {},
+      "dependency_uid": "pkg:npm/inflight?uuid=74ade41f-7830-457f-a6d4-b32072ba0050",
+      "for_package_uid": "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d",
+      "datafile_path": "package/package.json",
+      "datasource_id": "npm_package_json"
+    },
+    {
+      "purl": "pkg:npm/inherits",
+      "extracted_requirement": "2",
+      "scope": "dependencies",
+      "is_runtime": true,
+      "is_optional": false,
+      "is_resolved": false,
+      "resolved_package": {},
+      "extra_data": {},
+      "dependency_uid": "pkg:npm/inherits?uuid=a9d13236-4403-4cd9-9a6f-2a9d3de35565",
+      "for_package_uid": "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d",
+      "datafile_path": "package/package.json",
+      "datasource_id": "npm_package_json"
+    },
+    {
+      "purl": "pkg:npm/minimatch",
+      "extracted_requirement": "^3.0.4",
+      "scope": "dependencies",
+      "is_runtime": true,
+      "is_optional": false,
+      "is_resolved": false,
+      "resolved_package": {},
+      "extra_data": {},
+      "dependency_uid": "pkg:npm/minimatch?uuid=4720aa79-792a-45ba-952a-d4851be7a8dc",
+      "for_package_uid": "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d",
+      "datafile_path": "package/package.json",
+      "datasource_id": "npm_package_json"
+    },
+    {
+      "purl": "pkg:npm/once",
+      "extracted_requirement": "^1.3.0",
+      "scope": "dependencies",
+      "is_runtime": true,
+      "is_optional": false,
+      "is_resolved": false,
+      "resolved_package": {},
+      "extra_data": {},
+      "dependency_uid": "pkg:npm/once?uuid=b5e23715-9908-4ed5-846f-407285037c0d",
+      "for_package_uid": "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d",
+      "datafile_path": "package/package.json",
+      "datasource_id": "npm_package_json"
+    },
+    {
+      "purl": "pkg:npm/path-is-absolute",
+      "extracted_requirement": "^1.0.0",
+      "scope": "dependencies",
+      "is_runtime": true,
+      "is_optional": false,
+      "is_resolved": false,
+      "resolved_package": {},
+      "extra_data": {},
+      "dependency_uid": "pkg:npm/path-is-absolute?uuid=b5673212-9842-4924-bb9b-b007b9b935fb",
+      "for_package_uid": "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d",
+      "datafile_path": "package/package.json",
+      "datasource_id": "npm_package_json"
+    },
+    {
+      "purl": "pkg:npm/mkdirp",
+      "extracted_requirement": "0",
+      "scope": "devDependencies",
+      "is_runtime": false,
+      "is_optional": true,
+      "is_resolved": false,
+      "resolved_package": {},
+      "extra_data": {},
+      "dependency_uid": "pkg:npm/mkdirp?uuid=785b02f5-9f5c-45bc-9756-06c7d91f6d4e",
+      "for_package_uid": "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d",
+      "datafile_path": "package/package.json",
+      "datasource_id": "npm_package_json"
+    },
+    {
+      "purl": "pkg:npm/rimraf",
+      "extracted_requirement": "^2.2.8",
+      "scope": "devDependencies",
+      "is_runtime": false,
+      "is_optional": true,
+      "is_resolved": false,
+      "resolved_package": {},
+      "extra_data": {},
+      "dependency_uid": "pkg:npm/rimraf?uuid=0d8164e0-8218-4ee3-9df0-d95352fb7233",
+      "for_package_uid": "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d",
+      "datafile_path": "package/package.json",
+      "datasource_id": "npm_package_json"
+    },
+    {
+      "purl": "pkg:npm/tap",
+      "extracted_requirement": "^7.1.2",
+      "scope": "devDependencies",
+      "is_runtime": false,
+      "is_optional": true,
+      "is_resolved": false,
+      "resolved_package": {},
+      "extra_data": {},
+      "dependency_uid": "pkg:npm/tap?uuid=6a8465f9-57a8-41c2-b2d9-184bf46dfc0d",
+      "for_package_uid": "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d",
+      "datafile_path": "package/package.json",
+      "datasource_id": "npm_package_json"
+    },
+    {
+      "purl": "pkg:npm/tick",
+      "extracted_requirement": "0.0.6",
+      "scope": "devDependencies",
+      "is_runtime": false,
+      "is_optional": true,
+      "is_resolved": false,
+      "resolved_package": {},
+      "extra_data": {},
+      "dependency_uid": "pkg:npm/tick?uuid=ba03712d-f498-4418-b0bd-1106b78a98dc",
+      "for_package_uid": "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d",
+      "datafile_path": "package/package.json",
+      "datasource_id": "npm_package_json"
+    }
+  ],
+  "license_detections": [
+    {
+      "identifier": "isc-6c4320cc-eb5b-3792-8c56-b8565fff1119",
+      "license_expression": "isc",
+      "detection_count": 1
+    },
+    {
+      "identifier": "isc-90dc51e4-d418-5a40-d42f-6b015cf53d02",
+      "license_expression": "isc",
+      "detection_count": 1
+    },
+    {
+      "identifier": "isc-d21e4a8e-7cce-593b-6804-3c0c88f62348",
+      "license_expression": "isc",
+      "detection_count": 1
+    },
+    {
+      "identifier": "mit_and_isc-39fc4900-d3d1-3b03-adee-c12d89b75dd6",
+      "license_expression": "mit AND isc",
+      "detection_count": 1
+    }
+  ],
+  "tallies": {
+    "detected_license_expression": [
+      {
+        "value": null,
+        "count": 4
+      },
+      {
+        "value": "isc",
+        "count": 2
+      },
+      {
+        "value": "mit AND isc",
+        "count": 1
+      }
+    ],
+    "copyrights": [
+      {
+        "value": null,
+        "count": 6
+      },
+      {
+        "value": "Copyright (c) Isaac Z. Schlueter and Contributors",
+        "count": 1
+      }
+    ],
+    "holders": [
+      {
+        "value": null,
+        "count": 6
+      },
+      {
+        "value": "Isaac Z. Schlueter and Contributors",
+        "count": 1
+      }
+    ],
+    "authors": [
+      {
+        "value": null,
+        "count": 6
+      },
+      {
+        "value": "Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)",
+        "count": 1
+      }
+    ],
+    "programming_language": [
+      {
+        "value": "JavaScript",
+        "count": 3
+      }
+    ]
+  },
+  "tallies_of_key_files": {
+    "detected_license_expression": [
+      {
+        "value": "isc",
+        "count": 1
+      }
+    ],
+    "copyrights": [
+      {
+        "value": "Copyright (c) Isaac Z. Schlueter and Contributors",
+        "count": 1
+      }
+    ],
+    "holders": [
+      {
+        "value": "Isaac Z. Schlueter and Contributors",
+        "count": 1
+      }
+    ],
+    "authors": [],
+    "programming_language": []
+  },
+  "files": [
+    {
+      "path": "package",
+      "type": "directory",
+      "name": "package",
+      "base_name": "package",
+      "extension": "",
+      "size": 0,
+      "date": null,
+      "sha1": null,
+      "md5": null,
+      "sha256": null,
+      "mime_type": null,
+      "file_type": null,
+      "programming_language": null,
+      "is_binary": false,
+      "is_text": false,
+      "is_archive": false,
+      "is_media": false,
+      "is_source": false,
+      "is_script": false,
+      "package_data": [],
+      "for_packages": [],
+      "is_legal": false,
+      "is_manifest": false,
+      "is_readme": false,
+      "is_top_level": true,
+      "is_key_file": false,
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "copyrights": [],
+      "holders": [],
+      "authors": [],
+      "emails": [],
+      "urls": [],
+      "is_generated": false,
+      "files_count": 7,
+      "dirs_count": 0,
+      "size_count": 55474,
+      "scan_errors": []
+    },
+    {
+      "path": "package/changelog.md",
+      "type": "file",
+      "name": "changelog.md",
+      "base_name": "changelog",
+      "extension": ".md",
+      "size": 1430,
+      "date": "2016-02-11",
+      "sha1": "97bfa68176e50777c07a7ba58f98ff7a1730ac00",
+      "md5": "00f1acff927a7059ab085d87c72bbf43",
+      "sha256": "9cb64aedf3ac2f4e80039a29914f4dacb1780d28d340f757717916cd2ca58f45",
+      "mime_type": "text/plain",
+      "file_type": "ASCII text",
+      "programming_language": null,
+      "is_binary": false,
+      "is_text": true,
+      "is_archive": false,
+      "is_media": false,
+      "is_source": false,
+      "is_script": false,
+      "package_data": [],
+      "for_packages": [
+        "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d"
+      ],
+      "is_legal": false,
+      "is_manifest": false,
+      "is_readme": false,
+      "is_top_level": true,
+      "is_key_file": false,
+      "detected_license_expression": "isc",
+      "detected_license_expression_spdx": "ISC",
+      "license_detections": [
+        {
+          "license_expression": "isc",
+          "matches": [
+            {
+              "score": 99,
+              "start_line": 51,
+              "end_line": 51,
+              "matched_length": 2,
+              "match_coverage": 100,
+              "matcher": "2-aho",
+              "license_expression": "isc",
+              "rule_identifier": "isc_22.RULE",
+              "rule_relevance": 99,
+              "rule_url": "https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/isc_22.RULE",
+              "matched_text": "ISC license"
+            }
+          ],
+          "identifier": "isc-d21e4a8e-7cce-593b-6804-3c0c88f62348"
+        }
+      ],
+      "license_clues": [],
+      "percentage_of_license_text": 0.88,
+      "copyrights": [],
+      "holders": [],
+      "authors": [],
+      "emails": [],
+      "urls": [],
+      "is_generated": false,
+      "files_count": 0,
+      "dirs_count": 0,
+      "size_count": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "package/common.js",
+      "type": "file",
+      "name": "common.js",
+      "base_name": "common",
+      "extension": ".js",
+      "size": 6167,
+      "date": "2016-09-29",
+      "sha1": "2f948b495467f2a7ac0afbb1008af557ab040143",
+      "md5": "0041795c4700b9e1c1cd76729517f08b",
+      "sha256": "e9a5f37878266f441069556ea411a60d658bdfb16aa99d3b29b53fd639a5aa3a",
+      "mime_type": "text/plain",
+      "file_type": "ASCII text",
+      "programming_language": "JavaScript",
+      "is_binary": false,
+      "is_text": true,
+      "is_archive": false,
+      "is_media": false,
+      "is_source": true,
+      "is_script": false,
+      "package_data": [],
+      "for_packages": [
+        "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d"
+      ],
+      "is_legal": false,
+      "is_manifest": false,
+      "is_readme": false,
+      "is_top_level": true,
+      "is_key_file": false,
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "copyrights": [],
+      "holders": [],
+      "authors": [],
+      "emails": [],
+      "urls": [],
+      "is_generated": false,
+      "files_count": 0,
+      "dirs_count": 0,
+      "size_count": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "package/glob.js",
+      "type": "file",
+      "name": "glob.js",
+      "base_name": "glob",
+      "extension": ".js",
+      "size": 19433,
+      "date": "2017-02-10",
+      "sha1": "c2e95cdccba36eaca7b12e2bcf9b383438cee52d",
+      "md5": "20c4c7d5e53fcaaf2781e53942dc2e32",
+      "sha256": "e3f3d1fd54aa24133a3d518ae7eaf26d5cbc1b9496389e18dd24ba63ea763ed3",
+      "mime_type": "text/plain",
+      "file_type": "ASCII text",
+      "programming_language": "JavaScript",
+      "is_binary": false,
+      "is_text": true,
+      "is_archive": false,
+      "is_media": false,
+      "is_source": true,
+      "is_script": false,
+      "package_data": [],
+      "for_packages": [
+        "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d"
+      ],
+      "is_legal": false,
+      "is_manifest": false,
+      "is_readme": false,
+      "is_top_level": true,
+      "is_key_file": false,
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "copyrights": [],
+      "holders": [],
+      "authors": [],
+      "emails": [],
+      "urls": [
+        {
+          "url": "https://github.com/isaacs/node-glob/issues/205",
+          "start_line": 587,
+          "end_line": 587
+        }
+      ],
+      "is_generated": false,
+      "files_count": 0,
+      "dirs_count": 0,
+      "size_count": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "package/LICENSE",
+      "type": "file",
+      "name": "LICENSE",
+      "base_name": "LICENSE",
+      "extension": "",
+      "size": 765,
+      "date": "2014-07-28",
+      "sha1": "bb408e929caeb1731945b2ba54bc337edb87cc66",
+      "md5": "82703a69f6d7411dde679954c2fd9dca",
+      "sha256": "4ec3d4c66cd87f5c8d8ad911b10f99bf27cb00cdfcff82621956e379186b016b",
+      "mime_type": "text/plain",
+      "file_type": "ASCII text",
+      "programming_language": null,
+      "is_binary": false,
+      "is_text": true,
+      "is_archive": false,
+      "is_media": false,
+      "is_source": false,
+      "is_script": false,
+      "package_data": [],
+      "for_packages": [
+        "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d"
+      ],
+      "is_legal": true,
+      "is_manifest": false,
+      "is_readme": false,
+      "is_top_level": true,
+      "is_key_file": true,
+      "detected_license_expression": "isc",
+      "detected_license_expression_spdx": "ISC",
+      "license_detections": [
+        {
+          "license_expression": "isc",
+          "matches": [
+            {
+              "score": 99,
+              "start_line": 1,
+              "end_line": 1,
+              "matched_length": 2,
+              "match_coverage": 100,
+              "matcher": "2-aho",
+              "license_expression": "isc",
+              "rule_identifier": "isc_22.RULE",
+              "rule_relevance": 99,
+              "rule_url": "https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/isc_22.RULE",
+              "matched_text": "ISC License"
+            },
+            {
+              "score": 100,   
+              "start_line": 5,
+              "end_line": 15,
+              "matched_length": 112,
+              "match_coverage": 100,
+              "matcher": "2-aho",
+              "license_expression": "isc",
+              "rule_identifier": "isc.LICENSE",
+              "rule_relevance": 100,
+              "rule_url": "https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/licenses/isc.LICENSE",
+              "matched_text": "Permission to use, copy, modify, and/or distribute this software for any\npurpose with or without fee is hereby granted, provided that the above\ncopyright notice and this permission notice appear in all copies.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\" AND THE AUTHOR DISCLAIMS ALL WARRANTIES\nWITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF\nMERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR\nANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES\nWHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN\nACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR\nIN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE."
+            }
+          ],
+          "identifier": "isc-90dc51e4-d418-5a40-d42f-6b015cf53d02"
+        }
+      ],
+      "license_clues": [],
+      "percentage_of_license_text": 93.44,
+      "copyrights": [
+        {
+          "copyright": "Copyright (c) Isaac Z. Schlueter and Contributors",
+          "start_line": 3,
+          "end_line": 3
+        }
+      ],
+      "holders": [
+        {
+          "holder": "Isaac Z. Schlueter and Contributors",
+          "start_line": 3,
+          "end_line": 3
+        }
+      ],
+      "authors": [],
+      "emails": [],
+      "urls": [],
+      "is_generated": false,
+      "files_count": 0,
+      "dirs_count": 0,
+      "size_count": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "package/package.json",
+      "type": "file",
+      "name": "package.json",
+      "base_name": "package",
+      "extension": ".json",
+      "size": 1013,
+      "date": "2017-05-19",
+      "sha1": "844f90fa8a6fbf45d581593a333f69c5cb1f2d58",
+      "md5": "c48f03d61da8b37477bf9711d56aea41",
+      "sha256": "480d04f663e9461abde03863c44122b239b2fbbf6f309133c654c0595c786c00",
+      "mime_type": "application/json",
+      "file_type": "JSON data",
+      "programming_language": null,
+      "is_binary": false,
+      "is_text": true,
+      "is_archive": false,
+      "is_media": false,
+      "is_source": false,
+      "is_script": false,
+      "package_data": [
+        {
+          "type": "npm",
+          "namespace": null,
+          "name": "glob",
+          "version": "7.1.2",
+          "qualifiers": {},
+          "subpath": null,
+          "primary_language": "JavaScript",
+          "description": "a little globber",
+          "release_date": null,
+          "parties": [
+            {
+              "type": "person",
+              "role": "author",
+              "name": "Isaac Z. Schlueter",
+              "email": "i@izs.me",
+              "url": "http://blog.izs.me/"
+            }
+          ],
+          "keywords": [],
+          "homepage_url": null,
+          "download_url": "https://registry.npmjs.org/glob/-/glob-7.1.2.tgz",
+          "size": null,
+          "sha1": null,
+          "md5": null,
+          "sha256": null,
+          "sha512": null,
+          "bug_tracking_url": null,
+          "code_view_url": null,
+          "vcs_url": "git://github.com/isaacs/node-glob.git",
+          "copyright": null,
+          "holder": null,
+          "declared_license_expression": "isc",
+          "declared_license_expression_spdx": "ISC",
+          "license_detections": [
+            {
+              "license_expression": "isc",
+              "matches": [
+                {
+                  "score": 100,
+                  "start_line": 1,
+                  "end_line": 1,
+                  "matched_length": 1,
+                  "match_coverage": 100,
+                  "matcher": "1-spdx-id",
+                  "license_expression": "isc",
+                  "rule_identifier": "spdx-license-identifier-isc-9931cb7ad33c2eb18f322c94660b670a84186baa",
+                  "rule_relevance": 100,
+                  "rule_url": null,
+                  "matched_text": "ISC"
+                }
+              ],
+              "identifier": "isc-6c4320cc-eb5b-3792-8c56-b8565fff1119"
+            }
+          ],
+          "other_license_expression": null,
+          "other_license_expression_spdx": null,
+          "other_license_detections": [],
+          "extracted_license_statement": "- ISC\n",
+          "notice_text": null,
+          "source_packages": [],
+          "file_references": [],
+          "extra_data": {},
+          "dependencies": [
+            {
+              "purl": "pkg:npm/fs.realpath",
+              "extracted_requirement": "^1.0.0",
+              "scope": "dependencies",
+              "is_runtime": true,
+              "is_optional": false,
+              "is_resolved": false,
+              "resolved_package": {},
+              "extra_data": {}
+            },
+            {
+              "purl": "pkg:npm/inflight",
+              "extracted_requirement": "^1.0.4",
+              "scope": "dependencies",
+              "is_runtime": true,
+              "is_optional": false,
+              "is_resolved": false,
+              "resolved_package": {},
+              "extra_data": {}
+            },
+            {
+              "purl": "pkg:npm/inherits",
+              "extracted_requirement": "2",
+              "scope": "dependencies",
+              "is_runtime": true,
+              "is_optional": false,
+              "is_resolved": false,
+              "resolved_package": {},
+              "extra_data": {}
+            },
+            {
+              "purl": "pkg:npm/minimatch",
+              "extracted_requirement": "^3.0.4",
+              "scope": "dependencies",
+              "is_runtime": true,
+              "is_optional": false,
+              "is_resolved": false,
+              "resolved_package": {},
+              "extra_data": {}
+            },
+            {
+              "purl": "pkg:npm/once",
+              "extracted_requirement": "^1.3.0",
+              "scope": "dependencies",
+              "is_runtime": true,
+              "is_optional": false,
+              "is_resolved": false,
+              "resolved_package": {},
+              "extra_data": {}
+            },
+            {
+              "purl": "pkg:npm/path-is-absolute",
+              "extracted_requirement": "^1.0.0",
+              "scope": "dependencies",
+              "is_runtime": true,
+              "is_optional": false,
+              "is_resolved": false,
+              "resolved_package": {},
+              "extra_data": {}
+            },
+            {
+              "purl": "pkg:npm/mkdirp",
+              "extracted_requirement": "0",
+              "scope": "devDependencies",
+              "is_runtime": false,
+              "is_optional": true,
+              "is_resolved": false,
+              "resolved_package": {},
+              "extra_data": {}
+            },
+            {
+              "purl": "pkg:npm/rimraf",
+              "extracted_requirement": "^2.2.8",
+              "scope": "devDependencies",
+              "is_runtime": false,
+              "is_optional": true,
+              "is_resolved": false,
+              "resolved_package": {},
+              "extra_data": {}
+            },
+            {
+              "purl": "pkg:npm/tap",
+              "extracted_requirement": "^7.1.2",
+              "scope": "devDependencies",
+              "is_runtime": false,
+              "is_optional": true,
+              "is_resolved": false,
+              "resolved_package": {},
+              "extra_data": {}
+            },
+            {
+              "purl": "pkg:npm/tick",
+              "extracted_requirement": "0.0.6",
+              "scope": "devDependencies",
+              "is_runtime": false,
+              "is_optional": true,
+              "is_resolved": false,
+              "resolved_package": {},
+              "extra_data": {}
+            }
+          ],
+          "repository_homepage_url": "https://www.npmjs.com/package/glob",
+          "repository_download_url": "https://registry.npmjs.org/glob/-/glob-7.1.2.tgz",
+          "api_data_url": "https://registry.npmjs.org/glob/7.1.2",
+          "datasource_id": "npm_package_json",
+          "purl": "pkg:npm/glob@7.1.2"
+        }
+      ],
+      "for_packages": [
+        "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d"
+      ],
+      "is_legal": false,
+      "is_manifest": false,
+      "is_readme": false,
+      "is_top_level": false,
+      "is_key_file": false,
+      "detected_license_expression": "mit AND isc",
+      "detected_license_expression_spdx": "MIT AND ISC",
+      "license_detections": [
+        {
+          "license_expression": "mit AND isc",
+          "matches": [
+            {
+              "score": 71.25,
+              "start_line": 40,
+              "end_line": 42,
+              "matched_length": 3,
+              "match_coverage": 100,
+              "matcher": "2-aho",
+              "license_expression": "mit",
+              "rule_identifier": "mit_602.RULE",
+              "rule_relevance": 95,
+              "rule_url": "https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/mit_602.RULE",
+              "matched_text": "node [benchclean].js\"\n  },\n  \"license\": \""
+            },
+            {
+              "score": 100,
+              "start_line": 42,
+              "end_line": 42,
+              "matched_length": 2,
+              "match_coverage": 100,
+              "matcher": "2-aho",
+              "license_expression": "isc",
+              "rule_identifier": "isc_38.RULE",
+              "rule_relevance": 100,
+              "rule_url": "https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/isc_38.RULE",
+              "matched_text": "license\": \"ISC\""
+            }
+          ],
+          "identifier": "mit_and_isc-39fc4900-d3d1-3b03-adee-c12d89b75dd6"
+        }
+      ],
+      "license_clues": [],
+      "percentage_of_license_text": 3.05,
+      "copyrights": [],
+      "holders": [],
+      "authors": [
+        {
+          "author": "Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)",
+          "start_line": 2,
+          "end_line": 2
+        }
+      ],
+      "emails": [
+        {
+          "email": "i@izs.me",
+          "start_line": 2,
+          "end_line": 2
+        }
+      ],
+      "urls": [
+        {
+          "url": "http://blog.izs.me/",
+          "start_line": 2,
+          "end_line": 2
+        },
+        {
+          "url": "git://github.com/isaacs/node-glob.git",
+          "start_line": 8,
+          "end_line": 8
+        }
+      ],
+      "is_generated": false,
+      "files_count": 0,
+      "dirs_count": 0,
+      "size_count": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "package/README.md",
+      "type": "file",
+      "name": "README.md",
+      "base_name": "README",
+      "extension": ".md",
+      "size": 14664,
+      "date": "2016-09-20",
+      "sha1": "449f1592c9cf2d32a0d74bead66d7267218f2c4f",
+      "md5": "ebb6bd70ed9742c82792656adb349111",
+      "sha256": "1f0c4810b48885d093a9cf5390f7268bc9b3fc637362a355ed514c9711cc1999",
+      "mime_type": "text/plain",
+      "file_type": "ASCII text, with very long lines",
+      "programming_language": null,
+      "is_binary": false,
+      "is_text": true,
+      "is_archive": false,
+      "is_media": false,
+      "is_source": false,
+      "is_script": false,
+      "package_data": [],
+      "for_packages": [
+        "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d"
+      ],
+      "is_legal": false,
+      "is_manifest": false,
+      "is_readme": true,
+      "is_top_level": true,
+      "is_key_file": true,
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "copyrights": [],
+      "holders": [],
+      "authors": [],
+      "emails": [],
+      "urls": [
+        {
+          "url": "https://travis-ci.org/isaacs/node-glob.svg?branch=master",
+          "start_line": 5,
+          "end_line": 5
+        },
+        {
+          "url": "https://travis-ci.org/isaacs/node-glob",
+          "start_line": 5,
+          "end_line": 5
+        },
+        {
+          "url": "https://ci.appveyor.com/api/projects/status/kd7f3yftf7unxlsx?svg=true",
+          "start_line": 5,
+          "end_line": 5
+        },
+        {
+          "url": "https://ci.appveyor.com/project/isaacs/node-glob",
+          "start_line": 5,
+          "end_line": 5
+        },
+        {
+          "url": "https://coveralls.io/repos/isaacs/node-glob/badge.svg?branch=master&service=github",
+          "start_line": 5,
+          "end_line": 5
+        },
+        {
+          "url": "https://coveralls.io/github/isaacs/node-glob?branch=master",
+          "start_line": 5,
+          "end_line": 5
+        },
+        {
+          "url": "https://github.com/isaacs/minimatch",
+          "start_line": 100,
+          "end_line": 100
+        }
+      ],
+      "is_generated": false,
+      "files_count": 0,
+      "dirs_count": 0,
+      "size_count": 0,
+      "scan_errors": []
+    },
+    {
+      "path": "package/sync.js",
+      "type": "file",
+      "name": "sync.js",
+      "base_name": "sync",
+      "extension": ".js",
+      "size": 12002,
+      "date": "2016-10-07",
+      "sha1": "7482bc56682b97175655976b07044afcb65b0cc9",
+      "md5": "c29ff74e143a933770c75a66998fbeeb",
+      "sha256": "f04c04e9e40ea1ada97a1e414ad26d871faa0778e3b1fb0d5fc66ec6acbc243f",
+      "mime_type": "text/plain",
+      "file_type": "ASCII text",
+      "programming_language": "JavaScript",
+      "is_binary": false,
+      "is_text": true,
+      "is_archive": false,
+      "is_media": false,
+      "is_source": true,
+      "is_script": false,
+      "package_data": [],
+      "for_packages": [
+        "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d"
+      ],
+      "is_legal": false,
+      "is_manifest": false,
+      "is_readme": false,
+      "is_top_level": true,
+      "is_key_file": false,
+      "detected_license_expression": null,
+      "detected_license_expression_spdx": null,
+      "license_detections": [],
+      "license_clues": [],
+      "percentage_of_license_text": 0,
+      "copyrights": [],
+      "holders": [],
+      "authors": [],
+      "emails": [],
+      "urls": [
+        {
+          "url": "https://github.com/isaacs/node-glob/issues/167",
+          "start_line": 24,
+          "end_line": 24
+        },
+        {
+          "url": "https://github.com/isaacs/node-glob/issues/205",
+          "start_line": 319,
+          "end_line": 319
+        }
+      ],
+      "is_generated": false,
+      "files_count": 0,
+      "dirs_count": 0,
+      "size_count": 0,
+      "scan_errors": []
+    }
+  ]
+}
