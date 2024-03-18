@@ -6,7 +6,6 @@ const expect = chai.expect
 const proxyquire = require('proxyquire')
 const sinon = require('sinon')
 const sandbox = sinon.createSandbox()
-const fs = require('fs')
 const path = require('path')
 const { request } = require('../../../../ghcrawler')
 
@@ -90,7 +89,7 @@ describe('FSFE REUSE software process', () => {
         if (parameters.includes('--version')) {
           return callbackOrOptions(resultBox.versionError, { stdout: resultBox.versionResult })
         }
-        callback(resultBox.error, { stdout: fs.readFileSync(`${callbackOrOptions.cwd}/output.txt`).toString() })
+        callback(resultBox.error, {})
       }
     }
     const fsStub = { readdirSync: () => resultBox.licensesDirectory }
@@ -111,6 +110,7 @@ function setup(fixture, error, versionError) {
   Handler._resultBox.error = error
   Handler._resultBox.versionError = versionError
   const processor = Handler(options)
+  processor.createTempFile = sinon.stub().returns({ name: `test/fixtures/fsfeReuse/${fixture}/output.txt`})
   //processor.attachFiles = sinon.stub()
   return { request: testRequest, processor }
 }

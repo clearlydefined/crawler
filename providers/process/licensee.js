@@ -5,7 +5,7 @@ const AbstractProcessor = require('./abstractProcessor')
 const { promisify } = require('util')
 const execFile = promisify(require('child_process').execFile)
 const { flatten, merge, uniqBy } = require('lodash')
-const { trimAllParents } = require('../../lib/utils')
+const { trimAllParents, spawnPromisified } = require('../../lib/utils')
 const path = require('path')
 const throat = require('throat')
 
@@ -72,9 +72,7 @@ class LicenseeProcessor extends AbstractProcessor {
   // Licensee appears to only run on the give folder, not recursively
   async _runOnFolder(folder, root, parameters) {
     try {
-      const { stdout } = await execFile('licensee', ['detect', ...parameters, path.join(root, folder)], {
-        maxBuffer: 5 * 1024 * 1024
-      })
+      const stdout = await this._runLicensee(parameters, path.join(root, folder))
       if (!stdout.trim()) return
       const result = JSON.parse(stdout)
       result.matched_files.forEach(file => (file.filename = `${folder ? folder + '/' : ''}${file.filename}`))
@@ -86,6 +84,10 @@ class LicenseeProcessor extends AbstractProcessor {
       // handling of stdout
       if (error && error.code !== 1) throw error
     }
+  }
+
+  async _runLicensee(parameters, inputFolder) {
+    return await spawnPromisified('licensee', ['detect', ...parameters, inputFolder])
   }
 
   _detectVersion() {

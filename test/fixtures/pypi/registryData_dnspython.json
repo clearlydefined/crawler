@@ -1,0 +1,654 @@
+{
+  "info": {
+    "author": "Bob Halley",
+    "author_email": "halley@dnspython.org",
+    "bugtrack_url": null,
+    "classifiers": [
+      "License :: OSI Approved",
+      "Programming Language :: Python :: 3",
+      "Programming Language :: Python :: 3.6",
+      "Programming Language :: Python :: 3.7",
+      "Programming Language :: Python :: 3.8",
+      "Programming Language :: Python :: 3.9",
+      "Programming Language :: Python :: 3.10"
+    ],
+    "description": "# dnspython\n\n[![Build Status](https://github.com/rthalley/dnspython/actions/workflows/python-package.yml/badge.svg)](https://github.com/rthalley/dnspython/actions/)\n[![Documentation Status](https://readthedocs.org/projects/dnspython/badge/?version=latest)](https://dnspython.readthedocs.io/en/latest/?badge=latest)\n[![PyPI version](https://badge.fury.io/py/dnspython.svg)](https://badge.fury.io/py/dnspython)\n[![License: ISC](https://img.shields.io/badge/License-ISC-brightgreen.svg)](https://opensource.org/licenses/ISC)\n\n## INTRODUCTION\n\ndnspython is a DNS toolkit for Python. It supports almost all record types. It\ncan be used for queries, zone transfers, and dynamic updates. It supports TSIG\nauthenticated messages and EDNS0.\n\ndnspython provides both high and low level access to DNS. The high level classes\nperform queries for data of a given name, type, and class, and return an answer\nset. The low level classes allow direct manipulation of DNS zones, messages,\nnames, and records.\n\nTo see a few of the ways dnspython can be used, look in the `examples/`\ndirectory.\n\ndnspython is a utility to work with DNS, `/etc/hosts` is thus not used. For\nsimple forward DNS lookups, it's better to use `socket.getaddrinfo()` or\n`socket.gethostbyname()`.\n\ndnspython originated at Nominum where it was developed\nto facilitate the testing of DNS software.\n\n## ABOUT THIS RELEASE\n\nThis is dnspython 2.2.1\nPlease read\n[What's New](https://dnspython.readthedocs.io/en/stable/whatsnew.html) for\ninformation about the changes in this release.\n\n## INSTALLATION\n\n* Many distributions have dnspython packaged for you, so you should\n  check there first.\n* If you have pip installed, you can do `pip install dnspython`\n* If not just download the source file and unzip it, then run\n  `sudo python setup.py install`\n* To install the latest from the master branch, run `pip install git+https://github.com/rthalley/dnspython.git`\n\nDnspython's default installation does not depend on any modules other than\nthose in the Python standard library.  To use some features, additional modules\nmust be installed.  For convenience, pip options are defined for the requirements.\n\nIf you want to use DNS-over-HTTPS, run\n`pip install dnspython[doh]`.\n\nIf you want to use DNSSEC functionality, run\n`pip install dnspython[dnssec]`.\n\nIf you want to use internationalized domain names (IDNA)\nfunctionality, you must run\n`pip install dnspython[idna]`\n\nIf you want to use the Trio asynchronous I/O package, run\n`pip install dnspython[trio]`.\n\nIf you want to use the Curio asynchronous I/O package, run\n`pip install dnspython[curio]`.\n\nIf you want to use WMI on Windows to determine the active DNS settings\ninstead of the default registry scanning method, run\n`pip install dnspython[wmi]`.\n\nNote that you can install any combination of the above, e.g.:\n`pip install dnspython[doh,dnssec,idna]`\n\n### Notices\n\nPython 2.x support ended with the release of 1.16.0.  Dnspython 2.0.0 through\n2.2.x support Python 3.6 and later.  As of dnspython 2.3.0, the minimum\nsupported Python version will be 3.7.  We plan to align future support with the\nlifetime of the Python 3 versions.\n\nDocumentation has moved to\n[dnspython.readthedocs.io](https://dnspython.readthedocs.io).\n\nThe ChangeLog has been discontinued.  Please see the github project page\nand git history for detailed change information.\n\n",
+    "description_content_type": "text/markdown",
+    "docs_url": null,
+    "download_url": "",
+    "downloads": {
+      "last_day": -1,
+      "last_month": -1,
+      "last_week": -1
+    },
+    "home_page": "https://www.dnspython.org",
+    "keywords": "",
+    "license": "ISC",
+    "maintainer": "",
+    "maintainer_email": "",
+    "name": "dnspython",
+    "package_url": "https://pypi.org/project/dnspython/",
+    "platform": "",
+    "project_url": "https://pypi.org/project/dnspython/",
+    "project_urls": {
+      "Bug Tracker": "https://github.com/rthalley/dnspython/issues",
+      "Documentation": "https://dnspython.readthedocs.io/en/stable/",
+      "Homepage": "https://www.dnspython.org",
+      "Repository": "https://github.com/rthalley/dnspython.git"
+    },
+    "release_url": "https://pypi.org/project/dnspython/2.2.1/",
+    "requires_dist": [
+      "cryptography (>=2.6,<37.0); extra == \"dnssec\"",
+      "curio (>=1.2,<2.0); extra == \"curio\"",
+      "h2 (>=4.1.0); (python_full_version >= \"3.6.2\") and (extra == \"doh\")",
+      "httpx (>=0.21.1); (python_full_version >= \"3.6.2\") and (extra == \"doh\")",
+      "idna (>=2.1,<4.0); extra == \"idna\"",
+      "requests (>=2.23.0,<3.0.0); extra == \"doh\"",
+      "requests-toolbelt (>=0.9.1,<0.10.0); extra == \"doh\"",
+      "sniffio (>=1.1,<2.0); extra == \"curio\"",
+      "trio (>=0.14,<0.20); extra == \"trio\"",
+      "wmi (>=1.5.1,<2.0.0); extra == \"wmi\""
+    ],
+    "requires_python": ">=3.6,<4.0",
+    "summary": "DNS toolkit",
+    "version": "2.2.1",
+    "yanked": false,
+    "yanked_reason": null
+  },
+  "last_serial": 13095960,
+  "releases": {
+    "1.0.0": [],
+    "1.1.0": [],
+    "1.10.0": [],
+    "1.11.0": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "958a1a4e57cb30f6875cfea8724878e4",
+          "sha256": "6da2692a9fee03e5117309f511a39869d27d8a79f825d2515523300de14188d9"
+        },
+        "downloads": -1,
+        "filename": "dnspython-1.11.0.zip",
+        "has_sig": false,
+        "md5_digest": "958a1a4e57cb30f6875cfea8724878e4",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 220451,
+        "upload_time": "2013-07-22T12:13:40",
+        "upload_time_iso_8601": "2013-07-22T12:13:40.098223Z",
+        "url": "https://files.pythonhosted.org/packages/47/44/cfc70cf7ba3e79abb7aff1004165ef8aac5cae393203b033df1be991bd61/dnspython-1.11.0.zip",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "1.11.1": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "5829130ed557d6f2e1c3ca9ed01d337a",
+          "sha256": "fd0fc7a656679a6fd1f83d980fc05776c76e70d66f6ee2aab12a3558fa10a206"
+        },
+        "downloads": -1,
+        "filename": "dnspython-1.11.1.zip",
+        "has_sig": false,
+        "md5_digest": "5829130ed557d6f2e1c3ca9ed01d337a",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 220946,
+        "upload_time": "2013-09-02T19:43:00",
+        "upload_time_iso_8601": "2013-09-02T19:43:00.342062Z",
+        "url": "https://files.pythonhosted.org/packages/f1/19/68f9cd953a45e120e75f8352d0ce1d5019e503725d89679072bbcad5f8df/dnspython-1.11.1.zip",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "1.12.0": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "bcfab8f4f4a2280f875e646502b23e66",
+          "sha256": "63bd1fae61809eedb91f84b2185816fac1270ae51494fbdd36ea25f904a8502f"
+        },
+        "downloads": -1,
+        "filename": "dnspython-1.12.0.zip",
+        "has_sig": false,
+        "md5_digest": "bcfab8f4f4a2280f875e646502b23e66",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 230499,
+        "upload_time": "2014-09-01T15:30:58",
+        "upload_time_iso_8601": "2014-09-01T15:30:58.532198Z",
+        "url": "https://files.pythonhosted.org/packages/b3/e3/091c6489f0b573b8a4069ce956d037061ae9321401c89323386fe748dc9f/dnspython-1.12.0.zip",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "1.13.0": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "37ca7a0c7027ca77c5bc1a134245b260",
+          "sha256": "80f89881b402fc3b931a936111b43bcfe3abd8b0005d27e50e3c5fb59f7260f8"
+        },
+        "downloads": -1,
+        "filename": "dnspython-1.13.0.zip",
+        "has_sig": false,
+        "md5_digest": "37ca7a0c7027ca77c5bc1a134245b260",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 241873,
+        "upload_time": "2016-05-10T18:34:36",
+        "upload_time_iso_8601": "2016-05-10T18:34:36.615759Z",
+        "url": "https://files.pythonhosted.org/packages/dd/18/f3e269b1227e0efeba7bdd9db83fe7af1702cde053b03c504a148c34d19e/dnspython-1.13.0.zip",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "1.14.0": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "577f6b60b185d1ac90d76e9364a543d4",
+          "sha256": "21458b942637578f238c7029dc0512c75e61ef64ee0de82a62d175e89d2131dc"
+        },
+        "downloads": -1,
+        "filename": "dnspython-1.14.0.zip",
+        "has_sig": false,
+        "md5_digest": "577f6b60b185d1ac90d76e9364a543d4",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 251494,
+        "upload_time": "2016-05-27T18:26:31",
+        "upload_time_iso_8601": "2016-05-27T18:26:31.865004Z",
+        "url": "https://files.pythonhosted.org/packages/e1/ab/36f4e337d6cf6590f9cf46349f519b682542d211c604755ab8409f67f26b/dnspython-1.14.0.zip",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "1.15.0": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "4935606f3d2e5cd9f3e78f9ebc2e73a3",
+          "sha256": "861e6e58faa730f9845aaaa9c6c832851fbf89382ac52915a51f89c71accdd31"
+        },
+        "downloads": -1,
+        "filename": "dnspython-1.15.0-py2.py3-none-any.whl",
+        "has_sig": false,
+        "md5_digest": "4935606f3d2e5cd9f3e78f9ebc2e73a3",
+        "packagetype": "bdist_wheel",
+        "python_version": "any",
+        "requires_python": null,
+        "size": 177440,
+        "upload_time": "2016-10-08T23:44:34",
+        "upload_time_iso_8601": "2016-10-08T23:44:34.823836Z",
+        "url": "https://files.pythonhosted.org/packages/a6/72/209e18bdfedfd78c6994e9ec96981624a5ad7738524dd474237268422cb8/dnspython-1.15.0-py2.py3-none-any.whl",
+        "yanked": false,
+        "yanked_reason": null
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "05d33ffb5d8f35ae0474bb952778a344",
+          "sha256": "40f563e1f7a7b80dc5a4e76ad75c23da53d62f1e15e6e517293b04e1f84ead7c"
+        },
+        "downloads": -1,
+        "filename": "dnspython-1.15.0.zip",
+        "has_sig": false,
+        "md5_digest": "05d33ffb5d8f35ae0474bb952778a344",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": null,
+        "size": 252157,
+        "upload_time": "2016-09-30T15:36:54",
+        "upload_time_iso_8601": "2016-09-30T15:36:54.195688Z",
+        "url": "https://files.pythonhosted.org/packages/e4/96/a598fa35f8a625bc39fed50cdbe3fd8a52ef215ef8475c17cabade6656cb/dnspython-1.15.0.zip",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "1.16.0": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "df15dc9e08eddf76c183fe565f81fa9c",
+          "sha256": "f69c21288a962f4da86e56c4905b49d11aba7938d3d740e80d9e366ee4f1632d"
+        },
+        "downloads": -1,
+        "filename": "dnspython-1.16.0-py2.py3-none-any.whl",
+        "has_sig": true,
+        "md5_digest": "df15dc9e08eddf76c183fe565f81fa9c",
+        "packagetype": "bdist_wheel",
+        "python_version": "py2.py3",
+        "requires_python": ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*",
+        "size": 188353,
+        "upload_time": "2018-12-08T19:52:32",
+        "upload_time_iso_8601": "2018-12-08T19:52:32.154700Z",
+        "url": "https://files.pythonhosted.org/packages/ec/d3/3aa0e7213ef72b8585747aa0e271a9523e713813b9a20177ebe1e939deb0/dnspython-1.16.0-py2.py3-none-any.whl",
+        "yanked": false,
+        "yanked_reason": null
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "bc9ca3b3a82164667d5730ec6d5248a2",
+          "sha256": "36c5e8e38d4369a08b6780b7f27d790a292b2b08eea01607865bf0936c558e01"
+        },
+        "downloads": -1,
+        "filename": "dnspython-1.16.0.zip",
+        "has_sig": true,
+        "md5_digest": "bc9ca3b3a82164667d5730ec6d5248a2",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*",
+        "size": 266364,
+        "upload_time": "2018-12-08T19:54:12",
+        "upload_time_iso_8601": "2018-12-08T19:54:12.883296Z",
+        "url": "https://files.pythonhosted.org/packages/ec/c5/14bcd63cb6d06092a004793399ec395405edf97c2301dfdc146dfbd5beed/dnspython-1.16.0.zip",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "1.2.0": [],
+    "1.3.0": [],
+    "1.3.1": [],
+    "1.3.2": [],
+    "1.3.3": [],
+    "1.3.4": [],
+    "1.3.5": [],
+    "1.4.0": [],
+    "1.5.0": [],
+    "1.6.0": [],
+    "1.7.1": [],
+    "1.8.0": [],
+    "1.9.0": [],
+    "1.9.1": [],
+    "1.9.2": [],
+    "1.9.3": [],
+    "1.9.4": [],
+    "2.0.0": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "eeff47259f60783cb12c9a852c445eba",
+          "sha256": "40bb3c24b9d4ec12500f0124288a65df232a3aa749bb0c39734b782873a2544d"
+        },
+        "downloads": -1,
+        "filename": "dnspython-2.0.0-py3-none-any.whl",
+        "has_sig": true,
+        "md5_digest": "eeff47259f60783cb12c9a852c445eba",
+        "packagetype": "bdist_wheel",
+        "python_version": "py3",
+        "requires_python": ">=3.6",
+        "size": 208262,
+        "upload_time": "2020-07-17T13:35:48",
+        "upload_time_iso_8601": "2020-07-17T13:35:48.109268Z",
+        "url": "https://files.pythonhosted.org/packages/90/49/cb426577c28ca3e35332815b795a99e467523843fc83cc85ca0d6be2515a/dnspython-2.0.0-py3-none-any.whl",
+        "yanked": false,
+        "yanked_reason": null
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "42f922c9223dde0275e8c0695ead37da",
+          "sha256": "044af09374469c3a39eeea1a146e8cac27daec951f1f1f157b1962fc7cb9d1b7"
+        },
+        "downloads": -1,
+        "filename": "dnspython-2.0.0.zip",
+        "has_sig": true,
+        "md5_digest": "42f922c9223dde0275e8c0695ead37da",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": ">=3.6",
+        "size": 324706,
+        "upload_time": "2020-07-17T13:35:49",
+        "upload_time_iso_8601": "2020-07-17T13:35:49.597579Z",
+        "url": "https://files.pythonhosted.org/packages/67/d0/639a9b5273103a18c5c68a7a9fc02b01cffa3403e72d553acec444f85d5b/dnspython-2.0.0.zip",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "2.0.0rc1": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "19c6d52509296eba69ece7d4a6b77285",
+          "sha256": "25007cc5fd287575970d729fe354f7ec4d79aeb13289d8198b36c46f9506a921"
+        },
+        "downloads": -1,
+        "filename": "dnspython-2.0.0rc1-py3-none-any.whl",
+        "has_sig": true,
+        "md5_digest": "19c6d52509296eba69ece7d4a6b77285",
+        "packagetype": "bdist_wheel",
+        "python_version": "py3",
+        "requires_python": ">=3.6",
+        "size": 205004,
+        "upload_time": "2020-06-20T20:25:52",
+        "upload_time_iso_8601": "2020-06-20T20:25:52.088137Z",
+        "url": "https://files.pythonhosted.org/packages/ea/40/61060ed9ceac46ba45f7619df79813e77d797077b092df3a7a78a1d5841b/dnspython-2.0.0rc1-py3-none-any.whl",
+        "yanked": false,
+        "yanked_reason": null
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "69db8d2c260f0a66b642594d4f4130b7",
+          "sha256": "593cf321a2bf099e760285136fc5cd7ddd85aaea7141dfe19e824897ebb90a02"
+        },
+        "downloads": -1,
+        "filename": "dnspython-2.0.0rc1.zip",
+        "has_sig": true,
+        "md5_digest": "69db8d2c260f0a66b642594d4f4130b7",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": ">=3.6",
+        "size": 312645,
+        "upload_time": "2020-06-20T20:25:53",
+        "upload_time_iso_8601": "2020-06-20T20:25:53.592761Z",
+        "url": "https://files.pythonhosted.org/packages/c5/84/adfbcc4d643d210a9fa21ef3c1dce7c3a3503e4d3cd411d56a1f0bdab8db/dnspython-2.0.0rc1.zip",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "2.0.0rc2": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "8b65b3ad4d18187d403b69ac03763e18",
+          "sha256": "c3505b9b39a269def5fd47d5f85e3cb2dd2e55f95afcf3bb43c56e03e155ee4a"
+        },
+        "downloads": -1,
+        "filename": "dnspython-2.0.0rc2-py3-none-any.whl",
+        "has_sig": true,
+        "md5_digest": "8b65b3ad4d18187d403b69ac03763e18",
+        "packagetype": "bdist_wheel",
+        "python_version": "py3",
+        "requires_python": ">=3.6",
+        "size": 207804,
+        "upload_time": "2020-07-04T17:12:11",
+        "upload_time_iso_8601": "2020-07-04T17:12:11.823370Z",
+        "url": "https://files.pythonhosted.org/packages/5f/f2/96a0418ab2df409f6297dc85f12ebd0011ffed0d3deb21e6d5441f15a656/dnspython-2.0.0rc2-py3-none-any.whl",
+        "yanked": false,
+        "yanked_reason": null
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "a93ee64f3b25544d811c8b0195269ae4",
+          "sha256": "add7c6a4cbce1732250e1aee8ca1dea3d971e5c8586d6bd6ef528270edb407c0"
+        },
+        "downloads": -1,
+        "filename": "dnspython-2.0.0rc2.zip",
+        "has_sig": true,
+        "md5_digest": "a93ee64f3b25544d811c8b0195269ae4",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": ">=3.6",
+        "size": 322786,
+        "upload_time": "2020-07-04T17:12:13",
+        "upload_time_iso_8601": "2020-07-04T17:12:13.339221Z",
+        "url": "https://files.pythonhosted.org/packages/73/21/b117c27f7d8db40c82199c65561ecd08f2acefd6aab97ace19e959ba024a/dnspython-2.0.0rc2.zip",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "2.1.0": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "db0ee50c7bce99c7b0d04a491b559117",
+          "sha256": "95d12f6ef0317118d2a1a6fc49aac65ffec7eb8087474158f42f26a639135216"
+        },
+        "downloads": -1,
+        "filename": "dnspython-2.1.0-py3-none-any.whl",
+        "has_sig": true,
+        "md5_digest": "db0ee50c7bce99c7b0d04a491b559117",
+        "packagetype": "bdist_wheel",
+        "python_version": "py3",
+        "requires_python": ">=3.6",
+        "size": 241997,
+        "upload_time": "2021-01-07T17:23:58",
+        "upload_time_iso_8601": "2021-01-07T17:23:58.136151Z",
+        "url": "https://files.pythonhosted.org/packages/f5/2d/ae9e172b4e5e72fa4b3cfc2517f38b602cc9ba31355f9669c502b4e9c458/dnspython-2.1.0-py3-none-any.whl",
+        "yanked": false,
+        "yanked_reason": null
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "8a362d7b2358be3117683e2dbf9654fc",
+          "sha256": "e4a87f0b573201a0f3727fa18a516b055fd1107e0e5477cded4a2de497df1dd4"
+        },
+        "downloads": -1,
+        "filename": "dnspython-2.1.0.zip",
+        "has_sig": true,
+        "md5_digest": "8a362d7b2358be3117683e2dbf9654fc",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": ">=3.6",
+        "size": 389021,
+        "upload_time": "2021-01-07T17:23:59",
+        "upload_time_iso_8601": "2021-01-07T17:23:59.941247Z",
+        "url": "https://files.pythonhosted.org/packages/13/27/5277de856f605f3429d752a39af3588e29d10181a3aa2e2ee471d817485a/dnspython-2.1.0.zip",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "2.1.0rc1": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "d5aa6ef97b6bde48b7751a4a3c88381e",
+          "sha256": "e322a013ff2f920879c16e3b271a2d2b9508e2b5742fc606bc1bbe62995f487e"
+        },
+        "downloads": -1,
+        "filename": "dnspython-2.1.0rc1-py3-none-any.whl",
+        "has_sig": true,
+        "md5_digest": "d5aa6ef97b6bde48b7751a4a3c88381e",
+        "packagetype": "bdist_wheel",
+        "python_version": "py3",
+        "requires_python": ">=3.6",
+        "size": 241618,
+        "upload_time": "2020-10-30T16:32:20",
+        "upload_time_iso_8601": "2020-10-30T16:32:20.240144Z",
+        "url": "https://files.pythonhosted.org/packages/4a/6e/13b3a8e3f9b7b64ac215f1e521dae9c0fe370d243cfabf0a5d4a5e18ac83/dnspython-2.1.0rc1-py3-none-any.whl",
+        "yanked": false,
+        "yanked_reason": null
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "b71c504a799976ce2b488bce036636f6",
+          "sha256": "864cfddb6416fe1ac72a09b33a114cb0d6b1589be439e6a5e5fd0912748cf847"
+        },
+        "downloads": -1,
+        "filename": "dnspython-2.1.0rc1.zip",
+        "has_sig": true,
+        "md5_digest": "b71c504a799976ce2b488bce036636f6",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": ">=3.6",
+        "size": 388849,
+        "upload_time": "2020-10-30T16:32:24",
+        "upload_time_iso_8601": "2020-10-30T16:32:24.035681Z",
+        "url": "https://files.pythonhosted.org/packages/76/7c/ce8a1d3bb58f8eaf987cac8b5005a51920b1babf422f23073ec372c4e6dd/dnspython-2.1.0rc1.zip",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "2.2.0": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "c3f4099de26df98fcac2f16e71c72fd6",
+          "sha256": "081649da27ced5e75709a1ee542136eaba9842a0fe4c03da4fb0a3d3ed1f3c44"
+        },
+        "downloads": -1,
+        "filename": "dnspython-2.2.0-py3-none-any.whl",
+        "has_sig": false,
+        "md5_digest": "c3f4099de26df98fcac2f16e71c72fd6",
+        "packagetype": "bdist_wheel",
+        "python_version": "py3",
+        "requires_python": ">=3.6,<4.0",
+        "size": 266974,
+        "upload_time": "2022-01-18T13:43:15",
+        "upload_time_iso_8601": "2022-01-18T13:43:15.085179Z",
+        "url": "https://files.pythonhosted.org/packages/90/ad/013786c1a6ffa9de70bcd852c8a40e8798e25d823ce8497d907e6cd450da/dnspython-2.2.0-py3-none-any.whl",
+        "yanked": false,
+        "yanked_reason": null
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "6a247a755f7676f115c0e555842550d5",
+          "sha256": "e79351e032d0b606b98d38a4b0e6e2275b31a5b85c873e587cc11b73aca026d6"
+        },
+        "downloads": -1,
+        "filename": "dnspython-2.2.0.tar.gz",
+        "has_sig": false,
+        "md5_digest": "6a247a755f7676f115c0e555842550d5",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": ">=3.6,<4.0",
+        "size": 278858,
+        "upload_time": "2022-01-18T13:43:16",
+        "upload_time_iso_8601": "2022-01-18T13:43:16.452492Z",
+        "url": "https://files.pythonhosted.org/packages/84/f4/84eca79c279640671b8b7086ef1b97268c2b7ba17f7cfe0a19b466a6f95c/dnspython-2.2.0.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "2.2.0rc1": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "2015a178b0882b45f1428602d777baa2",
+          "sha256": "84656be4dc8379066be55c594622e82250874f9bccc9993f73cf9df72fc4cffc"
+        },
+        "downloads": -1,
+        "filename": "dnspython-2.2.0rc1-py3-none-any.whl",
+        "has_sig": false,
+        "md5_digest": "2015a178b0882b45f1428602d777baa2",
+        "packagetype": "bdist_wheel",
+        "python_version": "py3",
+        "requires_python": ">=3.6,<4.0",
+        "size": 267008,
+        "upload_time": "2021-12-21T16:09:45",
+        "upload_time_iso_8601": "2021-12-21T16:09:45.204892Z",
+        "url": "https://files.pythonhosted.org/packages/1d/fb/0fef49274ca29116f447b477140319dfe6fc8c5f91105d1c916b7af280a5/dnspython-2.2.0rc1-py3-none-any.whl",
+        "yanked": false,
+        "yanked_reason": null
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "d327d51f27af30a8f0b0f72f74f45a89",
+          "sha256": "258d7ea3c86c8cea20705e904764fef5e93837c07d1499a13154e9ba0a93b420"
+        },
+        "downloads": -1,
+        "filename": "dnspython-2.2.0rc1.tar.gz",
+        "has_sig": false,
+        "md5_digest": "d327d51f27af30a8f0b0f72f74f45a89",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": ">=3.6,<4.0",
+        "size": 278857,
+        "upload_time": "2021-12-21T16:09:47",
+        "upload_time_iso_8601": "2021-12-21T16:09:47.119557Z",
+        "url": "https://files.pythonhosted.org/packages/a8/f0/fb8142ade51e79343b7a1ad023c47586ca08210951fc79a892ab2a25dc71/dnspython-2.2.0rc1.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ],
+    "2.2.1": [
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "41353f4e58f1021c4fe469d901fd3f7d",
+          "sha256": "a851e51367fb93e9e1361732c1d60dab63eff98712e503ea7d92e6eccb109b4f"
+        },
+        "downloads": -1,
+        "filename": "dnspython-2.2.1-py3-none-any.whl",
+        "has_sig": false,
+        "md5_digest": "41353f4e58f1021c4fe469d901fd3f7d",
+        "packagetype": "bdist_wheel",
+        "python_version": "py3",
+        "requires_python": ">=3.6,<4.0",
+        "size": 269084,
+        "upload_time": "2022-03-06T23:36:12",
+        "upload_time_iso_8601": "2022-03-06T23:36:12.209793Z",
+        "url": "https://files.pythonhosted.org/packages/9b/ed/28fb14146c7033ba0e89decd92a4fa16b0b69b84471e2deab3cc4337cc35/dnspython-2.2.1-py3-none-any.whl",
+        "yanked": false,
+        "yanked_reason": null
+      },
+      {
+        "comment_text": "",
+        "digests": {
+          "md5": "c7172f4115cd7b60fd5037cfcd8f9408",
+          "sha256": "0f7569a4a6ff151958b64304071d370daa3243d15941a7beedf0c9fe5105603e"
+        },
+        "downloads": -1,
+        "filename": "dnspython-2.2.1.tar.gz",
+        "has_sig": false,
+        "md5_digest": "c7172f4115cd7b60fd5037cfcd8f9408",
+        "packagetype": "sdist",
+        "python_version": "source",
+        "requires_python": ">=3.6,<4.0",
+        "size": 281325,
+        "upload_time": "2022-03-06T23:36:14",
+        "upload_time_iso_8601": "2022-03-06T23:36:14.394399Z",
+        "url": "https://files.pythonhosted.org/packages/99/fb/e7cd35bba24295ad41abfdff30f6b4c271fd6ac70d20132fa503c3e768e0/dnspython-2.2.1.tar.gz",
+        "yanked": false,
+        "yanked_reason": null
+      }
+    ]
+  },
+  "urls": [
+    {
+      "comment_text": "",
+      "digests": {
+        "md5": "41353f4e58f1021c4fe469d901fd3f7d",
+        "sha256": "a851e51367fb93e9e1361732c1d60dab63eff98712e503ea7d92e6eccb109b4f"
+      },
+      "downloads": -1,
+      "filename": "dnspython-2.2.1-py3-none-any.whl",
+      "has_sig": false,
+      "md5_digest": "41353f4e58f1021c4fe469d901fd3f7d",
+      "packagetype": "bdist_wheel",
+      "python_version": "py3",
+      "requires_python": ">=3.6,<4.0",
+      "size": 269084,
+      "upload_time": "2022-03-06T23:36:12",
+      "upload_time_iso_8601": "2022-03-06T23:36:12.209793Z",
+      "url": "https://files.pythonhosted.org/packages/9b/ed/28fb14146c7033ba0e89decd92a4fa16b0b69b84471e2deab3cc4337cc35/dnspython-2.2.1-py3-none-any.whl",
+      "yanked": false,
+      "yanked_reason": null
+    },
+    {
+      "comment_text": "",
+      "digests": {
+        "md5": "c7172f4115cd7b60fd5037cfcd8f9408",
+        "sha256": "0f7569a4a6ff151958b64304071d370daa3243d15941a7beedf0c9fe5105603e"
+      },
+      "downloads": -1,
+      "filename": "dnspython-2.2.1.tar.gz",
+      "has_sig": false,
+      "md5_digest": "c7172f4115cd7b60fd5037cfcd8f9408",
+      "packagetype": "sdist",
+      "python_version": "source",
+      "requires_python": ">=3.6,<4.0",
+      "size": 281325,
+      "upload_time": "2022-03-06T23:36:14",
+      "upload_time_iso_8601": "2022-03-06T23:36:14.394399Z",
+      "url": "https://files.pythonhosted.org/packages/99/fb/e7cd35bba24295ad41abfdff30f6b4c271fd6ac70d20132fa503c3e768e0/dnspython-2.2.1.tar.gz",
+      "yanked": false,
+      "yanked_reason": null
+    }
+  ],
+  "vulnerabilities": []
+}

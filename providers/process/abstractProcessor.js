@@ -6,11 +6,11 @@ const EntitySpec = require('../../lib/entitySpec')
 const fs = require('fs')
 const path = require('path')
 const shajs = require('sha.js')
-const { clone, flatten, intersection, pick, set } = require('lodash')
+const { clone, flatten, pick, set } = require('lodash')
 const { promisify } = require('util')
 const readdir = promisify(fs.readdir)
 const lstat = promisify(fs.lstat)
-const { trimAllParents } = require('../../lib/utils')
+const { trimAllParents, isGitFile } = require('../../lib/utils')
 
 class AbstractProcessor extends BaseHandler {
   constructor(options) {
@@ -150,12 +150,7 @@ class AbstractProcessor extends BaseHandler {
    */
   async filterFiles(location) {
     const fullList = await this.getFiles(location)
-    const exclusions = ['.git']
-    const filteredList = fullList.filter(file => {
-      if (!file) return false
-      const segments = file.split(/[\\/]/g)
-      return !intersection(segments, exclusions).length
-    })
+    const filteredList = fullList.filter(file => file && !isGitFile(file))
     return trimAllParents(filteredList, location).filter(x => x)
   }
 

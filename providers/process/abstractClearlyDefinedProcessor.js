@@ -6,7 +6,7 @@ const throat = require('throat')
 const path = require('path')
 const { pick, merge } = require('lodash')
 const du = require('du')
-const { trimParents } = require('../../lib/utils')
+const { trimParents, isGitFile } = require('../../lib/utils')
 
 class AbstractClearlyDefinedProcessor extends AbstractProcessor {
   get toolVersion() {
@@ -75,7 +75,7 @@ class AbstractClearlyDefinedProcessor extends AbstractProcessor {
     let count = 0
     const bytes = await du(location, {
       filter: file => {
-        if (path.basename(file) === '.git') return false
+        if (isGitFile(file)) return false
         count++
         return true
       }
