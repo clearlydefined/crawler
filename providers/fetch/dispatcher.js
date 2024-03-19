@@ -56,7 +56,9 @@ class FetchDispatcher extends AbstractFetch {
     if (!force && this.filter && !this.filter.shouldFetch(request)) return request
     // get the right real fetcher for this request and dispatch
     const handler = this._getHandler(request, this.fetchers)
-    if (!handler) throw new Error(`No fetcher found for ${request.toString()}`)
+    if (!handler) {
+      throw new Error(`No fetcher found for ${request.toString()}`)
+    }
 
     await this._fetchResult(request, handler)
     return request

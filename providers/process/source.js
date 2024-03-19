@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractProcessor = require('./abstractProcessor')
-const supportedTypes = ['git', 'sourcearchive', 'debsrc']
+const supportedTypes = ['git', 'sourcearchive', 'debsrc', 'condasrc']
 
 class SourceProcessor extends AbstractProcessor {
   shouldFetch() {

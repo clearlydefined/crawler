@@ -1,0 +1,38 @@
+{
+  "channeldata_version": 1,
+  "packages": {
+    "21cmfast": {
+      "activate.d": false,
+      "binary_prefix": true,
+      "deactivate.d": false,
+      "description": "21cmFAST provides a simple and fast simulation package for the cosmological 21cm signal as either coeval cubes or full lightcones.",
+      "dev_url": "https://github.com/21cmFAST/21cmFAST",
+      "doc_url": "https://21cmFAST.readthedocs.io/",
+      "home": "https://github.com/21cmFAST/21cmFAST",
+      "license": "MIT",
+      "post_link": false,
+      "pre_link": false,
+      "pre_unlink": false,
+      "run_exports": {},
+      "source_url": "https://pypi.io/packages/source/2/21cmFAST/21cmFAST-3.3.1.tar.gz",
+      "subdirs": ["linux-64", "osx-64"],
+      "summary": "A semi-numerical cosmological simulation code for the 21cm signal",
+      "text_prefix": true,
+      "timestamp": 1651260314,
+      "version": "3.3.1"
+    },
+    "21cmfast_invalid": {
+      "activate.d": false,
+      "binary_prefix": true,
+      "deactivate.d": false,
+      "post_link": false,
+      "pre_link": false,
+      "pre_unlink": false,
+      "run_exports": {},
+      "subdirs": ["linux-64", "osx-64"],
+      "text_prefix": true,
+      "timestamp": 1651260314,
+      "version": "3.3.1"
+    }
+  }
+}
