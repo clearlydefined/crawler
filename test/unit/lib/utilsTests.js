@@ -1,8 +1,13 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const expect = require('chai').expect
-const { normalizePath, normalizePaths, trimParents, trimAllParents, extractDate } = require('../../../lib/utils')
+const chai = require('chai')
+const chaiAsPromised = require('chai-as-promised')
+const { normalizePath, normalizePaths, trimParents, trimAllParents, extractDate, spawnPromisified, isGitFile } = require('../../../lib/utils')
+const { promisify } = require('util')
+const execFile = promisify(require('child_process').execFile)
+chai.use(chaiAsPromised)
+const expect = chai.expect
 
 describe('Utils path functions', () => {
   it('normalizes one path', () => {
@@ -51,6 +56,22 @@ describe('Utils path functions', () => {
   })
 })
 
+describe('Util isGitFile', () => {
+  const entries = new Map([
+    [null, false],
+    ['/', false],
+    ['/tmp/tempX/package/src', false],
+    ['.git', true],
+    ['/tmp/tempX/package/.git', true],
+    ['/tmp/tempX/package/.git/hooks/pre-merge-commit.sample', true]
+  ])
+
+  entries.forEach((expected, file) => {
+    it(`should return ${expected} for isGitFile given '${file}'`, () => expect(isGitFile(file)).to.eq(expected))
+  })
+
+})
+
 describe('Util extractDate', () => {
   it('handle null', () => {
     expect(extractDate(null)).to.be.null
@@ -82,3 +103,46 @@ describe('Util extractDate', () => {
     expect(parsed).not.to.be.ok
   })
 })
+
+describe('test spawnPromisified ', () => {
+
+  it('should handle spawn + command successfully', async () => {
+    const { stdout: expected} = await execFile('ls', ['-l'])
+    const actual = await spawnPromisified('ls', ['-l'])
+    expect(actual).to.be.equal(expected)
+  })
+
+  it('should throw for spawn success + command failure', async () => {
+    const expectedError = await getError(execFile('cat', ['t.txt']))
+    const actualError = await getError(spawnPromisified('cat', ['t.txt']))
+    expect(expectedError.code).to.be.equal(actualError.code)
+    expect(expectedError.message).to.include(actualError.message)
+  })
+
+  it('should throw for spawn failure', async () => {
+    const expectedError = await getError(execFile('f', ['t.txt']))
+    const actualError = await getError(spawnPromisified('f', ['t.txt']))
+    expect(expectedError.code).to.be.equal(actualError.code)
+    expect(expectedError.message).to.be.equal(actualError.message)
+  })
+
+  it('should handle output more than 5MB', async () => {
+    const largeFile = 'test/fixtures/debian/0ad_0.0.17-1_armhf.deb'
+    const execFilePromise = execFile('cat', [largeFile, largeFile], {
+      maxBuffer: 5 * 1024 * 1024
+    })
+    await expect(execFilePromise).to.be.rejectedWith('stdout maxBuffer length exceeded')
+
+    const output = await spawnPromisified('cat', [largeFile, largeFile])
+    expect(output).to.be.ok
+  })
+})
+
+async function getError(promise) {
+  try {
+    await promise
+  } catch (error) {
+    return error
+  }
+}
+
