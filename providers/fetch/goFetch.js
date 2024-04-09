@@ -69,7 +69,8 @@ class GoFetch extends AbstractFetch {
   }
 
   async _getLatestVersion(spec) {
-    const initial_url = `https://${spec.provider}/${spec.namespace}/${spec.name}/@v/list`
+    //const initial_url = `https://${spec.provider}/${spec.namespace}/${spec.name}/@v/list`
+    const initial_url = `https://proxy.golang.org/${spec.namespace}/${spec.name}/@v/list`
     const replace_encoded_url = this._replace_encodings(initial_url)
     const url = replace_encoded_url.replace(/null\//g, '')
 
