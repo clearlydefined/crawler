@@ -5,10 +5,22 @@ const Request = require('../../../../ghcrawler').request
 const { expect } = require('chai')
 
 describe('podExtract', () => {
+  let extract
+
+  beforeEach(() => {
+    extract = podExtract({})
+  })
+
+  it('builds the correct documentKey via getUrnFor', async () => {
+    const request = new Request('pod', 'cd:/pod/cocoapods/-/SwiftLCS/1.0')
+    const documentKey = extract.getUrnFor(request)
+    expect(documentKey).to.be.equal('urn:pod:cocoapods:-:SwiftLCS:revision:1.0:tool:clearlydefined:1.2.1')
+  })
+
   it('builds the correct self link which reflects the current _schemaVersion of podExtract', async () => {
     const request = new Request('pod', 'cd:/pod/cocoapods/-/SwiftLCS/1.0')
     request.document = { _metadata: { links: {} } }
-    createPodExtract().handle(request)
+    mockPodExtract(extract).handle(request)
     expect(request.document._metadata.links.self.href).to.be.equal(
       'urn:pod:cocoapods:-:SwiftLCS:revision:1.0:tool:clearlydefined:1.2.1'
     )
@@ -17,8 +29,7 @@ describe('podExtract', () => {
   })
 })
 
-function createPodExtract() {
-  const extract = podExtract({})
+function mockPodExtract(extract) {
   extract._createDocument = async () => {}
   extract.isProcessing = () => true
   return extract
