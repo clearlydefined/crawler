@@ -10,10 +10,10 @@ describe('podExtract', () => {
     request.document = { _metadata: { links: {} } }
     createPodExtract().handle(request)
     expect(request.document._metadata.links.self.href).to.be.equal(
-      'urn:pod:cocoapods:-:SwiftLCS:revision:1.0:tool:clearlydefined:1.2.0'
+      'urn:pod:cocoapods:-:SwiftLCS:revision:1.0:tool:clearlydefined:1.2.1'
     )
     expect(request.document._metadata.links.self.type).to.be.equal('resource')
-    expect(request.document._metadata.schemaVersion).to.be.equal('1.2.0')
+    expect(request.document._metadata.schemaVersion).to.be.equal('1.2.1')
   })
 })
 
