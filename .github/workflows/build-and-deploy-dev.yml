@@ -1,0 +1,15 @@
+# This workflow will build a docker image, push it to ghcr.io, and deploy it to an Azure WebApp.
+name: Build and Deploy to dev crawler app
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+
+jobs:
+  build-and-deploy:
+    uses: clearlydefined/operations/.github/workflows/build-and-deploy-dev.yml@elr/shared-dev-deploy
+    secrets: inherit
+    with:
+      application-name: "cdcrawler"
+      application-type: "worker"
