@@ -47,6 +47,7 @@ describe('Go Proxy fetching', () => {
   beforeEach(() => {
     const requestPromiseStub = options => {
       if (options.url) {
+        expect(options.url).to.contain(stub)
         if (options.url.includes('error')) throw new Error('yikes')
         if (options.url.includes('code')) throw { statusCode: 500, message: 'Code' }
         if (options.url.includes('missing')) throw { statusCode: 404 }
