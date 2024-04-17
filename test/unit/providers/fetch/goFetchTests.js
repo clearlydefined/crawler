@@ -9,16 +9,16 @@ const Request = require('../../../../ghcrawler').request
 const fs = require('fs')
 const { merge } = require('lodash')
 
-const stub = 'https://proxy.golang.org/'
+const goBaseURL = 'https://proxy.golang.org/'
 
 describe('Go utility functions', () => {
   it('builds URLs', () => {
     const fetch = GoFetch({})
-    expect(fetch._buildUrl(spec('go', 'golang', 'cloud.google.com', 'go', 'v0.56.0'))).to.equal(stub + 'cloud.google.com/go/@v/v0.56.0.zip')
-    expect(fetch._buildUrl(spec('go', 'golang', 'cloud.google.com', 'go', 'v0.56.0'), '.mod')).to.equal(stub + 'cloud.google.com/go/@v/v0.56.0.mod')
-    expect(fetch._buildUrl(spec('go', 'golang', '-', 'collectd.org', 'v0.5.0'))).to.equal(stub + 'collectd.org/@v/v0.5.0.zip')
-    expect(fetch._buildUrl(spec('go', 'golang', 'github.com%2fAzure%2fazure-event-hubs-go', 'v3', 'v3.2.0'))).to.equal(stub + 'github.com/Azure/azure-event-hubs-go/v3/@v/v3.2.0.zip')
-    expect(fetch._buildUrl(spec('go', 'golang', 'github.com%2FAzure%2Fazure-event-hubs-go', 'v3', 'v3.2.0'))).to.equal(stub + 'github.com/Azure/azure-event-hubs-go/v3/@v/v3.2.0.zip')
+    expect(fetch._buildUrl(spec('go', 'golang', 'cloud.google.com', 'go', 'v0.56.0'))).to.equal(goBaseURL + 'cloud.google.com/go/@v/v0.56.0.zip')
+    expect(fetch._buildUrl(spec('go', 'golang', 'cloud.google.com', 'go', 'v0.56.0'), '.mod')).to.equal(goBaseURL + 'cloud.google.com/go/@v/v0.56.0.mod')
+    expect(fetch._buildUrl(spec('go', 'golang', '-', 'collectd.org', 'v0.5.0'))).to.equal(goBaseURL + 'collectd.org/@v/v0.5.0.zip')
+    expect(fetch._buildUrl(spec('go', 'golang', 'github.com%2fAzure%2fazure-event-hubs-go', 'v3', 'v3.2.0'))).to.equal(goBaseURL + 'github.com/Azure/azure-event-hubs-go/v3/@v/v3.2.0.zip')
+    expect(fetch._buildUrl(spec('go', 'golang', 'github.com%2FAzure%2Fazure-event-hubs-go', 'v3', 'v3.2.0'))).to.equal(goBaseURL + 'github.com/Azure/azure-event-hubs-go/v3/@v/v3.2.0.zip')
   })
 })
 
@@ -47,7 +47,7 @@ describe('Go Proxy fetching', () => {
   beforeEach(() => {
     const requestPromiseStub = options => {
       if (options.url) {
-        expect(options.url).to.contain(stub)
+        expect(options.url).to.contain(goBaseURL)
         if (options.url.includes('error')) throw new Error('yikes')
         if (options.url.includes('code')) throw { statusCode: 500, message: 'Code' }
         if (options.url.includes('missing')) throw { statusCode: 404 }
