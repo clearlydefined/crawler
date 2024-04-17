@@ -13,7 +13,7 @@ class PodExtract extends AbstractClearlyDefinedProcessor {
   }
 
   get toolVersion() {
-    return '1.0.1'
+    return '2.0.0'
   }
 
   canHandle(request) {
