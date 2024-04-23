@@ -11,10 +11,10 @@ const memCache = require('memory-cache')
 const nodeRequest = require('request')
 const path = require('path')
 const { promisify } = require('util')
-const requestPromise = require('request-promise-native')
 const tmp = require('tmp')
 const unixArchive = require('ar-async')
 const FetchResult = require('../../lib/fetchResult')
+const { callFetch } = require('../../lib/fetch')
 
 const exec = promisify(require('child_process').exec)
 const exists = promisify(fs.exists)
@@ -72,7 +72,7 @@ class DebianFetch extends AbstractFetch {
   // Example: https://sources.debian.org/api/src/amoeba/latest
   async _getLatestVersion(spec) {
     const url = `https://sources.debian.org/api/src/${spec.name}/latest`
-    const response = await requestPromise({ url, json: true })
+    const response = await callFetch({ url, responseTyoe: 'json' })
     return response.version
   }
 
@@ -310,7 +310,7 @@ class DebianFetch extends AbstractFetch {
     if (!copyrightUrl) return []
     let response = ''
     try {
-      response = await requestPromise({ url: copyrightUrl, json: false })
+      response = await callFetch({ url: copyrightUrl, responseType: 'text' })
     } catch (error) {
       if (error.statusCode === 404) return []
       else throw error

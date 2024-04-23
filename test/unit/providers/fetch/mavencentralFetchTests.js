@@ -34,7 +34,7 @@ describe('Maven Central utility functions', () => {
   it('gets releaseDate from pomProperties', async () => {
     const fetch = MavenFetch({
       logger: { log: sinon.stub() },
-      requestPromise: sinon.stub().resolves({})
+      callFetch: sinon.stub().resolves({})
     })
     sinon.replace(fs, 'exists', (loc, cb) => cb(true))
     sinon.replace(fs, 'readFile', (loc, cb) =>
@@ -76,7 +76,7 @@ describe('MavenCentral fetching', () => {
       }
       const file = options.url.includes('solrsearch') ? 'swt-3.3.0-v3346.json' : pickArtifact(options.url)
       const content = fs.readFileSync(`test/fixtures/maven/${file}`)
-      return options.json ? JSON.parse(content) : content
+      return options.responseType === 'json' ? JSON.parse(content) : content
     }
     const getStub = (url, callback) => {
       const response = new PassThrough()
@@ -93,7 +93,7 @@ describe('MavenCentral fetching', () => {
 
     handler = MavenFetch({
       logger: { log: sinon.stub() },
-      requestPromise: requestPromiseStub,
+      callFetch : requestPromiseStub,
       requestStream: getStub
     })
   })

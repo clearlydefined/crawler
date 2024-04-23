@@ -1,5 +1,4 @@
 const { clone } = require('lodash')
-const requestPromise = require('request-promise-native')
 const AbstractFetch = require('./abstractFetch')
 const nodeRequest = require('request')
 const fs = require('fs')
@@ -8,6 +7,7 @@ const { default: axiosRetry, exponentialDelay, isNetworkOrIdempotentRequestError
 const { parse: htmlParser } = require('node-html-parser')
 const { parse: spdxParser } = require('@clearlydefined/spdx')
 const FetchResult = require('../../lib/fetchResult')
+const { callFetch } = require('../../lib/fetch')
 
 const providerMap = {
   golang: 'https://proxy.golang.org'
@@ -77,7 +77,7 @@ class GoFetch extends AbstractFetch {
     const replace_encoded_url = this._replace_encodings(initial_url)
     const url = replace_encoded_url.replace(/null\//g, '')
 
-    const response = await requestPromise({ url })
+    const response = await callFetch({ url, responseType: 'text' })
     const versions = response.toString().split('\n').sort()
 
     // return last version in sorted versions array
@@ -125,7 +125,7 @@ class GoFetch extends AbstractFetch {
     let content
 
     try {
-      content = await requestPromise({ url })
+      content = await callFetch({ url, responseType: 'text' })
     } catch (error) {
       if (error.statusCode === 404) return null
       else throw this._google_proxy_error_string(error)

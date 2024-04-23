@@ -19,7 +19,8 @@ const hashes = {
 }
 
 function pickFile(url) {
-  if (url.endsWith('download')) return 'bitflags-1.0.4.crate'
+  if (url.endsWith('.crate')) return 'bitflags-1.0.4.crate'
+  if (url.endsWith('download')) return 'bitflags-downloadurl-1.0.4.json'
   return 'bitflags.json'
 }
 
@@ -31,15 +32,15 @@ describe('crateFetch workflow', () => {
         if (options.url.includes('missing')) throw { statusCode: 404 }
       }
       const body = fs.readFileSync(`test/fixtures/crates/${pickFile(options.url)}`)
-      if (options && options.json) return JSON.parse(body)
+      if (options && options.responseType === 'json') return JSON.parse(body)
       const response = new PassThrough()
-      response.write(fs.readFileSync(`test/fixtures/crates/${pickFile(options.url)}`))
+      response.write(body)
       response.statusCode = 200
       response.end()
       return response
     }
     Fetch = proxyquire('../../../../providers/fetch/cratesioFetch', {
-      'request-promise-native': requestPromiseStub
+      '../../lib/fetch': { callFetch: requestPromiseStub }
     })
   })
 
@@ -58,55 +59,55 @@ describe('crateFetch workflow', () => {
     expect(request.document.manifest.id).to.equal('bitflags')
   })
 
-  it('handles download error', async () => {
-    const handler = setup()
-    handler._getRegistryData = () => {
-      return {
-        version: { num: '1.0.4', dl_path: 'error' }
+    it('handles download error', async () => {
+      const handler = setup()
+      handler._getRegistryData = () => {
+        return {
+          version: { num: '1.0.4', dl_path: 'error' }
+        }
       }
-    }
-    const request = new Request('test', 'cd:/crate/cratesio/-/bitflags/1.0.4')
-    try {
-      await handler.handle(request)
-      expect(false).to.be.true
-    } catch (error) {
-      expect(error.message).to.be.equal('yikes')
-      expect(request.getTrackedCleanups().length).to.be.greaterThan(0)
-    }
-  })
-
-  it('handles download with non-200 status code', async () => {
-    const handler = setup()
-    handler._getRegistryData = () => {
-      return {
-        version: { num: '1.0.4', dl_path: 'missing' }
+      const request = new Request('test', 'cd:/crate/cratesio/-/bitflags/1.0.4')
+      try {
+        await handler.handle(request)
+        expect(false).to.be.true
+      } catch (error) {
+        expect(error.message).to.be.equal('yikes')
+        expect(request.getTrackedCleanups().length).to.be.greaterThan(0)
       }
-    }
-    const request = new Request('test', 'cd:/crate/cratesio/-/bitflags/1.0.4')
-    try {
-      await handler.handle(request)
-      expect(false).to.be.true
-    } catch (error) {
-      expect(error.statusCode).to.be.equal(404)
-      expect(request.getTrackedCleanups().length).to.be.greaterThan(0)
-    }
-  })
+    })
 
-  it('handles missing registry data', async () => {
-    const handler = setup()
-    const request = await handler.handle(new Request('test', 'cd:/crate/cratesio/-/missing/1.0.4'))
-    expect(request.processControl).to.equal('skip')
-  })
+    it('handles download with non-200 status code', async () => {
+      const handler = setup()
+      handler._getRegistryData = () => {
+        return {
+          version: { num: '1.0.4', dl_path: 'missing' }
+        }
+      }
+      const request = new Request('test', 'cd:/crate/cratesio/-/bitflags/1.0.4')
+      try {
+        await handler.handle(request)
+        expect(false).to.be.true
+      } catch (error) {
+        expect(error.statusCode).to.be.equal(404)
+        expect(request.getTrackedCleanups().length).to.be.greaterThan(0)
+      }
+    })
 
-  it('handles error getting registry data', async () => {
-    const handler = setup()
-    try {
-      await handler.handle(new Request('test', 'cd:/crate/cratesio/-/error/1.0.4'))
-      expect(false).to.be.true
-    } catch (error) {
-      expect(error.message).to.be.equal('yikes')
-    }
-  })
+    it('handles missing registry data', async () => {
+      const handler = setup()
+      const request = await handler.handle(new Request('test', 'cd:/crate/cratesio/-/missing/1.0.4'))
+      expect(request.processControl).to.equal('skip')
+    })
+
+    it('handles error getting registry data', async () => {
+      const handler = setup()
+      try {
+        await handler.handle(new Request('test', 'cd:/crate/cratesio/-/error/1.0.4'))
+        expect(false).to.be.true
+      } catch (error) {
+        expect(error.message).to.be.equal('yikes')
+      }
+    })
 })
 
 function setup() {

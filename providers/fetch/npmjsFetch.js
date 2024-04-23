@@ -3,10 +3,10 @@
 
 const AbstractFetch = require('./abstractFetch')
 const nodeRequest = require('request')
-const requestPromise = require('request-promise-native')
 const fs = require('fs')
 const { clone, get } = require('lodash')
 const FetchResult = require('../../lib/fetchResult')
+const { callFetch } = require('../../lib/fetch')
 
 const providerMap = {
   npmjs: 'https://registry.npmjs.com'
@@ -61,9 +61,9 @@ class NpmFetch extends AbstractFetch {
     const fullName = `${spec.namespace ? spec.namespace + '/' : ''}${spec.name}`
     let registryData
     try {
-      registryData = await requestPromise({
+      registryData = await callFetch({
         url: `${baseUrl}/${encodeURIComponent(fullName).replace('%40', '@')}`, // npmjs doesn't handle the escaped version
-        json: true
+        responseType: 'json'
       })
     } catch (exception) {
       if (exception.statusCode !== 404) throw exception

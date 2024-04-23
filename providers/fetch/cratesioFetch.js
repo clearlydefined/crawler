@@ -3,10 +3,10 @@
 
 const { clone } = require('lodash')
 const AbstractFetch = require('./abstractFetch')
-const request = require('request-promise-native')
 const fs = require('fs')
 const path = require('path')
 const FetchResult = require('../../lib/fetchResult')
+const { callFetch } = require('../../lib/fetch')
 
 class CratesioFetch extends AbstractFetch {
   canHandle(request) {
@@ -49,9 +49,9 @@ class CratesioFetch extends AbstractFetch {
   async _getRegistryData(spec) {
     let registryData
     try {
-      registryData = await request({
+      registryData = await callFetch({
         url: `https://crates.io/api/v1/crates/${spec.name}`,
-        json: true,
+        responseType: 'json',
         headers: { 'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)' }
       })
     } catch (exception) {
@@ -66,21 +66,30 @@ class CratesioFetch extends AbstractFetch {
     }
   }
 
+  async _getPackageDownloadURL(downloadUrl) {
+    const crateDownloadUrl = await callFetch({
+      url: downloadUrl,
+      responseType: 'json',
+      headers: { 'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)' }
+    })
+    return crateDownloadUrl.url
+  }
+
   // Example: https://crates.io/api/v1/crates/bitflags/1.0.4/download
   async _getPackage(zip, version) {
-    return new Promise((resolve, reject) => {
-      request({
-        url: `https://crates.io${version.dl_path}`,
-        json: false,
-        encoding: null,
-        headers: { 'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)' }
-      }).pipe(
-        fs
-          .createWriteStream(zip)
-          .on('finish', () => resolve(null))
-          .on('error', reject)
-      )
+    const crateDownloadUrl = await this._getPackageDownloadURL(`https://crates.io${version.dl_path}`)
+    const response = await callFetch({
+      url: crateDownloadUrl,
+      responseType: 'stream',
+      headers: { 'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)' }
     })
+    return new Promise((resolve, reject) => {
+      response.pipe(fs.createWriteStream(zip)
+        .on('finish', () => resolve(null))
+        .on('error', reject)
+      );
+    });
+
   }
 }
 

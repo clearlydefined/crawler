@@ -19,7 +19,7 @@ describe('podFetch', () => {
         }
       }
     },
-    'request-promise-native': sinon.stub().resolves(loadJson('registryData.json'))
+    '../../lib/fetch': { callFetch: sinon.stub().resolves(loadJson('registryData.json')) }
   })
 
   let fetch

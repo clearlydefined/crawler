@@ -91,7 +91,7 @@ describe('MavenGoogle fetching', () => {
 
     handler = MavenGoogleFetch({
       logger: { log: sinon.stub() },
-      requestPromise: requestPromiseStub,
+      callFetch: requestPromiseStub,
       requestStream: getStub
     })
   })
