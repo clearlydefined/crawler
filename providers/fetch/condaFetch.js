@@ -84,7 +84,7 @@ class CondaFetch extends AbstractFetch {
     fetchResult.document = {
       location: dir.name,
       registryData: { 'channelData': packageChannelData, downloadUrl },
-      releaseDate: new Date(packageChannelData.timestamp).toISOString(),
+      releaseDate: new Date(packageChannelData.timestamp || 0).toISOString(),
       declaredLicenses: packageChannelData.license,
       hashes
     }
@@ -109,7 +109,7 @@ class CondaFetch extends AbstractFetch {
         .filter(packageMatches)
         .map(([packageFile, packageData]) => { return { packageFile, packageData } }))
     }
-    packageRepoEntries.sort((a, b) => b.packageData.timestamp - a.packageData.timestamp)
+    packageRepoEntries.sort((a, b) => (b.packageData.timestamp || 0) - (a.packageData.timestamp || 0))
     return packageRepoEntries
   }
 
@@ -146,7 +146,7 @@ class CondaFetch extends AbstractFetch {
     fetchResult.document = {
       location: dir.name,
       registryData: { 'channelData': packageChannelData, 'repoData': packageRepoEntry, downloadUrl },
-      releaseDate: new Date(packageRepoEntry.packageData.timestamp).toISOString(),
+      releaseDate: new Date(packageRepoEntry.packageData.timestamp || 0).toISOString(),
       declaredLicenses: packageRepoEntry.packageData.license,
       hashes
     }
