@@ -64,7 +64,6 @@
     "parse-github-url": "^1.0.2",
     "patch-package": "^6.2.2",
     "promise-retry": "^1.1.1",
-    "request-promise-native": "^1.0.5",
     "requestretry": "^4.0.0",
     "rimraf": "^3.0.0",
     "sha.js": "^2.4.11",

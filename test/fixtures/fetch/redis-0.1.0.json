@@ -1,0 +1,33 @@
+{
+  "name": "redis",
+  "version": "0.1.0",
+  "description": "Redis client library",
+  "author": {
+    "name": "Matt Ranney",
+    "email": "mjr@ranney.com"
+  },
+  "main": "./index",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mranney/node_redis.git"
+  },
+  "_id": "redis@0.1.0",
+  "engines": {
+    "node": "*"
+  },
+  "_nodeSupported": true,
+  "_npmVersion": "0.2.7-2",
+  "_nodeVersion": "v0.3.1-pre",
+  "dist": {
+    "tarball": "https://registry.npmjs.org/redis/-/redis-0.1.0.tgz",
+    "shasum": "6f1c493aec95638f654058a7001f42b5df6ba517",
+    "integrity": "sha512-JJCzhwVAfoa9CF26RWjJafrUkNFjQZw+F2l8kiJo0V0GUwfEI1NNbsiy5ARN9Zrfzp7Eif++OtIKfn+gXy6p9w==",
+    "signatures": [
+      {
+        "keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+        "sig": "MEUCIQDNKjPgRYSLe0f0xhylEWpdOSHflJvXV2R+bhpXzKFm3QIgJYd4VlkHWdeM0HV6Ll9+c/PlV6oecAN6DexxD6sZ0H8="
+      }
+    ]
+  },
+  "directories": {}
+}

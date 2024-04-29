@@ -66,30 +66,26 @@ class CratesioFetch extends AbstractFetch {
     }
   }
 
-  async _getPackageDownloadURL(downloadUrl) {
-    const crateDownloadUrl = await callFetch({
-      url: downloadUrl,
-      responseType: 'json',
-      headers: { 'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)' }
-    })
-    return crateDownloadUrl.url
-  }
+
 
   // Example: https://crates.io/api/v1/crates/bitflags/1.0.4/download
   async _getPackage(zip, version) {
-    const crateDownloadUrl = await this._getPackageDownloadURL(`https://crates.io${version.dl_path}`)
     const response = await callFetch({
-      url: crateDownloadUrl,
+      url: `https://crates.io${version.dl_path}`,
       responseType: 'stream',
-      headers: { 'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)' }
+      headers: {
+        'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)',
+        'Accept': 'text/html'
+      }
     })
     return new Promise((resolve, reject) => {
-      response.pipe(fs.createWriteStream(zip)
-        .on('finish', () => resolve(null))
-        .on('error', reject)
-      );
-    });
-
+      response.pipe(
+        fs
+          .createWriteStream(zip)
+          .on('finish', () => resolve(null))
+          .on('error', reject)
+      )
+    })
   }
 }
 

@@ -19,8 +19,7 @@ const hashes = {
 }
 
 function pickFile(url) {
-  if (url.endsWith('.crate')) return 'bitflags-1.0.4.crate'
-  if (url.endsWith('download')) return 'bitflags-downloadurl-1.0.4.json'
+  if (url.endsWith('download')) return 'bitflags-1.0.4.crate'
   return 'bitflags.json'
 }
 
