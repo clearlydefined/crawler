@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-and-deploy:
-    uses: clearlydefined/operations/.github/workflows/app-build-and-deploy.yml@elr/reusable-deploy-workflow
+    uses: clearlydefined/operations/.github/workflows/app-build-and-deploy.yml@v1.0.0
     secrets:
       AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
       AZURE_WEBAPP_PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_DEV }}
