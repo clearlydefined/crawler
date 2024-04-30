@@ -3,7 +3,7 @@
 
 const chai = require('chai')
 const chaiAsPromised = require('chai-as-promised')
-const { normalizePath, normalizePaths, trimParents, trimAllParents, extractDate, spawnPromisified } = require('../../../lib/utils')
+const { normalizePath, normalizePaths, trimParents, trimAllParents, extractDate, spawnPromisified, isGitFile } = require('../../../lib/utils')
 const { promisify } = require('util')
 const execFile = promisify(require('child_process').execFile)
 chai.use(chaiAsPromised)
@@ -54,6 +54,22 @@ describe('Utils path functions', () => {
     expect(trimAllParents(null, 'foo')).to.be.null
     expect(trimAllParents(undefined, 'foo')).to.be.undefined
   })
+})
+
+describe('Util isGitFile', () => {
+  const entries = new Map([
+    [null, false],
+    ['/', false],
+    ['/tmp/tempX/package/src', false],
+    ['.git', true],
+    ['/tmp/tempX/package/.git', true],
+    ['/tmp/tempX/package/.git/hooks/pre-merge-commit.sample', true]
+  ])
+
+  entries.forEach((expected, file) => {
+    it(`should return ${expected} for isGitFile given '${file}'`, () => expect(isGitFile(file)).to.eq(expected))
+  })
+
 })
 
 describe('Util extractDate', () => {

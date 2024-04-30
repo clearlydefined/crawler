@@ -1,6 +1,6 @@
 {
   "name": "clearlydefined-crawler",
-  "version": "0.1.1",
+  "version": "1.0.2",
   "description": "A crawler that walks projects and packages looking for data of interest to the ClearlyDefined project.",
   "main": "./index.js",
   "scripts": {
@@ -33,7 +33,7 @@
     "applicationinsights": "^1.5.0",
     "ar-async": "^0.1.4",
     "async": "^3.1.0",
-    "axios": "^0.27.2",
+    "axios": "^1.6.0",
     "axios-retry": "^3.2.5",
     "azure-storage": "^2.10.3",
     "body-parser": "^1.19.0",
