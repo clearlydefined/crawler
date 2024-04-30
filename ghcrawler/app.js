@@ -22,9 +22,7 @@ function configureApp(service, logger) {
   app.use('/requests', require('./routes/requests')(service))
 
   // to keep AlwaysOn flooding logs with errors
-  app.get('/', (request, response) => {
-    response.helpers.send.noContent()
-  })
+  app.use('/', require('./routes/index')(config.get('BUILD_SHA'), config.get('APP_VERSION')))
 
   // Catch 404 and forward to error handler
   const requestHandler = (request, response, next) => {
