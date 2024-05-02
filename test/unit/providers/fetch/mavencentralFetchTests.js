@@ -93,7 +93,7 @@ describe('MavenCentral fetching', () => {
 
     handler = MavenFetch({
       logger: { log: sinon.stub() },
-      callFetch : requestPromiseStub,
+      callFetch: requestPromiseStub,
       requestStream: getStub
     })
   })

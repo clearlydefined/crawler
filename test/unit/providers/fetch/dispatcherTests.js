@@ -115,7 +115,7 @@ describe('fetchDispatcher cache fetch result', () => {
       }
       return MavenFetch({
         logger: { log: sinon.stub() },
-        callFetch : createRequestPromiseStub(fileSupplier),
+        callFetch: createRequestPromiseStub(fileSupplier),
         requestStream: createGetStub(fileSupplier)
       })
     }

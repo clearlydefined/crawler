@@ -16,8 +16,6 @@ const { extractDate } = require('../../lib/utils')
 const FetchResult = require('../../lib/fetchResult')
 const { callFetch } = require('../../lib/fetch')
 
-
-
 const extensionMap = {
   sourcesJar: '-sources.jar',
   pom: '.pom',
@@ -185,7 +183,7 @@ class MavenBasedFetch extends AbstractFetch {
 
   async _requestPromise(options) {
     try {
-      options["headers"] = defaultHeaders
+      options.headers = { ...defaultHeaders.headers, ...options.headers }
       return await this._handleCallFetch(options)
     } catch (error) {
       if (error.statusCode === 404) return null

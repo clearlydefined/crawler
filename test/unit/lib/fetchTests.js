@@ -21,9 +21,9 @@ describe('CallFetch', () => {
     expect(response).to.be.equal('module "rsc.io/quote"\n')
   })
 
-
-
-  it('checks if the package is downloaded when responseType is stream', async () => {
+  //This test case downloads a crate package
+  //This URL would send a JSON response if the header is not provided as a part of request.
+  it('should follow redirect and download the package when responseType is stream', async () => {
     const response = await callFetch({
       url: 'https://crates.io/api/v1/crates/bitflags/1.0.4/download',
       method: 'GET',
@@ -32,7 +32,18 @@ describe('CallFetch', () => {
         'Accept': 'text/html'
       }
     })
+    //Validating the length of the content inorder to verify the response is a crate package.
+    // JSON response would not return this header in response resulting in failing this test case.
     expect(response.headers['content-length']).to.be.equal('15282')
   })
 
+  it('should follow redirect and download the package when responseType is stream', async () => {
+    const response = await callFetch({
+      url: 'https://static.crates.io/crates/bitflags/bitflags-1.0.4.crate',
+      method: 'GET',
+      responseType: 'stream',
+    })
+    //Validating the length of the content inorder to verify the response is a crate package.
+    expect(response.headers['content-length']).to.be.equal('15282')
+  })
 })
