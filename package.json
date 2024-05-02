@@ -1,6 +1,6 @@
 {
   "name": "clearlydefined-crawler",
-  "version": "0.1.1",
+  "version": "1.0.2",
   "description": "A crawler that walks projects and packages looking for data of interest to the ClearlyDefined project.",
   "main": "./index.js",
   "scripts": {
@@ -28,12 +28,12 @@
     "url": "https://github.com/clearlydefined/crawler"
   },
   "dependencies": {
-    "@clearlydefined/spdx": "^0.1.6",
+    "@clearlydefined/spdx": "^0.1.7",
     "@microsoft/refreshing-config": "^0.1.3",
     "applicationinsights": "^1.5.0",
     "ar-async": "^0.1.4",
     "async": "^3.1.0",
-    "axios": "^0.27.2",
+    "axios": "^1.6.0",
     "axios-retry": "^3.2.5",
     "azure-storage": "^2.10.3",
     "body-parser": "^1.19.0",
@@ -53,7 +53,7 @@
     "js-yaml": "^3.13.1",
     "linebyline": "^1.3.0",
     "lodash": "^4.17.21",
-    "luxon": "^2.1.1",
+    "luxon": "^2.5.2",
     "lzma-native": "^8.0.1",
     "memory-cache": "^0.2.0",
     "mkdirp": "^0.5.1",
@@ -74,7 +74,7 @@
     "unbzip2-stream": "^1.3.3",
     "winston": "^2.3.0",
     "winston-azure-application-insights": "^1.5.0",
-    "xml2js": "^0.4.22"
+    "xml2js": "^0.5.0"
   },
   "devDependencies": {
     "chai": "^4.2.0",
