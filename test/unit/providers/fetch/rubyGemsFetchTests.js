@@ -12,10 +12,11 @@ describe('rubyGemsFetch', () => {
     fetch._getRegistryData = sinon.stub().resolves({
       name: 'small',
       version: '0.5.1',
-      gem_uri: 'https://rubygems.org/gems/small-0.5.1.gem',
+      gem_uri: 'https://rubygems.org/gems/small-0.5.1.gem'
     })
-    fetch._getPackage = sinon.stub().callsFake((spec, destination) =>
-      getPacakgeStub('test/fixtures/ruby/small-0.5.1.gem', destination))
+    fetch._getPackage = sinon
+      .stub()
+      .callsFake((spec, destination) => getPacakgeStub('test/fixtures/ruby/small-0.5.1.gem', destination))
   })
 
   function verifyFetch(result) {

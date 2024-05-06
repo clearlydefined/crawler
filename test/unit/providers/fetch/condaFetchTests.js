@@ -19,7 +19,9 @@ describe('condaFetch utilities', () => {
 
   it('matches packages in repodata.packages.conda correctly', () => {
     expect(fetch._matchPackage('21cmfast', '3.0.2', 'py37h48b2cff_0', repoData).length).to.greaterThan(0)
-    expect(fetch._matchPackage('21cmfast', '3.0.2', 'py37h48b2cff_0', repoData)[0].packageData.build).to.equal('py37h48b2cff_0')
+    expect(fetch._matchPackage('21cmfast', '3.0.2', 'py37h48b2cff_0', repoData)[0].packageData.build).to.equal(
+      'py37h48b2cff_0'
+    )
   })
 
   it('matches the latest package when version not specified', () => {
@@ -38,13 +40,9 @@ describe('condaFetch', () => {
       logger: { info: sinon.stub() },
       cdFileLocation: 'test/fixtures/conda/fragment'
     })
-    fetch.getChannelData = sinon.stub().resolves(
-      JSON.parse(fs.readFileSync('test/fixtures/conda/channeldata.json'))
-    )
+    fetch.getChannelData = sinon.stub().resolves(JSON.parse(fs.readFileSync('test/fixtures/conda/channeldata.json')))
 
-    fetch.getRepoData = sinon.stub().resolves(
-      JSON.parse(fs.readFileSync('test/fixtures/conda/repodata.json'))
-    )
+    fetch.getRepoData = sinon.stub().resolves(JSON.parse(fs.readFileSync('test/fixtures/conda/repodata.json')))
 
     fetch._downloadPackage = sinon.stub().callsFake((downloadUrl, destination) => {
       expect(downloadUrl).to.contains('https://conda.anaconda.org/conda-forge/')
@@ -106,7 +104,9 @@ describe('condaFetch', () => {
   })
 
   it('fetch package with version, architecture, and build version', async () => {
-    const result = await fetch.handle(new Request('test', 'cd:/conda/conda-forge/linux-64/21cmfast/3.0.2-py37hd45b216_1'))
+    const result = await fetch.handle(
+      new Request('test', 'cd:/conda/conda-forge/linux-64/21cmfast/3.0.2-py37hd45b216_1')
+    )
     verifyFetch(result.fetchResult)
   })
 
@@ -116,14 +116,20 @@ describe('condaFetch', () => {
   })
 
   it('reports failed package matching', async () => {
-    const result = await fetch.handle(new Request('test', 'cd:/conda/conda-forge/linux-64/21cmfast/3.0.2-py9999_invalid'))
-    expect(result.outcome).to.equal('Missing package with matching spec (version: 3.0.2, buildVersion: py9999_invalid) in linux-64 repository')
+    const result = await fetch.handle(
+      new Request('test', 'cd:/conda/conda-forge/linux-64/21cmfast/3.0.2-py9999_invalid')
+    )
+    expect(result.outcome).to.equal(
+      'Missing package with matching spec (version: 3.0.2, buildVersion: py9999_invalid) in linux-64 repository'
+    )
   })
 
   it('reports failed repodata fetching and parsing', async () => {
     fetch.getRepoData = sinon.stub().resolves(null)
     const result = await fetch.handle(new Request('test', 'cd:/conda/conda-forge/linux-64/21cmfast/3.0.2'))
-    expect(result.outcome).to.equal('failed to fetch and parse repodata json file for channel conda-forge in architecture linux-64')
+    expect(result.outcome).to.equal(
+      'failed to fetch and parse repodata json file for channel conda-forge in architecture linux-64'
+    )
   })
 
   it('reports failed channeldata fetching and parsing', async () => {
@@ -140,13 +146,9 @@ describe('condaSrcFetch', () => {
       logger: { info: sinon.stub() },
       cdFileLocation: 'test/fixtures/conda/fragment'
     })
-    fetch.getChannelData = sinon.stub().resolves(
-      JSON.parse(fs.readFileSync('test/fixtures/conda/channeldata.json'))
-    )
+    fetch.getChannelData = sinon.stub().resolves(JSON.parse(fs.readFileSync('test/fixtures/conda/channeldata.json')))
 
-    fetch.getRepoData = sinon.stub().resolves(
-      JSON.parse(fs.readFileSync('test/fixtures/conda/repodata.json'))
-    )
+    fetch.getRepoData = sinon.stub().resolves(JSON.parse(fs.readFileSync('test/fixtures/conda/repodata.json')))
 
     fetch._downloadPackage = sinon.stub().callsFake((downloadUrl, destination) => {
       expect(downloadUrl).to.equal('https://pypi.io/packages/source/2/21cmFAST/21cmFAST-3.3.1.tar.gz')

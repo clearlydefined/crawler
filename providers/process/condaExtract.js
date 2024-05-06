@@ -41,10 +41,10 @@ class CondaExtract extends AbstractClearlyDefinedProcessor {
       registryData.channelData.home,
       registryData.channelData.dev_url,
       registryData.channelData.doc_url,
-      registryData.channelData.doc_source_url].filter(e => e)
+      registryData.channelData.doc_source_url
+    ].filter(e => e)
     let sourceInfo = undefined
-    const githubSource = await this.sourceFinder(
-      registryData.repoData.packageData.version, sourceCandidates, {
+    const githubSource = await this.sourceFinder(registryData.repoData.packageData.version, sourceCandidates, {
       githubToken: this.options.githubToken,
       logger: this.logger
     })
