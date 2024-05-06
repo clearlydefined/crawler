@@ -18,9 +18,21 @@ class TopProcessor extends AbstractProcessor {
     return (
       request.type === 'top' &&
       spec &&
-      ['anaconda-main', 'anaconda-r', 'npmjs', 'cocoapods', 'conda-forge', 'cratesio', 'mavencentral', 'mavengoogle', 'nuget', 'github', 'pypi', 'composer', 'debian'].includes(
-        spec.provider
-      )
+      [
+        'anaconda-main',
+        'anaconda-r',
+        'npmjs',
+        'cocoapods',
+        'conda-forge',
+        'cratesio',
+        'mavencentral',
+        'mavengoogle',
+        'nuget',
+        'github',
+        'pypi',
+        'composer',
+        'debian'
+      ].includes(spec.provider)
     )
   }
 
@@ -184,16 +196,19 @@ class TopProcessor extends AbstractProcessor {
     if (spec.type === 'conda') {
       for (let subdir of channelData.subdirs) {
         let repoData = await condaFetch.getRepoData(channelUrl, spec.provider, subdir)
-        let repoCoordinates = Object.entries(repoData.packages).
-          map(([, packageData]) => `cd:/conda/${spec.provider}/${subdir}/${packageData.name}/${packageData.version}-${packageData.build}/`
-          )
+        let repoCoordinates = Object.entries(repoData.packages).map(
+          ([, packageData]) =>
+            `cd:/conda/${spec.provider}/${subdir}/${packageData.name}/${packageData.version}-${packageData.build}/`
+        )
         packagesCoordinates = packagesCoordinates.concat(repoCoordinates)
         if (start < packagesCoordinates.length && end <= packagesCoordinates.length) {
           break
         }
       }
     } else {
-      packagesCoordinates = Object.entries(channelData.packages).map(([packageName, packageData]) => `cd:/condasrc/${spec.provider}/-/${packageName}/${packageData.version}/`)
+      packagesCoordinates = Object.entries(channelData.packages).map(
+        ([packageName, packageData]) => `cd:/condasrc/${spec.provider}/-/${packageName}/${packageData.version}/`
+      )
     }
 
     let slicedCoordinates = packagesCoordinates.slice(start, end)
@@ -202,7 +217,9 @@ class TopProcessor extends AbstractProcessor {
       `Conda top - coordinates: ${packagesCoordinates.length}, start: ${start}, end: ${end}, sliced: ${slicedCoordinates.length}`
     )
 
-    await request.queueRequests(slicedCoordinates.map(coord => new Request(spec.type === 'conda' ? 'package' : 'source', coord)))
+    await request.queueRequests(
+      slicedCoordinates.map(coord => new Request(spec.type === 'conda' ? 'package' : 'source', coord))
+    )
     return request.markNoSave()
   }
 

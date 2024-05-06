@@ -28,7 +28,7 @@ describe('Conda processing', () => {
 })
 
 async function setup() {
-  const processor = CondaExtract({ logger: { info: () => { } } }, () => { })
+  const processor = CondaExtract({ logger: { info: () => {} } }, () => {})
   processor.linkAndQueueTool = sinon.stub()
   const request = createRequest()
   const dir = processor.createTempDir(request)
@@ -52,7 +52,7 @@ function createRequest() {
       channelData: {},
       repoData: {
         packageData: {
-          'version': '3.0.2'
+          version: '3.0.2'
         }
       }
     }

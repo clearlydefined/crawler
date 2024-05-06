@@ -66,18 +66,19 @@ class FetchDispatcher extends AbstractFetch {
 
   async _fetchResult(request, handler) {
     const cacheKey = this.toSpec(request).toUrlPath()
-    const fetchResult = this.fetched.get(cacheKey) || await this._fetchPromise(handler, request, cacheKey)
+    const fetchResult = this.fetched.get(cacheKey) || (await this._fetchPromise(handler, request, cacheKey))
     fetchResult?.decorate(request)
   }
 
   _fetchPromise(handler, request, cacheKey) {
-    return this.inProgressFetches[cacheKey] ||
+    return (
+      this.inProgressFetches[cacheKey] ||
       (this.inProgressFetches[cacheKey] = this._createFetchPromise(handler, request, cacheKey))
+    )
   }
 
   _createFetchPromise(handler, request, cacheKey) {
-    return this._fetch(handler, request, cacheKey)
-      .finally(() => delete this.inProgressFetches[cacheKey])
+    return this._fetch(handler, request, cacheKey).finally(() => delete this.inProgressFetches[cacheKey])
   }
 
   async _fetch(handler, request, cacheKey) {
@@ -96,7 +97,8 @@ class FetchDispatcher extends AbstractFetch {
       cacheKey,
       fetchResult,
       this._cleanupResult.bind(this),
-      (key, result) => !result.isInUse())
+      (key, result) => !result.isInUse()
+    )
   }
 
   _cleanupResult(key, result) {

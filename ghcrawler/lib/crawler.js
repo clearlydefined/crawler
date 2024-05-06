@@ -280,7 +280,8 @@ class Crawler {
         result => {
           completedPromises++
           debug(
-            `_completeRequest(${loopName}:${request.toUniqueString()}): completed ${completedPromises} of ${trackedPromises.length
+            `_completeRequest(${loopName}:${request.toUniqueString()}): completed ${completedPromises} of ${
+              trackedPromises.length
             } promises (${failedPromises} failed)`
           )
           return result
@@ -289,7 +290,8 @@ class Crawler {
           completedPromises++
           failedPromises++
           debug(
-            `_completeRequest(${loopName}:${request.toUniqueString()}): completed ${completedPromises} of ${trackedPromises.length
+            `_completeRequest(${loopName}:${request.toUniqueString()}): completed ${completedPromises} of ${
+              trackedPromises.length
             } promises (${failedPromises} failed)`
           )
           throw error
@@ -512,7 +514,6 @@ class Crawler {
       request.outcome = request.outcome || 'Traversed'
     }
     return request
-
   }
 
   async _logStartEnd(name, request, work) {
