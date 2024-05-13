@@ -2,19 +2,20 @@
   "headers": [
     {
       "tool_name": "scancode-toolkit",
-      "tool_version": "32.0.8",
+      "tool_version": "32.1.0",
       "options": {
         "input": [
-          "/tmp/cd-sc95Qo"
+          "/tmp/cd-4jELcg"
         ],
         "--classify": true,
         "--copyright": true,
         "--email": true,
         "--generated": true,
         "--info": true,
-        "--json-pp": "/tmp/cd-FMpnfO",
+        "--json-pp": "/tmp/cd-TrTYk9",
         "--license": true,
         "--license-clarity-score": true,
+        "--license-references": true,
         "--license-text": true,
         "--license-text-diagnostics": true,
         "--package": true,
@@ -27,10 +28,10 @@
         "--url": true
       },
       "notice": "Generated with ScanCode and provided on an \"AS IS\" BASIS, WITHOUT WARRANTIES\nOR CONDITIONS OF ANY KIND, either express or implied. No content created from\nScanCode should be considered or used as legal advice. Consult an Attorney\nfor any legal advice.\nScanCode is a free software code scanning tool from nexB Inc. and others.\nVisit https://github.com/nexB/scancode-toolkit/ for support and download.",
-      "start_timestamp": "2023-12-08T190727.262712",
-      "end_timestamp": "2023-12-08T190731.702379",
-      "output_format_version": "3.0.0",
-      "duration": 4.43967866897583,
+      "start_timestamp": "2024-05-13T122802.873828",
+      "end_timestamp": "2024-05-13T122807.761284",
+      "output_format_version": "3.1.0",
+      "duration": 4.887468099594116,
       "message": null,
       "errors": [],
       "warnings": [],
@@ -38,11 +39,11 @@
         "system_environment": {
           "operating_system": "linux",
           "cpu_architecture": "64",
-          "platform": "Linux-6.2.0-1016-azure-x86_64-with-glibc2.31",
-          "platform_version": "#16~22.04.1-Ubuntu SMP Tue Oct 10 17:11:51 UTC 2023",
+          "platform": "Linux-6.5.0-1019-azure-x86_64-with-glibc2.31",
+          "platform_version": "#20~22.04.1-Ubuntu SMP Wed Apr  3 03:28:18 UTC 2024",
           "python_version": "3.9.2 (default, Feb 28 2021, 17:03:44) \n[GCC 10.2.1 20210110]"
         },
-        "spdx_license_list_version": "3.21",
+        "spdx_license_list_version": "3.23",
         "files_count": 7
       }
     }
@@ -116,17 +117,20 @@
       "license_detections": [
         {
           "license_expression": "isc",
+          "license_expression_spdx": "ISC",
           "matches": [
             {
-              "score": 100,
+              "license_expression": "isc",
+              "spdx_license_expression": "ISC",
+              "from_file": "cd-4jELcg/package/package.json",
               "start_line": 1,
               "end_line": 1,
+              "matcher": "1-spdx-id",
+              "score": 100,
               "matched_length": 1,
               "match_coverage": 100,
-              "matcher": "1-spdx-id",
-              "license_expression": "isc",
-              "rule_identifier": "spdx-license-identifier-isc-9931cb7ad33c2eb18f322c94660b670a84186baa",
               "rule_relevance": 100,
+              "rule_identifier": "spdx-license-identifier-isc-9931cb7ad33c2eb18f322c94660b670a84186baa",
               "rule_url": null,
               "matched_text": "ISC"
             }
@@ -144,7 +148,7 @@
       "repository_homepage_url": "https://www.npmjs.com/package/glob",
       "repository_download_url": "https://registry.npmjs.org/glob/-/glob-7.1.2.tgz",
       "api_data_url": "https://registry.npmjs.org/glob/7.1.2",
-      "package_uid": "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d",
+      "package_uid": "pkg:npm/glob@7.1.2?uuid=202e0916-57df-4632-a927-140b599d4a94",
       "datafile_paths": [
         "package/package.json"
       ],
@@ -164,8 +168,8 @@
       "is_resolved": false,
       "resolved_package": {},
       "extra_data": {},
-      "dependency_uid": "pkg:npm/fs.realpath?uuid=93dd21b8-4539-41d0-8e49-a94201794308",
-      "for_package_uid": "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d",
+      "dependency_uid": "pkg:npm/fs.realpath?uuid=fce37c6b-47bb-41ff-90dd-857aee07455e",
+      "for_package_uid": "pkg:npm/glob@7.1.2?uuid=202e0916-57df-4632-a927-140b599d4a94",
       "datafile_path": "package/package.json",
       "datasource_id": "npm_package_json"
     },
@@ -178,8 +182,8 @@
       "is_resolved": false,
       "resolved_package": {},
       "extra_data": {},
-      "dependency_uid": "pkg:npm/inflight?uuid=74ade41f-7830-457f-a6d4-b32072ba0050",
-      "for_package_uid": "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d",
+      "dependency_uid": "pkg:npm/inflight?uuid=016d12d0-941d-47a9-807b-3a7d128baa3b",
+      "for_package_uid": "pkg:npm/glob@7.1.2?uuid=202e0916-57df-4632-a927-140b599d4a94",
       "datafile_path": "package/package.json",
       "datasource_id": "npm_package_json"
     },
@@ -192,8 +196,8 @@
       "is_resolved": false,
       "resolved_package": {},
       "extra_data": {},
-      "dependency_uid": "pkg:npm/inherits?uuid=a9d13236-4403-4cd9-9a6f-2a9d3de35565",
-      "for_package_uid": "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d",
+      "dependency_uid": "pkg:npm/inherits?uuid=11ea3a9f-f6d1-4f26-8053-fdfc0d3fa9a5",
+      "for_package_uid": "pkg:npm/glob@7.1.2?uuid=202e0916-57df-4632-a927-140b599d4a94",
       "datafile_path": "package/package.json",
       "datasource_id": "npm_package_json"
     },
@@ -206,8 +210,8 @@
       "is_resolved": false,
       "resolved_package": {},
       "extra_data": {},
-      "dependency_uid": "pkg:npm/minimatch?uuid=4720aa79-792a-45ba-952a-d4851be7a8dc",
-      "for_package_uid": "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d",
+      "dependency_uid": "pkg:npm/minimatch?uuid=4f82980b-e349-418c-a2cb-fd5cb13b1d6f",
+      "for_package_uid": "pkg:npm/glob@7.1.2?uuid=202e0916-57df-4632-a927-140b599d4a94",
       "datafile_path": "package/package.json",
       "datasource_id": "npm_package_json"
     },
@@ -220,8 +224,8 @@
       "is_resolved": false,
       "resolved_package": {},
       "extra_data": {},
-      "dependency_uid": "pkg:npm/once?uuid=b5e23715-9908-4ed5-846f-407285037c0d",
-      "for_package_uid": "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d",
+      "dependency_uid": "pkg:npm/once?uuid=94f6ff07-a765-49f9-8ae2-c1937e2d7f62",
+      "for_package_uid": "pkg:npm/glob@7.1.2?uuid=202e0916-57df-4632-a927-140b599d4a94",
       "datafile_path": "package/package.json",
       "datasource_id": "npm_package_json"
     },
@@ -234,8 +238,8 @@
       "is_resolved": false,
       "resolved_package": {},
       "extra_data": {},
-      "dependency_uid": "pkg:npm/path-is-absolute?uuid=b5673212-9842-4924-bb9b-b007b9b935fb",
-      "for_package_uid": "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d",
+      "dependency_uid": "pkg:npm/path-is-absolute?uuid=afbe9a58-f894-4ba4-89c1-8560b7108587",
+      "for_package_uid": "pkg:npm/glob@7.1.2?uuid=202e0916-57df-4632-a927-140b599d4a94",
       "datafile_path": "package/package.json",
       "datasource_id": "npm_package_json"
     },
@@ -248,8 +252,8 @@
       "is_resolved": false,
       "resolved_package": {},
       "extra_data": {},
-      "dependency_uid": "pkg:npm/mkdirp?uuid=785b02f5-9f5c-45bc-9756-06c7d91f6d4e",
-      "for_package_uid": "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d",
+      "dependency_uid": "pkg:npm/mkdirp?uuid=f97ff40f-19e7-4d0c-b2b1-b0a99d5e670d",
+      "for_package_uid": "pkg:npm/glob@7.1.2?uuid=202e0916-57df-4632-a927-140b599d4a94",
       "datafile_path": "package/package.json",
       "datasource_id": "npm_package_json"
     },
@@ -262,8 +266,8 @@
       "is_resolved": false,
       "resolved_package": {},
       "extra_data": {},
-      "dependency_uid": "pkg:npm/rimraf?uuid=0d8164e0-8218-4ee3-9df0-d95352fb7233",
-      "for_package_uid": "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d",
+      "dependency_uid": "pkg:npm/rimraf?uuid=48d87753-00eb-4632-a264-6360363d266e",
+      "for_package_uid": "pkg:npm/glob@7.1.2?uuid=202e0916-57df-4632-a927-140b599d4a94",
       "datafile_path": "package/package.json",
       "datasource_id": "npm_package_json"
     },
@@ -276,8 +280,8 @@
       "is_resolved": false,
       "resolved_package": {},
       "extra_data": {},
-      "dependency_uid": "pkg:npm/tap?uuid=6a8465f9-57a8-41c2-b2d9-184bf46dfc0d",
-      "for_package_uid": "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d",
+      "dependency_uid": "pkg:npm/tap?uuid=11c1b20d-d04d-4056-b099-86452d79cfdc",
+      "for_package_uid": "pkg:npm/glob@7.1.2?uuid=202e0916-57df-4632-a927-140b599d4a94",
       "datafile_path": "package/package.json",
       "datasource_id": "npm_package_json"
     },
@@ -290,8 +294,8 @@
       "is_resolved": false,
       "resolved_package": {},
       "extra_data": {},
-      "dependency_uid": "pkg:npm/tick?uuid=ba03712d-f498-4418-b0bd-1106b78a98dc",
-      "for_package_uid": "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d",
+      "dependency_uid": "pkg:npm/tick?uuid=e65abc08-194c-4d5f-943c-e2612cf8d7eb",
+      "for_package_uid": "pkg:npm/glob@7.1.2?uuid=202e0916-57df-4632-a927-140b599d4a94",
       "datafile_path": "package/package.json",
       "datasource_id": "npm_package_json"
     }
@@ -300,22 +304,129 @@
     {
       "identifier": "isc-6c4320cc-eb5b-3792-8c56-b8565fff1119",
       "license_expression": "isc",
-      "detection_count": 1
+      "license_expression_spdx": "ISC",
+      "detection_count": 1,
+      "reference_matches": [
+        {
+          "license_expression": "isc",
+          "license_expression_spdx": "ISC",
+          "from_file": "cd-4jELcg/package/package.json",
+          "start_line": 1,
+          "end_line": 1,
+          "matcher": "1-spdx-id",
+          "score": 100,
+          "matched_length": 1,
+          "match_coverage": 100,
+          "rule_relevance": 100,
+          "rule_identifier": "spdx-license-identifier-isc-9931cb7ad33c2eb18f322c94660b670a84186baa",
+          "rule_url": null,
+          "matched_text": "ISC"
+        }
+      ]
     },
     {
       "identifier": "isc-90dc51e4-d418-5a40-d42f-6b015cf53d02",
       "license_expression": "isc",
-      "detection_count": 1
+      "license_expression_spdx": "ISC",
+      "detection_count": 1,
+      "reference_matches": [
+        {
+          "license_expression": "isc",
+          "license_expression_spdx": "ISC",
+          "from_file": "cd-4jELcg/package/LICENSE",
+          "start_line": 1,
+          "end_line": 1,
+          "matcher": "2-aho",
+          "score": 99,
+          "matched_length": 2,
+          "match_coverage": 100,
+          "rule_relevance": 99,
+          "rule_identifier": "isc_22.RULE",
+          "rule_url": "https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/isc_22.RULE",
+          "matched_text": "The ISC License",
+          "matched_text_diagnostics": "ISC License"
+        },
+        {
+          "license_expression": "isc",
+          "license_expression_spdx": "ISC",
+          "from_file": "cd-4jELcg/package/LICENSE",
+          "start_line": 5,
+          "end_line": 15,
+          "matcher": "2-aho",
+          "score": 100,
+          "matched_length": 112,
+          "match_coverage": 100,
+          "rule_relevance": 100,
+          "rule_identifier": "isc.LICENSE",
+          "rule_url": "https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/licenses/isc.LICENSE",
+          "matched_text": "Permission to use, copy, modify, and/or distribute this software for any\npurpose with or without fee is hereby granted, provided that the above\ncopyright notice and this permission notice appear in all copies.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\" AND THE AUTHOR DISCLAIMS ALL WARRANTIES\nWITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF\nMERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR\nANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES\nWHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN\nACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR\nIN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.",
+          "matched_text_diagnostics": "Permission to use, copy, modify, and/or distribute this software for any\npurpose with or without fee is hereby granted, provided that the above\ncopyright notice and this permission notice appear in all copies.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\" AND THE AUTHOR DISCLAIMS ALL WARRANTIES\nWITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF\nMERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR\nANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES\nWHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN\nACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR\nIN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE."
+        }
+      ]
     },
     {
       "identifier": "isc-d21e4a8e-7cce-593b-6804-3c0c88f62348",
       "license_expression": "isc",
-      "detection_count": 1
+      "license_expression_spdx": "ISC",
+      "detection_count": 1,
+      "reference_matches": [
+        {
+          "license_expression": "isc",
+          "license_expression_spdx": "ISC",
+          "from_file": "cd-4jELcg/package/changelog.md",
+          "start_line": 51,
+          "end_line": 51,
+          "matcher": "2-aho",
+          "score": 99,
+          "matched_length": 2,
+          "match_coverage": 100,
+          "rule_relevance": 99,
+          "rule_identifier": "isc_22.RULE",
+          "rule_url": "https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/isc_22.RULE",
+          "matched_text": "- switch to ISC license",
+          "matched_text_diagnostics": "ISC license"
+        }
+      ]
     },
     {
       "identifier": "mit_and_isc-39fc4900-d3d1-3b03-adee-c12d89b75dd6",
       "license_expression": "mit AND isc",
-      "detection_count": 1
+      "license_expression_spdx": "MIT AND ISC",
+      "detection_count": 1,
+      "reference_matches": [
+        {
+          "license_expression": "mit",
+          "license_expression_spdx": "MIT",
+          "from_file": "cd-4jELcg/package/package.json",
+          "start_line": 40,
+          "end_line": 42,
+          "matcher": "2-aho",
+          "score": 71.25,
+          "matched_length": 3,
+          "match_coverage": 100,
+          "rule_relevance": 95,
+          "rule_identifier": "mit_602.RULE",
+          "rule_url": "https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/mit_602.RULE",
+          "matched_text": "    \"benchclean\": \"node benchclean.js\"\n  },\n  \"license\": \"ISC\"",
+          "matched_text_diagnostics": "node [benchclean].js\"\n  },\n  \"license\": \""
+        },
+        {
+          "license_expression": "isc",
+          "license_expression_spdx": "ISC",
+          "from_file": "cd-4jELcg/package/package.json",
+          "start_line": 42,
+          "end_line": 42,
+          "matcher": "2-aho",
+          "score": 100,
+          "matched_length": 2,
+          "match_coverage": 100,
+          "rule_relevance": 100,
+          "rule_identifier": "isc_38.RULE",
+          "rule_url": "https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/isc_38.RULE",
+          "matched_text": "  \"license\": \"ISC\"",
+          "matched_text_diagnostics": "license\": \"ISC\""
+        }
+      ]
     }
   ],
   "tallies": {
@@ -392,6 +503,235 @@
     "authors": [],
     "programming_language": []
   },
+  "license_references": [
+    {
+      "key": "isc",
+      "language": "en",
+      "short_name": "ISC License",
+      "name": "ISC License",
+      "category": "Permissive",
+      "owner": "ISC - Internet Systems Consortium",
+      "homepage_url": "https://www.isc.org/licenses/",
+      "notes": "Per SPDX.org, this license is OSI certified.",
+      "is_builtin": true,
+      "is_exception": false,
+      "is_unknown": false,
+      "is_generic": false,
+      "spdx_license_key": "ISC",
+      "other_spdx_license_keys": [],
+      "osi_license_key": null,
+      "text_urls": [
+        "http://fedoraproject.org/wiki/Licensing:MIT#Old_Style_with_legal_disclaimer_2",
+        "http://openbsd.wikia.com/wiki/OpenBSD%27s_BSD_license",
+        "http://opensource.org/licenses/isc-license.txt",
+        "https://www.isc.org/software/license"
+      ],
+      "osi_url": "http://opensource.org/licenses/isc-license.txt",
+      "faq_url": null,
+      "other_urls": [
+        "http://openbsd.wikia.com/wiki/OpenBSD%27s_BSD_license",
+        "http://www.isc.org/software/license",
+        "http://www.opensource.org/licenses/ISC",
+        "https://opensource.org/licenses/ISC",
+        "https://www.isc.org/downloads/software-support-policy/isc-license/",
+        "https://www.isc.org/isc-license-1.0.html",
+        "https://www.isc.org/software/license"
+      ],
+      "key_aliases": [],
+      "minimum_coverage": 0,
+      "standard_notice": null,
+      "ignorable_copyrights": [],
+      "ignorable_holders": [],
+      "ignorable_authors": [],
+      "ignorable_urls": [],
+      "ignorable_emails": [],
+      "text": "Permission to use, copy, modify, and/or distribute this software for any purpose\nwith or without fee is hereby granted, provided that the above copyright notice\nand this permission notice appear in all copies.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH\nREGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND\nFITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,\nINDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS\nOF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER\nTORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF\nTHIS SOFTWARE.",
+      "scancode_url": "https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/licenses/isc.LICENSE",
+      "licensedb_url": "https://scancode-licensedb.aboutcode.org/isc",
+      "spdx_url": "https://spdx.org/licenses/ISC"
+    },
+    {
+      "key": "mit",
+      "language": "en",
+      "short_name": "MIT License",
+      "name": "MIT License",
+      "category": "Permissive",
+      "owner": "MIT",
+      "homepage_url": "http://opensource.org/licenses/mit-license.php",
+      "notes": "Per SPDX.org, this license is OSI certified.",
+      "is_builtin": true,
+      "is_exception": false,
+      "is_unknown": false,
+      "is_generic": false,
+      "spdx_license_key": "MIT",
+      "other_spdx_license_keys": [
+        "LicenseRef-MIT-Bootstrap",
+        "LicenseRef-MIT-Discord",
+        "LicenseRef-MIT-TC",
+        "LicenseRef-MIT-Diehl"
+      ],
+      "osi_license_key": null,
+      "text_urls": [
+        "http://opensource.org/licenses/mit-license.php"
+      ],
+      "osi_url": "http://www.opensource.org/licenses/MIT",
+      "faq_url": "https://ieeexplore.ieee.org/document/9263265",
+      "other_urls": [
+        "https://opensource.com/article/18/3/patent-grant-mit-license",
+        "https://opensource.com/article/19/4/history-mit-license",
+        "https://opensource.org/licenses/MIT"
+      ],
+      "key_aliases": [],
+      "minimum_coverage": 0,
+      "standard_notice": null,
+      "ignorable_copyrights": [],
+      "ignorable_holders": [],
+      "ignorable_authors": [],
+      "ignorable_urls": [],
+      "ignorable_emails": [],
+      "text": "Permission is hereby granted, free of charge, to any person obtaining\na copy of this software and associated documentation files (the\n\"Software\"), to deal in the Software without restriction, including\nwithout limitation the rights to use, copy, modify, merge, publish,\ndistribute, sublicense, and/or sell copies of the Software, and to\npermit persons to whom the Software is furnished to do so, subject to\nthe following conditions:\n\nThe above copyright notice and this permission notice shall be\nincluded in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND,\nEXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF\nMERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.\nIN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY\nCLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,\nTORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE\nSOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.",
+      "scancode_url": "https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/licenses/mit.LICENSE",
+      "licensedb_url": "https://scancode-licensedb.aboutcode.org/mit",
+      "spdx_url": "https://spdx.org/licenses/MIT"
+    }
+  ],
+  "license_rule_references": [
+    {
+      "license_expression": "isc",
+      "identifier": "isc.LICENSE",
+      "language": "en",
+      "rule_url": "https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/licenses/isc.LICENSE",
+      "is_license_text": true,
+      "is_license_notice": false,
+      "is_license_reference": false,
+      "is_license_tag": false,
+      "is_license_intro": false,
+      "is_license_clue": false,
+      "is_continuous": false,
+      "is_builtin": true,
+      "is_from_license": true,
+      "is_synthetic": false,
+      "length": 112,
+      "relevance": 100,
+      "minimum_coverage": 0,
+      "referenced_filenames": [],
+      "notes": null,
+      "ignorable_copyrights": [],
+      "ignorable_holders": [],
+      "ignorable_authors": [],
+      "ignorable_urls": [],
+      "ignorable_emails": [],
+      "text": "Permission to use, copy, modify, and/or distribute this software for any purpose\nwith or without fee is hereby granted, provided that the above copyright notice\nand this permission notice appear in all copies.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH\nREGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND\nFITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,\nINDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS\nOF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER\nTORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF\nTHIS SOFTWARE."
+    },
+    {
+      "license_expression": "isc",
+      "identifier": "isc_22.RULE",
+      "language": "en",
+      "rule_url": "https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/isc_22.RULE",
+      "is_license_text": false,
+      "is_license_notice": false,
+      "is_license_reference": true,
+      "is_license_tag": false,
+      "is_license_intro": false,
+      "is_license_clue": false,
+      "is_continuous": false,
+      "is_builtin": true,
+      "is_from_license": false,
+      "is_synthetic": false,
+      "length": 2,
+      "relevance": 99,
+      "minimum_coverage": 100,
+      "referenced_filenames": [],
+      "notes": null,
+      "ignorable_copyrights": [],
+      "ignorable_holders": [],
+      "ignorable_authors": [],
+      "ignorable_urls": [],
+      "ignorable_emails": [],
+      "text": "ISC License"
+    },
+    {
+      "license_expression": "isc",
+      "identifier": "isc_38.RULE",
+      "language": "en",
+      "rule_url": "https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/isc_38.RULE",
+      "is_license_text": false,
+      "is_license_notice": false,
+      "is_license_reference": false,
+      "is_license_tag": true,
+      "is_license_intro": false,
+      "is_license_clue": false,
+      "is_continuous": false,
+      "is_builtin": true,
+      "is_from_license": false,
+      "is_synthetic": false,
+      "length": 2,
+      "relevance": 100,
+      "minimum_coverage": 100,
+      "referenced_filenames": [],
+      "notes": null,
+      "ignorable_copyrights": [],
+      "ignorable_holders": [],
+      "ignorable_authors": [],
+      "ignorable_urls": [],
+      "ignorable_emails": [],
+      "text": "\"license\": \"ISC\","
+    },
+    {
+      "license_expression": "mit",
+      "identifier": "mit_602.RULE",
+      "language": "en",
+      "rule_url": "https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/mit_602.RULE",
+      "is_license_text": false,
+      "is_license_notice": false,
+      "is_license_reference": true,
+      "is_license_tag": false,
+      "is_license_intro": false,
+      "is_license_clue": false,
+      "is_continuous": false,
+      "is_builtin": true,
+      "is_from_license": false,
+      "is_synthetic": false,
+      "length": 3,
+      "relevance": 95,
+      "minimum_coverage": 80,
+      "referenced_filenames": [],
+      "notes": null,
+      "ignorable_copyrights": [],
+      "ignorable_holders": [],
+      "ignorable_authors": [],
+      "ignorable_urls": [],
+      "ignorable_emails": [],
+      "text": "Node.js license."
+    },
+    {
+      "license_expression": "isc",
+      "identifier": "spdx-license-identifier-isc-9931cb7ad33c2eb18f322c94660b670a84186baa",
+      "language": "en",
+      "rule_url": null,
+      "is_license_text": false,
+      "is_license_notice": false,
+      "is_license_reference": false,
+      "is_license_tag": true,
+      "is_license_intro": false,
+      "is_license_clue": false,
+      "is_continuous": false,
+      "is_builtin": true,
+      "is_from_license": false,
+      "is_synthetic": true,
+      "length": 1,
+      "relevance": 100,
+      "minimum_coverage": 0,
+      "referenced_filenames": [],
+      "notes": null,
+      "ignorable_copyrights": [],
+      "ignorable_holders": [],
+      "ignorable_authors": [],
+      "ignorable_urls": [],
+      "ignorable_emails": [],
+      "text": "ISC"
+    }
+  ],
   "files": [
     {
       "path": "package",
@@ -458,7 +798,7 @@
       "is_script": false,
       "package_data": [],
       "for_packages": [
-        "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d"
+        "pkg:npm/glob@7.1.2?uuid=202e0916-57df-4632-a927-140b599d4a94"
       ],
       "is_legal": false,
       "is_manifest": false,
@@ -470,19 +810,23 @@
       "license_detections": [
         {
           "license_expression": "isc",
+          "license_expression_spdx": "ISC",
           "matches": [
             {
-              "score": 99,
+              "license_expression": "isc",
+              "spdx_license_expression": "ISC",
+              "from_file": "cd-4jELcg/package/changelog.md",
               "start_line": 51,
               "end_line": 51,
+              "matcher": "2-aho",
+              "score": 99,
               "matched_length": 2,
               "match_coverage": 100,
-              "matcher": "2-aho",
-              "license_expression": "isc",
-              "rule_identifier": "isc_22.RULE",
               "rule_relevance": 99,
+              "rule_identifier": "isc_22.RULE",
               "rule_url": "https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/isc_22.RULE",
-              "matched_text": "ISC license"
+              "matched_text": "- switch to ISC license",
+              "matched_text_diagnostics": "ISC license"
             }
           ],
           "identifier": "isc-d21e4a8e-7cce-593b-6804-3c0c88f62348"
@@ -523,7 +867,7 @@
       "is_script": false,
       "package_data": [],
       "for_packages": [
-        "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d"
+        "pkg:npm/glob@7.1.2?uuid=202e0916-57df-4632-a927-140b599d4a94"
       ],
       "is_legal": false,
       "is_manifest": false,
@@ -568,7 +912,7 @@
       "is_script": false,
       "package_data": [],
       "for_packages": [
-        "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d"
+        "pkg:npm/glob@7.1.2?uuid=202e0916-57df-4632-a927-140b599d4a94"
       ],
       "is_legal": false,
       "is_manifest": false,
@@ -619,7 +963,7 @@
       "is_script": false,
       "package_data": [],
       "for_packages": [
-        "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d"
+        "pkg:npm/glob@7.1.2?uuid=202e0916-57df-4632-a927-140b599d4a94"
       ],
       "is_legal": true,
       "is_manifest": false,
@@ -631,32 +975,39 @@
       "license_detections": [
         {
           "license_expression": "isc",
+          "license_expression_spdx": "ISC",
           "matches": [
             {
-              "score": 99,
+              "license_expression": "isc",
+              "spdx_license_expression": "ISC",
+              "from_file": "cd-4jELcg/package/LICENSE",
               "start_line": 1,
               "end_line": 1,
+              "matcher": "2-aho",
+              "score": 99,
               "matched_length": 2,
               "match_coverage": 100,
-              "matcher": "2-aho",
-              "license_expression": "isc",
-              "rule_identifier": "isc_22.RULE",
               "rule_relevance": 99,
+              "rule_identifier": "isc_22.RULE",
               "rule_url": "https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/isc_22.RULE",
-              "matched_text": "ISC License"
+              "matched_text": "The ISC License",
+              "matched_text_diagnostics": "ISC License"
             },
             {
-              "score": 100,   
+              "license_expression": "isc",
+              "spdx_license_expression": "ISC",
+              "from_file": "cd-4jELcg/package/LICENSE",
               "start_line": 5,
               "end_line": 15,
+              "matcher": "2-aho",
+              "score": 100,
               "matched_length": 112,
               "match_coverage": 100,
-              "matcher": "2-aho",
-              "license_expression": "isc",
-              "rule_identifier": "isc.LICENSE",
               "rule_relevance": 100,
+              "rule_identifier": "isc.LICENSE",
               "rule_url": "https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/licenses/isc.LICENSE",
-              "matched_text": "Permission to use, copy, modify, and/or distribute this software for any\npurpose with or without fee is hereby granted, provided that the above\ncopyright notice and this permission notice appear in all copies.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\" AND THE AUTHOR DISCLAIMS ALL WARRANTIES\nWITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF\nMERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR\nANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES\nWHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN\nACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR\nIN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE."
+              "matched_text": "Permission to use, copy, modify, and/or distribute this software for any\npurpose with or without fee is hereby granted, provided that the above\ncopyright notice and this permission notice appear in all copies.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\" AND THE AUTHOR DISCLAIMS ALL WARRANTIES\nWITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF\nMERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR\nANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES\nWHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN\nACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR\nIN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.",
+              "matched_text_diagnostics": "Permission to use, copy, modify, and/or distribute this software for any\npurpose with or without fee is hereby granted, provided that the above\ncopyright notice and this permission notice appear in all copies.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\" AND THE AUTHOR DISCLAIMS ALL WARRANTIES\nWITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF\nMERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR\nANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES\nWHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN\nACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR\nIN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE."
             }
           ],
           "identifier": "isc-90dc51e4-d418-5a40-d42f-6b015cf53d02"
@@ -745,17 +1096,20 @@
           "license_detections": [
             {
               "license_expression": "isc",
+              "license_expression_spdx": "ISC",
               "matches": [
                 {
-                  "score": 100,
+                  "license_expression": "isc",
+                  "spdx_license_expression": "ISC",
+                  "from_file": "cd-4jELcg/package/package.json",
                   "start_line": 1,
                   "end_line": 1,
+                  "matcher": "1-spdx-id",
+                  "score": 100,
                   "matched_length": 1,
                   "match_coverage": 100,
-                  "matcher": "1-spdx-id",
-                  "license_expression": "isc",
-                  "rule_identifier": "spdx-license-identifier-isc-9931cb7ad33c2eb18f322c94660b670a84186baa",
                   "rule_relevance": 100,
+                  "rule_identifier": "spdx-license-identifier-isc-9931cb7ad33c2eb18f322c94660b670a84186baa",
                   "rule_url": null,
                   "matched_text": "ISC"
                 }
@@ -881,7 +1235,7 @@
         }
       ],
       "for_packages": [
-        "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d"
+        "pkg:npm/glob@7.1.2?uuid=202e0916-57df-4632-a927-140b599d4a94"
       ],
       "is_legal": false,
       "is_manifest": false,
@@ -893,32 +1247,39 @@
       "license_detections": [
         {
           "license_expression": "mit AND isc",
+          "license_expression_spdx": "MIT AND ISC",
           "matches": [
             {
-              "score": 71.25,
+              "license_expression": "mit",
+              "spdx_license_expression": "MIT",
+              "from_file": "cd-4jELcg/package/package.json",
               "start_line": 40,
               "end_line": 42,
+              "matcher": "2-aho",
+              "score": 71.25,
               "matched_length": 3,
               "match_coverage": 100,
-              "matcher": "2-aho",
-              "license_expression": "mit",
-              "rule_identifier": "mit_602.RULE",
               "rule_relevance": 95,
+              "rule_identifier": "mit_602.RULE",
               "rule_url": "https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/mit_602.RULE",
-              "matched_text": "node [benchclean].js\"\n  },\n  \"license\": \""
+              "matched_text": "    \"benchclean\": \"node benchclean.js\"\n  },\n  \"license\": \"ISC\"",
+              "matched_text_diagnostics": "node [benchclean].js\"\n  },\n  \"license\": \""
             },
             {
-              "score": 100,
+              "license_expression": "isc",
+              "spdx_license_expression": "ISC",
+              "from_file": "cd-4jELcg/package/package.json",
               "start_line": 42,
               "end_line": 42,
+              "matcher": "2-aho",
+              "score": 100,
               "matched_length": 2,
               "match_coverage": 100,
-              "matcher": "2-aho",
-              "license_expression": "isc",
-              "rule_identifier": "isc_38.RULE",
               "rule_relevance": 100,
+              "rule_identifier": "isc_38.RULE",
               "rule_url": "https://github.com/nexB/scancode-toolkit/tree/develop/src/licensedcode/data/rules/isc_38.RULE",
-              "matched_text": "license\": \"ISC\""
+              "matched_text": "  \"license\": \"ISC\"",
+              "matched_text_diagnostics": "license\": \"ISC\""
             }
           ],
           "identifier": "mit_and_isc-39fc4900-d3d1-3b03-adee-c12d89b75dd6"
@@ -982,7 +1343,7 @@
       "is_script": false,
       "package_data": [],
       "for_packages": [
-        "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d"
+        "pkg:npm/glob@7.1.2?uuid=202e0916-57df-4632-a927-140b599d4a94"
       ],
       "is_legal": false,
       "is_manifest": false,
@@ -1063,7 +1424,7 @@
       "is_script": false,
       "package_data": [],
       "for_packages": [
-        "pkg:npm/glob@7.1.2?uuid=00b145f8-932f-4982-b5d6-0e054d09405d"
+        "pkg:npm/glob@7.1.2?uuid=202e0916-57df-4632-a927-140b599d4a94"
       ],
       "is_legal": false,
       "is_manifest": false,
