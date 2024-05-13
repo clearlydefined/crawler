@@ -35,6 +35,16 @@ const npm = {
   fossology
 }
 
+const conda = {
+  _type: 'conda',
+  source,
+  clearlydefined,
+  licensee,
+  reuse,
+  scancode,
+  fossology
+}
+
 const crate = {
   _type: 'crate',
   source,
@@ -127,6 +137,7 @@ const gem = {
 const _package = {
   _type: 'package',
   npm,
+  conda,
   crate,
   deb,
   go,
@@ -156,6 +167,7 @@ const entities = {
   licensee,
   reuse,
   npm,
+  conda,
   crate,
   deb,
   go,

@@ -38,7 +38,7 @@ RUN gem install nokogiri:1.12.5 --no-document && \
 
 # REUSE
 RUN pip3 install setuptools
-RUN pip3 install reuse
+RUN pip3 install reuse==3.0.1
 
 # Crawler config
 ENV CRAWLER_DEADLETTER_PROVIDER=cd(azblob)

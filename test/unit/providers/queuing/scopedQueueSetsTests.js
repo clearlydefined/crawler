@@ -11,7 +11,6 @@ const QueueSet = require('../../../../ghcrawler/providers/queuing/queueSet.js')
 const EventEmitter = require('events')
 
 describe('scopedQueueSets', () => {
-
   describe('subscription management', () => {
     let scopedQueues
     let globalQueues
@@ -286,7 +285,7 @@ describe('integration test with AttenuatedQueue and InMemoryCrawlQueue', () => {
     options = {
       _config: new EventEmitter(),
       logger: {
-        verbose: sinon.stub(),
+        verbose: sinon.stub()
       }
     }
     queueSets = createScopedQueueSets(queueName, options)

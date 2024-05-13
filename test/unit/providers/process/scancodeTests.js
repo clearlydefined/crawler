@@ -39,7 +39,7 @@ describe('ScanCode misc', () => {
     const handlerFactory = proxyquire('../../../../providers/process/scancode', {
       fs: fsStub
     })
-    Handler = handlerFactory({ logger: { log: () => { } } })
+    Handler = handlerFactory({ logger: { log: () => {} } })
     Handler._resultBox = resultBox
   })
 

@@ -81,7 +81,7 @@ describe('Crate processing', () => {
 })
 
 async function setup() {
-  const processor = CrateExtract({ logger: {} }, () => { })
+  const processor = CrateExtract({ logger: {} }, () => {})
   processor._detectLicenses = () => 'MIT'
   processor.linkAndQueueTool = sinon.stub()
   const request = createRequest()

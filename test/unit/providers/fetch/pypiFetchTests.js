@@ -58,7 +58,7 @@ describe('pypiFetch handle function', () => {
     // release information in the registry data is empty
     requestGetStub.returns({
       body: {
-        'releases': { '1.10.0': [] }
+        releases: { '1.10.0': [] }
       },
       statusCode: 200
     })
@@ -91,7 +91,7 @@ describe('pypiFetch handle function', () => {
       'GNU Lesser General Public License v3.0': 'LGPL-3.0-or-later',
       'GNU LGPL v3.0': 'LGPL-3.0-or-later',
       '(LGPL)': 'LGPL-3.0-or-later',
-      'LGLP3': 'LGPL-3.0-or-later',
+      LGLP3: 'LGPL-3.0-or-later',
       'LGPL 2.1': 'LGPL-2.1-only',
       'LGPL 3': 'LGPL-3.0-or-later',
       'LGPL 3.0': 'LGPL-3.0-or-later',
@@ -99,19 +99,19 @@ describe('pypiFetch handle function', () => {
       'LGPL v2': 'LGPL-2.0-only',
       'LGPL v2+': 'LGPL-2.0-or-later',
       'LGPL v3': 'LGPL-3.0-or-later',
-      'LGPL': 'LGPL-3.0-or-later',
+      LGPL: 'LGPL-3.0-or-later',
       'LGPL-2': 'LGPL-2.0-only',
       'LGPL-3': 'LGPL-3.0-or-later',
       'LGPL.v3': 'LGPL-3.0-or-later',
-      'LGPL2': 'LGPL-2.0-only',
+      LGPL2: 'LGPL-2.0-only',
       'LGPL2.1': 'LGPL-2.1-only',
       'LGPL2.1+': 'LGPL-2.1-or-later',
-      'LGPL3': 'LGPL-3.0-or-later',
+      LGPL3: 'LGPL-3.0-or-later',
       'LGPL3+': 'LGPL-3.0-or-later',
       'LGPL3.0': 'LGPL-3.0-or-later',
       'LGPL:': 'LGPL-3.0-or-later',
       'LGPLv2.1': 'LGPL-2.1-only',
-      'LGPLv3': 'LGPL-3.0-or-later',
+      LGPLv3: 'LGPL-3.0-or-later',
       'LGPLv3+': 'LGPL-3.0-or-later',
       'LGPL-2.0+': 'LGPL-2.0-or-later',
       'LGPL-2.1+': 'LGPL-2.1-or-later',
