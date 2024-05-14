@@ -60,7 +60,7 @@ describe('NPM processing', () => {
 })
 
 async function setup() {
-  const processor = npmExtract({ logger: {} }, () => { })
+  const processor = npmExtract({ logger: {} }, () => {})
   processor._detectLicenses = () => 'MIT'
   processor.linkAndQueueTool = sinon.stub()
   const request = createRequest()
@@ -79,14 +79,14 @@ function createRequest() {
 
 describe('npmExtract source discovery', () => {
   it('discovers source candidates', async () => {
-    const processor = npmExtract({ logger: { info: () => { } } }, () => { })
+    const processor = npmExtract({ logger: { info: () => {} } }, () => {})
     const manifest = { repository: { url: 'one' }, url: 'two', homepage: 'three', bugs: 'http://four' }
     const candidates = processor._discoverCandidateSourceLocations(manifest)
     expect(candidates).to.have.members(['one', 'two', 'three', 'http://four'])
   })
 
   it('discovers source candidates with odd structures', async () => {
-    const processor = npmExtract({ logger: { info: () => { } } }, () => { })
+    const processor = npmExtract({ logger: { info: () => {} } }, () => {})
     const manifest = { repository: { url: 'one' }, url: 'two', homepage: ['three', 'four'], bugs: { url: 'five' } }
     const candidates = processor._discoverCandidateSourceLocations(manifest)
     expect(candidates).to.have.members(['one', 'two', 'three', 'five'])

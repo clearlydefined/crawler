@@ -182,11 +182,7 @@ describe('link and queue local tasks', () => {
     const request = new Request('npm', 'cd:/npm/npmjs/-/redie/0.3.0')
     processor.addLocalToolTasks(request)
     expect(processor.linkAndQueueTool.callCount).to.be.equal(3)
-    expect(processor.linkAndQueueTool.args.map(call => call[1])).to.have.members([
-      'licensee',
-      'scancode',
-      'reuse'
-    ])
+    expect(processor.linkAndQueueTool.args.map(call => call[1])).to.have.members(['licensee', 'scancode', 'reuse'])
   })
 })
 

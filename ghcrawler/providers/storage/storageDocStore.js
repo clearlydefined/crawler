@@ -103,7 +103,8 @@ class AzureStorageDocStore {
               reject(error)
             }
             return resolve(response)
-          })
+          }
+        )
       })
       entries = entries.concat(
         result.entries.map(entry => {
@@ -162,7 +163,8 @@ class AzureStorageDocStore {
               reject(error)
             }
             return resolve(response)
-          })
+          }
+        )
       })
       entryCount += result.entries.length
     } while (continuationToken)
