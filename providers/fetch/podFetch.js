@@ -89,8 +89,9 @@ class PodFetch extends AbstractFetch {
   async _getSourceArchive(dir, url, podspec) {
     const archive = path.join(dir.name, `${podspec.name}-${podspec.version}.archive`)
     const output = path.join(dir.name, `${podspec.name}-${podspec.version}`)
+    const response = await callFetch({ url: url, responseType: 'stream' })
     return new Promise((resolve, reject) => {
-      callFetch({ url: url, responseType: 'stream' }).pipe(
+      response.pipe(
         fs
           .createWriteStream(archive)
           .on('finish', async () => {

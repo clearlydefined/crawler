@@ -12,6 +12,28 @@ describe('CallFetch', () => {
     expect(response).to.be.deep.equal(JSON.parse(fs.readFileSync('test/fixtures/fetch/redis-0.1.0.json')))
   })
 
+  it('checks if the full response is fetched', async () => {
+    const response = await callFetch({
+      url: 'https://registry.npmjs.com/redis/0.1.0',
+      method: 'GET',
+      responseType: 'json',
+      resolveWithFullResponse: true
+    })
+    expect(response.status).to.be.equal(200)
+    expect(response.statusText).to.be.equal('OK')
+  })
+
+  it('checks if the full response is fetched with error code', async () => {
+    const response = await callFetch({
+      url: 'https://registry.npmjs.com/redis/0.',
+      method: 'GET',
+      responseType: 'json',
+      resolveWithFullResponse: true
+    })
+    expect(response.status).to.be.equal(404)
+    expect(response.statusText).to.be.equal('Not Found')
+  })
+
   it('checks if the response is text while sending GET request', async () => {
     const response = await callFetch({
       url: 'https://proxy.golang.org/rsc.io/quote/@v/v1.3.0.mod',
