@@ -100,14 +100,16 @@ function run(service, logger) {
    * Event listener for HTTP server 'close' event.
    */
   function onClose() {
-    service.stop()
-      .then(() => {
+    service.stop().then(
+      () => {
         console.log('Server closed.')
         process.exit(0)
-      }, error => {
+      },
+      error => {
         console.error(`Closing server: ${error}`)
         process.exit(1)
-      })
+      }
+    )
   }
 
   /**

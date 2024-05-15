@@ -20,7 +20,7 @@ class GoFetch extends AbstractFetch {
     axiosRetry(axios, {
       retries: 5,
       retryDelay: exponentialDelay,
-      retryCondition: (err) => {
+      retryCondition: err => {
         return isNetworkOrIdempotentRequestError(err) || err.response?.status == 429
       }
     })
@@ -59,7 +59,10 @@ class GoFetch extends AbstractFetch {
     try {
       registryData = await this._getRegistryData(spec)
     } catch (err) {
-      if (err instanceof RequeueError && (request.attemptCount === undefined || request.attemptCount < this.options.maxRequeueAttemptCount)) {
+      if (
+        err instanceof RequeueError &&
+        (request.attemptCount === undefined || request.attemptCount < this.options.maxRequeueAttemptCount)
+      ) {
         return request.markRequeue('Throttled', err.message)
       }
     }
@@ -102,7 +105,7 @@ class GoFetch extends AbstractFetch {
   }
 
   _replace_encodings(url) {
-    return `${url.replace(/%2f/ig, '/')}`
+    return `${url.replace(/%2f/gi, '/')}`
   }
 
   async _getArtifact(spec, destination) {
@@ -164,7 +167,9 @@ class GoFetch extends AbstractFetch {
         this.logger.info(msg)
         throw new RequeueError(msg)
       }
-      this.logger.info(`Getting declared license from pkg.go.dev failed. ${JSON.stringify(err.response?.data || err.request || err.message)}`)
+      this.logger.info(
+        `Getting declared license from pkg.go.dev failed. ${JSON.stringify(err.response?.data || err.request || err.message)}`
+      )
     }
   }
 

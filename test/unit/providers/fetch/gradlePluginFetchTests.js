@@ -9,7 +9,6 @@ const GradlePluginFetch = require('../../../../providers/fetch/gradlePluginFetch
 const Request = require('../../../../ghcrawler').request
 
 describe('Gradle plugin fetch', () => {
-
   describe('look up latest version in maven meta data', () => {
     const spec = {
       type: 'maven',
@@ -127,7 +126,9 @@ describe('Gradle plugin fetch', () => {
     })
 
     it('test success with sourcearchive', async () => {
-      const request = await handler.handle(new Request('test', 'cd:/sourcearchive/gradleplugin/org.eclipse/swt/3.3.0-v3344'))
+      const request = await handler.handle(
+        new Request('test', 'cd:/sourcearchive/gradleplugin/org.eclipse/swt/3.3.0-v3344')
+      )
       verifySuccess(request.fetchResult)
       expect(request.fetchResult.casedSpec.revision).to.equal('3.3.0-v3344')
       expect(request.fetchResult.document.location).to.be.a('string')
@@ -153,7 +154,9 @@ describe('Gradle plugin fetch', () => {
         response.end()
         return response
       }
-      const request = await handler.handle(new Request('test', 'cd:/sourcearchive/gradleplugin/org.eclipse/swt/3.3.0-v3344'))
+      const request = await handler.handle(
+        new Request('test', 'cd:/sourcearchive/gradleplugin/org.eclipse/swt/3.3.0-v3344')
+      )
       expect(request.processControl).to.be.equal('skip')
     })
   })

@@ -6,7 +6,6 @@ const proxyquire = require('proxyquire')
 const Request = require('../../../../ghcrawler/lib/request.js')
 
 describe('podFetch', () => {
-
   const loadJson = fileName => {
     return JSON.parse(fs.readFileSync(`test/fixtures/pod/${fileName}`))
   }
