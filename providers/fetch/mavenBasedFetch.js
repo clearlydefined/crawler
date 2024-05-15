@@ -115,7 +115,7 @@ class MavenBasedFetch extends AbstractFetch {
 
   async _getPom(spec) {
     const url = this._buildUrl(spec, extensionMap.pom)
-    const content = await this._requestPromise({ url, responseType:'text' })
+    const content = await this._requestPromise({ url, responseType: 'text' })
     if (!content) return null
     const pom = await parseString(content)
     // clean up some stuff we don't actually look at.

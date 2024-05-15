@@ -143,7 +143,9 @@ describe('Gradle plugin fetch', () => {
 
     it('handle no pom found', async () => {
       handler._handleCallFetch = sinon.stub().rejects({ statusCode: 404 })
-      const request = await handler.handle(new Request('test', 'cd:/sourcearchive/gradleplugin/org.eclipse/swt/3.3.0-v3344'))
+      const request = await handler.handle(
+        new Request('test', 'cd:/sourcearchive/gradleplugin/org.eclipse/swt/3.3.0-v3344')
+      )
       expect(request.processControl).to.be.equal('skip')
     })
 

@@ -35,7 +35,7 @@ class CratesioFetch extends AbstractFetch {
       releaseDate: version.created_at,
       location,
       hashes: await this.computeHashes(zip),
-      manifest: registryData.manifest
+      manifest: registryData.manifest,
     }
     if (version.crate) {
       fetchResult.casedSpec = clone(spec)
@@ -52,21 +52,19 @@ class CratesioFetch extends AbstractFetch {
       registryData = await callFetch({
         url: `https://crates.io/api/v1/crates/${spec.name}`,
         responseType: 'json',
-        headers: { 'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)' }
+        headers: { 'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)' },
       })
     } catch (exception) {
       if (exception.statusCode !== 404) throw exception
       return null
     }
     if (!registryData.versions) return null
-    const version = spec.revision || this.getLatestVersion(registryData.versions.map(x => x.num))
+    const version = spec.revision || this.getLatestVersion(registryData.versions.map((x) => x.num))
     return {
       manifest: registryData.crate,
-      version: registryData.versions.find(x => x.num === version)
+      version: registryData.versions.find((x) => x.num === version),
     }
   }
-
-
 
   // Example: https://crates.io/api/v1/crates/bitflags/1.0.4/download
   async _getPackage(zip, version) {
@@ -75,18 +73,18 @@ class CratesioFetch extends AbstractFetch {
       responseType: 'stream',
       headers: {
         'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)',
-        'Accept': 'text/html'
-      }
+        Accept: 'text/html',
+      },
     })
     return new Promise((resolve, reject) => {
       response.pipe(
         fs
           .createWriteStream(zip)
           .on('finish', () => resolve(null))
-          .on('error', reject)
+          .on('error', reject),
       )
     })
   }
 }
 
-module.exports = options => new CratesioFetch(options)
+module.exports = (options) => new CratesioFetch(options)
