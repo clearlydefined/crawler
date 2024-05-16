@@ -56,7 +56,9 @@ class FetchDispatcher extends AbstractFetch {
     if (!force && this.filter && !this.filter.shouldFetch(request)) return request
     // get the right real fetcher for this request and dispatch
     const handler = this._getHandler(request, this.fetchers)
-    if (!handler) throw new Error(`No fetcher found for ${request.toString()}`)
+    if (!handler) {
+      throw new Error(`No fetcher found for ${request.toString()}`)
+    }
 
     await this._fetchResult(request, handler)
     return request
@@ -64,18 +66,19 @@ class FetchDispatcher extends AbstractFetch {
 
   async _fetchResult(request, handler) {
     const cacheKey = this.toSpec(request).toUrlPath()
-    const fetchResult = this.fetched.get(cacheKey) || await this._fetchPromise(handler, request, cacheKey)
+    const fetchResult = this.fetched.get(cacheKey) || (await this._fetchPromise(handler, request, cacheKey))
     fetchResult?.decorate(request)
   }
 
   _fetchPromise(handler, request, cacheKey) {
-    return this.inProgressFetches[cacheKey] ||
+    return (
+      this.inProgressFetches[cacheKey] ||
       (this.inProgressFetches[cacheKey] = this._createFetchPromise(handler, request, cacheKey))
+    )
   }
 
   _createFetchPromise(handler, request, cacheKey) {
-    return this._fetch(handler, request, cacheKey)
-      .finally(() => delete this.inProgressFetches[cacheKey])
+    return this._fetch(handler, request, cacheKey).finally(() => delete this.inProgressFetches[cacheKey])
   }
 
   async _fetch(handler, request, cacheKey) {
@@ -94,7 +97,8 @@ class FetchDispatcher extends AbstractFetch {
       cacheKey,
       fetchResult,
       this._cleanupResult.bind(this),
-      (key, result) => !result.isInUse())
+      (key, result) => !result.isInUse()
+    )
   }
 
   _cleanupResult(key, result) {
