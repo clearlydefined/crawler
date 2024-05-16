@@ -3,7 +3,15 @@
 
 const chai = require('chai')
 const chaiAsPromised = require('chai-as-promised')
-const { normalizePath, normalizePaths, trimParents, trimAllParents, extractDate, spawnPromisified } = require('../../../lib/utils')
+const {
+  normalizePath,
+  normalizePaths,
+  trimParents,
+  trimAllParents,
+  extractDate,
+  spawnPromisified,
+  isGitFile
+} = require('../../../lib/utils')
 const { promisify } = require('util')
 const execFile = promisify(require('child_process').execFile)
 chai.use(chaiAsPromised)
@@ -56,6 +64,21 @@ describe('Utils path functions', () => {
   })
 })
 
+describe('Util isGitFile', () => {
+  const entries = new Map([
+    [null, false],
+    ['/', false],
+    ['/tmp/tempX/package/src', false],
+    ['.git', true],
+    ['/tmp/tempX/package/.git', true],
+    ['/tmp/tempX/package/.git/hooks/pre-merge-commit.sample', true]
+  ])
+
+  entries.forEach((expected, file) => {
+    it(`should return ${expected} for isGitFile given '${file}'`, () => expect(isGitFile(file)).to.eq(expected))
+  })
+})
+
 describe('Util extractDate', () => {
   it('handle null', () => {
     expect(extractDate(null)).to.be.null
@@ -89,9 +112,8 @@ describe('Util extractDate', () => {
 })
 
 describe('test spawnPromisified ', () => {
-
   it('should handle spawn + command successfully', async () => {
-    const { stdout: expected} = await execFile('ls', ['-l'])
+    const { stdout: expected } = await execFile('ls', ['-l'])
     const actual = await spawnPromisified('ls', ['-l'])
     expect(actual).to.be.equal(expected)
   })
@@ -129,4 +151,3 @@ async function getError(promise) {
     return error
   }
 }
-

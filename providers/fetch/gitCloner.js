@@ -7,7 +7,7 @@ const { clone } = require('lodash')
 const rimraf = require('rimraf')
 const FetchResult = require('../../lib/fetchResult')
 
-const providerDictionary = {
+const providerMap = {
   gitlab: 'https://gitlab.com',
   github: 'https://github.com'
 }
@@ -95,7 +95,7 @@ class GitCloner extends AbstractFetch {
 
   _buildUrl(spec) {
     const fullName = `${spec.namespace.replace(/\./g, '/')}/${spec.name}`
-    return `${providerDictionary[spec.provider]}/${fullName}.git`
+    return `${providerMap[spec.provider]}/${fullName}.git`
   }
 }
 
