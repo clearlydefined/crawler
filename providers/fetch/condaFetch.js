@@ -11,7 +11,7 @@ const FetchResult = require('../../lib/fetchResult')
 class CondaFetch extends AbstractFetch {
   constructor(options) {
     super(options)
-    this.packageMapFolder = this.options.cdFileLocation
+    this.packageMapPrefix = this.options.cdFileLocation
     this.channels = {
       'anaconda-main': 'https://repo.anaconda.com/pkgs/main',
       'anaconda-r': 'https://repo.anaconda.com/pkgs/r',
@@ -210,7 +210,7 @@ class CondaFetch extends AbstractFetch {
       `${condaChannelID}-channelDataFile`,
       `${condaChannelUrl}/channeldata.json`,
       this.CACHE_DURATION,
-      `${this.packageMapFolder}/${condaChannelID}-channelDataFile.json`
+      `${this.packageMapPrefix}-${condaChannelID}-channelDataFile.json`
     )
   }
 
@@ -219,7 +219,7 @@ class CondaFetch extends AbstractFetch {
       `${condaChannelID}-repoDataFile-${architecture}`,
       `${condaChannelUrl}/${architecture}/repodata.json`,
       this.CACHE_DURATION,
-      `${this.packageMapFolder}/${condaChannelID}-repoDataFile-${architecture}.json`
+      `${this.packageMapPrefix}-${condaChannelID}-repoDataFile-${architecture}.json`
     )
   }
 }
