@@ -50,27 +50,6 @@
         "<node_internals>/**/*.js"
       ],
       "showAsyncStacks": true
-    },
-    {
-      "name": "Coverage",
-      "type": "node",
-      "request": "launch",
-      "program": "${workspaceRoot}/node_modules/istanbul/lib/cli.js",
-      "stopOnEntry": false,
-      "args": [
-        "cover",
-        "${workspaceRoot}/node_modules/mocha/bin/_mocha",
-        "${workspaceRoot}/test/unit/**/*.js"
-      ],
-      "cwd": "${workspaceRoot}",
-      "runtimeExecutable": null,
-      "runtimeArgs": [
-        "--nolazy"
-      ],
-      "env": {
-        "NODE_ENV": "localhost"
-      },
-      "console": "internalConsole"
     }
   ]
 }
