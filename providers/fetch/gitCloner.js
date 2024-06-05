@@ -4,7 +4,7 @@
 const AbstractFetch = require('./abstractFetch')
 const { exec } = require('child_process')
 const { clone } = require('lodash')
-const rimraf = require('rimraf')
+const { rm } = require('fs').promises
 const FetchResult = require('../../lib/fetchResult')
 
 const providerMap = {
@@ -86,11 +86,7 @@ class GitCloner extends AbstractFetch {
   }
 
   _deleteGitDatabase(dirName, specName) {
-    return new Promise((resolve, reject) => {
-      rimraf(`${dirName}/${specName}/.git`, error => {
-        error ? reject(error) : resolve()
-      })
-    })
+    return rm(`${dirName}/${specName}/.git`, { recursive: true, force: true })
   }
 
   _buildUrl(spec) {
