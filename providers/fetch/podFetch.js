@@ -151,10 +151,7 @@ class PodFetch extends AbstractFetch {
     // Ported from: https://www.rubydoc.info/gems/cocoapods-core/Pod%2FSource%2FMetadata:path_fragment
     let prefixes
     if (prefixLengths.length > 0) {
-      let hashedName = crypto
-        .createHash('md5')
-        .update(spec.name)
-        .digest('hex')
+      let hashedName = crypto.createHash('md5').update(spec.name).digest('hex')
       prefixes = prefixLengths.map(function (length) {
         const prefix = hashedName.slice(0, length)
         hashedName = hashedName.substring(length)

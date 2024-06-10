@@ -9,19 +9,28 @@ const Request = require('../../../../ghcrawler').request
 const fs = require('fs')
 const { merge } = require('lodash')
 
-const stub = 'https://proxy.golang.org/'
+const goBaseURL = 'https://proxy.golang.org/'
 
 describe('Go utility functions', () => {
   it('builds URLs', () => {
     const fetch = GoFetch({})
-    expect(fetch._buildUrl(spec('go', 'golang', 'cloud.google.com', 'go', 'v0.56.0'))).to.equal(stub + 'cloud.google.com/go/@v/v0.56.0.zip')
-    expect(fetch._buildUrl(spec('go', 'golang', 'cloud.google.com', 'go', 'v0.56.0'), '.mod')).to.equal(stub + 'cloud.google.com/go/@v/v0.56.0.mod')
-    expect(fetch._buildUrl(spec('go', 'golang', '-', 'collectd.org', 'v0.5.0'))).to.equal(stub + 'collectd.org/@v/v0.5.0.zip')
-    expect(fetch._buildUrl(spec('go', 'golang', 'github.com%2fAzure%2fazure-event-hubs-go', 'v3', 'v3.2.0'))).to.equal(stub + 'github.com/Azure/azure-event-hubs-go/v3/@v/v3.2.0.zip')
-    expect(fetch._buildUrl(spec('go', 'golang', 'github.com%2FAzure%2Fazure-event-hubs-go', 'v3', 'v3.2.0'))).to.equal(stub + 'github.com/Azure/azure-event-hubs-go/v3/@v/v3.2.0.zip')
+    expect(fetch._buildUrl(spec('go', 'golang', 'cloud.google.com', 'go', 'v0.56.0'))).to.equal(
+      goBaseURL + 'cloud.google.com/go/@v/v0.56.0.zip'
+    )
+    expect(fetch._buildUrl(spec('go', 'golang', 'cloud.google.com', 'go', 'v0.56.0'), '.mod')).to.equal(
+      goBaseURL + 'cloud.google.com/go/@v/v0.56.0.mod'
+    )
+    expect(fetch._buildUrl(spec('go', 'golang', '-', 'collectd.org', 'v0.5.0'))).to.equal(
+      goBaseURL + 'collectd.org/@v/v0.5.0.zip'
+    )
+    expect(fetch._buildUrl(spec('go', 'golang', 'github.com%2fAzure%2fazure-event-hubs-go', 'v3', 'v3.2.0'))).to.equal(
+      goBaseURL + 'github.com/Azure/azure-event-hubs-go/v3/@v/v3.2.0.zip'
+    )
+    expect(fetch._buildUrl(spec('go', 'golang', 'github.com%2FAzure%2Fazure-event-hubs-go', 'v3', 'v3.2.0'))).to.equal(
+      goBaseURL + 'github.com/Azure/azure-event-hubs-go/v3/@v/v3.2.0.zip'
+    )
   })
 })
-
 
 const hashes = {
   'v1.3.0.zip': {
@@ -33,7 +42,6 @@ const hashes = {
 let Fetch
 
 function pickArtifact(url) {
-
   if (url.endsWith('.mod')) return 'v1.3.0.mod'
   if (url.endsWith('.info')) return 'v1.3.0.info'
   if (url.endsWith('.zip')) return 'v1.3.0.zip'
@@ -47,6 +55,7 @@ describe('Go Proxy fetching', () => {
   beforeEach(() => {
     const requestPromiseStub = options => {
       if (options.url) {
+        expect(options.url).to.contain(goBaseURL)
         if (options.url.includes('error')) throw new Error('yikes')
         if (options.url.includes('code')) throw { statusCode: 500, message: 'Code' }
         if (options.url.includes('missing')) throw { statusCode: 404 }
@@ -79,7 +88,7 @@ describe('Go Proxy fetching', () => {
     }
     Fetch = proxyquire('../../../../providers/fetch/goFetch', {
       request: { get: getStub },
-      'request-promise-native': requestPromiseStub,
+      'request-promise-native': requestPromiseStub
     })
   })
 
@@ -151,14 +160,16 @@ describe('Go Proxy fetching', () => {
     const handler = Fetch({
       logger: {
         log: sinon.spy(),
-        info: sinon.spy(),
+        info: sinon.spy()
       },
       http: {
-        get: sinon.stub().throws(merge(new Error(), {
-          response: {
-            status: 429
-          }
-        }))
+        get: sinon.stub().throws(
+          merge(new Error(), {
+            response: {
+              status: 429
+            }
+          })
+        )
       }
     })
     const request = await handler.handle(new Request('test', 'cd:/go/golang/rsc.io/quote/v1.3.0'))
@@ -169,14 +180,16 @@ describe('Go Proxy fetching', () => {
     const handler = Fetch({
       logger: {
         log: sinon.spy(),
-        info: sinon.spy(),
+        info: sinon.spy()
       },
       http: {
-        get: sinon.stub().throws(merge(new Error(), {
-          response: {
-            status: 429
-          }
-        }))
+        get: sinon.stub().throws(
+          merge(new Error(), {
+            response: {
+              status: 429
+            }
+          })
+        )
       }
     })
     let request = new Request('test', 'cd:/go/golang/rsc.io/quote/v1.3.0')
@@ -189,14 +202,16 @@ describe('Go Proxy fetching', () => {
     const handler = Fetch({
       logger: {
         log: sinon.spy(),
-        info: sinon.spy(),
+        info: sinon.spy()
       },
       http: {
-        get: sinon.stub().throws(merge(new Error(), {
-          response: {
-            status: 404
-          }
-        }))
+        get: sinon.stub().throws(
+          merge(new Error(), {
+            response: {
+              status: 404
+            }
+          })
+        )
       }
     })
     const request = await handler.handle(new Request('test', 'cd:/go/golang/rsc.io/quote/v1.3.0'))
@@ -208,13 +223,12 @@ describe('Go Proxy fetching', () => {
     const handler = Fetch({
       logger: {
         log: sinon.spy(),
-        info,
+        info
       },
       http: {
         get: sinon.stub().returns({
           status: 200,
-          data:
-            `<article>
+          data: `<article>
                 <section class="License" id="lic-0">
                   <h2 class="go-textTitle">
                     <div id="#lic-0">Apache-2.0</div>

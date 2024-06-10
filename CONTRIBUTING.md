@@ -5,7 +5,7 @@ The ClearlyDefined project welcomes your suggestions and contributions! Before o
 
 ## Contribution Licensing
 
-Most of our code is distributed under the terms of the [MIT license](LICENSE), and when you contribute code that you wrote to our repositories, 
+Most of our code is distributed under the terms of the [MIT license](LICENSE), and when you contribute code that you wrote to our repositories,
 you agree that you are contributing under those same terms. In addition, by submitting your contributions you are indicating that
 you have the right to submit those contributions under those terms.
 

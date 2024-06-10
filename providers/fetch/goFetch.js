@@ -9,6 +9,10 @@ const { parse: htmlParser } = require('node-html-parser')
 const { parse: spdxParser } = require('@clearlydefined/spdx')
 const FetchResult = require('../../lib/fetchResult')
 
+const providerMap = {
+  golang: 'https://proxy.golang.org'
+}
+
 class GoFetch extends AbstractFetch {
   constructor(options) {
     super(options)
@@ -16,7 +20,7 @@ class GoFetch extends AbstractFetch {
     axiosRetry(axios, {
       retries: 5,
       retryDelay: exponentialDelay,
-      retryCondition: (err) => {
+      retryCondition: err => {
         return isNetworkOrIdempotentRequestError(err) || err.response?.status == 429
       }
     })
@@ -55,7 +59,10 @@ class GoFetch extends AbstractFetch {
     try {
       registryData = await this._getRegistryData(spec)
     } catch (err) {
-      if (err instanceof RequeueError && (request.attemptCount === undefined || request.attemptCount < this.options.maxRequeueAttemptCount)) {
+      if (
+        err instanceof RequeueError &&
+        (request.attemptCount === undefined || request.attemptCount < this.options.maxRequeueAttemptCount)
+      ) {
         return request.markRequeue('Throttled', err.message)
       }
     }
@@ -69,7 +76,7 @@ class GoFetch extends AbstractFetch {
   }
 
   async _getLatestVersion(spec) {
-    const initial_url = `https://${spec.provider}/${spec.namespace}/${spec.name}/@v/list`
+    const initial_url = `${providerMap.golang}/${spec.namespace}/${spec.name}/@v/list`
     const replace_encoded_url = this._replace_encodings(initial_url)
     const url = replace_encoded_url.replace(/null\//g, '')
 
@@ -89,7 +96,7 @@ class GoFetch extends AbstractFetch {
   }
 
   _buildUrl(spec, extension = '.zip') {
-    let initial_url = `https://proxy.golang.org/${spec.namespace}/${spec.name}/@v/${spec.revision}${extension}`
+    let initial_url = `${providerMap.golang}/${spec.namespace}/${spec.name}/@v/${spec.revision}${extension}`
     return this._replace_encodings(this._remove_blank_fields(initial_url))
   }
 
@@ -98,7 +105,7 @@ class GoFetch extends AbstractFetch {
   }
 
   _replace_encodings(url) {
-    return `${url.replace(/%2f/ig, '/')}`
+    return `${url.replace(/%2f/gi, '/')}`
   }
 
   async _getArtifact(spec, destination) {
@@ -160,7 +167,9 @@ class GoFetch extends AbstractFetch {
         this.logger.info(msg)
         throw new RequeueError(msg)
       }
-      this.logger.info(`Getting declared license from pkg.go.dev failed. ${JSON.stringify(err.response?.data || err.request || err.message)}`)
+      this.logger.info(
+        `Getting declared license from pkg.go.dev failed. ${JSON.stringify(err.response?.data || err.request || err.message)}`
+      )
     }
   }
 

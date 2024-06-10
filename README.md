@@ -81,16 +81,20 @@ Process the source, if any:
 The crawler's output is stored for use by the rest of the ClearlyDefined infrastructure -- it is not intended to be used directly by humans. Note that each tool's output is stored separately and the results of processing the component and the component source are also separated.
 
 ### <a id="more-on-type"></a>More on `type`
+
 The `type` in the request object typically corresponds to an internal processor in CD.
-1. `component` is the most generic type.  Internally, it is converted to a `package` or `source` request by the component processor.
-2. `package` request is processed by the package processor and is further converted to a request with a specific type (`crate`, `deb`, `gem`, `go`, `maven`, `npm`, `nuget`, `composer`, `pod`, `pypi`).  For a `package` typed request, if the mentioned specific binary package type is known, the specific type (e.g. `npm`) can be used (instead of `package`) in the harvest request and skip the conversion step.  For example,
+
+1. `component` is the most generic type. Internally, it is converted to a `package` or `source` request by the component processor.
+2. `package` request is processed by the package processor and is further converted to a request with a specific type (`crate`, `deb`, `gem`, `go`, `maven`, `npm`, `nuget`, `composer`, `pod`, `pypi`). For a `package` typed request, if the mentioned specific binary package type is known, the specific type (e.g. `npm`) can be used (instead of `package`) in the harvest request and skip the conversion step. For example,
+
 ```json
 {
   "type": "npm",
   "url": "cd:/npm/npmjs/-/redie/0.3.0"
 }
 ```
-3. `source` requests are processed by the source processor, which subsequently dispatches a `clearlydefined` typed request for the supported source types and other requests (one for each scanning tool).  These are the more advanced scenarios where the request type and the coordinate type differ.
+
+3. `source` requests are processed by the source processor, which subsequently dispatches a `clearlydefined` typed request for the supported source types and other requests (one for each scanning tool). These are the more advanced scenarios where the request type and the coordinate type differ.
 
 # Configuration
 
@@ -133,7 +137,7 @@ If a CRAWLER_ID is specified, then each instance must have this setting globally
 ## Run Docker image from Docker Hub
 
 You can run the image as is from docker (this is w/o any port forwarding, which means the only way you can interact with the crawler locally is through the queue. See below for examples of how to run with ports exposed to do curl based testing).
-`docker run --env-file ../<env_name>.env.list clearlydefined/crawler`
+`docker run --platform linux/amd64 --env-file ../<env_name>.env.list clearlydefined/crawler`
 
 See `local.env.list`, `dev.env.list` and `prod.env.list` tempate files.
 
@@ -145,13 +149,13 @@ See `local.env.list`, `dev.env.list` and `prod.env.list` tempate files.
 
 ## Build and run Docker image locally
 
-`docker build -t cdcrawler:latest .`
+`docker build --platform linux/amd64 -t cdcrawler:latest .`
 
-`docker run --rm --env-file ../dev.env.list -p 5000:5000 -p 9229:9229 cdcrawler:latest`
+`docker run --platform linux/amd64 --rm --env-file ../dev.env.list -p 5000:5000 -p 9229:9229 cdcrawler:latest`
 
 With a debugger:
 
-`docker run --rm -d --env-file ../dev.env.list -p 9229:9229 -p 5000:5000 --entrypoint node cdcrawler:latest --inspect-brk=0.0.0.0:9229 index.js`
+`docker run --platform linux/amd64 --rm -d --env-file ../dev.env.list -p 9229:9229 -p 5000:5000 --entrypoint node cdcrawler:latest --inspect-brk=0.0.0.0:9229 index.js`
 
 At this point you can attach VS Code with the built in debugging profile (see .vscode/launch.json)
 
@@ -238,7 +242,8 @@ Make sure you started the container with the 5000 port forwarded for this to wor
       -X POST \
       http://crawler:5000/requests
 
-  On windows:
+On Windows:
+
     curl -d "{\"type\":\"npm\", \"url\":\"cd:/npm/npmjs/-/redie/0.3.0\"}" -H "Content-Type: application/json" -H "X-token: secret" -X POST http://localhost:5000/requests
 
 Expose dashboard port:

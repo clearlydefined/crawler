@@ -4,10 +4,10 @@
 const AbstractFetch = require('./abstractFetch')
 const { exec } = require('child_process')
 const { clone } = require('lodash')
-const rimraf = require('rimraf')
+const { rm } = require('fs').promises
 const FetchResult = require('../../lib/fetchResult')
 
-const providerDictionary = {
+const providerMap = {
   gitlab: 'https://gitlab.com',
   github: 'https://github.com'
 }
@@ -86,16 +86,12 @@ class GitCloner extends AbstractFetch {
   }
 
   _deleteGitDatabase(dirName, specName) {
-    return new Promise((resolve, reject) => {
-      rimraf(`${dirName}/${specName}/.git`, error => {
-        error ? reject(error) : resolve()
-      })
-    })
+    return rm(`${dirName}/${specName}/.git`, { recursive: true, force: true })
   }
 
   _buildUrl(spec) {
     const fullName = `${spec.namespace.replace(/\./g, '/')}/${spec.name}`
-    return `${providerDictionary[spec.provider]}/${fullName}.git`
+    return `${providerMap[spec.provider]}/${fullName}.git`
   }
 }
 
