@@ -155,7 +155,7 @@ See `local.env.list`, `dev.env.list` and `prod.env.list` tempate files.
 
 With a debugger:
 
-`docker run --platform linux/amd64 --rm -d --env-file ../dev.env.list -p 9229:9229 -p 5000:5000 --entrypoint node cdcrawler:latest --inspect-brk=0.0.0.0:9229 index.js`
+`docker run --platform linux/amd64 --rm -d --env-file ../dev.env.list -p 9229:9229 -p 5000:5000 cdcrawler:latest node --inspect-brk=0.0.0.0:9229 index.js`
 
 At this point you can attach VS Code with the built in debugging profile (see .vscode/launch.json)
 
