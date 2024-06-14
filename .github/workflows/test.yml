@@ -1,4 +1,4 @@
-name: Run tests
+name: Run Docker build and tests
 
 on:
   push:
@@ -13,11 +13,12 @@ permissions:
 
 jobs:
   test:
+    name: Run tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.1.1
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4.0.1
+      - uses: actions/setup-node@v4
         with:
           node-version: 18
           cache: 'npm'
@@ -27,3 +28,12 @@ jobs:
 
       - name: Run tests
         run: npm test
+
+  docker-build:
+    name: Build Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Docker build
+        run: docker build .
