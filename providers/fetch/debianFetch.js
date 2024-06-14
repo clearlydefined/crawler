@@ -79,7 +79,7 @@ class DebianFetch extends AbstractFetch {
   // Example: https://sources.debian.org/api/src/amoeba/latest
   async _getLatestVersion(spec) {
     const url = `https://sources.debian.org/api/src/${spec.name}/latest`
-    const response = await callFetch({ url, responseTyoe: 'json' })
+    const response = await callFetch({ url, responseType: 'json' })
     return response.version
   }
 
