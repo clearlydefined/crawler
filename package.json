@@ -68,7 +68,7 @@
     "node-uuid": "^1.4.8",
     "painless-config": "^0.1.2",
     "parse-github-url": "^1.0.2",
-    "patch-package": "^6.2.2",
+    "patch-package": "^6.5.1",
     "qlimit": "^0.1.1",
     "request-promise-native": "^1.0.5",
     "requestretry": "^4.0.0",
