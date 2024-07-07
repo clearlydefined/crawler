@@ -32,22 +32,22 @@ describe('CallFetch', () => {
         method: 'GET',
         resolveWithFullResponse: true
       })
-      expect(response.status).to.be.equal(200)
-      expect(response.statusText).to.be.equal('OK')
+      expect(response.statusCode).to.be.equal(200)
+      expect(response.statusMessage).to.be.equal('OK')
     })
 
-    it('checks if the full response is fetched with error code', async () => {
+    it('should throw error with error code', async () => {
       const path = '/registry.npmjs.com/redis/0.1.'
       await mockServer.forGet(path).thenReply(404)
 
-      const response = await callFetch({
+      await callFetch({
         url: mockServer.urlFor(path),
         method: 'GET',
         json: 'true',
         resolveWithFullResponse: true
+      }).catch(err => {
+        expect(err.statusCode).to.be.equal(404)
       })
-      expect(response.status).to.be.equal(404)
-      expect(response.statusText).to.be.equal('Not Found')
     })
 
     it('checks if the response is text while sending GET request', async () => {
@@ -95,6 +95,43 @@ describe('CallFetch', () => {
       expect(requests[0].headers).to.include(defaultOptions.headers)
       expect(requests[1].url).to.equal(url)
       expect(requests[1].headers).to.include(defaultOptions.headers)
+    })
+
+    describe('test simple', () => {
+      it('should handle 300 when simple is true by default', async () => {
+        const path = '/registry.npmjs.com/redis/0.1.0'
+        await mockServer.forGet(path).thenReply(300, 'test')
+
+        await callFetch({
+          url: mockServer.urlFor(path)
+        }).catch(err => {
+          expect(err.statusCode).to.be.equal(300)
+        })
+      })
+
+      it('should handle 300 with simple === false', async () => {
+        const path = '/registry.npmjs.com/redis/0.1.0'
+        await mockServer.forGet(path).thenReply(300, 'test')
+
+        const response = await callFetch({
+          url: mockServer.urlFor(path),
+          simple: false
+        })
+        expect(response).to.be.equal('test')
+      })
+
+      it('should return status 300 with simple === false', async () => {
+        const path = '/registry.npmjs.com/redis/0.1.0'
+        await mockServer.forGet(path).thenReply(300, 'test')
+
+        const response = await callFetch({
+          url: mockServer.urlFor(path),
+          simple: false,
+          resolveWithFullResponse: true
+        })
+        expect(response.statusCode).to.be.equal(300)
+        expect(response.statusMessage).to.be.equal('Multiple Choices')
+      })
     })
   })
 
