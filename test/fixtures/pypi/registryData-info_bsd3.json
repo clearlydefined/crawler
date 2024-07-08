@@ -1,0 +1,43 @@
+{
+  "info": {
+    "author": "Joel Nothman",
+    "author_email": "joel.nothman@gmail.com",
+    "bugtrack_url": null,
+    "classifiers": [
+      "Intended Audience :: Science/Research",
+      "License :: OSI Approved :: BSD License",
+      "Programming Language :: Python :: 3",
+      "Programming Language :: Python :: 3.10",
+      "Programming Language :: Python :: 3.6",
+      "Topic :: Scientific/Engineering :: Visualization"
+    ],
+    "description": "UpSetPlot documentation\n============================\n\n|version| |licence| |py-versions|\n\n|issues| |build| |docs| |coverage|\n\nThis is another Python implementation of UpSet plots by Lex et al. [Lex2014]_.\nUpSet plots are used to visualise set overlaps; like Venn diagrams but\nmore readable. Documentation is at https://upsetplot.readthedocs.io.\n\nThis ``upsetplot`` library tries to provide a simple interface backed by an\nextensible, object-oriented design.\n\nThere are many ways to represent the categorisation of data, as covered in\nour `Data Format Guide <https://upsetplot.readthedocs.io/en/stable/formats.html>`_.\n\nOur internal input format uses a `pandas.Series` containing counts\ncorresponding to subset sizes, where each subset is an intersection of named\ncategories.  The index of the Series indicates which rows pertain to which\ncategories, by having multiple boolean indices, like ``example`` in the\nfollowing::\n\n    >>> from upsetplot import generate_counts\n    >>> example = generate_counts()\n    >>> example\n    cat0   cat1   cat2\n    False  False  False      56\n                  True      283\n           True   False    1279\n                  True     5882\n    True   False  False      24\n                  True       90\n           True   False     429\n                  True     1957\n    Name: value, dtype: int64\n\nThen::\n\n    >>> from upsetplot import plot\n    >>> plot(example)  # doctest: +SKIP\n    >>> from matplotlib import pyplot\n    >>> pyplot.show()  # doctest: +SKIP\n\nmakes:\n\n.. image:: http://upsetplot.readthedocs.io/en/latest/_images/sphx_glr_plot_generated_001.png\n   :target: ../auto_examples/plot_generated.html\n\nAnd you can save the image in various formats::\n\n    >>> pyplot.savefig(\"/path/to/myplot.pdf\")  # doctest: +SKIP\n    >>> pyplot.savefig(\"/path/to/myplot.png\")  # doctest: +SKIP\n\nThis plot shows the cardinality of every category combination seen in our data.\nThe leftmost column counts items absent from any category. The next three\ncolumns count items only in ``cat1``, ``cat2`` and ``cat3`` respectively, with\nfollowing columns showing cardinalities for items in each combination of\nexactly two named sets. The rightmost column counts items in all three sets.\n\nRotation\n........\n\nWe call the above plot style \"horizontal\" because the category intersections\nare presented from left to right.  `Vertical plots\n<http://upsetplot.readthedocs.io/en/latest/auto_examples/plot_vertical.html>`__\nare also supported!\n\n.. image:: http://upsetplot.readthedocs.io/en/latest/_images/sphx_glr_plot_vertical_001.png\n   :target: http://upsetplot.readthedocs.io/en/latest/auto_examples/plot_vertical.html\n\nDistributions\n.............\n\nProviding a DataFrame rather than a Series as input allows us to expressively\n`plot the distribution of variables\n<http://upsetplot.readthedocs.io/en/latest/auto_examples/plot_diabetes.html>`__\nin each subset.\n\n.. image:: http://upsetplot.readthedocs.io/en/latest/_images/sphx_glr_plot_diabetes_001.png\n   :target: http://upsetplot.readthedocs.io/en/latest/auto_examples/plot_diabetes.html\n\nLoading datasets\n................\n\nWhile the dataset above is randomly generated, you can prepare your own dataset\nfor input to upsetplot.  A helpful tool is `from_memberships`, which allows\nus to reconstruct the example above by indicating each data point's category\nmembership::\n\n    >>> from upsetplot import from_memberships\n    >>> example = from_memberships(\n    ...     [[],\n    ...      ['cat2'],\n    ...      ['cat1'],\n    ...      ['cat1', 'cat2'],\n    ...      ['cat0'],\n    ...      ['cat0', 'cat2'],\n    ...      ['cat0', 'cat1'],\n    ...      ['cat0', 'cat1', 'cat2'],\n    ...      ],\n    ...      data=[56, 283, 1279, 5882, 24, 90, 429, 1957]\n    ... )\n    >>> example\n    cat0   cat1   cat2\n    False  False  False      56\n                  True      283\n           True   False    1279\n                  True     5882\n    True   False  False      24\n                  True       90\n           True   False     429\n                  True     1957\n    dtype: int64\n\nSee also `from_contents`, another way to describe categorised data, and\n`from_indicators` which allows each category to be indicated by a column in\nthe data frame (or a function of the column's data such as whether it is a\nmissing value).\n\nInstallation\n------------\n\nTo install the library, you can use `pip`::\n\n    $ pip install upsetplot\n\nInstallation requires:\n\n* pandas\n* matplotlib >= 2.0\n* seaborn to use `UpSet.add_catplot`\n\nIt should then be possible to::\n\n    >>> import upsetplot\n\nin Python.\n\nWhy an alternative to py-upset?\n-------------------------------\n\nProbably for petty reasons. It appeared `py-upset\n<https://github.com/ImSoErgodic/py-upset>`_ was not being maintained.  Its\ninput format was undocumented, inefficient and, IMO, inappropriate.  It did not\nfacilitate showing plots of each subset's distribution as in Lex et al's work\nintroducing UpSet plots. Nor did it include the horizontal bar plots\nillustrated there. It did not support Python 2. I decided it would be easier to\nconstruct a cleaner version than to fix it.\n\nReferences\n----------\n\n.. [Lex2014] Alexander Lex, Nils Gehlenborg, Hendrik Strobelt, Romain Vuillemot, Hanspeter Pfister,\n   *UpSet: Visualization of Intersecting Sets*,\n   IEEE Transactions on Visualization and Computer Graphics (InfoVis '14), vol. 20, no. 12, pp. 1983–1992, 2014.\n   doi: `doi.org/10.1109/TVCG.2014.2346248 <https://doi.org/10.1109/TVCG.2014.2346248>`_\n\n\n.. |py-versions| image:: https://img.shields.io/pypi/pyversions/upsetplot.svg\n    :alt: Python versions supported\n\n.. |version| image:: https://badge.fury.io/py/UpSetPlot.svg\n    :alt: Latest version on PyPi\n    :target: https://badge.fury.io/py/UpSetPlot\n\n.. |build| image:: https://github.com/jnothman/upsetplot/actions/workflows/test.yml/badge.svg\n    :alt: Github Workflows CI build status\n    :scale: 100%\n    :target: https://github.com/jnothman/UpSetPlot/actions/workflows/test.yml\n\n.. |issues| image:: https://img.shields.io/github/issues/jnothman/UpSetPlot.svg\n    :alt: Issue tracker\n    :target: https://github.com/jnothman/UpSetPlot\n\n.. |coverage| image:: https://coveralls.io/repos/github/jnothman/UpSetPlot/badge.svg\n    :alt: Test coverage\n    :target: https://coveralls.io/github/jnothman/UpSetPlot\n\n.. |docs| image:: https://readthedocs.org/projects/upsetplot/badge/?version=latest\n     :alt: Documentation Status\n     :scale: 100%\n     :target: https://upsetplot.readthedocs.io/en/latest/?badge=latest\n\n.. |licence| image:: https://img.shields.io/badge/Licence-BSD-blue.svg\n     :target: https://opensource.org/licenses/BSD-3-Clause\n",
+    "description_content_type": "",
+    "docs_url": null,
+    "download_url": "",
+    "downloads": {
+      "last_day": -1,
+      "last_month": -1,
+      "last_week": -1
+    },
+    "home_page": "https://upsetplot.readthedocs.io",
+    "keywords": "",
+    "license": "BSD-3-Clause",
+    "maintainer": "",
+    "maintainer_email": "",
+    "name": "UpSetPlot",
+    "package_url": "https://pypi.org/project/UpSetPlot/",
+    "platform": null,
+    "project_url": "https://pypi.org/project/UpSetPlot/",
+    "project_urls": {
+      "Homepage": "https://upsetplot.readthedocs.io"
+    },
+    "release_url": "https://pypi.org/project/UpSetPlot/0.9.0/",
+    "requires_dist": null,
+    "requires_python": "",
+    "summary": "Draw Lex et al.'s UpSet plots with Pandas and Matplotlib",
+    "version": "0.9.0",
+    "yanked": false,
+    "yanked_reason": null
+  }
+}
