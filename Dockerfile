@@ -1,14 +1,8 @@
 # Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 # SPDX-License-Identifier: MIT
 
-#FROM fossology/fossology:3.4.0 as fossology
-#COPY fossology_init.sh fossology_init.sh
-#RUN ./fossology_init.sh
-
 FROM node:18-bullseye
 ENV APPDIR=/opt/service
-#RUN apk update && apk upgrade && \
-#    apk add --no-cache bash git openssh
 
 ARG BUILD_NUMBER=0
 ENV CRAWLER_BUILD_NUMBER=$BUILD_NUMBER
@@ -22,12 +16,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends --no-install-su
   gem install bundler -v 2.5.4 --no-document
 
 # Scancode
-ARG SCANCODE_VERSION="30.1.0"
+ARG SCANCODE_VERSION="32.1.0"
 RUN pip3 install --upgrade pip setuptools wheel && \
   curl -Os https://raw.githubusercontent.com/nexB/scancode-toolkit/v$SCANCODE_VERSION/requirements.txt && \
   pip3 install --constraint requirements.txt scancode-toolkit==$SCANCODE_VERSION && \
   rm requirements.txt && \
-  scancode --reindex-licenses && \
+  scancode-reindex-licenses && \
   scancode --version
 
 ENV SCANCODE_HOME=/usr/local/bin
@@ -45,32 +39,6 @@ RUN gem install nokogiri:1.16.0 --no-document && \
 RUN pip3 install setuptools
 RUN pip3 install reuse==3.0.1
 
-# FOSSology
-# WORKDIR /opt
-# RUN git clone https://github.com/fossology/fossology.git
-# RUN cd fossology && git checkout -b clearlydefined tags/3.4.0
-
-# See https://github.com/fossology/fossology/blob/faaaeedb9d08f00def00f9b8a68a5cffc5eaa657/utils/fo-installdeps#L103-L105
-# Additional libjsoncpp-dev https://github.com/fossology/fossology/blob/261d1a3e663b5fd20652a05b2d6360f4b31a17cb/src/copyright/mod_deps#L79-L80
-# RUN apt-get update && apt-get install -y --no-install-recommends --no-install-suggests \
-#  libmxml-dev curl libxml2-dev libcunit1-dev libjsoncpp-dev \
-#  build-essential libtext-template-perl subversion rpm librpm-dev libmagic-dev libglib2.0 libboost-regex-dev libboost-program-options-dev
-
-# WORKDIR /opt/fossology/src/nomos/agent
-# RUN make -f Makefile.sa
-# RUN echo $(./nomossa -V)
-
-# NOTE: must build copyright before Monk to cause libfossology to be built
-# WORKDIR /opt/fossology/src/copyright/agent
-# RUN make
-
-# WORKDIR /opt/fossology/src/monk/agent
-# RUN make
-# RUN echo $(./monk -V)
-# COPY --from=fossology /tmp/monk_knowledgebase .
-
-# ENV FOSSOLOGY_HOME=/opt/fossology/src
-
 # Crawler config
 ENV CRAWLER_DEADLETTER_PROVIDER=cd(azblob)
 ENV CRAWLER_NAME=cdcrawlerprod
@@ -84,7 +52,7 @@ RUN git config --global --add safe.directory '*'
 
 COPY package*.json /tmp/
 COPY patches /tmp/patches
-RUN cd /tmp && npm install --production
+RUN cd /tmp && npm install --omit=dev
 RUN mkdir -p "${APPDIR}" && cp -a /tmp/node_modules "${APPDIR}"
 
 WORKDIR "${APPDIR}"

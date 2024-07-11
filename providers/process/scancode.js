@@ -72,7 +72,7 @@ class ScanCodeProcessor extends AbstractProcessor {
     // Pick files that represent whole packages. We can be reasonably agressive here
     // and the summarizers etc will further refine what makes it into the final definitions
     const packages = output.files.reduce((result, file) => {
-      file.packages.forEach(entry => {
+      file.package_data.forEach(entry => {
         // in this case the manifest_path contains a subpath pointing to the corresponding file
         if (file.type === 'directory' && entry.manifest_path)
           result.push(`${file.path ? file.path + '/' : ''}${entry.manifest_path}`)
@@ -113,8 +113,8 @@ class ScanCodeProcessor extends AbstractProcessor {
         this.logger.info('Detecting ScanCode version')
 
         const raw_output = result.stdout
-        const scancode_line = raw_output.match(/ScanCode version .*\n/)[0]
-        this._toolVersion = scancode_line.replace('ScanCode version ', '').trim()
+        const scancode_line = raw_output.match(/ScanCode version: .*\n/)[0]
+        this._toolVersion = scancode_line.replace('ScanCode version: ', '').trim()
         this._schemaVersion = this.aggregateVersions(
           [this._schemaVersion, this.toolVersion, this.configVersion],
           'Invalid ScanCode version'
