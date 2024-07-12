@@ -3,10 +3,10 @@
 
 const { clone } = require('lodash')
 const AbstractFetch = require('./abstractFetch')
+const { callFetch: request } = require('../../lib/fetch')
 const fs = require('fs')
 const path = require('path')
 const FetchResult = require('../../lib/fetchResult')
-const { callFetch } = require('../../lib/fetch')
 
 class CratesioFetch extends AbstractFetch {
   canHandle(request) {
@@ -49,9 +49,9 @@ class CratesioFetch extends AbstractFetch {
   async _getRegistryData(spec) {
     let registryData
     try {
-      registryData = await callFetch({
+      registryData = await request({
         url: `https://crates.io/api/v1/crates/${spec.name}`,
-        responseType: 'json',
+        json: true,
         headers: { 'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)' }
       })
     } catch (exception) {
@@ -68,9 +68,9 @@ class CratesioFetch extends AbstractFetch {
 
   // Example: https://crates.io/api/v1/crates/bitflags/1.0.4/download
   async _getPackage(zip, version) {
-    const response = await callFetch({
+    const response = await request({
       url: `https://crates.io${version.dl_path}`,
-      responseType: 'stream',
+      encoding: null,
       headers: {
         'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)',
         Accept: 'text/html'

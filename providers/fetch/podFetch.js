@@ -3,13 +3,13 @@
 
 const { clone, get } = require('lodash')
 const AbstractFetch = require('./abstractFetch')
+const { callFetch: request } = require('../../lib/fetch')
 const fs = require('fs')
 const path = require('path')
 const crypto = require('crypto')
 const { exec } = require('child_process')
 const requestRetry = require('requestretry').defaults({ maxAttempts: 3, fullResponse: true })
 const FetchResult = require('../../lib/fetchResult')
-const { callFetch } = require('../../lib/fetch')
 
 const services = {
   trunk: 'https://trunk.cocoapods.org/api/v1',
@@ -57,12 +57,12 @@ class PodFetch extends AbstractFetch {
   async _getRegistryData(spec) {
     let registryData
     try {
-      registryData = await callFetch({
+      registryData = await request({
         url: `${services.specs}/Specs/${this._masterRepoPathFragment(spec, [1, 1, 1])}/${spec.name}.podspec.json`,
         headers: {
           Authorization: this.options.githubToken ? `token ${this.options.githubToken}` : ''
         },
-        responseType: 'json'
+        json: true
       })
     } catch (exception) {
       if (exception.statusCode !== 404) throw exception
@@ -89,7 +89,7 @@ class PodFetch extends AbstractFetch {
   async _getSourceArchive(dir, url, podspec) {
     const archive = path.join(dir.name, `${podspec.name}-${podspec.version}.archive`)
     const output = path.join(dir.name, `${podspec.name}-${podspec.version}`)
-    const response = await callFetch({ url: url, responseType: 'stream' })
+    const response = await request({ url: url, encoding: null })
     return new Promise((resolve, reject) => {
       response.pipe(
         fs

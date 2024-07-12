@@ -31,7 +31,7 @@ describe('crateFetch workflow', () => {
         if (options.url.includes('missing')) throw { statusCode: 404 }
       }
       const body = fs.readFileSync(`test/fixtures/crates/${pickFile(options.url)}`)
-      if (options && options.responseType === 'json') return JSON.parse(body)
+      if (options && options.json) return JSON.parse(body)
       const response = new PassThrough()
       response.write(body)
       response.statusCode = 200

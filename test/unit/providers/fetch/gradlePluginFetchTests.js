@@ -20,7 +20,7 @@ describe('Gradle plugin fetch', () => {
     it('get latest version from maven meta data', async () => {
       const gradleFetch = GradlePluginFetch({
         logger: { log: sinon.stub() },
-        callFetch: sinon.stub().resolves(fs.readFileSync('test/fixtures/maven/maven-metadata.xml'))
+        requestPromise: sinon.stub().resolves(fs.readFileSync('test/fixtures/maven/maven-metadata.xml'))
       })
       const latest = await gradleFetch._getLatestVersion(spec)
       expect(latest).to.be.eq('4.5.10')
@@ -29,7 +29,7 @@ describe('Gradle plugin fetch', () => {
     it('no latest version', async () => {
       const gradleFetch = GradlePluginFetch({
         logger: { log: sinon.stub() },
-        callFetch: sinon.stub().resolves('')
+        requestPromise: sinon.stub().resolves('')
       })
       const latest = await gradleFetch._getLatestVersion(spec)
       expect(latest).to.be.null
@@ -38,7 +38,7 @@ describe('Gradle plugin fetch', () => {
     it('no maven meta data found', async () => {
       const gradleFetch = GradlePluginFetch({
         logger: { log: sinon.stub() },
-        callFetch: sinon.stub().rejects({ statusCode: 404 })
+        requestPromise: sinon.stub().rejects({ statusCode: 404 })
       })
       const latest = await gradleFetch._getLatestVersion(spec)
       expect(latest).to.be.null
@@ -90,7 +90,7 @@ describe('Gradle plugin fetch', () => {
       }
       handler = GradlePluginFetch({
         logger: { log: sinon.stub(), error: sinon.stub() },
-        callFetch: requestPromiseStub,
+        requestPromise: requestPromiseStub,
         requestStream: getStub
       })
     })
@@ -136,13 +136,13 @@ describe('Gradle plugin fetch', () => {
     })
 
     it('handle no maven meta data found', async () => {
-      handler._handleCallFetch = sinon.stub().rejects({ statusCode: 404 })
+      handler._handleRequestPromise = sinon.stub().rejects({ statusCode: 404 })
       const request = await handler.handle(new Request('test', 'cd:/sourcearchive/gradleplugin/org.eclipse/swt'))
       expect(request.processControl).to.be.equal('skip')
     })
 
     it('handle no pom found', async () => {
-      handler._handleCallFetch = sinon.stub().rejects({ statusCode: 404 })
+      handler._handleRequestPromise = sinon.stub().rejects({ statusCode: 404 })
       const request = await handler.handle(
         new Request('test', 'cd:/sourcearchive/gradleplugin/org.eclipse/swt/3.3.0-v3344')
       )

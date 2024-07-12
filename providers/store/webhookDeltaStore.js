@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
+const { callFetch: request } = require('../../lib/fetch')
 const { pick } = require('lodash')
-const { callFetch } = require('../../lib/fetch')
 
 class WebhookDeltaStore {
   constructor(options) {
@@ -19,7 +19,7 @@ class WebhookDeltaStore {
     var options = {
       method: 'POST',
       url: uri,
-      responseType: 'json',
+      json: true,
       body: pick(document, '_metadata'),
       headers: {
         'x-crawler': this.options.token || 'secret'
@@ -27,9 +27,9 @@ class WebhookDeltaStore {
       resolveWithFullResponse: true
     }
     try {
-      const response = await callFetch(options)
-      if (response.status !== 200)
-        this.logger.info(`Failure  Firing webhook failed: ${response.status} ${response.statusText}`)
+      const response = await request(options)
+      if (response.statusCode !== 200)
+        this.logger.info(`Failure  Firing webhook failed: ${response.statusCode} ${response.statusMessage}`)
     } catch (error) {
       this.logger.info(`Failure  Firing webhook failed: ${error.message}`)
     }

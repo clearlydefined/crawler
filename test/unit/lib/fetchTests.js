@@ -68,7 +68,7 @@ describe('CallFetch', () => {
 
       const response = await callFetch({
         url: mockServer.urlFor(path),
-        encode: null
+        encoding: null
       })
       const destination = 'test/fixtures/fetch/temp.json'
       await new Promise((resolve) => {
@@ -142,7 +142,7 @@ describe('CallFetch', () => {
       const response = await callFetch({
         url: 'https://crates.io/api/v1/crates/bitflags/1.0.4/download',
         method: 'GET',
-        encode: null,
+        encoding: null,
         headers: {
           Accept: 'text/html'
         }
@@ -156,7 +156,7 @@ describe('CallFetch', () => {
       const response = await callFetch({
         url: 'https://static.crates.io/crates/bitflags/bitflags-1.0.4.crate',
         method: 'GET',
-        encode: null
+        encoding: null
       })
       // Validating the length of the content inorder to verify the response is a crate package.
       expect(response.headers['content-length']).to.be.equal('15282')

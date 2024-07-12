@@ -122,7 +122,7 @@ describe('fetchDispatcher cache fetch result', () => {
       }
       return MavenFetch({
         logger: { log: sinon.stub() },
-        callFetch: createRequestPromiseStub(fileSupplier),
+        requestPromise: createRequestPromiseStub(fileSupplier),
         requestStream: createGetStub(fileSupplier)
       })
     }
@@ -276,7 +276,7 @@ describe('fetchDispatcher cache fetch result', () => {
   describe('cache CrateioFetch result', () => {
     const requestPromiseStub = options => {
       const body = fs.readFileSync('test/fixtures/crates/bitflags.json')
-      if (options && options.responseType === 'json') return JSON.parse(body)
+      if (options && options.json) return JSON.parse(body)
       const response = new PassThrough()
       response.write(fs.readFileSync('test/fixtures/crates/bitflags-1.0.4.crate'))
       response.statusCode = 200
