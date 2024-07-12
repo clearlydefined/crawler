@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractFetch = require('./abstractFetch')
+const { withDefaults } = require('../../lib/fetch')
 const nodeRequest = require('request')
 const { clone, get } = require('lodash')
 const { promisify } = require('util')
@@ -14,7 +15,6 @@ const parseString = promisify(require('xml2js').parseString)
 const EntitySpec = require('../../lib/entitySpec')
 const { extractDate } = require('../../lib/utils')
 const FetchResult = require('../../lib/fetchResult')
-const { callFetch } = require('../../lib/fetch')
 
 const extensionMap = {
   sourcesJar: '-sources.jar',
@@ -29,7 +29,7 @@ class MavenBasedFetch extends AbstractFetch {
   constructor(providerMap, options) {
     super(options)
     this._providerMap = { ...providerMap }
-    this._handleCallFetch = options.callFetch || callFetch
+    this._handleRequestPromise = options.requestPromise || withDefaults(defaultHeaders)
     this._handleRequestStream = options.requestStream || nodeRequest.defaults(defaultHeaders).get
   }
 
@@ -71,7 +71,7 @@ class MavenBasedFetch extends AbstractFetch {
     //Use Maven repository meta data model to get the latest version
     //https://maven.apache.org/ref/3.2.5/maven-repository-metadata/repository-metadata.html#class_versioning
     const url = `${this._buildBaseUrl(spec)}/maven-metadata.xml`
-    const response = await this._requestPromise({ url, responseType: 'text' })
+    const response = await this._requestPromise({ url, json: false })
     if (!response) return null
     const meta = await parseString(response)
     return get(meta, 'metadata.versioning[0].release[0]')
@@ -115,7 +115,7 @@ class MavenBasedFetch extends AbstractFetch {
 
   async _getPom(spec) {
     const url = this._buildUrl(spec, extensionMap.pom)
-    const content = await this._requestPromise({ url, responseType: 'text' })
+    const content = await this._requestPromise({ url, json: false })
     if (!content) return null
     const pom = await parseString(content)
     // clean up some stuff we don't actually look at.
@@ -182,8 +182,7 @@ class MavenBasedFetch extends AbstractFetch {
 
   async _requestPromise(options) {
     try {
-      options.headers = { ...defaultHeaders.headers, ...options.headers }
-      return await this._handleCallFetch(options)
+      return await this._handleRequestPromise(options)
     } catch (error) {
       if (error.statusCode === 404) return null
       else throw error
