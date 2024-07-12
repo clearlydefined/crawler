@@ -18,7 +18,7 @@ class WebhookDeltaStore {
     const uri = this.options.url
     var options = {
       method: 'POST',
-      url: uri,
+      uri,
       json: true,
       body: pick(document, '_metadata'),
       headers: {
