@@ -1,3 +1,4 @@
+const { fail } = require('assert')
 const { callFetch, withDefaults } = require('../../../lib/fetch')
 const { expect } = require('chai')
 const fs = require('fs')
@@ -39,15 +40,17 @@ describe('CallFetch', () => {
     it('should throw error with error code', async () => {
       const path = '/registry.npmjs.com/redis/0.1.'
       await mockServer.forGet(path).thenReply(404)
-
-      await callFetch({
-        url: mockServer.urlFor(path),
-        method: 'GET',
-        json: 'true',
-        resolveWithFullResponse: true
-      }).catch(err => {
+      try {
+        await callFetch({
+          url: mockServer.urlFor(path),
+          method: 'GET',
+          json: 'true',
+          resolveWithFullResponse: true
+        })
+        fail('should have thrown')
+      } catch (err) {
         expect(err.statusCode).to.be.equal(404)
-      })
+      }
     })
 
     it('checks if the response is text while sending GET request', async () => {
@@ -71,7 +74,7 @@ describe('CallFetch', () => {
         encoding: null
       })
       const destination = 'test/fixtures/fetch/temp.json'
-      await new Promise((resolve) => {
+      await new Promise(resolve => {
         response.pipe(fs.createWriteStream(destination).on('finish', () => resolve(true)))
       })
       const downloaded = JSON.parse(fs.readFileSync(destination))
@@ -97,16 +100,48 @@ describe('CallFetch', () => {
       expect(requests[1].headers).to.include(defaultOptions.headers)
     })
 
+    it('checks if the response is text with uri option in GET request', async () => {
+      const path = '/proxy.golang.org/rsc.io/quote/@v/v1.3.0.mod'
+      await mockServer.forGet(path).thenReply(200, 'done')
+
+      const response = await callFetch({
+        uri: mockServer.urlFor(path),
+        method: 'GET'
+      })
+      expect(response).to.be.equal('done')
+    })
+
+    it('should POST with JSON', async function () {
+      const path = '/webhook'
+      const endpointMock = await mockServer.forPost(path).thenReply(200, 'done')
+
+      const response = await callFetch({
+        method: 'POST',
+        uri: mockServer.urlFor(path),
+        json: true,
+        body: { test: 'test' },
+        headers: { 'x-crawler': 'secret' },
+        resolveWithFullResponse: true
+      })
+      expect(response.statusCode).to.be.equal(200)
+      const requests = await endpointMock.getSeenRequests()
+      expect(requests.length).to.equal(1)
+      const json = await requests[0].body.getJson()
+      expect(json).to.deep.equal({ test: 'test' })
+      expect(requests[0].headers).to.include({ 'x-crawler': 'secret' })
+    })
+
     describe('test simple', () => {
       it('should handle 300 when simple is true by default', async () => {
         const path = '/registry.npmjs.com/redis/0.1.0'
         await mockServer.forGet(path).thenReply(300, 'test')
 
-        await callFetch({
-          url: mockServer.urlFor(path)
-        }).catch(err => {
+        try {
+          await callFetch({ url: mockServer.urlFor(path) })
+          fail('should have thrown')
+        } catch (err) {
           expect(err.statusCode).to.be.equal(300)
-        })
+        }
       })
 
       it('should handle 300 with simple === false', async () => {
@@ -150,6 +185,11 @@ describe('CallFetch', () => {
       // Validating the length of the content in order to verify the response is a crate package.
       // JSON response would not return this header in response resulting in failing this test case.
       expect(response.headers['content-length']).to.be.equal('15282')
+      return new Promise((resolve, reject) => {
+        response.on('data', () => {})
+        response.on('end', () => resolve(true))
+        response.on('error', reject)
+      })
     })
 
     it('should download the package when responseType is stream', async () => {
@@ -160,6 +200,11 @@ describe('CallFetch', () => {
       })
       // Validating the length of the content inorder to verify the response is a crate package.
       expect(response.headers['content-length']).to.be.equal('15282')
+      return new Promise((resolve, reject) => {
+        response.on('data', () => {})
+        response.on('end', () => resolve(true))
+        response.on('error', reject)
+      })
     })
   })
 })
