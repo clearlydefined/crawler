@@ -3,7 +3,7 @@
 
 const AbstractFetch = require('./abstractFetch')
 const nodeRequest = require('request')
-const requestPromise = require('request-promise-native')
+const { callFetch: requestPromise } = require('../../lib/fetch')
 const fs = require('fs')
 const { clone, get } = require('lodash')
 const FetchResult = require('../../lib/fetchResult')
