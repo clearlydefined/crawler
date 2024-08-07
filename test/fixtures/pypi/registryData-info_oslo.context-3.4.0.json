@@ -1,0 +1,51 @@
+{
+  "info": {
+    "author": "OpenStack",
+    "author_email": "openstack-discuss@lists.openstack.org",
+    "bugtrack_url": null,
+    "classifiers": [
+      "Environment :: OpenStack",
+      "Intended Audience :: Information Technology",
+      "Intended Audience :: System Administrators",
+      "License :: OSI Approved :: Apache Software License",
+      "Operating System :: POSIX :: Linux",
+      "Programming Language :: Python",
+      "Programming Language :: Python :: 3",
+      "Programming Language :: Python :: 3 :: Only",
+      "Programming Language :: Python :: 3.8",
+      "Programming Language :: Python :: 3.9",
+      "Programming Language :: Python :: Implementation :: CPython"
+    ],
+    "description": "====================\nOslo Context Library\n====================\n\nThe Oslo context library has helpers to maintain useful information\nabout a request context. The request context is usually populated in\nthe WSGI pipeline and used by various modules such as logging.\n\n* License: Apache License, Version 2.0\n* Documentation: https://docs.openstack.org/oslo.context/latest/\n* Source: https://opendev.org/openstack/oslo.context\n* Bugs: https://bugs.launchpad.net/oslo.context\n* Release notes:  https://docs.openstack.org/releasenotes/oslo.context/\n\nTeam and repository tags\n========================\n\n.. image:: https://governance.openstack.org/tc/badges/oslo.context.svg\n    :target: https://governance.openstack.org/tc/reference/tags/index.html\n\n.. Change things from this point on\n\n.. image:: https://img.shields.io/pypi/v/oslo.context.svg\n    :target: https://pypi.org/project/oslo.context/\n    :alt: Latest Version\n\n.. image:: https://img.shields.io/pypi/dm/oslo.context.svg\n    :target: https://pypi.org/project/oslo.context/\n    :alt: Downloads\n\n\n\n",
+    "description_content_type": "",
+    "docs_url": null,
+    "download_url": "",
+    "downloads": {
+      "last_day": -1,
+      "last_month": -1,
+      "last_week": -1
+    },
+    "home_page": "https://docs.openstack.org/oslo.context/latest/",
+    "keywords": "",
+    "license": "",
+    "maintainer": "",
+    "maintainer_email": "",
+    "name": "oslo.context",
+    "package_url": "https://pypi.org/project/oslo.context/",
+    "platform": null,
+    "project_url": "https://pypi.org/project/oslo.context/",
+    "project_urls": {
+      "Homepage": "https://docs.openstack.org/oslo.context/latest/"
+    },
+    "release_url": "https://pypi.org/project/oslo.context/5.1.1/",
+    "requires_dist": [
+      "debtcollector (>=1.2.0)",
+      "pbr (!=2.1.0,>=2.0.0)"
+    ],
+    "requires_python": ">=3.8",
+    "summary": "Oslo Context library",
+    "version": "5.1.1",
+    "yanked": false,
+    "yanked_reason": null
+  }
+}
