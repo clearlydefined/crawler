@@ -147,6 +147,17 @@ See `local.env.list`, `dev.env.list` and `prod.env.list` tempate files.
 - Allowed resource types: Container, Object
 - Allowed permissions: Read, Write, List, Add, Process
 
+### Running Crawler Queues in separate Azure account
+
+Crawler can be run with the queues in a different Azure account from the storage
+blobs. This is useful where you are running the crawler and submitting results
+to `clearlydefinedprod` *but* you don't want to have queues in the same Azure
+account. As anyone with access to `clearlydefinedprod` can get access to your
+queues.
+
+Set env var `CRAWLER_QUEUE_AZURE_CONNECTION_STRING` with a connection string
+obtained from Azure.
+
 ## Build and run Docker image locally
 
 `docker build --platform linux/amd64 -t cdcrawler:latest .`
