@@ -151,7 +151,7 @@ See `local.env.list`, `dev.env.list` and `prod.env.list` tempate files.
 
 Crawler can be run with the queues in a different Azure account from the storage
 blobs. This is useful where you are running the crawler and submitting results
-to `clearlydefinedprod` *but* you don't want to have queues in the same Azure
+to `clearlydefinedprod` _but_ you don't want to have queues in the same Azure
 account. As anyone with access to `clearlydefinedprod` can get access to your
 queues.
 
