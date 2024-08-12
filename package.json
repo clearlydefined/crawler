@@ -1,6 +1,6 @@
 {
   "name": "clearlydefined-crawler",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "A crawler that walks projects and packages looking for data of interest to the ClearlyDefined project.",
   "main": "./index.js",
   "scripts": {
@@ -70,7 +70,6 @@
     "parse-github-url": "^1.0.2",
     "patch-package": "^6.5.1",
     "qlimit": "^0.1.1",
-    "request-promise-native": "^1.0.5",
     "requestretry": "^4.0.0",
     "semver": "^7.6.0",
     "sha.js": "^2.4.11",
@@ -89,6 +88,7 @@
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "mocha": "^8.2.0",
+    "mockttp": "^3.13.0",
     "nyc": "^15.0.0",
     "prettier": "3.2.4",
     "proxyquire": "^2.1.3",

@@ -88,7 +88,7 @@ describe('Go Proxy fetching', () => {
     }
     Fetch = proxyquire('../../../../providers/fetch/goFetch', {
       request: { get: getStub },
-      'request-promise-native': requestPromiseStub
+      '../../lib/fetch': { callFetch: requestPromiseStub }
     })
   })
 

@@ -41,7 +41,7 @@ describe('packagistFetch', () => {
     }
     Fetch = proxyquire('../../../../providers/fetch/packagistFetch', {
       request: { get: getStub },
-      'request-promise-native': requestPromiseStub
+      '../../lib/fetch': { callFetch: requestPromiseStub }
     })
     Fetch._resultBox = resultBox
   })
