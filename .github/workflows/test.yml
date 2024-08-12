@@ -1,12 +1,15 @@
 name: Run Docker build and tests
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - master
+      - prod
   pull_request:
     branches:
       - master
+      - prod
 
 permissions:
   contents: read
