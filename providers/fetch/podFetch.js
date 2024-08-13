@@ -141,7 +141,11 @@ class PodFetch extends AbstractFetch {
       if (spec.revision) {
         return versions.find(version => version.name === spec.revision)
       } else {
-        return versions[versions.length - 1] // the versions are already sorted
+        return versions.sort((a, b) => {
+          const aDate = typeof a.created_at === 'string' ? a.created_at : ''
+          const bDate = typeof b.created_at === 'string' ? b.created_at : ''
+          return bDate.localeCompare(aDate)
+        })[0]
       }
     } else {
       return null
