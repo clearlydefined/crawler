@@ -3,7 +3,7 @@
 
 const { clone } = require('lodash')
 const AbstractFetch = require('./abstractFetch')
-const request = require('request-promise-native')
+const { callFetch: request } = require('../../lib/fetch')
 const fs = require('fs')
 const path = require('path')
 const FetchResult = require('../../lib/fetchResult')
@@ -68,13 +68,16 @@ class CratesioFetch extends AbstractFetch {
 
   // Example: https://crates.io/api/v1/crates/bitflags/1.0.4/download
   async _getPackage(zip, version) {
+    const response = await request({
+      url: `https://crates.io${version.dl_path}`,
+      encoding: null,
+      headers: {
+        'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)',
+        Accept: 'text/html'
+      }
+    })
     return new Promise((resolve, reject) => {
-      request({
-        url: `https://crates.io${version.dl_path}`,
-        json: false,
-        encoding: null,
-        headers: { 'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)' }
-      }).pipe(
+      response.pipe(
         fs
           .createWriteStream(zip)
           .on('finish', () => resolve(null))

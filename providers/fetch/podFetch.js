@@ -3,7 +3,7 @@
 
 const { clone, get } = require('lodash')
 const AbstractFetch = require('./abstractFetch')
-const request = require('request-promise-native')
+const { callFetch: request } = require('../../lib/fetch')
 const fs = require('fs')
 const path = require('path')
 const crypto = require('crypto')
@@ -89,8 +89,9 @@ class PodFetch extends AbstractFetch {
   async _getSourceArchive(dir, url, podspec) {
     const archive = path.join(dir.name, `${podspec.name}-${podspec.version}.archive`)
     const output = path.join(dir.name, `${podspec.name}-${podspec.version}`)
+    const response = await request({ url: url, encoding: null })
     return new Promise((resolve, reject) => {
-      request({ url: url, json: false, encoding: null }).pipe(
+      response.pipe(
         fs
           .createWriteStream(archive)
           .on('finish', async () => {
@@ -140,7 +141,11 @@ class PodFetch extends AbstractFetch {
       if (spec.revision) {
         return versions.find(version => version.name === spec.revision)
       } else {
-        return versions[versions.length - 1] // the versions are already sorted
+        return versions.sort((a, b) => {
+          const aDate = typeof a.created_at === 'string' ? a.created_at : ''
+          const bDate = typeof b.created_at === 'string' ? b.created_at : ''
+          return bDate.localeCompare(aDate)
+        })[0]
       }
     } else {
       return null
