@@ -129,6 +129,8 @@ describe('CallFetch', () => {
       const json = await requests[0].body.getJson()
       expect(json).to.deep.equal({ test: 'test' })
       expect(requests[0].headers).to.include({ 'x-crawler': 'secret' })
+      //Check for the default header value
+      expect(requests[0].headers).to.include({ 'user-agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)' })
     })
 
     describe('test simple', () => {
