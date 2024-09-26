@@ -79,18 +79,24 @@ class PyPiFetch extends AbstractFetch {
     for (const classifier in classifiers) {
       if (classifiers[classifier].includes('License :: OSI Approved ::')) {
         const lastColon = classifiers[classifier].lastIndexOf(':')
-        const rawLicense = classifiers[classifier].slice(lastColon + 1)
-        return spdxCorrect(rawLicense)
+        return classifiers[classifier].slice(lastColon + 1)
       }
     }
     return null
   }
 
   _extractDeclaredLicense(registryData) {
-    const licenseFromClassifiers = this._extractLicenseFromClassifiers(registryData)
-    if (licenseFromClassifiers) return licenseFromClassifiers
-    const license = get(registryData, 'info.license')
-    return license && spdxCorrect(license)
+    const licenseInMetadata = get(registryData, 'info.license')
+    const hasVersionInMeta = /\d+/.test(licenseInMetadata)
+    const licenseInClassifiers = this._extractLicenseFromClassifiers(registryData)
+    const hasVersionInClassifier = /\d+/.test(licenseInClassifiers)
+
+    let licenses = [licenseInMetadata, licenseInClassifiers]
+    if (hasVersionInClassifier && !hasVersionInMeta) licenses = [licenseInClassifiers, licenseInMetadata]
+    for (const rawLicense of licenses) {
+      const parsed = rawLicense && spdxCorrect(rawLicense)
+      if (parsed) return parsed
+    }
   }
 
   async _getPackage(spec, registryData, destination) {
