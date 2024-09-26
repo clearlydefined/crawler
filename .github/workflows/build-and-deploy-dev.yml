@@ -3,8 +3,9 @@ name: Build and Deploy -- DEV
 
 on:
   workflow_dispatch:
-  push:
-    branches: [master]
+  # TODO: once tested run on master push
+  # push:
+  #   branches: [master]
 
 jobs:
   upload-package-lock-json:
