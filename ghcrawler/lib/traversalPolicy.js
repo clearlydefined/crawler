@@ -143,6 +143,10 @@ class TraversalPolicy {
     return new TraversalPolicy('storageOnly', 'always', TraversalPolicy._resolveMapSpec(map))
   }
 
+  static reharvestAlways(map) {
+    return new TraversalPolicy('mutables', 'always', TraversalPolicy._resolveMapSpec(map))
+  }
+
   static clone(policy) {
     return new TraversalPolicy(policy.fetch, policy.freshness, policy.map)
   }
