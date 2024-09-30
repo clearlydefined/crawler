@@ -1,0 +1,21 @@
+# This workflow will build a docker image, push it to ghcr.io, and deploy it to an Azure WebApp.
+name: Build and Deploy -- PROD
+
+on:
+  workflow_dispatch:
+  #TODO: deploy on production branch trigger
+
+jobs:
+  build-and-deploy-prod:
+    uses: clearlydefined/operations/.github/workflows/app-build-and-deploy.yml@v1.1.0
+    secrets: 
+      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      AZURE_WEBAPP_PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_PROD }}
+      AZURE_SECONDARY_WEBAPP_PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_PROD_EU }}
+      DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+      PRODUCTION_DEPLOYERS: ${{ secrets.PRODUCTION_DEPLOYERS }}
+    with:
+      deploy-env: prod
+      application-type: worker
+      azure-app-base-name: cdcrawler
+      azure-app-name-postfix: -prod
