@@ -6,6 +6,19 @@ on:
   #TODO: deploy on production branch trigger
 
 jobs:
+  upload-package-lock-json:
+    name: Upload package-lock.json from this repo
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.1.1
+
+      - name: Upload package-lock.json
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-lock.json
+          path: package-lock.json
+jobs:
   build-and-deploy-prod:
     uses: clearlydefined/operations/.github/workflows/app-build-and-deploy.yml@v2.0.0
     secrets: 
