@@ -20,7 +20,7 @@ jobs:
           path: package-lock.json
 
   build-and-deploy-prod:
-    uses: clearlydefined/operations/.github/workflows/app-build-and-deploy.yml@skip-settings-set
+    uses: clearlydefined/operations/.github/workflows/app-build-and-deploy.yml@e08700fc66250441917d10b6f5115a72c65db18e
     secrets: 
       AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
       AZURE_WEBAPP_PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_PROD }}
@@ -31,3 +31,4 @@ jobs:
       application-type: worker
       azure-app-base-name: cdcrawler
       azure-app-name-postfix: -prod
+      docker-hub-username: ${{ vars.DOCKERHUB_USERNAME }}
