@@ -20,7 +20,7 @@ jobs:
           path: package-lock.json
 
   build-and-deploy-prod:
-    uses: clearlydefined/operations/.github/workflows/app-build-and-deploy.yml@8c0dc9caa703241172de486205f5a74f9f9a0c13
+    uses: clearlydefined/operations/.github/workflows/app-build-and-deploy.yml@fa4c9591fe01661258d17347a4b82e2840c01398
     secrets: 
       AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
       AZURE_WEBAPP_PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_PROD }}
