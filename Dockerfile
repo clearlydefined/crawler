@@ -5,8 +5,6 @@ FROM node:18-bullseye
 ENV APPDIR=/opt/service
 
 # Set environment variables from build arguments
-ARG BUILD_NUMBER=0
-ENV BUILD_NUMBER=$APP_VERSION
 ARG APP_VERSION="UNKNOWN"
 ENV APP_VERSION=$APP_VERSION
 ARG BUILD_SHA="UNKNOWN"
