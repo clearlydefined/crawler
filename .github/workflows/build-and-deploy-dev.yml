@@ -23,7 +23,7 @@ jobs:
   build-and-deploy:
     name: Build and Deploy
     needs: upload-package-lock-json
-    uses: clearlydefined/operations/.github/workflows/app-build-and-deploy.yml@86bf7d26a27eb3bb603b9074bcba76d120f4caab
+    uses: clearlydefined/operations/.github/workflows/app-build-and-deploy.yml@d6f322edeaf369efb34d6b68582f8d90f54f222d
     secrets: 
       AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
       AZURE_WEBAPP_PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_DEV }}
