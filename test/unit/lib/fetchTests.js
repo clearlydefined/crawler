@@ -23,6 +23,48 @@ describe('CallFetch', () => {
       expect(response).to.be.deep.equal(JSON.parse(expected))
     })
 
+    it('checks if the default header user-agent and other header is present in crate components', async () => {
+      const path = '/crates.io/api/v1/crates/name/1.0.0/download'
+      const endpointMock = await mockServer.forGet(path).thenReply(200, 'success')
+
+      await callFetch({
+        url: mockServer.urlFor(path),
+        method: 'GET',
+        json: true,
+        encoding: null,
+        headers: {
+          Accept: 'text/html'
+        }
+      })
+      const requests = await endpointMock.getSeenRequests()
+      expect(requests[0].headers).to.include({ 'user-agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)' })
+      expect(requests[0].headers).to.include({ accept: 'text/html' })
+    })
+
+    it('checks if the default header user-agent is present in crate components', async () => {
+      const path = '/crates.io/api/v1/crates/name'
+      const endpointMock = await mockServer.forGet(path).thenReply(200, 'success')
+
+      await callFetch({
+        url: mockServer.urlFor(path),
+        method: 'GET',
+        json: true
+      })
+      const requests = await endpointMock.getSeenRequests()
+      expect(requests[0].headers).to.include({ 'user-agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)' })
+    })
+
+    it('checks if the default header user-agent is present in packagist components', async () => {
+      const path = '/api.github.com/repos/php-fig/log/zipball/fe5ea303b0887d5caefd3d431c3e61ad47037001'
+      const endpointMock = await mockServer.forGet(path).thenReply(200, 'success')
+
+      await callFetch({
+        url: mockServer.urlFor(path)
+      })
+      const requests = await endpointMock.getSeenRequests()
+      expect(requests[0].headers).to.include({ 'user-agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)' })
+    })
+
     it('checks if the full response is fetched', async () => {
       const path = '/registry.npmjs.com/redis/0.1.0'
       const expected = fs.readFileSync('test/fixtures/fetch/redis-0.1.0.json')
