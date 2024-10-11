@@ -61,10 +61,7 @@ class PackagistFetch extends AbstractFetch {
     if (!distUrl) return request.markSkip('Missing dist.url ')
     return new Promise((resolve, reject) => {
       const options = {
-        url: distUrl,
-        headers: {
-          'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)'
-        }
+        url: distUrl
       }
       nodeRequest
         .get(options, (error, response) => {

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractFetch = require('./abstractFetch')
-const { withDefaults } = require('../../lib/fetch')
+const { callFetch, defaultHeaders } = require('../../lib/fetch')
 const nodeRequest = require('request')
 const { clone, get } = require('lodash')
 const { promisify } = require('util')
@@ -23,13 +23,11 @@ const extensionMap = {
   jar: '.jar'
 }
 
-const defaultHeaders = { headers: { 'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)' } }
-
 class MavenBasedFetch extends AbstractFetch {
   constructor(providerMap, options) {
     super(options)
     this._providerMap = { ...providerMap }
-    this._handleRequestPromise = options.requestPromise || withDefaults(defaultHeaders)
+    this._handleRequestPromise = options.requestPromise || callFetch
     this._handleRequestStream = options.requestStream || nodeRequest.defaults(defaultHeaders).get
   }
 
