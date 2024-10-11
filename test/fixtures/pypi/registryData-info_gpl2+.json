@@ -1,0 +1,81 @@
+{
+  "info": {
+    "author": null,
+    "author_email": "Python Code Quality Authority <code-quality@python.org>",
+    "bugtrack_url": null,
+    "classifiers": [
+      "Development Status :: 6 - Mature",
+      "Environment :: Console",
+      "Intended Audience :: Developers",
+      "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+      "Operating System :: OS Independent",
+      "Programming Language :: Python",
+      "Programming Language :: Python :: 3",
+      "Programming Language :: Python :: 3 :: Only",
+      "Programming Language :: Python :: 3.10",
+      "Programming Language :: Python :: 3.11",
+      "Programming Language :: Python :: 3.12",
+      "Programming Language :: Python :: 3.8",
+      "Programming Language :: Python :: 3.9",
+      "Programming Language :: Python :: Implementation :: CPython",
+      "Programming Language :: Python :: Implementation :: PyPy",
+      "Topic :: Software Development :: Debuggers",
+      "Topic :: Software Development :: Quality Assurance",
+      "Topic :: Software Development :: Testing",
+      "Typing :: Typed"
+    ],
+    "description": "`Pylint`_\n=========\n\n.. _`Pylint`: https://pylint.readthedocs.io/\n\n.. This is used inside the doc to recover the start of the introduction\n\n.. image:: https://github.com/pylint-dev/pylint/actions/workflows/tests.yaml/badge.svg?branch=main\n    :target: https://github.com/pylint-dev/pylint/actions\n\n.. image:: https://codecov.io/gh/pylint-dev/pylint/branch/main/graph/badge.svg?token=ZETEzayrfk\n    :target: https://codecov.io/gh/pylint-dev/pylint\n\n.. image:: https://img.shields.io/pypi/v/pylint.svg\n    :alt: Pypi Package version\n    :target: https://pypi.python.org/pypi/pylint\n\n.. image:: https://readthedocs.org/projects/pylint/badge/?version=latest\n    :target: https://pylint.readthedocs.io/en/latest/?badge=latest\n    :alt: Documentation Status\n\n.. image:: https://img.shields.io/badge/code%20style-black-000000.svg\n    :target: https://github.com/ambv/black\n\n.. image:: https://img.shields.io/badge/linting-pylint-yellowgreen\n    :target: https://github.com/pylint-dev/pylint\n\n.. image:: https://results.pre-commit.ci/badge/github/pylint-dev/pylint/main.svg\n   :target: https://results.pre-commit.ci/latest/github/pylint-dev/pylint/main\n   :alt: pre-commit.ci status\n\n.. image:: https://bestpractices.coreinfrastructure.org/projects/6328/badge\n   :target: https://bestpractices.coreinfrastructure.org/projects/6328\n   :alt: CII Best Practices\n\n.. image:: https://img.shields.io/ossf-scorecard/github.com/PyCQA/pylint?label=openssf%20scorecard&style=flat\n   :target: https://api.securityscorecards.dev/projects/github.com/PyCQA/pylint\n   :alt: OpenSSF Scorecard\n\n.. image:: https://img.shields.io/discord/825463413634891776.svg\n   :target: https://discord.gg/qYxpadCgkx\n   :alt: Discord\n\nWhat is Pylint?\n---------------\n\nPylint is a `static code analyser`_ for Python 2 or 3. The latest version supports Python\n3.8.0 and above.\n\n.. _`static code analyser`: https://en.wikipedia.org/wiki/Static_code_analysis\n\nPylint analyses your code without actually running it. It checks for errors, enforces a\ncoding standard, looks for `code smells`_, and can make suggestions about how the code\ncould be refactored.\n\n.. _`code smells`: https://martinfowler.com/bliki/CodeSmell.html\n\nInstall\n-------\n\n.. This is used inside the doc to recover the start of the short text for installation\n\nFor command line use, pylint is installed with::\n\n    pip install pylint\n\nOr if you want to also check spelling with ``enchant`` (you might need to\n`install the enchant C library <https://pyenchant.github.io/pyenchant/install.html#installing-the-enchant-c-library>`_):\n\n.. code-block:: sh\n\n   pip install pylint[spelling]\n\nIt can also be integrated in most editors or IDEs. More information can be found\n`in the documentation`_.\n\n.. _in the documentation: https://pylint.readthedocs.io/en/latest/user_guide/installation/index.html\n\n.. This is used inside the doc to recover the end of the short text for installation\n\nWhat differentiates Pylint?\n---------------------------\n\nPylint is not trusting your typing and is inferring the actual value of nodes (for a\nstart because there was no typing when pylint started off) using its internal code\nrepresentation (astroid). If your code is ``import logging as argparse``, Pylint\ncan check and know that ``argparse.error(...)`` is in fact a logging call and not an\nargparse call. This makes pylint slower, but it also lets pylint find more issues if\nyour code is not fully typed.\n\n    [inference] is the killer feature that keeps us using [pylint] in our project despite how painfully slow it is.\n    - `Realist pylint user`_, 2022\n\n.. _`Realist pylint user`: https://github.com/charliermarsh/ruff/issues/970#issuecomment-1381067064\n\npylint, not afraid of being a little slower than it already is, is also a lot more thorough than other linters.\nThere are more checks, including some opinionated ones that are deactivated by default\nbut can be enabled using configuration.\n\nHow to use pylint\n-----------------\n\nPylint isn't smarter than you: it may warn you about things that you have\nconscientiously done or check for some things that you don't care about.\nDuring adoption, especially in a legacy project where pylint was never enforced,\nit's best to start with the ``--errors-only`` flag, then disable\nconvention and refactor messages with ``--disable=C,R`` and progressively\nre-evaluate and re-enable messages as your priorities evolve.\n\nPylint is highly configurable and permits to write plugins in order to add your\nown checks (for example, for internal libraries or an internal rule). Pylint also has an\necosystem of existing plugins for popular frameworks and third-party libraries.\n\n.. note::\n\n    Pylint supports the Python standard library out of the box. Third-party\n    libraries are not always supported, so a plugin might be needed. A good place\n    to start is ``PyPI`` which often returns a plugin by searching for\n    ``pylint <library>``. `pylint-pydantic`_, `pylint-django`_ and\n    `pylint-sonarjson`_ are examples of such plugins. More information about plugins\n    and how to load them can be found at `plugins`_.\n\n.. _`plugins`: https://pylint.readthedocs.io/en/latest/development_guide/how_tos/plugins.html#plugins\n.. _`pylint-pydantic`: https://pypi.org/project/pylint-pydantic\n.. _`pylint-django`: https://github.com/pylint-dev/pylint-django\n.. _`pylint-sonarjson`: https://github.com/omegacen/pylint-sonarjson\n\nAdvised linters alongside pylint\n--------------------------------\n\nProjects that you might want to use alongside pylint include ruff_ (**really** fast,\nwith builtin auto-fix and a large number of checks taken from popular linters, but\nimplemented in ``rust``) or flake8_ (a framework to implement your own checks in python using ``ast`` directly),\nmypy_, pyright_ / pylance or pyre_ (typing checks), bandit_ (security oriented checks), black_ and\nisort_ (auto-formatting), autoflake_ (automated removal of unused imports or variables), pyupgrade_\n(automated upgrade to newer python syntax) and pydocstringformatter_ (automated pep257).\n\n.. _ruff: https://github.com/charliermarsh/ruff\n.. _flake8: https://github.com/PyCQA/flake8\n.. _bandit: https://github.com/PyCQA/bandit\n.. _mypy: https://github.com/python/mypy\n.. _pyright: https://github.com/microsoft/pyright\n.. _pyre: https://github.com/facebook/pyre-check\n.. _black: https://github.com/psf/black\n.. _autoflake: https://github.com/myint/autoflake\n.. _pyupgrade: https://github.com/asottile/pyupgrade\n.. _pydocstringformatter: https://github.com/DanielNoord/pydocstringformatter\n.. _isort: https://pycqa.github.io/isort/\n\nAdditional tools included in pylint\n-----------------------------------\n\nPylint ships with two additional tools:\n\n- pyreverse_ (standalone tool that generates package and class diagrams.)\n- symilar_  (duplicate code finder that is also integrated in pylint)\n\n.. _pyreverse: https://pylint.readthedocs.io/en/latest/pyreverse.html\n.. _symilar: https://pylint.readthedocs.io/en/latest/symilar.html\n\n\n.. This is used inside the doc to recover the end of the introduction\n\nContributing\n------------\n\n.. This is used inside the doc to recover the start of the short text for contribution\n\nWe welcome all forms of contributions such as updates for documentation, new code, checking issues for duplicates or telling us\nthat we can close them, confirming that issues still exist, `creating issues because\nyou found a bug or want a feature`_, etc. Everything is much appreciated!\n\nPlease follow the `code of conduct`_ and check `the Contributor Guides`_ if you want to\nmake a code contribution.\n\n.. _creating issues because you found a bug or want a feature: https://pylint.readthedocs.io/en/latest/contact.html#bug-reports-feedback\n.. _code of conduct: https://github.com/pylint-dev/pylint/blob/main/CODE_OF_CONDUCT.md\n.. _the Contributor Guides: https://pylint.readthedocs.io/en/latest/development_guide/contribute.html\n\n.. This is used inside the doc to recover the end of the short text for contribution\n\nShow your usage\n-----------------\n\nYou can place this badge in your README to let others know your project uses pylint.\n\n    .. image:: https://img.shields.io/badge/linting-pylint-yellowgreen\n        :target: https://github.com/pylint-dev/pylint\n\nLearn how to add a badge to your documentation in `the badge documentation`_.\n\n.. _the badge documentation: https://pylint.readthedocs.io/en/latest/user_guide/installation/badge.html\n\nLicense\n-------\n\npylint is, with a few exceptions listed below, `GPLv2 <https://github.com/pylint-dev/pylint/blob/main/LICENSE>`_.\n\nThe icon files are licensed under the `CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0/>`_ license:\n\n- `doc/logo.png <https://raw.githubusercontent.com/pylint-dev/pylint/main/doc/logo.png>`_\n- `doc/logo.svg <https://raw.githubusercontent.com/pylint-dev/pylint/main/doc/logo.svg>`_\n\nSupport\n-------\n\nPlease check `the contact information`_.\n\n.. _`the contact information`: https://pylint.readthedocs.io/en/latest/contact.html\n\n.. |tideliftlogo| image:: https://raw.githubusercontent.com/pylint-dev/pylint/main/doc/media/Tidelift_Logos_RGB_Tidelift_Shorthand_On-White.png\n   :width: 200\n   :alt: Tidelift\n\n.. list-table::\n   :widths: 10 100\n\n   * - |tideliftlogo|\n     - Professional support for pylint is available as part of the `Tidelift\n       Subscription`_.  Tidelift gives software development teams a single source for\n       purchasing and maintaining their software, with professional grade assurances\n       from the experts who know it best, while seamlessly integrating with existing\n       tools.\n\n.. _Tidelift Subscription: https://tidelift.com/subscription/pkg/pypi-pylint?utm_source=pypi-pylint&utm_medium=referral&utm_campaign=readme\n",
+    "description_content_type": "text/x-rst",
+    "docs_url": null,
+    "download_url": null,
+    "downloads": {
+      "last_day": -1,
+      "last_month": -1,
+      "last_week": -1
+    },
+    "dynamic": null,
+    "home_page": null,
+    "keywords": "static code analysis, linter, python, lint",
+    "license": "GPL-2.0-or-later",
+    "maintainer": null,
+    "maintainer_email": null,
+    "name": "pylint",
+    "package_url": "https://pypi.org/project/pylint/",
+    "platform": null,
+    "project_url": "https://pypi.org/project/pylint/",
+    "project_urls": {
+      "Bug Tracker": "https://github.com/pylint-dev/pylint/issues",
+      "Discord Server": "https://discord.com/invite/Egy6P8AMB5",
+      "Docs: Contributor Guide": "https://pylint.readthedocs.io/en/latest/development_guide/contributor_guide/index.html",
+      "Docs: User Guide": "https://pylint.readthedocs.io/en/latest/",
+      "Source Code": "https://github.com/pylint-dev/pylint",
+      "What's New": "https://pylint.readthedocs.io/en/latest/whatsnew/3/",
+      "homepage": "https://github.com/pylint-dev/pylint"
+    },
+    "provides_extra": [
+      "spelling",
+      "testutils"
+    ],
+    "release_url": "https://pypi.org/project/pylint/3.2.3/",
+    "requires_dist": [
+      "platformdirs>=2.2.0",
+      "astroid<=3.3.0-dev0,>=3.2.2",
+      "isort!=5.13.0,<6,>=4.2.5",
+      "mccabe<0.8,>=0.6",
+      "tomlkit>=0.10.1",
+      "typing-extensions>=3.10.0; python_version < \"3.10\"",
+      "dill>=0.2; python_version < \"3.11\"",
+      "tomli>=1.1.0; python_version < \"3.11\"",
+      "dill>=0.3.6; python_version >= \"3.11\"",
+      "dill>=0.3.7; python_version >= \"3.12\"",
+      "colorama>=0.4.5; sys_platform == \"win32\"",
+      "pyenchant~=3.2; extra == \"spelling\"",
+      "gitpython>3; extra == \"testutils\""
+    ],
+    "requires_python": ">=3.8.0",
+    "summary": "python code static checker",
+    "version": "3.2.3",
+    "yanked": false,
+    "yanked_reason": null
+  }
+}
