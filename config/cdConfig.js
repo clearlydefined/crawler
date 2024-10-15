@@ -135,6 +135,8 @@ module.exports = {
       attenuation: {
         ttl: 3000
       }
-    }
+    },
+    appVersion: config.get('APP_VERSION'),
+    buildsha: config.get('BUILD_SHA')
   }
 }
