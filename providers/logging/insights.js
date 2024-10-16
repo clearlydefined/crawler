@@ -4,13 +4,13 @@
 const appInsights = require('applicationinsights')
 
 class Insights {
-  constructor(tattoos, client = null, echo = true) {
+  constructor(tattoos, client = null, echo = false) {
     this.client = client
     this.tattoos = tattoos
     this.echo = echo
   }
 
-  static setup(tattoos, key = 'mock', echo = true) {
+  static setup(tattoos, key = 'mock', echo = false) {
     // exit if we are already setup
     if (appInsights.defaultClient instanceof Insights) return
     if (!key || key === 'mock') appInsights.defaultClient = new Insights(tattoos, null, echo)
