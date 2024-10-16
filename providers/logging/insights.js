@@ -36,10 +36,10 @@ class Insights {
 
   trackTrace(traceTelemetry) {
     this.tattoo(traceTelemetry)
-    const severities = ['V', 'I', 'W', 'E', 'C']
-    const propertyString = JSON.stringify(traceTelemetry.properties)
-    if (this.client) this.client.trackTrace(traceTelemetry)
-    if (this.echo) console.log(`[${severities[traceTelemetry.severity]}] ${traceTelemetry.message} ${propertyString}`)
+    // const severities = ['V', 'I', 'W', 'E', 'C']
+    // const propertyString = JSON.stringify(traceTelemetry.properties)
+    // if (this.client) this.client.trackTrace(traceTelemetry)
+    // if (this.echo) console.log(`[${severities[traceTelemetry.severity]}] ${traceTelemetry.message} ${propertyString}`)
   }
 
   tattoo(telemetry) {
