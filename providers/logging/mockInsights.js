@@ -33,7 +33,6 @@ class MockInsights {
   }
 
   trackTrace(traceTelemetry) {
-    this.tattoo(traceTelemetry)
     const severities = ['V', 'I', 'W', 'E', 'C']
     const propertyString = JSON.stringify(traceTelemetry.properties)
     console.log(`[${severities[traceTelemetry.severity]}] ${traceTelemetry.message} ${propertyString}`)
