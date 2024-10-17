@@ -15,8 +15,9 @@ class Insights {
     if (appInsights.defaultClient instanceof Insights) return
     if (!key || key === 'mock') appInsights.defaultClient = new Insights(tattoos, null, echo)
     else {
-      appInsights.setup(key).setAutoCollectPerformance(false).setAutoCollectDependencies(false).start()
+      appInsights.setup(key).setAutoCollectPerformance(false).setAutoCollectDependencies(false)
       appInsights.defaultClient = new Insights(tattoos, appInsights.defaultClient, echo)
+      appInsights.start()
     }
   }
 
@@ -34,13 +35,13 @@ class Insights {
     }
   }
 
-  trackTrace(traceTelemetry) {
-    this.tattoo(traceTelemetry)
-    // const severities = ['V', 'I', 'W', 'E', 'C']
-    // const propertyString = JSON.stringify(traceTelemetry.properties)
-    // if (this.client) this.client.trackTrace(traceTelemetry)
-    // if (this.echo) console.log(`[${severities[traceTelemetry.severity]}] ${traceTelemetry.message} ${propertyString}`)
-  }
+  // trackTrace(traceTelemetry) {
+  //   this.tattoo(traceTelemetry)
+  //   const severities = ['V', 'I', 'W', 'E', 'C']
+  //   const propertyString = JSON.stringify(traceTelemetry.properties)
+  //   if (this.client) this.client.trackTrace(traceTelemetry)
+  //   if (this.echo) console.log(`[${severities[traceTelemetry.severity]}] ${traceTelemetry.message} ${propertyString}`)
+  // }
 
   tattoo(telemetry) {
     telemetry.properties = { ...(telemetry.properties || {}), ...this.tattoos }
