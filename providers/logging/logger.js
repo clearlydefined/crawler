@@ -18,7 +18,7 @@ function factory(options) {
     MockInsights.setup(realOptions.key || 'mock', realOptions.echo)
     appInsights.defaultClient = new MockInsights(appInsights.defaultClient)
   } else {
-    appInsights.setup(key).setAutoCollectPerformance(false).setAutoCollectDependencies(true).start()
+    appInsights.setup(realOptions.key).setAutoCollectPerformance(false).setAutoCollectDependencies(true).start()
   }
 
   const result = new winston.Logger()
