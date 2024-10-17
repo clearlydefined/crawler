@@ -6,8 +6,8 @@ const mockttp = require('mockttp')
 
 function checkHeader(headers) {
   for (const [key, value] of Object.entries(defaultHeaders)) {
-    expect(headers).to.have.property(key.toLowerCase()).that.equals(value);
-    }
+    expect(headers).to.have.property(key.toLowerCase()).that.equals(value)
+  }
 }
 describe('CallFetch', () => {
   describe('with mock server', () => {
