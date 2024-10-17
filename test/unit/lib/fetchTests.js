@@ -4,6 +4,11 @@ const { expect } = require('chai')
 const fs = require('fs')
 const mockttp = require('mockttp')
 
+function checkHeader(headers) {
+  for (const [key, value] of Object.entries(defaultHeaders)) {
+    expect(headers).to.have.property(key.toLowerCase()).that.equals(value);
+    }
+}
 describe('CallFetch', () => {
   describe('with mock server', () => {
     const mockServer = mockttp.getLocal()
@@ -37,7 +42,7 @@ describe('CallFetch', () => {
         }
       })
       const requests = await endpointMock.getSeenRequests()
-      expect(requests[0].headers).to.includes(defaultHeaders)
+      checkHeader(requests[0].headers)
       expect(requests[0].headers).to.include({ accept: 'text/html' })
     })
 
@@ -51,7 +56,7 @@ describe('CallFetch', () => {
         json: true
       })
       const requests = await endpointMock.getSeenRequests()
-      expect(requests[0].headers).to.include(defaultHeaders)
+      checkHeader(requests[0].headers)
     })
 
     it('checks if the default header user-agent is present in packagist components', async () => {
@@ -62,7 +67,7 @@ describe('CallFetch', () => {
         url: mockServer.urlFor(path)
       })
       const requests = await endpointMock.getSeenRequests()
-      expect(requests[0].headers).to.include(defaultHeaders)
+      checkHeader(requests[0].headers)
     })
 
     it('checks if the full response is fetched', async () => {
@@ -137,9 +142,9 @@ describe('CallFetch', () => {
       const requests = await endpointMock.getSeenRequests()
       expect(requests.length).to.equal(2)
       expect(requests[0].url).to.equal(url)
-      expect(requests[0].headers).to.include(defaultOptions.headers)
+      checkHeader(requests[0].headers)
       expect(requests[1].url).to.equal(url)
-      expect(requests[1].headers).to.include(defaultOptions.headers)
+      checkHeader(requests[1].headers)
     })
 
     it('checks if the response is text with uri option in GET request', async () => {
@@ -172,7 +177,7 @@ describe('CallFetch', () => {
       expect(json).to.deep.equal({ test: 'test' })
       expect(requests[0].headers).to.include({ 'x-crawler': 'secret' })
       //Check for the default header value
-      expect(requests[0].headers).to.include(defaultHeaders)
+      checkHeader(requests[0].headers)
     })
 
     describe('test simple', () => {
