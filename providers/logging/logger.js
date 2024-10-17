@@ -5,7 +5,7 @@ const config = require('painless-config')
 const appInsights = require('applicationinsights')
 const aiLogger = require('winston-azure-application-insights').AzureApplicationInsightsLogger
 const winston = require('winston')
-const mockInsights = require('./mockInsights')
+const MockInsights = require('./mockInsights')
 
 function factory(options) {
   const realOptions = options || {
@@ -15,7 +15,7 @@ function factory(options) {
   }
 
   if (!realOptions.key || realOptions.key === 'mock') {
-    mockInsights.setup(realOptions.key || 'mock', realOptions.echo)
+    MockInsights.setup(realOptions.key || 'mock', realOptions.echo)
     appInsights.defaultClient = new MockInsights(appInsights.defaultClient)
   } else {
     appInsights.setup(key).setAutoCollectPerformance(false).setAutoCollectDependencies(true).start()
