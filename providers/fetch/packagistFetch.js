@@ -9,6 +9,7 @@ const nodeRequest = require('request')
 const { promisify } = require('util')
 const readdir = promisify(fs.readdir)
 const FetchResult = require('../../lib/fetchResult')
+const { defaultHeaders } = require('../../lib/fetch')
 
 const providerMap = {
   packagist: 'https://repo.packagist.org/'
@@ -61,7 +62,8 @@ class PackagistFetch extends AbstractFetch {
     if (!distUrl) return request.markSkip('Missing dist.url ')
     return new Promise((resolve, reject) => {
       const options = {
-        url: distUrl
+        url: distUrl,
+        headers: defaultHeaders
       }
       nodeRequest
         .get(options, (error, response) => {

@@ -1,5 +1,5 @@
 const { fail } = require('assert')
-const { callFetch, withDefaults } = require('../../../lib/fetch')
+const { callFetch, withDefaults, defaultHeaders } = require('../../../lib/fetch')
 const { expect } = require('chai')
 const fs = require('fs')
 const mockttp = require('mockttp')
@@ -37,7 +37,7 @@ describe('CallFetch', () => {
         }
       })
       const requests = await endpointMock.getSeenRequests()
-      expect(requests[0].headers).to.include({ 'user-agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)' })
+      expect(requests[0].headers).to.includes(defaultHeaders)
       expect(requests[0].headers).to.include({ accept: 'text/html' })
     })
 
@@ -51,7 +51,7 @@ describe('CallFetch', () => {
         json: true
       })
       const requests = await endpointMock.getSeenRequests()
-      expect(requests[0].headers).to.include({ 'user-agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)' })
+      expect(requests[0].headers).to.include(defaultHeaders)
     })
 
     it('checks if the default header user-agent is present in packagist components', async () => {
@@ -62,7 +62,7 @@ describe('CallFetch', () => {
         url: mockServer.urlFor(path)
       })
       const requests = await endpointMock.getSeenRequests()
-      expect(requests[0].headers).to.include({ 'user-agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)' })
+      expect(requests[0].headers).to.include(defaultHeaders)
     })
 
     it('checks if the full response is fetched', async () => {
@@ -129,7 +129,7 @@ describe('CallFetch', () => {
       const url = mockServer.urlFor(path)
       const endpointMock = await mockServer.forGet(path).thenReply(200)
 
-      const defaultOptions = { headers: { 'user-agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)' } }
+      const defaultOptions = { headers: defaultHeaders }
       const requestWithDefaults = withDefaults(defaultOptions)
       await requestWithDefaults({ url })
       await requestWithDefaults({ url })
@@ -172,7 +172,7 @@ describe('CallFetch', () => {
       expect(json).to.deep.equal({ test: 'test' })
       expect(requests[0].headers).to.include({ 'x-crawler': 'secret' })
       //Check for the default header value
-      expect(requests[0].headers).to.include({ 'user-agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)' })
+      expect(requests[0].headers).to.include(defaultHeaders)
     })
 
     describe('test simple', () => {

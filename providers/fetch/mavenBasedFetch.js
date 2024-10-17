@@ -28,7 +28,7 @@ class MavenBasedFetch extends AbstractFetch {
     super(options)
     this._providerMap = { ...providerMap }
     this._handleRequestPromise = options.requestPromise || callFetch
-    this._handleRequestStream = options.requestStream || nodeRequest.defaults(defaultHeaders).get
+    this._handleRequestStream = options.requestStream || nodeRequest.defaults({ headers: defaultHeaders }).get
   }
 
   canHandle(request) {
