@@ -4,6 +4,7 @@
 const config = require('painless-config')
 const aiLogger = require('winston-azure-application-insights').AzureApplicationInsightsLogger
 const winston = require('winston')
+const appInsights = require('applicationinsights')
 const mockInsights = require('./mockInsights')
 
 function factory(options) {
@@ -13,10 +14,10 @@ function factory(options) {
     level: 'info'
   }
 
-  if (!realOptions.key || realOptions.key === 'mock') mockInsights.setup(realOptions.key || 'mock', realOptions.echo)
+  mockInsights.setup(realOptions.key || 'mock', realOptions.echo)
   const result = new winston.Logger()
   result.add(aiLogger, {
-    key: realOptions.key,
+    insights: appInsights,
     echo: realOptions.echo,
     treatErrorsAsExceptions: true,
     exitOnError: false,
