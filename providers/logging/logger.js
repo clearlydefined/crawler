@@ -8,7 +8,8 @@ const appInsights = require('applicationinsights')
 
 function factory(options) {
   appInsights.setup(options)
-  if (!options.key || options.key === 'mock') mockInsights.setup('mock', realOptions.echo)
+
+  if (!options.key || options.key === 'mock') mockInsights.setup('mock', options.echo)
 
   const result = new winston.Logger()
   result.add(aiLogger, {
