@@ -1,0 +1,55 @@
+{
+  "info": {
+    "author": "Mark Pilgrim",
+    "author_email": "mark@diveintomark.org",
+    "bugtrack_url": null,
+    "classifiers": [
+      "Development Status :: 5 - Production/Stable",
+      "Intended Audience :: Developers",
+      "License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)",
+      "Operating System :: OS Independent",
+      "Programming Language :: Python",
+      "Programming Language :: Python :: 3",
+      "Programming Language :: Python :: 3.10",
+      "Programming Language :: Python :: 3.11",
+      "Programming Language :: Python :: 3.7",
+      "Programming Language :: Python :: 3.8",
+      "Programming Language :: Python :: 3.9",
+      "Programming Language :: Python :: Implementation :: CPython",
+      "Programming Language :: Python :: Implementation :: PyPy",
+      "Topic :: Software Development :: Libraries :: Python Modules",
+      "Topic :: Text Processing :: Linguistic"
+    ],
+    "description": "Chardet: The Universal Character Encoding Detector\n--------------------------------------------------\n\n.. image:: https://img.shields.io/travis/chardet/chardet/stable.svg\n   :alt: Build status\n   :target: https://travis-ci.org/chardet/chardet\n\n.. image:: https://img.shields.io/coveralls/chardet/chardet/stable.svg\n   :target: https://coveralls.io/r/chardet/chardet\n\n.. image:: https://img.shields.io/pypi/v/chardet.svg\n   :target: https://warehouse.python.org/project/chardet/\n   :alt: Latest version on PyPI\n\n.. image:: https://img.shields.io/pypi/l/chardet.svg\n   :alt: License\n\n\nDetects\n - ASCII, UTF-8, UTF-16 (2 variants), UTF-32 (4 variants)\n - Big5, GB2312, EUC-TW, HZ-GB-2312, ISO-2022-CN (Traditional and Simplified Chinese)\n - EUC-JP, SHIFT_JIS, CP932, ISO-2022-JP (Japanese)\n - EUC-KR, ISO-2022-KR, Johab (Korean)\n - KOI8-R, MacCyrillic, IBM855, IBM866, ISO-8859-5, windows-1251 (Cyrillic)\n - ISO-8859-5, windows-1251 (Bulgarian)\n - ISO-8859-1, windows-1252, MacRoman (Western European languages)\n - ISO-8859-7, windows-1253 (Greek)\n - ISO-8859-8, windows-1255 (Visual and Logical Hebrew)\n - TIS-620 (Thai)\n\n.. note::\n   Our ISO-8859-2 and windows-1250 (Hungarian) probers have been temporarily\n   disabled until we can retrain the models.\n\nRequires Python 3.7+.\n\nInstallation\n------------\n\nInstall from `PyPI <https://pypi.org/project/chardet/>`_::\n\n    pip install chardet\n\nDocumentation\n-------------\n\nFor users, docs are now available at https://chardet.readthedocs.io/.\n\nCommand-line Tool\n-----------------\n\nchardet comes with a command-line script which reports on the encodings of one\nor more files::\n\n    % chardetect somefile someotherfile\n    somefile: windows-1252 with confidence 0.5\n    someotherfile: ascii with confidence 1.0\n\nAbout\n-----\n\nThis is a continuation of Mark Pilgrim's excellent original chardet port from C, and `Ian Cordasco <https://github.com/sigmavirus24>`_'s\n`charade <https://github.com/sigmavirus24/charade>`_ Python 3-compatible fork.\n\n:maintainer: Dan Blanchard\n",
+    "description_content_type": "",
+    "docs_url": null,
+    "download_url": "",
+    "downloads": {
+      "last_day": -1,
+      "last_month": -1,
+      "last_week": -1
+    },
+    "home_page": "https://github.com/chardet/chardet",
+    "keywords": "encoding,i18n,xml",
+    "license": "LGPL",
+    "maintainer": "Daniel Blanchard",
+    "maintainer_email": "dan.blanchard@gmail.com",
+    "name": "chardet",
+    "package_url": "https://pypi.org/project/chardet/",
+    "platform": null,
+    "project_url": "https://pypi.org/project/chardet/",
+    "project_urls": {
+      "Documentation": "https://chardet.readthedocs.io/",
+      "GitHub Project": "https://github.com/chardet/chardet",
+      "Homepage": "https://github.com/chardet/chardet",
+      "Issue Tracker": "https://github.com/chardet/chardet/issues"
+    },
+    "release_url": "https://pypi.org/project/chardet/5.1.0/",
+    "requires_dist": null,
+    "requires_python": ">=3.7",
+    "summary": "Universal encoding detector for Python 3",
+    "version": "5.1.0",
+    "yanked": false,
+    "yanked_reason": null
+  }
+}

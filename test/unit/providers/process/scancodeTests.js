@@ -50,20 +50,20 @@ describe('ScanCode misc', () => {
 
 describe('ScanCode process', () => {
   it('should handle gems', async () => {
-    const { request, processor } = setup('2.9.8/gem.json')
+    const { request, processor } = setup('32.1.0/gem.json')
     await processor.handle(request)
     expect(request.document._metadata.toolVersion).to.equal('1.2.0')
     expect(flatten(processor.attachFiles.args.map(x => x[1]))).to.have.members([])
   })
 
   it('should handle simple npms', async () => {
-    const { request, processor } = setup('2.9.8/npm-basic.json')
+    const { request, processor } = setup('32.1.0/npm-basic.json')
     await processor.handle(request)
     expect(flatten(processor.attachFiles.args.map(x => x[1]))).to.have.members(['package/package.json'])
   })
 
   it('should handle large npms', async () => {
-    const { request, processor } = setup('2.9.8/npm-large.json')
+    const { request, processor } = setup('32.1.0/npm-large.json')
     await processor.handle(request)
     expect(flatten(processor.attachFiles.args.map(x => x[1]))).to.have.members(['package/package.json'])
   })
@@ -85,7 +85,7 @@ describe('ScanCode process', () => {
   })
 
   beforeEach(function () {
-    const resultBox = { error: null, versionResult: 'ScanCode version 1.2.0\n', versionError: null }
+    const resultBox = { error: null, versionResult: 'ScanCode version: 1.2.0\n', versionError: null }
     const processStub = {
       execFile: (command, parameters, callbackOrOptions, callback) => {
         if (parameters.includes('--version'))

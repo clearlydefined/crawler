@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractFetch = require('./abstractFetch')
-const requestPromise = require('request-promise-native')
+const { withDefaults } = require('../../lib/fetch')
 const nodeRequest = require('request')
 const { clone, get } = require('lodash')
 const { promisify } = require('util')
@@ -29,7 +29,7 @@ class MavenBasedFetch extends AbstractFetch {
   constructor(providerMap, options) {
     super(options)
     this._providerMap = { ...providerMap }
-    this._handleRequestPromise = options.requestPromise || requestPromise.defaults(defaultHeaders)
+    this._handleRequestPromise = options.requestPromise || withDefaults(defaultHeaders)
     this._handleRequestStream = options.requestStream || nodeRequest.defaults(defaultHeaders).get
   }
 

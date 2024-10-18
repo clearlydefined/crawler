@@ -14,12 +14,16 @@
       "name": "ClearlyDefined",
       "program": "${workspaceRoot}/index.js",
       "cwd": "${workspaceRoot}",
-      "runtimeArgs": ["--nolazy"],
+      "runtimeArgs": [
+        "--nolazy"
+      ],
       "env": {
         "NODE_ENV": "localhost",
         "PORT": "5000"
       },
-      "skipFiles": ["<node_internals>/**/*.js"],
+      "skipFiles": [
+        "<node_internals>/**/*.js"
+      ],
       "showAsyncStacks": true
     },
     {
@@ -28,38 +32,24 @@
       "name": "Mocha",
       "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
       "stopOnEntry": false,
-      "args": ["${workspaceRoot}/test/**/*.js", "--timeout", "999999"],
+      "args": [
+        "${workspaceRoot}/test/**/*.js",
+        "--timeout",
+        "999999"
+      ],
       "cwd": "${workspaceRoot}",
       "runtimeExecutable": null,
-      "runtimeArgs": ["--nolazy"],
+      "runtimeArgs": [
+        "--nolazy"
+      ],
       "env": {
         "NODE_ENV": "localhost"
       },
       "console": "internalConsole",
-      "skipFiles": ["<node_internals>/**/*.js"],
+      "skipFiles": [
+        "<node_internals>/**/*.js"
+      ],
       "showAsyncStacks": true
-    },
-    {
-      "name": "Coverage",
-      "type": "node",
-      "request": "launch",
-      "program": "${workspaceRoot}/node_modules/istanbul/lib/cli.js",
-      "stopOnEntry": false,
-      "args": ["cover", "${workspaceRoot}/node_modules/mocha/bin/_mocha", "${workspaceRoot}/test/unit/**/*.js"],
-      "cwd": "${workspaceRoot}",
-      "runtimeExecutable": null,
-      "runtimeArgs": ["--nolazy"],
-      "env": {
-        "NODE_ENV": "localhost"
-      },
-      "console": "internalConsole"
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Launch in WSL",
-      "useWSL": true,
-      "program": "${workspaceFolder}/index.js"
     }
   ]
 }

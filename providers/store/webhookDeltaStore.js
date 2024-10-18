@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const request = require('request-promise-native')
+const { callFetch: request } = require('../../lib/fetch')
 const { pick } = require('lodash')
 
 class WebhookDeltaStore {

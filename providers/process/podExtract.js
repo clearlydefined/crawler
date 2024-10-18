@@ -12,8 +12,8 @@ class PodExtract extends AbstractClearlyDefinedProcessor {
     this.sourceFinder = sourceFinder
   }
 
-  get schemaVersion() {
-    return '1.0.0'
+  get toolVersion() {
+    return '2.0.0'
   }
 
   canHandle(request) {
