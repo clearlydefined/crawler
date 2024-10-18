@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 const config = require('painless-config')
-const appInsights = require('applicationinsights')
 const aiLogger = require('winston-azure-application-insights').AzureApplicationInsightsLogger
 const winston = require('winston')
 const mockInsights = require('./mockInsights')
@@ -14,15 +13,14 @@ function factory(options) {
     level: 'info'
   }
 
-  appInsights = setup(key).setAutoCollectPerformance(false).setAutoCollectDependencies(false).start()
-
-  mockInsights.setup(realOptions.key || 'mock', realOptions.echo)
+  if (!realOptions.key || realOptions.key === 'mock') mockInsights.setup(realOptions.key || 'mock', realOptions.echo)
   const result = new winston.Logger()
   result.add(aiLogger, {
-    insights: appInsights,
+    key: realOptions.key,
+    echo: realOptions.echo,
     treatErrorsAsExceptions: true,
     exitOnError: false,
-    level: realOptions.level,
+    level: realOptions.level
   })
   return result
 }
