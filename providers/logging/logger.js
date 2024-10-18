@@ -1,27 +1,22 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const config = require('painless-config')
 const aiLogger = require('winston-azure-application-insights').AzureApplicationInsightsLogger
 const winston = require('winston')
-const appInsights = require('applicationinsights')
 const mockInsights = require('./mockInsights')
+const appInsights = require('applicationinsights')
 
 function factory(options) {
-  const realOptions = options || {
-    key: config.get('APPINSIGHTS_INSTRUMENTATIONKEY'),
-    echo: false,
-    level: 'info'
-  }
+  appInsights.setup(options)
+  if (!options.key || options.key === 'mock') mockInsights.setup('mock', realOptions.echo)
 
-  mockInsights.setup(realOptions.key || 'mock', realOptions.echo)
   const result = new winston.Logger()
   result.add(aiLogger, {
     insights: appInsights,
-    echo: realOptions.echo,
+    echo: options.echo,
     treatErrorsAsExceptions: true,
     exitOnError: false,
-    level: realOptions.level
+    level: options.level
   })
   return result
 }

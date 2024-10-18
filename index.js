@@ -8,6 +8,8 @@ const searchPath = [require('./providers')]
 const maps = require('./config/map')
 const uuid = require('node-uuid')
 const logger = require('./providers/logging/logger')({
+  key: config.get('CRAWLER_INSIGHTS_KEY'),
+  level: 'info',
   crawlerId: config.get('CRAWLER_ID') || uuid.v4(),
   crawlerHost: config.get('CRAWLER_HOST'),
   appVersion: config.get('APP_VERSION') || 'local'
