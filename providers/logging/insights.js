@@ -4,19 +4,19 @@
 const appInsights = require('applicationinsights')
 
 class Insights {
-  constructor(tattoos, client = null, echo = true) {
+  constructor(options, client = null, echo = false) {
     this.client = client
-    this.tattoos = tattoos
+    this.options = options
     this.echo = echo
   }
 
-  static setup(tattoos, key = 'mock', echo = true) {
+  static setup(options, key = 'mock', echo = false) {
     // exit if we are already setup
     if (appInsights.defaultClient instanceof Insights) return
-    if (!key || key === 'mock') appInsights.defaultClient = new Insights(tattoos, null, echo)
+    if (!key || key === 'mock') appInsights.defaultClient = new Insights(options, null, echo)
     else {
       appInsights.setup(key).setAutoCollectPerformance(false).setAutoCollectDependencies(false).start()
-      appInsights.defaultClient = new Insights(tattoos, appInsights.defaultClient, echo)
+      appInsights.defaultClient = new Insights(options, appInsights.defaultClient, echo)
     }
   }
 
@@ -43,7 +43,7 @@ class Insights {
   }
 
   tattoo(telemetry) {
-    telemetry.properties = { ...(telemetry.properties || {}), ...this.tattoos }
+    telemetry.properties = { ...(telemetry.properties || {}), ...this.options }
   }
 }
 module.exports = Insights
