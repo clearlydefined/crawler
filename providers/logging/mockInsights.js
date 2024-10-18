@@ -13,9 +13,8 @@ class MockInsights {
     if (appInsights.defaultClient instanceof MockInsights) return
     if (!key || key === 'mock') appInsights.defaultClient = new MockInsights(null, echo)
     else {
-      appInsights.setup(key).setAutoCollectPerformance(false).setAutoCollectDependencies(false)
-      appInsights.defaultClient = new MockInsights(appInsights.defaultClient, echo)
-      appInsights.start()
+      appInsights.setup(key).setAutoCollectPerformance(false).setAutoCollectDependencies(false).start()
+      if (echo) appInsights.defaultClient = new MockInsights(appInsights.defaultClient)
     }
   }
 
@@ -34,8 +33,10 @@ class MockInsights {
 
   trackTrace(traceTelemetry) {
     const severities = ['V', 'I', 'W', 'E', 'C']
-    const propertyString = JSON.stringify(traceTelemetry.properties)
+    const hasProperties = traceTelemetry.properties && Object.keys(traceTelemetry.properties).length > 0
+    const propertyString = hasProperties ? `${JSON.stringify(traceTelemetry.properties)}` : ''
     console.log(`[${severities[traceTelemetry.severity]}] ${traceTelemetry.message} ${propertyString}`)
+    if (this.client) this.client.trackTrace(traceTelemetry)
   }
 }
 module.exports = MockInsights
