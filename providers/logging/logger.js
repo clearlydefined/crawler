@@ -14,6 +14,8 @@ function factory(options) {
     level: 'info'
   }
 
+  appInsights = setup(key).setAutoCollectPerformance(false).setAutoCollectDependencies(false).start()
+
   mockInsights.setup(realOptions.key || 'mock', realOptions.echo)
   const result = new winston.Logger()
   result.add(aiLogger, {
@@ -21,7 +23,6 @@ function factory(options) {
     treatErrorsAsExceptions: true,
     exitOnError: false,
     level: realOptions.level,
-    echo: realOptions.echo
   })
   return result
 }

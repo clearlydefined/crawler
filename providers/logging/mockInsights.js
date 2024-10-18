@@ -13,7 +13,6 @@ class MockInsights {
     if (appInsights.defaultClient instanceof MockInsights) return
     if (!key || key === 'mock') appInsights.defaultClient = new MockInsights(null, echo)
     else {
-      appInsights.setup(key).setAutoCollectPerformance(false).setAutoCollectDependencies(false).start()
       if (echo) appInsights.defaultClient = new MockInsights(appInsights.defaultClient)
     }
   }
