@@ -3,25 +3,22 @@
 
 const appInsights = require('applicationinsights')
 
-class Insights {
-  constructor(tattoos, client = null, echo = true) {
+class MockInsights {
+  constructor(client = null) {
     this.client = client
-    this.tattoos = tattoos
-    this.echo = echo
   }
 
-  static setup(tattoos, key = 'mock', echo = true) {
+  static setup(key = 'mock', echo = false) {
     // exit if we are already setup
-    if (appInsights.defaultClient instanceof Insights) return
-    if (!key || key === 'mock') appInsights.defaultClient = new Insights(tattoos, null, echo)
+    if (appInsights.defaultClient instanceof MockInsights) return
+    if (!key || key === 'mock') appInsights.defaultClient = new MockInsights(null, echo)
     else {
-      appInsights.setup(key).setAutoCollectPerformance(false).setAutoCollectDependencies(false).start()
-      appInsights.defaultClient = new Insights(tattoos, appInsights.defaultClient, echo)
+      appInsights.setup(key).setAutoCollectPerformance(false).setAutoCollectDependencies(true).start()
+      if (echo) appInsights.defaultClient = new MockInsights(appInsights.defaultClient)
     }
   }
 
   trackException(exceptionTelemetry) {
-    this.tattoo(exceptionTelemetry)
     if (exceptionTelemetry.exception && exceptionTelemetry.exception._type) {
       exceptionTelemetry.properties.type = exceptionTelemetry.exception._type
       exceptionTelemetry.properties.url = exceptionTelemetry.exception._url
@@ -35,15 +32,11 @@ class Insights {
   }
 
   trackTrace(traceTelemetry) {
-    this.tattoo(traceTelemetry)
     const severities = ['V', 'I', 'W', 'E', 'C']
-    const propertyString = JSON.stringify(traceTelemetry.properties)
+    const hasProperties = traceTelemetry.properties && Object.keys(traceTelemetry.properties).length > 0
+    const propertyString = hasProperties ? `${JSON.stringify(traceTelemetry.properties)}` : ''
+    console.log(`[${severities[traceTelemetry.severity]}] ${traceTelemetry.message} ${propertyString}`)
     if (this.client) this.client.trackTrace(traceTelemetry)
-    if (this.echo) console.log(`[${severities[traceTelemetry.severity]}] ${traceTelemetry.message} ${propertyString}`)
-  }
-
-  tattoo(telemetry) {
-    telemetry.properties = { ...(telemetry.properties || {}), ...this.tattoos }
   }
 }
-module.exports = Insights
+module.exports = MockInsights
