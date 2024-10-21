@@ -1,0 +1,5 @@
+.github/workflows/*
+.vscode/launch.json
+schemas/*.json
+test/**/*.json
+test/**/*.yaml

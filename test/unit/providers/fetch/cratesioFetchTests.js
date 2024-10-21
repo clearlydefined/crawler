@@ -33,13 +33,13 @@ describe('crateFetch workflow', () => {
       const body = fs.readFileSync(`test/fixtures/crates/${pickFile(options.url)}`)
       if (options && options.json) return JSON.parse(body)
       const response = new PassThrough()
-      response.write(fs.readFileSync(`test/fixtures/crates/${pickFile(options.url)}`))
+      response.write(body)
       response.statusCode = 200
       response.end()
       return response
     }
     Fetch = proxyquire('../../../../providers/fetch/cratesioFetch', {
-      'request-promise-native': requestPromiseStub
+      '../../lib/fetch': { callFetch: requestPromiseStub }
     })
   })
 

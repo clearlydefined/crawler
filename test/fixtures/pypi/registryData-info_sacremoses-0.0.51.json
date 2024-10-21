@@ -1,0 +1,40 @@
+{
+  "info": {
+    "author": "",
+    "author_email": "",
+    "bugtrack_url": null,
+    "classifiers": [
+      "License :: OSI Approved :: MIT License",
+      "Operating System :: OS Independent",
+      "Programming Language :: Python :: 3"
+    ],
+    "description": "MosesTokenizer in Python\n\n",
+    "description_content_type": "",
+    "docs_url": null,
+    "download_url": "",
+    "downloads": {
+      "last_day": -1,
+      "last_month": -1,
+      "last_week": -1
+    },
+    "home_page": "https://github.com/alvations/sacremoses",
+    "keywords": "",
+    "license": "",
+    "maintainer": "",
+    "maintainer_email": "",
+    "name": "sacremoses",
+    "package_url": "https://pypi.org/project/sacremoses/",
+    "platform": null,
+    "project_url": "https://pypi.org/project/sacremoses/",
+    "project_urls": {
+      "Homepage": "https://github.com/alvations/sacremoses"
+    },
+    "release_url": "https://pypi.org/project/sacremoses/0.0.53/",
+    "requires_dist": null,
+    "requires_python": "",
+    "summary": "SacreMoses",
+    "version": "0.0.53",
+    "yanked": false,
+    "yanked_reason": null
+  }
+}

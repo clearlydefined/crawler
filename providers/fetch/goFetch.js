@@ -1,5 +1,5 @@
 const { clone } = require('lodash')
-const requestPromise = require('request-promise-native')
+const { callFetch: requestPromise } = require('../../lib/fetch')
 const AbstractFetch = require('./abstractFetch')
 const nodeRequest = require('request')
 const fs = require('fs')

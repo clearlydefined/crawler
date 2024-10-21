@@ -213,7 +213,7 @@ describe('fetchDispatcher cache fetch result', () => {
 
     beforeEach(() => {
       const NpmFetch = proxyquire('../../../../providers/fetch/npmjsFetch', {
-        'request-promise-native': npmRegistryRequestStub
+        '../../lib/fetch': { callFetch: npmRegistryRequestStub }
       })
       const npmFetch = NpmFetch({ logger: { log: sinon.stub() } })
       npmFetch._getPackage = sinon
@@ -288,7 +288,7 @@ describe('fetchDispatcher cache fetch result', () => {
 
     beforeEach(() => {
       const CrateioFetch = proxyquire('../../../../providers/fetch/cratesioFetch', {
-        'request-promise-native': requestPromiseStub
+        '../../lib/fetch': { callFetch: requestPromiseStub }
       })
       const packagistFetch = CrateioFetch({ logger: { log: sinon.stub() } })
       fetchDispatcher = setupDispatcher(packagistFetch)
@@ -340,7 +340,7 @@ describe('fetchDispatcher cache fetch result', () => {
     beforeEach(() => {
       const GoFetch = proxyquire('../../../../providers/fetch/goFetch', {
         request: { get: createGetStub(fileSupplier) },
-        'request-promise-native': createRequestPromiseStub(fileSupplier)
+        '../../lib/fetch': { callFetch: createRequestPromiseStub(fileSupplier) }
       })
       const fetch = GoFetch({ logger: { info: sinon.stub() }, http: successHttpStub })
       fetchDispatcher = setupDispatcher(fetch)
@@ -402,7 +402,7 @@ describe('fetchDispatcher cache fetch result', () => {
             return { get: sinon.stub().resolves({ body: loadJson('pod/versions.json'), statusCode: 200 }) }
           }
         },
-        'request-promise-native': sinon.stub().resolves(loadJson('pod/registryData.json'))
+        '../../lib/fetch': { callFetch: sinon.stub().resolves(loadJson('pod/registryData.json')) }
       })
       const fetch = PodFetch({ logger: { info: sinon.stub() } })
       fetch._getPackage = sinon.stub().resolves('/tmp/cd-pYKk9q/SwiftLCS-1.0')

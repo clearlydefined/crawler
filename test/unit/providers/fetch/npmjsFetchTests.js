@@ -73,7 +73,7 @@ describe('', () => {
     }
     Fetch = proxyquire('../../../../providers/fetch/npmjsFetch', {
       request: { get: getStub },
-      'request-promise-native': requestPromiseStub
+      '../../lib/fetch': { callFetch: requestPromiseStub }
     })
     Fetch._resultBox = resultBox
   })
