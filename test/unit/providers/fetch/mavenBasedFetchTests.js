@@ -2,7 +2,14 @@ const { expect } = require('chai')
 const MavenBasedFetch = require('../../../../providers/fetch/mavenBasedFetch')
 const mockttp = require('mockttp')
 const sinon = require('sinon')
+const { defaultHeaders } = require('../../../../lib/fetch')
 const Request = require('../../../../ghcrawler').request
+
+function checkHeader(headers) {
+  for (const [key, value] of Object.entries(defaultHeaders)) {
+    expect(headers).to.have.property(key.toLowerCase()).that.equals(value)
+  }
+}
 
 describe('MavenBasedFetch', () => {
   describe('find contained file stat', () => {
@@ -47,7 +54,7 @@ describe('MavenBasedFetch', () => {
     it('should check for default header in any request', async () => {
       await handler.handle(new Request('test', 'cd:/maven/mavencentral/org.apache.httpcomponents/httpcore/4.4.16'))
       const requests = await endpointMock.getSeenRequests()
-      expect(requests[0].headers).to.include({ 'user-agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)' })
+      checkHeader(requests[0].headers)
     })
   })
 })
