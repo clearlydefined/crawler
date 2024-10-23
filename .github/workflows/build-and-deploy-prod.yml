@@ -3,7 +3,8 @@ name: Build and Deploy -- PROD
 
 on:
   workflow_dispatch:
-  #TODO: deploy on production branch trigger
+  release:
+    types: [published]
 
 jobs:
   upload-package-lock-json:
