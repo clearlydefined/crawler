@@ -94,7 +94,7 @@ module.exports = {
         // '--quiet'
       ],
       timeout: 1000,
-      processes: 2,
+      processes: Number(process.env.CRAWLER_SCANCODE_PARALLELISM) || 2,
       format: '--json-pp'
     },
     source: {},
