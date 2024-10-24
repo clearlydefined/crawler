@@ -77,24 +77,25 @@ module.exports = {
       installDir: config.get('SCANCODE_HOME'),
       options: [
         '--copyright',
-        '--license',
         '--info',
-        '--license-text',
-        '--is-license-text',
         '--package',
-        '--license-text-diagnostics',
         '--strip-root',
         '--email',
         '--url',
-        '--license-clarity-score',
         '--classify',
         '--generated',
+        '--license',
+        '--license-clarity-score',
+        '--license-references',
+        '--license-text',
+        '--license-text-diagnostics',
         '--summary',
-        '--summary-key-files'
+        '--tallies',
+        '--tallies-key-files'
         // '--quiet'
       ],
       timeout: 1000,
-      processes: 2,
+      processes: Number(config.get('CRAWLER_SCANCODE_PARALLELISM') || process.env.CRAWLER_SCANCODE_PARALLELISM) || 2,
       format: '--json-pp'
     },
     source: {},
@@ -134,6 +135,8 @@ module.exports = {
       attenuation: {
         ttl: 3000
       }
-    }
+    },
+    appVersion: config.get('APP_VERSION'),
+    buildsha: config.get('BUILD_SHA')
   }
 }
