@@ -5,7 +5,7 @@ const sinon = require('sinon')
 const { defaultHeaders } = require('../../../../lib/fetch')
 const Request = require('../../../../ghcrawler').request
 
-function checkHeader(headers) {
+function checkDefaultHeaders(headers) {
   for (const [key, value] of Object.entries(defaultHeaders)) {
     expect(headers).to.have.property(key.toLowerCase()).that.equals(value)
   }
@@ -54,7 +54,7 @@ describe('MavenBasedFetch', () => {
     it('should check for default header in any request', async () => {
       await handler.handle(new Request('test', 'cd:/maven/mavencentral/org.apache.httpcomponents/httpcore/4.4.16'))
       const requests = await endpointMock.getSeenRequests()
-      checkHeader(requests[0].headers)
+      checkDefaultHeaders(requests[0].headers)
     })
   })
 })
