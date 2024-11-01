@@ -22,8 +22,8 @@ jobs:
 
   build-and-deploy-prod:
     needs: upload-package-lock-json
-    uses: clearlydefined/operations/.github/workflows/app-build-and-deploy.yml@v3.1.1
-    secrets: 
+    uses: clearlydefined/operations/.github/workflows/app-build-and-deploy.yml@v3.2.0
+    secrets:
       AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
       AZURE_WEBAPP_PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_PROD }}
       DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
