@@ -1,6 +1,6 @@
 {
   "name": "clearlydefined-crawler",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A crawler that walks projects and packages looking for data of interest to the ClearlyDefined project.",
   "main": "./index.js",
   "scripts": {
