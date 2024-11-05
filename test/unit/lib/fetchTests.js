@@ -1,9 +1,14 @@
 const { fail } = require('assert')
-const { callFetch, withDefaults } = require('../../../lib/fetch')
+const { callFetch, withDefaults, defaultHeaders } = require('../../../lib/fetch')
 const { expect } = require('chai')
 const fs = require('fs')
 const mockttp = require('mockttp')
 
+function checkDefaultHeaders(headers) {
+  for (const [key, value] of Object.entries(defaultHeaders)) {
+    expect(headers).to.have.property(key.toLowerCase()).that.equals(value)
+  }
+}
 describe('CallFetch', () => {
   describe('with mock server', () => {
     const mockServer = mockttp.getLocal()
@@ -21,6 +26,37 @@ describe('CallFetch', () => {
         json: true
       })
       expect(response).to.be.deep.equal(JSON.parse(expected))
+    })
+
+    it('checks if the default header user-agent and other header is present in crate components', async () => {
+      const path = '/crates.io/api/v1/crates/name/1.0.0/download'
+      const endpointMock = await mockServer.forGet(path).thenReply(200, 'success')
+
+      await callFetch({
+        url: mockServer.urlFor(path),
+        method: 'GET',
+        json: true,
+        encoding: null,
+        headers: {
+          Accept: 'text/html'
+        }
+      })
+      const requests = await endpointMock.getSeenRequests()
+      checkDefaultHeaders(requests[0].headers)
+      expect(requests[0].headers).to.include({ accept: 'text/html' })
+    })
+
+    it('checks if the default header user-agent is present in crate components', async () => {
+      const path = '/crates.io/api/v1/crates/name'
+      const endpointMock = await mockServer.forGet(path).thenReply(200, 'success')
+
+      await callFetch({
+        url: mockServer.urlFor(path),
+        method: 'GET',
+        json: true
+      })
+      const requests = await endpointMock.getSeenRequests()
+      checkDefaultHeaders(requests[0].headers)
     })
 
     it('checks if the full response is fetched', async () => {
@@ -87,7 +123,7 @@ describe('CallFetch', () => {
       const url = mockServer.urlFor(path)
       const endpointMock = await mockServer.forGet(path).thenReply(200)
 
-      const defaultOptions = { headers: { 'user-agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)' } }
+      const defaultOptions = { headers: defaultHeaders }
       const requestWithDefaults = withDefaults(defaultOptions)
       await requestWithDefaults({ url })
       await requestWithDefaults({ url })
@@ -95,9 +131,9 @@ describe('CallFetch', () => {
       const requests = await endpointMock.getSeenRequests()
       expect(requests.length).to.equal(2)
       expect(requests[0].url).to.equal(url)
-      expect(requests[0].headers).to.include(defaultOptions.headers)
+      checkDefaultHeaders(requests[0].headers)
       expect(requests[1].url).to.equal(url)
-      expect(requests[1].headers).to.include(defaultOptions.headers)
+      checkDefaultHeaders(requests[1].headers)
     })
 
     it('checks if the response is text with uri option in GET request', async () => {
@@ -129,6 +165,8 @@ describe('CallFetch', () => {
       const json = await requests[0].body.getJson()
       expect(json).to.deep.equal({ test: 'test' })
       expect(requests[0].headers).to.include({ 'x-crawler': 'secret' })
+      //Check for the default header value
+      checkDefaultHeaders(requests[0].headers)
     })
 
     describe('test simple', () => {
