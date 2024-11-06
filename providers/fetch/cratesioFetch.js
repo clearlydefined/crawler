@@ -51,8 +51,7 @@ class CratesioFetch extends AbstractFetch {
     try {
       registryData = await request({
         url: `https://crates.io/api/v1/crates/${spec.name}`,
-        json: true,
-        headers: { 'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)' }
+        json: true
       })
     } catch (exception) {
       if (exception.statusCode !== 404) throw exception
@@ -72,7 +71,6 @@ class CratesioFetch extends AbstractFetch {
       url: `https://crates.io${version.dl_path}`,
       encoding: null,
       headers: {
-        'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)',
         Accept: 'text/html'
       }
     })

@@ -9,6 +9,7 @@ const nodeRequest = require('request')
 const { promisify } = require('util')
 const readdir = promisify(fs.readdir)
 const FetchResult = require('../../lib/fetchResult')
+const { defaultHeaders } = require('../../lib/fetch')
 
 const providerMap = {
   packagist: 'https://repo.packagist.org/'
@@ -62,9 +63,7 @@ class PackagistFetch extends AbstractFetch {
     return new Promise((resolve, reject) => {
       const options = {
         url: distUrl,
-        headers: {
-          'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)'
-        }
+        headers: defaultHeaders
       }
       nodeRequest
         .get(options, (error, response) => {
