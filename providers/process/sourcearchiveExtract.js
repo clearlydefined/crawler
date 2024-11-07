@@ -19,7 +19,7 @@ class SourceArchiveExtract extends AbstractClearlyDefinedProcessor {
     await super.handle(request)
     const { summary, poms, releaseDate } = request.document
     const manifest = { summary, poms }
-    request.document = merge(this.clone(request.document), { releaseDate, manifest })
+    request.document = merge(this.clone(request.document), { manifest, releaseDate })
   }
 }
 
