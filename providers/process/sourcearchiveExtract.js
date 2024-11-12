@@ -5,7 +5,6 @@ const AbstractClearlyDefinedProcessor = require('./abstractClearlyDefinedProcess
 const { merge } = require('lodash')
 
 class SourceArchiveExtract extends AbstractClearlyDefinedProcessor {
-
   get toolVersion() {
     return '1.2.0'
   }
