@@ -48,6 +48,7 @@ module.exports = {
     scancode: require('./process/scancode'),
     fossology: require('./process/fossology'),
     source: require('./process/source').processor,
+    sourcearchive: require('./process/sourcearchiveExtract'),
     top: require('./process/top')
   },
   store: {
