@@ -99,6 +99,7 @@ module.exports = {
       format: '--json-pp'
     },
     source: {},
+    sourcearchive: {},
     top: { githubToken }
   },
   store: {
