@@ -11,19 +11,26 @@ const summaryObj = { version: '8.1.0' }
 describe('SourceArchiveExtract Tests', () => {
   let processor, request
   beforeEach(async () => {
-    const result = await setup()
-    processor = result.processor
-    request = result.request
+    ;({ processor, request } = await setup())
   })
 
-  it('should verify version of source archive extract', () => {
+  afterEach(() => {
+    request.getTrackedCleanups().forEach(cleanup => cleanup())
+  })
+
+  it('verifies the version of the source archive extract', () => {
     expect(processor._schemaVersion).to.equal('1.4.0')
   })
 
-  it('checks the summary and poms section in clearlydefined result', async () => {
+  it('handles a source archive request', () => {
+    expect(processor.canHandle(request)).to.be.true
+  })
+
+  it('extracts the release date, summary and poms sections', async () => {
     await processor.handle(request)
     expect(request.document.manifest.summary).to.be.deep.equal(summaryObj)
     expect(request.document.manifest.poms).to.be.deep.equal(pomsArray)
+    expect(request.document.releaseDate).to.be.equal('2021-08-01T00:00:00.000Z')
   })
 })
 
@@ -32,13 +39,14 @@ async function setup() {
   const request = createRequest()
   const dir = processor.createTempDir(request)
   request.document.location = dir.name
-  request.document.summary = summaryObj
-  request.document.poms = pomsArray
+  request.document.summary = { ...summaryObj }
+  request.document.poms = [...pomsArray]
+  request.document.releaseDate = '2021-08-01T00:00:00.000Z'
   return { processor, request }
 }
 
 function createRequest() {
-  const request = new Request('source', 'cd:/sourcearchive/mavencentral/org.osgi/osgi.annotation/8.1.0')
+  const request = new Request('clearlydefined', 'cd:/sourcearchive/mavencentral/org.osgi/osgi.annotation/8.1.0')
   request.document = { _metadata: { links: {} }, registryData: { manifest: {} } }
   return request
 }

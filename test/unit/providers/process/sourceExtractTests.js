@@ -5,7 +5,7 @@ const { expect } = require('chai')
 const SourceExtract = require('../../../../providers/process/sourceExtract')
 
 describe('SourceExtract', () => {
-  it('verify version of source extract', () => {
+  it('verifies version of the source extract', () => {
     const handler = SourceExtract({})
     expect(handler._schemaVersion).to.equal('1.3.0')
   })
