@@ -1,7 +1,7 @@
 const sinon = require('sinon')
 const { expect } = require('chai')
-const StorageQueueManager = require('../../../../providers/queuing/storageQueueManager')
-const StorageQueue = require('../../../../providers/queuing/storageQueue')
+const StorageQueueManager = require('../../../../ghcrawler/providers/queuing/storageQueueManager')
+const StorageQueue = require('../../../../ghcrawler/providers/queuing/storageQueue')
 
 describe('StorageQueueManager', () => {
   let manager, clientStub
@@ -10,7 +10,7 @@ describe('StorageQueueManager', () => {
     clientStub = {
       createMessage: sinon.stub().yields(null, {})
     }
-    manager = new StorageQueueManager('connectionString', { expiration: 3600 }) // 1 hour expiration
+    manager = new StorageQueueManager('connectionString', { messageTimeToLive: 3600 }) // 1 hour expiration
     manager.client = clientStub
   })
 
