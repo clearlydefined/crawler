@@ -129,6 +129,7 @@ module.exports = {
       weights: { immediate: 3, soon: 2, normal: 3, later: 2 },
       connectionString: config.get('CRAWLER_QUEUE_AZURE_CONNECTION_STRING') || cd_azblob.connection,
       queueName: config.get('CRAWLER_QUEUE_PREFIX') || 'cdcrawlerdev',
+      messageTimeToLive: config.get('CRAWLER_QUEUE_MESSAGE_EXPIRATION') || 60 * 60 * 24 * 7, // Default to 7 days
       visibilityTimeout: 8 * 60 * 60, // 8 hours
       visibilityTimeout_remainLocal: fetchedCacheTtlSeconds,
       maxDequeueCount: 5,
