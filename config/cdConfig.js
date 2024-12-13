@@ -5,7 +5,8 @@ const config = require('painless-config')
 
 const cd_azblob = {
   connection: config.get('CRAWLER_AZBLOB_CONNECTION_STRING'),
-  container: config.get('CRAWLER_AZBLOB_CONTAINER_NAME')
+  container: config.get('CRAWLER_AZBLOB_CONTAINER_NAME'),
+  account: config.get('CRAWLER_AZBLOB_ACCOUNT_NAME'),
 }
 
 const githubToken = config.get('CRAWLER_GITHUB_TOKEN')
@@ -111,6 +112,7 @@ module.exports = {
     },
     azqueue: {
       connectionString: cd_azblob.connection,
+      account: cd_azblob.account,
       queueName: config.get('CRAWLER_HARVESTS_QUEUE_NAME') || 'harvests'
     },
     'cd(azblob)': cd_azblob,

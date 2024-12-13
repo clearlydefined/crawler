@@ -2,14 +2,31 @@
 // SPDX-License-Identifier: MIT
 
 const AttenuatedQueue = require('./attenuatedQueue')
-const AzureStorage = require('azure-storage')
+const { QueueServiceClient } = require('@azure/storage-queue')
 const Request = require('../../lib/request')
 const StorageQueue = require('./storageQueue')
+const { DefaultAzureCredential } = require('@azure/identity')
 
 class StorageQueueManager {
-  constructor(connectionString) {
-    const retryOperations = new AzureStorage.ExponentialRetryPolicyFilter()
-    this.client = AzureStorage.createQueueService(connectionString).withFilter(retryOperations)
+  constructor(connectionString, options) {
+    const pipelineOptions = {
+      retryOptions: {
+        maxTries: 3,
+        retryDelayInMs: 1000,
+        maxRetryDelayInMs: 120 * 1000,
+        tryTimeoutInMs: 30000,
+        retryPolicyType: StorageRetryPolicyType.EXPONENTIAL
+      }
+    }
+    if (connectionString) {
+      this.client = QueueServiceClient.fromConnectionString(connectionString, pipelineOptions)
+    } else {
+      this.client = new QueueServiceClient(
+        `https://${options.account}.queue.core.windows.net`,
+        new DefaultAzureCredential(),
+        pipelineOptions
+      )
+    }
   }
 
   createQueueClient(name, formatter, options) {
