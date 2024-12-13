@@ -37,6 +37,7 @@ class StorageQueue {
         qlimit(this.options.parallelPush || 1)(request => {
           const body = JSON.stringify(request)
           return new Promise((resolve, reject) => {
+            this.logger.info(`Sending createMessage to ${this.queueName} with options ${JSON.stringify(option)}`)
             this.client.createMessage(this.queueName, body, option, (error, queueMessageResult) => {
               if (error) {
                 return reject(error)
