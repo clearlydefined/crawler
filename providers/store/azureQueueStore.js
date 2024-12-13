@@ -1,25 +1,46 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const azure = require('azure-storage')
+const { DefaultAzureCredential } = require('@azure/identity')
+const { QueueServiceClient, StorageRetryPolicyType } = require('@azure/storage-queue')
 const { promisify } = require('util')
 
 class AzureStorageQueue {
   constructor(options) {
     this.options = options
+    this.queueName = options.queueName
     this.logger = options.logger
+
+    const { connectionString, account } = options
+
+    const pipelineOptions = {
+      retryOptions: {
+        maxTries: 3,
+        retryDelayInMs: 1000,
+        maxRetryDelayInMs: 120 * 1000,
+        tryTimeoutInMs: 30000,
+        retryPolicyType: StorageRetryPolicyType.FIXED
+      }
+    }
+    if (connectionString) {
+      this.client = QueueServiceClient.fromConnectionString(connectionString, pipelineOptions)
+    } else {
+      this.client = new QueueServiceClient(
+        `https://${account}.queue.core.windows.net`,
+        new DefaultAzureCredential(),
+        pipelineOptions
+      )
+    }
   }
 
   async connect() {
-    this.queueService = azure
-      .createQueueService(this.options.connectionString)
-      .withFilter(new azure.LinearRetryPolicyFilter())
-    await promisify(this.queueService.createQueueIfNotExists).bind(this.queueService)(this.options.queueName)
+    this.queueService = this.client.getQueueClient(this.queueName)
+    this.queueService.createIfNotExists()
   }
 
   async upsert(document) {
     const message = Buffer.from(JSON.stringify({ _metadata: document._metadata })).toString('base64')
-    await promisify(this.queueService.createMessage).bind(this.queueService)(this.options.queueName, message)
+    return await this.queueService.sendMessage(message)
   }
 
   get() {
