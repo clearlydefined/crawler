@@ -91,6 +91,32 @@ class AzureStorageDocStore {
     await blockBlobClient.delete()
   }
 
+  // This API can only be used for the 'deadletter' store because we cannot look up documents by type performantly
+  async count(type, force = false) {
+    this._ensureDeadletter(type)
+    const key = `${this.name}:count:${type || ''}`
+
+    if (!force) {
+      const cachedCount = memoryCache.get(key)
+      if (cachedCount) {
+        return cachedCount
+      }
+    }
+
+    let entryCount = 0
+    const properties = await this.containerClient.getProperties()
+    properties.blobCount
+    try {
+      for await (const blob of this.containerClient.listBlobsFlat()) {
+        entryCount++
+      }
+      memoryCache.put(key, entryCount, 60000)
+      return entryCount
+    } catch (error) {
+      throw error
+    }
+  }
+
   async close() {
     return
   }
@@ -139,7 +165,7 @@ class AzureStorageDocStore {
   async _streamToString(readableStream) {
     return new Promise((resolve, reject) => {
       const chunks = []
-      readableStream.on('data', (data) => {
+      readableStream.on('data', data => {
         chunks.push(data.toString())
       })
       readableStream.on('end', () => {
