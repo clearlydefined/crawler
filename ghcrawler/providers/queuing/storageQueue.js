@@ -32,7 +32,7 @@ class StorageQueue {
     // No specific unsubscribe logic for Azure Queue Storage
   }
 
-  async push(requests, _option) {
+  async push(requests) {
     requests = Array.isArray(requests) ? requests : [requests]
     return Promise.all(
       requests.map(

@@ -104,7 +104,7 @@ class AzureStorageDocStore {
     let entryCount = 0
     const properties = await this.containerClient.getProperties()
     properties.blobCount
-    for await (const _blob of this.containerClient.listBlobsFlat()) {
+    for await (const {} of this.containerClient.listBlobsFlat()) {
       entryCount++
     }
     memoryCache.put(key, entryCount, 60000)
