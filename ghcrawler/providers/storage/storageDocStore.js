@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-const { BlobServiceClient } = require('@azure/storage-blob')
+// eslint-disable-next-line no-unused-vars
 const { ContainerClient } = require('@azure/storage-blob')
 const memoryCache = require('memory-cache')
 const { Readable } = require('stream')
@@ -95,26 +95,20 @@ class AzureStorageDocStore {
   async count(type, force = false) {
     this._ensureDeadletter(type)
     const key = `${this.name}:count:${type || ''}`
-
     if (!force) {
       const cachedCount = memoryCache.get(key)
       if (cachedCount) {
         return cachedCount
       }
     }
-
     let entryCount = 0
     const properties = await this.containerClient.getProperties()
     properties.blobCount
-    try {
-      for await (const blob of this.containerClient.listBlobsFlat()) {
-        entryCount++
-      }
-      memoryCache.put(key, entryCount, 60000)
-      return entryCount
-    } catch (error) {
-      throw error
+    for await (const _blob of this.containerClient.listBlobsFlat()) {
+      entryCount++
     }
+    memoryCache.put(key, entryCount, 60000)
+    return entryCount
   }
 
   async close() {

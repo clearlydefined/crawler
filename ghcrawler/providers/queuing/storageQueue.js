@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation and others. Made available under the MIT license.
 // SPDX-License-Identifier: MIT
 
+// eslint-disable-next-line no-unused-vars
 const { QueueServiceClient } = require('@azure/storage-queue')
 const qlimit = require('qlimit')
 const { cloneDeep } = require('lodash')
@@ -31,7 +32,7 @@ class StorageQueue {
     // No specific unsubscribe logic for Azure Queue Storage
   }
 
-  async push(requests, option) {
+  async push(requests, _option) {
     requests = Array.isArray(requests) ? requests : [requests]
     return Promise.all(
       requests.map(
