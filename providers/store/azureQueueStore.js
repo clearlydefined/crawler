@@ -3,7 +3,6 @@
 
 const { DefaultAzureCredential } = require('@azure/identity')
 const { QueueServiceClient, StorageRetryPolicyType } = require('@azure/storage-queue')
-const { promisify } = require('util')
 
 class AzureStorageQueue {
   constructor(options) {

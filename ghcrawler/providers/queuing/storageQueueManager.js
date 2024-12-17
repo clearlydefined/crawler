@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 const AttenuatedQueue = require('./attenuatedQueue')
-const { QueueServiceClient } = require('@azure/storage-queue')
+const { QueueServiceClient, StorageRetryPolicyType } = require('@azure/storage-queue')
 const Request = require('../../lib/request')
 const StorageQueue = require('./storageQueue')
 const { DefaultAzureCredential } = require('@azure/identity')
