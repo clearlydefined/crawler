@@ -104,7 +104,8 @@ class AzureStorageDocStore {
     let entryCount = 0
     const properties = await this.containerClient.getProperties()
     properties.blobCount
-    for await (const {} of this.containerClient.listBlobsFlat()) {
+    // eslint-disable-next-line no-unused-vars
+    for await (const _ of this.containerClient.listBlobsFlat()) {
       entryCount++
     }
     memoryCache.put(key, entryCount, 60000)
