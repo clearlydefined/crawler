@@ -6,7 +6,7 @@ const config = require('painless-config')
 const cd_azblob = {
   connection: config.get('CRAWLER_AZBLOB_CONNECTION_STRING'),
   container: config.get('CRAWLER_AZBLOB_CONTAINER_NAME'),
-  account: config.get('CRAWLER_AZBLOB_ACCOUNT_NAME'),
+  account: config.get('CRAWLER_AZBLOB_ACCOUNT_NAME')
 }
 
 const githubToken = config.get('CRAWLER_GITHUB_TOKEN')

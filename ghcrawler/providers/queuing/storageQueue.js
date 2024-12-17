@@ -40,7 +40,8 @@ class StorageQueue {
           const queueMessageResult = await this.queueClient.sendMessage(body)
           this._log('Queued', request)
           return this._buildMessageReceipt(queueMessageResult, request)
-        }))
+        })
+      )
     )
   }
 
@@ -59,7 +60,11 @@ class StorageQueue {
     }
     if (this.options.maxDequeueCount && message.dequeueCount > this.options.maxDequeueCount) {
       this.logger.verbose('maxDequeueCount exceeded')
-      await this.queueClient.deleteMessage(message.messageId, message.popReceipt)
+      try {
+        await this.queueClient.deleteMessage(message.messageId, message.popReceipt)
+      } catch (error) {
+        // Ignore error
+      }
       return null
     } else {
       message.body = JSON.parse(message.messageText)
@@ -102,8 +107,13 @@ class StorageQueue {
   }
 
   async getInfo() {
-    const properties = await this.queueClient.getProperties()
-    return { count: properties.approximateMessagesCount }
+    try {
+      const properties = await this.queueClient.getProperties()
+      return { count: properties.approximateMessagesCount }
+    } catch (error) {
+      this.logger.error(error)
+      return null
+    }
   }
 
   getName() {

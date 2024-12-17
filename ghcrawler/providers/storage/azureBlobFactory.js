@@ -4,7 +4,7 @@
 // @ts-check
 const { BlobServiceClient, StorageRetryPolicyType } = require('@azure/storage-blob')
 const AzureStorageDocStore = require('./storageDocStore')
-const { DefaultAzureCredential } = require ('@azure/identity');
+const { DefaultAzureCredential } = require('@azure/identity')
 
 /**
  * @param {object} options
@@ -33,7 +33,11 @@ module.exports = options => {
     blobServiceClient = BlobServiceClient.fromConnectionString(connection, pipelineOptions)
   } else if (account) {
     options.logger.info('using default credentials')
-    blobServiceClient = new BlobServiceClient(`https://${account}.blob.core.windows.net`, new DefaultAzureCredential(), pipelineOptions)
+    blobServiceClient = new BlobServiceClient(
+      `https://${account}.blob.core.windows.net`,
+      new DefaultAzureCredential(),
+      pipelineOptions
+    )
   } else {
     throw new Error('either connection or account must be provided')
   }
