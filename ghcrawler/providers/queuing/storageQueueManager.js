@@ -5,7 +5,7 @@ const AttenuatedQueue = require('./attenuatedQueue')
 const { QueueServiceClient, StorageRetryPolicyType } = require('@azure/storage-queue')
 const Request = require('../../lib/request')
 const StorageQueue = require('./storageQueue')
-const { DefaultAzureCredential } = require('@azure/identity')
+const { DefaultAzureCredential, ClientSecretCredential } = require('@azure/identity')
 
 class StorageQueueManager {
   constructor(connectionString, options) {
@@ -21,11 +21,15 @@ class StorageQueueManager {
     if (connectionString) {
       this.client = QueueServiceClient.fromConnectionString(connectionString, pipelineOptions)
     } else {
-      this.client = new QueueServiceClient(
-        `https://${options.account}.queue.core.windows.net`,
-        new DefaultAzureCredential(),
-        pipelineOptions
-      )
+      const { account, spnAuth } = options
+      let credential
+      if (spnAuth) {
+        const authParsed = JSON.parse(spnAuth)
+        credential = new ClientSecretCredential(authParsed.tenantId, authParsed.clientId, authParsed.clientSecret)
+      } else {
+        credential = new DefaultAzureCredential()
+      }
+      this.client = new QueueServiceClient(`https://${account}.queue.core.windows.net`, credential, pipelineOptions)
     }
   }
 

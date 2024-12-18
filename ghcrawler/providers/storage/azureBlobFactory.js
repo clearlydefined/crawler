@@ -4,7 +4,7 @@
 // @ts-check
 const { BlobServiceClient, StorageRetryPolicyType } = require('@azure/storage-blob')
 const AzureStorageDocStore = require('./storageDocStore')
-const { DefaultAzureCredential } = require('@azure/identity')
+const { DefaultAzureCredential, ClientSecretCredential } = require('@azure/identity')
 
 /**
  * @param {object} options
@@ -12,10 +12,11 @@ const { DefaultAzureCredential } = require('@azure/identity')
  * @param {string} options.connection
  * @param {string} options.container
  * @param {object} options.logger
+ * @param {object} options.spnAuth
  */
 module.exports = options => {
   options.logger.info('creating azure storage store')
-  const { account, connection, container } = options
+  const { account, connection, container, spnAuth } = options
 
   const pipelineOptions = {
     retryOptions: {
@@ -31,15 +32,17 @@ module.exports = options => {
   if (connection) {
     options.logger.info('using connection string')
     blobServiceClient = BlobServiceClient.fromConnectionString(connection, pipelineOptions)
-  } else if (account) {
-    options.logger.info('using default credentials')
-    blobServiceClient = new BlobServiceClient(
-      `https://${account}.blob.core.windows.net`,
-      new DefaultAzureCredential(),
-      pipelineOptions
-    )
   } else {
-    throw new Error('either connection or account must be provided')
+    let credential
+    if (spnAuth) {
+      const authParsed = JSON.parse(spnAuth)
+      credential = new ClientSecretCredential(authParsed.tenantId, authParsed.clientId, authParsed.clientSecret)
+      options.logger.info('using service principal credentials')
+    } else {
+      credential = new DefaultAzureCredential()
+      options.logger.info('using default credentials')
+    }
+    blobServiceClient = new BlobServiceClient(`https://${account}.blob.core.windows.net`, credential, pipelineOptions)
   }
 
   const containerClient = blobServiceClient.getContainerClient(container)
