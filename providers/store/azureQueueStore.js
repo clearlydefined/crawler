@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const { DefaultAzureCredential } = require('@azure/identity')
+const { DefaultAzureCredential, ClientSecretCredential } = require('@azure/identity')
 const { QueueServiceClient, StorageRetryPolicyType } = require('@azure/storage-queue')
 
 class AzureStorageQueue {
@@ -10,7 +10,7 @@ class AzureStorageQueue {
     this.queueName = options.queueName
     this.logger = options.logger
 
-    const { connectionString, account } = options
+    const { connectionString, account, spnAuth } = options
 
     const pipelineOptions = {
       retryOptions: {
@@ -24,11 +24,14 @@ class AzureStorageQueue {
     if (connectionString) {
       this.client = QueueServiceClient.fromConnectionString(connectionString, pipelineOptions)
     } else {
-      this.client = new QueueServiceClient(
-        `https://${account}.queue.core.windows.net`,
-        new DefaultAzureCredential(),
-        pipelineOptions
-      )
+      let credential
+      if (spnAuth) {
+        const authParsed = JSON.parse(spnAuth)
+        credential = new ClientSecretCredential(authParsed.tenantId, authParsed.clientId, authParsed.clientSecret)
+      } else {
+        credential = new DefaultAzureCredential()
+      }
+      this.client = new QueueServiceClient(`https://${account}.queue.core.windows.net`, credential, pipelineOptions)
     }
   }
 
