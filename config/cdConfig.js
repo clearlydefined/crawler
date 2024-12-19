@@ -139,7 +139,9 @@ module.exports = {
       maxDequeueCount: 5,
       attenuation: {
         ttl: 3000
-      }
+      },
+      spnAuth: config.get('CRAWLER_HARVESTS_QUEUE_SPN_AUTH'),
+      account: cd_azblob.account
     },
     appVersion: config.get('APP_VERSION'),
     buildsha: config.get('BUILD_SHA')
