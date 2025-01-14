@@ -68,7 +68,15 @@ class StorageQueue {
       }
       return null
     } else {
-      message.body = JSON.parse(message.messageText)
+      try {
+        message.body = JSON.parse(message.messageText)
+      } catch (error) {
+        this.logger.error(`Failed to parse message ${message.messageId}:`)
+        this.logger.error(`Raw message: ${message.messageText}`)
+        this.logger.error(`Parse error: ${error.message}`)
+        await this.queueClient.deleteMessage(message.messageId, message.popReceipt)
+        return null
+      }
       const request = this.messageFormatter(message)
       request._message = message
       this._log('Popped', message.body)
