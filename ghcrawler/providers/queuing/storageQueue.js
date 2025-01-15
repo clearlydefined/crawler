@@ -69,7 +69,13 @@ class StorageQueue {
       return null
     } else {
       try {
-        message.body = JSON.parse(message.messageText)
+        const decodedText = message.messageText
+          .replace(/&quot;/g, '"')
+          .replace(/&amp;/g, '&')
+          .replace(/&#39;/g, "'")
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+        message.body = JSON.parse(decodedText)
       } catch (error) {
         this.logger.error(`Failed to parse message ${message.messageId}:`)
         this.logger.error(`Raw message: ${message.messageText}`)
