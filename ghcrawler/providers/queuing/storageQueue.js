@@ -110,9 +110,12 @@ class StorageQueue {
   }
 
   async updateVisibilityTimeout(request, visibilityTimeout = 0) {
-    await this.queueClient.updateMessage(request._message.messageId, request._message.popReceipt, {
+    await this.queueClient.updateMessage(
+      request._message.messageId,
+      request._message.popReceipt,
+      undefined,
       visibilityTimeout
-    })
+    )
     this._log('NAKed', request._message.body)
   }
 
