@@ -95,6 +95,12 @@ function createRequest() {
 }
 
 describe('nugetExtract source discovery', () => {
+  it('verifies the version of the nuget extract', () => {
+    const finder = sinon.stub().callsFake(sourceDiscovery())
+    const extractor = extract({}, finder)
+    expect(extractor._schemaVersion).to.equal('1.4.3')
+  })
+
   it('handles no tags in GitHub', async () => {
     const finder = sinon.stub().callsFake(() => null)
     const extractor = extract({}, finder)
