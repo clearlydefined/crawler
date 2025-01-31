@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "allowJs": true, // Allow JavaScript files to be compiled.
+    "checkJs": true, // Enable type checking on JavaScript files.
+    "noEmit": true, // Do not generate any files.
+    "strict": true, // Enable all strict type checking options.
+    "types": ["node"] // Include node type definitions.
+  },
+  "include": [
+    "ghcrawler/providers/storage/azureBlobFactory.js" // Include specific files.
+  ],
+  "exclude": [
+    "node_modules", // Exclude 'node_modules' to avoid unnecessary type-checking.
+    "docs",
+    "data",
+    "dev-scripts",
+    "patches"
+  ]
+}

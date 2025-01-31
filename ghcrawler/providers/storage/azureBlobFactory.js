@@ -7,12 +7,19 @@ const AzureStorageDocStore = require('./storageDocStore')
 const { DefaultAzureCredential, ClientSecretCredential } = require('@azure/identity')
 
 /**
+ * @typedef {Object} Logger
+ * @property {(message: string) => void} info
+ */
+
+/**
  * @param {object} options
  * @param {string} options.account
  * @param {string} options.connection
  * @param {string} options.container
- * @param {object} options.logger
- * @param {object} options.spnAuth
+ * @param {Logger} options.logger
+ * @param {string} options.spnAuth
+ * @param {string} options.blobKey
+ * @param {boolean} options.preserveCase
  */
 module.exports = options => {
   options.logger.info('creating azure storage store')
