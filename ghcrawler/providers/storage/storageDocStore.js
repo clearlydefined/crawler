@@ -46,6 +46,7 @@ class AzureStorageDocStore {
     dataStream.push(null)
     const blockBlobClient = this.containerClient.getBlockBlobClient(blobName)
     await blockBlobClient.uploadStream(dataStream, 8 << 20, 5, options)
+    return blobName
   }
 
   async get(type, key) {
@@ -102,11 +103,10 @@ class AzureStorageDocStore {
       }
     }
     let entryCount = 0
-    const properties = await this.containerClient.getProperties()
-    properties.blobCount
-    // eslint-disable-next-line no-unused-vars
-    for await (const _ of this.containerClient.listBlobsFlat()) {
-      entryCount++
+    for await (const page of this.containerClient.listBlobsFlat().byPage({ maxPageSize: 1000 })) {
+      if (page.segment.blobItems) {
+        entryCount += page.segment.blobItems.length()
+      }
     }
     memoryCache.put(key, entryCount, 60000)
     return entryCount

@@ -64,7 +64,8 @@ class StorageQueue {
       try {
         await this.queueClient.deleteMessage(message.messageId, message.popReceipt)
       } catch (error) {
-        // Ignore error
+        this.logger.error(`Failed to delete message ${message.messageId} in storageQueue, error: ${error.message}`)
+        throw error
       }
       return null
     } else {
@@ -110,13 +111,14 @@ class StorageQueue {
   }
 
   async updateVisibilityTimeout(request, visibilityTimeout = 0) {
-    await this.queueClient.updateMessage(
+    const response = await this.queueClient.updateMessage(
       request._message.messageId,
       request._message.popReceipt,
       undefined,
       visibilityTimeout
     )
     this._log('NAKed', request._message.body)
+    return this._buildMessageReceipt(response, request)
   }
 
   async flush() {
