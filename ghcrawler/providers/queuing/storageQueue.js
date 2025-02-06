@@ -118,7 +118,7 @@ class StorageQueue {
       visibilityTimeout
     )
     this._log('NAKed', request._message.body)
-    return this._buildMessageReceipt(response, request)
+    return this._buildMessageReceipt({ messageId: request._message.messageId, ...response }, request)
   }
 
   async flush() {
