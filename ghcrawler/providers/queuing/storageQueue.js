@@ -38,7 +38,8 @@ class StorageQueue {
       requests.map(
         qlimit(this.options.parallelPush || 1)(async request => {
           const body = JSON.stringify(request)
-          const queueMessageResult = await this.queueClient.sendMessage(body)
+          const encoded = this._encodeXMLSafe(body)
+          const queueMessageResult = await this.queueClient.sendMessage(encoded)
           this._log('Queued', request)
           return this._buildMessageReceipt(queueMessageResult, request)
         })
@@ -70,12 +71,7 @@ class StorageQueue {
       return null
     } else {
       try {
-        const decodedText = message.messageText
-          .replace(/&quot;/g, '"')
-          .replace(/&amp;/g, '&')
-          .replace(/&#39;/g, "'")
-          .replace(/&lt;/g, '<')
-          .replace(/&gt;/g, '>')
+        const decodedText = this._decodeXMLSafe(message.messageText)
         message.body = JSON.parse(decodedText)
       } catch (error) {
         this.logger.error(`Failed to parse message ${message.messageId}:`)
@@ -146,6 +142,35 @@ class StorageQueue {
 
   isMessageNotFound(error) {
     return error?.code === 'MessageNotFound'
+  }
+
+  _encodeXMLSafe(text) {
+    if (typeof text !== 'string') return text
+
+    return (
+      text
+        // Handle & first to prevent double-encoding
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+    )
+  }
+
+  _decodeXMLSafe(text) {
+    if (typeof text !== 'string') return text
+
+    return (
+      text
+        // Handle both XML and HTML encodings for quotes and apostrophes
+        .replace(/&apos;|&#39;|&#x27;/g, "'")
+        .replace(/&quot;|&#34;|&#x22;/g, '"')
+        // Handle basic XML entities
+        .replace(/&lt;|&#60;|&#x3[Cc];/g, '<')
+        .replace(/&gt;|&#62;|&#x3[Ee];/g, '>')
+        .replace(/&amp;|&#38;|&#x26;/g, '&') // Must be after other & entities
+    )
   }
 }
 
