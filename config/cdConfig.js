@@ -140,8 +140,9 @@ module.exports = {
       attenuation: {
         ttl: 3000
       },
-      spnAuth: config.get('CRAWLER_HARVESTS_QUEUE_SPN_AUTH'),
-      account: cd_azblob.account
+      spnAuth: config.get('CRAWLER_QUEUE_AZURE_SPN_AUTH') || cd_azblob.spnAuth,
+      account: config.get('CRAWLER_QUEUE_AZURE_ACCOUNT_NAME') || cd_azblob.account,
+      isSpnAuth: config.get('CRAWLER_QUEUE_AZURE_IS_SPN_AUTH') || false
     },
     appVersion: config.get('APP_VERSION'),
     buildsha: config.get('BUILD_SHA')
