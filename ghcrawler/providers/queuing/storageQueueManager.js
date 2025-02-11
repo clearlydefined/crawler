@@ -18,19 +18,28 @@ class StorageQueueManager {
         retryPolicyType: StorageRetryPolicyType.EXPONENTIAL
       }
     }
+
+    const { account, spnAuth, isSpnAuth } = options
+    if (isSpnAuth) {
+      const authParsed = JSON.parse(spnAuth)
+      this.client = new QueueServiceClient(
+        `https://${account}.queue.core.windows.net`,
+        new ClientSecretCredential(authParsed.tenantId, authParsed.clientId, authParsed.clientSecret),
+        pipelineOptions
+      )
+      return
+    }
+
     if (connectionString) {
       this.client = QueueServiceClient.fromConnectionString(connectionString, pipelineOptions)
-    } else {
-      const { account, spnAuth } = options
-      let credential
-      if (spnAuth) {
-        const authParsed = JSON.parse(spnAuth)
-        credential = new ClientSecretCredential(authParsed.tenantId, authParsed.clientId, authParsed.clientSecret)
-      } else {
-        credential = new DefaultAzureCredential()
-      }
-      this.client = new QueueServiceClient(`https://${account}.queue.core.windows.net`, credential, pipelineOptions)
+      return
     }
+
+    this.client = new QueueServiceClient(
+      `https://${account}.queue.core.windows.net`,
+      new DefaultAzureCredential(),
+      pipelineOptions
+    )
   }
 
   createQueueClient(name, formatter, options) {
