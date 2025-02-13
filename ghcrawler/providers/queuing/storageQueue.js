@@ -1,50 +1,47 @@
 // Copyright (c) Microsoft Corporation and others. Made available under the MIT license.
 // SPDX-License-Identifier: MIT
 
+// eslint-disable-next-line no-unused-vars
+const { QueueServiceClient } = require('@azure/storage-queue')
 const qlimit = require('qlimit')
 const { cloneDeep } = require('lodash')
 
 class StorageQueue {
+  /**
+   * @param {QueueServiceClient} client
+   * @param {string} name
+   * @param {string} queueName
+   * @param {object} formatter
+   * @param {object} options
+   */
   constructor(client, name, queueName, formatter, options) {
-    this.client = client
     this.name = name
     this.queueName = queueName
     this.messageFormatter = formatter
     this.options = options
     this.logger = options.logger
+    this.queueClient = client.getQueueClient(this.queueName)
   }
 
   async subscribe() {
-    return new Promise((resolve, reject) => {
-      this.client.createQueueIfNotExists(this.queueName, error => {
-        if (error) {
-          return reject(error)
-        }
-        this.logger.info(`Subscribed to ${this.queueName} using Queue Storage`)
-        resolve()
-      })
-    })
+    await this.queueClient.createIfNotExists()
+    this.logger.info(`Subscribed to ${this.queueName} using Queue Storage`)
   }
 
   async unsubscribe() {
-    return
+    // No specific unsubscribe logic for Azure Queue Storage
   }
 
-  async push(requests, option) {
+  async push(requests) {
     requests = Array.isArray(requests) ? requests : [requests]
     return Promise.all(
       requests.map(
-        qlimit(this.options.parallelPush || 1)(request => {
+        qlimit(this.options.parallelPush || 1)(async request => {
           const body = JSON.stringify(request)
-          return new Promise((resolve, reject) => {
-            this.client.createMessage(this.queueName, body, option, (error, queueMessageResult) => {
-              if (error) {
-                return reject(error)
-              }
-              this._log('Queued', request)
-              resolve(this._buildMessageReceipt(queueMessageResult, request))
-            })
-          })
+          const encoded = this._encodeXMLSafe(body)
+          const queueMessageResult = await this.queueClient.sendMessage(encoded)
+          this._log('Queued', request)
+          return this._buildMessageReceipt(queueMessageResult, request)
         })
       )
     )
@@ -56,47 +53,46 @@ class StorageQueue {
   }
 
   async pop() {
-    const msgOptions = { numOfMessages: 1, visibilityTimeout: this.options.visibilityTimeout || 60 * 60 }
-    return new Promise((resolve, reject) => {
-      this.client.getMessages(this.queueName, msgOptions, (error, result) => {
-        if (error) {
-          return reject(error)
-        }
-        const message = result[0]
-        if (!message) {
-          this.logger.verbose('No messages to receive')
-          return resolve(null)
-        }
-        if (this.options.maxDequeueCount && message.dequeueCount > this.options.maxDequeueCount) {
-          this.logger.verbose('maxDequeueCount exceeded')
-          this.client.deleteMessage(this.queueName, message.messageId, message.popReceipt, error => {
-            if (error) return reject(error)
-            resolve(null)
-          })
-        } else {
-          message.body = JSON.parse(message.messageText)
-          const request = this.messageFormatter(message)
-          request._message = message
-          this._log('Popped', message.body)
-          resolve(request)
-        }
-      })
-    })
+    const msgOptions = { numberOfMessages: 1, visibilityTimeout: this.options.visibilityTimeout || 60 * 60 }
+    const response = await this.queueClient.receiveMessages(msgOptions)
+    const message = response.receivedMessageItems[0]
+    if (!message) {
+      this.logger.verbose('No messages to receive')
+      return null
+    }
+    if (this.options.maxDequeueCount && message.dequeueCount > this.options.maxDequeueCount) {
+      this.logger.verbose('maxDequeueCount exceeded')
+      try {
+        await this.queueClient.deleteMessage(message.messageId, message.popReceipt)
+      } catch (error) {
+        this.logger.error(`Failed to delete message ${message.messageId} in storageQueue, error: ${error.message}`)
+        throw error
+      }
+      return null
+    } else {
+      try {
+        const decodedText = this._decodeXMLSafe(message.messageText)
+        message.body = JSON.parse(decodedText)
+      } catch (error) {
+        this.logger.error(`Failed to parse message ${message.messageId}:`)
+        this.logger.error(`Raw message: ${message.messageText}`)
+        this.logger.error(`Parse error: ${error.message}`)
+        await this.queueClient.deleteMessage(message.messageId, message.popReceipt)
+        return null
+      }
+      const request = this.messageFormatter(message)
+      request._message = message
+      this._log('Popped', message.body)
+      return request
+    }
   }
 
   async done(request) {
     if (!request || !request._message) {
       return
     }
-    return new Promise((resolve, reject) => {
-      this.client.deleteMessage(this.queueName, request._message.messageId, request._message.popReceipt, error => {
-        if (error) {
-          return reject(error)
-        }
-        this._log('ACKed', request._message.body)
-        resolve()
-      })
-    })
+    await this.queueClient.deleteMessage(request._message.messageId, request._message.popReceipt)
+    this._log('ACKed', request._message.body)
   }
 
   async defer(request) {
@@ -110,47 +106,30 @@ class StorageQueue {
     await this.updateVisibilityTimeout(request)
   }
 
-  updateVisibilityTimeout(request, visibilityTimeout = 0) {
-    return new Promise((resolve, reject) => {
-      // visibilityTimeout is updated to 0 to unlock/unlease the message
-      this.client.updateMessage(
-        this.queueName,
-        request._message.messageId,
-        request._message.popReceipt,
-        visibilityTimeout,
-        (error, result) => {
-          if (error) {
-            return reject(error)
-          }
-          this._log('NAKed', request._message.body)
-          resolve(this._buildMessageReceipt(result, request._message.body))
-        }
-      )
-    })
+  async updateVisibilityTimeout(request, visibilityTimeout = 0) {
+    const response = await this.queueClient.updateMessage(
+      request._message.messageId,
+      request._message.popReceipt,
+      undefined,
+      visibilityTimeout
+    )
+    this._log('NAKed', request._message.body)
+    return this._buildMessageReceipt({ messageId: request._message.messageId, ...response }, request)
   }
 
   async flush() {
-    return new Promise((resolve, reject) => {
-      this.client.deleteQueue(this.queueName, error => {
-        if (error) return reject(error)
-        this.client.createQueueIfNotExists(this.queueName, error => {
-          if (error) return reject(error)
-          resolve()
-        })
-      })
-    })
+    await this.queueClient.clearMessages()
+    this.logger.info(`Flushed all messages from ${this.queueName}`)
   }
 
   async getInfo() {
-    return new Promise(resolve => {
-      this.client.getQueueMetadata(this.queueName, (result, error) => {
-        if (error) {
-          this.logger.error(error)
-          resolve(null)
-        }
-        resolve({ count: result[0].approximateMessageCount })
-      })
-    })
+    try {
+      const properties = await this.queueClient.getProperties()
+      return { count: properties.approximateMessagesCount }
+    } catch (error) {
+      this.logger.error(error)
+      return null
+    }
   }
 
   getName() {
@@ -163,6 +142,35 @@ class StorageQueue {
 
   isMessageNotFound(error) {
     return error?.code === 'MessageNotFound'
+  }
+
+  _encodeXMLSafe(text) {
+    if (typeof text !== 'string') return text
+
+    return (
+      text
+        // Handle & first to prevent double-encoding
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+    )
+  }
+
+  _decodeXMLSafe(text) {
+    if (typeof text !== 'string') return text
+
+    return (
+      text
+        // Handle both XML and HTML encodings for quotes and apostrophes
+        .replace(/&apos;|&#39;|&#x27;/g, "'")
+        .replace(/&quot;|&#34;|&#x22;/g, '"')
+        // Handle basic XML entities
+        .replace(/&lt;|&#60;|&#x3[Cc];/g, '<')
+        .replace(/&gt;|&#62;|&#x3[Ee];/g, '>')
+        .replace(/&amp;|&#38;|&#x26;/g, '&') // Must be after other & entities
+    )
   }
 }
 
