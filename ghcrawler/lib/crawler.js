@@ -638,7 +638,7 @@ class Crawler {
       metadata.errorMessage = request._error.message
       metadata.errorStack = request._error.stack
     }
-    metadata.version = 1
+    metadata.version = "1"
     metadata.meta = request.meta
     metadata.type = 'deadletter'
     metadata.url = request.url.replace('//', '//deadletter.')
