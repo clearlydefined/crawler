@@ -95,7 +95,7 @@ class AzureStorageDocStore {
   // This API can only be used for the 'deadletter' store because we cannot look up documents by type performantly
   async count(type, force = false) {
     this._ensureDeadletter(type)
-    const key = `${this.name}:count:${type || ''}`
+    const key = `${this.options.container}:count:${type || ''}`
     if (!force) {
       const cachedCount = memoryCache.get(key)
       if (cachedCount) {
