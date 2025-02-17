@@ -7,7 +7,8 @@ const cd_azblob = {
   connection: config.get('CRAWLER_AZBLOB_CONNECTION_STRING'),
   container: config.get('CRAWLER_AZBLOB_CONTAINER_NAME'),
   account: config.get('CRAWLER_AZBLOB_ACCOUNT_NAME'),
-  spnAuth: config.get('CRAWLER_AZBLOB_SPN_AUTH')
+  spnAuth: config.get('CRAWLER_AZBLOB_SPN_AUTH'),
+  isSpnAuth: config.get('CRAWLER_AZBLOB_IS_SPN_AUTH') || false
 }
 
 const githubToken = config.get('CRAWLER_GITHUB_TOKEN')
@@ -115,7 +116,8 @@ module.exports = {
       connectionString: cd_azblob.connection,
       account: cd_azblob.account,
       queueName: config.get('CRAWLER_HARVESTS_QUEUE_NAME') || 'harvests',
-      spnAuth: config.get('CRAWLER_HARVESTS_QUEUE_SPN_AUTH')
+      spnAuth: config.get('CRAWLER_HARVESTS_QUEUE_SPN_AUTH'),
+      isSpnAuth: config.get('CRAWLER_HARVESTS_QUEUE_IS_SPN_AUTH') || false
     },
     'cd(azblob)': cd_azblob,
     'cd(file)': cd_file

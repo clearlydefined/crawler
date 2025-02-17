@@ -10,7 +10,7 @@ class AzureStorageQueue {
     this.queueName = options.queueName
     this.logger = options.logger
 
-    const { connectionString, account, spnAuth } = options
+    const { connectionString, account, spnAuth, isSpnAuth } = options
 
     const pipelineOptions = {
       retryOptions: {
@@ -21,18 +21,30 @@ class AzureStorageQueue {
         retryPolicyType: StorageRetryPolicyType.FIXED
       }
     }
-    if (connectionString) {
-      this.client = QueueServiceClient.fromConnectionString(connectionString, pipelineOptions)
-    } else {
-      let credential
-      if (spnAuth) {
-        const authParsed = JSON.parse(spnAuth)
-        credential = new ClientSecretCredential(authParsed.tenantId, authParsed.clientId, authParsed.clientSecret)
-      } else {
-        credential = new DefaultAzureCredential()
-      }
-      this.client = new QueueServiceClient(`https://${account}.queue.core.windows.net`, credential, pipelineOptions)
+
+    if (isSpnAuth) {
+      options.logger.info('using service principal credentials in azureQueueStore')
+      const authParsed = JSON.parse(spnAuth)
+      this.client = new QueueServiceClient(
+        `https://${account}.queue.core.windows.net`,
+        new ClientSecretCredential(authParsed.tenantId, authParsed.clientId, authParsed.clientSecret),
+        pipelineOptions
+      )
+      return
     }
+
+    if (connectionString) {
+      options.logger.info('using connection string in azureQueueStore')
+      this.client = QueueServiceClient.fromConnectionString(connectionString, pipelineOptions)
+      return
+    }
+
+    options.logger.info('using default credentials in azureQueueStore')
+    this.client = new QueueServiceClient(
+      `https://${account}.queue.core.windows.net`,
+      new DefaultAzureCredential(),
+      pipelineOptions
+    )
   }
 
   async connect() {

@@ -21,6 +21,7 @@ class StorageQueueManager {
 
     const { account, spnAuth, isSpnAuth } = options
     if (isSpnAuth) {
+      options.logger.info('using service principal credentials in storageQueueManager')
       const authParsed = JSON.parse(spnAuth)
       this.client = new QueueServiceClient(
         `https://${account}.queue.core.windows.net`,
@@ -31,10 +32,12 @@ class StorageQueueManager {
     }
 
     if (connectionString) {
+      options.logger.info('using connection string in storageQueueManager')
       this.client = QueueServiceClient.fromConnectionString(connectionString, pipelineOptions)
       return
     }
 
+    options.logger.info('using default credentials in storageQueueManager')
     this.client = new QueueServiceClient(
       `https://${account}.queue.core.windows.net`,
       new DefaultAzureCredential(),

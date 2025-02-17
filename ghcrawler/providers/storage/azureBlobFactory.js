@@ -13,10 +13,11 @@ const { DefaultAzureCredential, ClientSecretCredential } = require('@azure/ident
  * @param {string} options.container
  * @param {object} options.logger
  * @param {object} options.spnAuth
+ * @param {object} options.isSpnAuth
  */
 module.exports = options => {
   options.logger.info('creating azure storage store')
-  const { account, connection, container, spnAuth } = options
+  const { account, connection, container, spnAuth, isSpnAuth } = options
 
   const pipelineOptions = {
     retryOptions: {
@@ -27,22 +28,28 @@ module.exports = options => {
       retryPolicyType: StorageRetryPolicyType.EXPONENTIAL
     }
   }
-
   let blobServiceClient
-  if (connection) {
-    options.logger.info('using connection string')
-    blobServiceClient = BlobServiceClient.fromConnectionString(connection, pipelineOptions)
+
+  if (isSpnAuth) {
+    options.logger.info('using service principal credentials in azureBlobFactory')
+    const authParsed = JSON.parse(spnAuth)
+    blobServiceClient = new BlobServiceClient(
+      `https://${account}.queue.core.windows.net`,
+      new ClientSecretCredential(authParsed.tenantId, authParsed.clientId, authParsed.clientSecret),
+      pipelineOptions
+    )
   } else {
-    let credential
-    if (spnAuth) {
-      const authParsed = JSON.parse(spnAuth)
-      credential = new ClientSecretCredential(authParsed.tenantId, authParsed.clientId, authParsed.clientSecret)
-      options.logger.info('using service principal credentials')
+    if (connection) {
+      options.logger.info('using connection string in azureBlobFactory')
+      blobServiceClient = BlobServiceClient.fromConnectionString(connection, pipelineOptions)
     } else {
-      credential = new DefaultAzureCredential()
-      options.logger.info('using default credentials')
+      options.logger.info('using default credentials in azureBlobFactory')
+      blobServiceClient = new BlobServiceClient(
+        `https://${account}.queue.core.windows.net`,
+        new DefaultAzureCredential(),
+        pipelineOptions
+      )
     }
-    blobServiceClient = new BlobServiceClient(`https://${account}.blob.core.windows.net`, credential, pipelineOptions)
   }
 
   const containerClient = blobServiceClient.getContainerClient(container)
