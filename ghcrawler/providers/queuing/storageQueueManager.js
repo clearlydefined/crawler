@@ -2,14 +2,47 @@
 // SPDX-License-Identifier: MIT
 
 const AttenuatedQueue = require('./attenuatedQueue')
-const AzureStorage = require('azure-storage')
+const { QueueServiceClient, StorageRetryPolicyType } = require('@azure/storage-queue')
 const Request = require('../../lib/request')
 const StorageQueue = require('./storageQueue')
+const { DefaultAzureCredential, ClientSecretCredential } = require('@azure/identity')
 
 class StorageQueueManager {
-  constructor(connectionString) {
-    const retryOperations = new AzureStorage.ExponentialRetryPolicyFilter()
-    this.client = AzureStorage.createQueueService(connectionString).withFilter(retryOperations)
+  constructor(connectionString, options) {
+    const pipelineOptions = {
+      retryOptions: {
+        maxTries: 3,
+        retryDelayInMs: 1000,
+        maxRetryDelayInMs: 120 * 1000,
+        tryTimeoutInMs: 30000,
+        retryPolicyType: StorageRetryPolicyType.EXPONENTIAL
+      }
+    }
+
+    const { account, spnAuth, isSpnAuth } = options
+    if (isSpnAuth) {
+      options.logger.info('using service principal credentials in storageQueueManager')
+      const authParsed = JSON.parse(spnAuth)
+      this.client = new QueueServiceClient(
+        `https://${account}.queue.core.windows.net`,
+        new ClientSecretCredential(authParsed.tenantId, authParsed.clientId, authParsed.clientSecret),
+        pipelineOptions
+      )
+      return
+    }
+
+    if (connectionString) {
+      options.logger.info('using connection string in storageQueueManager')
+      this.client = QueueServiceClient.fromConnectionString(connectionString, pipelineOptions)
+      return
+    }
+
+    options.logger.info('using default credentials in storageQueueManager')
+    this.client = new QueueServiceClient(
+      `https://${account}.queue.core.windows.net`,
+      new DefaultAzureCredential(),
+      pipelineOptions
+    )
   }
 
   createQueueClient(name, formatter, options) {
