@@ -7,6 +7,11 @@ const SourceSpec = require('../../../../lib/sourceSpec')
 const EntitySpec = require('../../../../lib/entitySpec')
 
 describe('mavenExtract source discovery', () => {
+  it('verifies the version of the nuget extract', () => {
+    const extractor = extract({}, () => {})
+    expect(extractor._schemaVersion).to.equal('1.5.1')
+  })
+
   it('handles no tags in GitHub and falls back to made up sourcearchive', async () => {
     const spec = createSpec('test')
     const extractor = extract({}, () => null)

@@ -1,32 +1,29 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-const azure = require('azure-storage')
+// eslint-disable-next-line no-unused-vars
+const { ContainerClient } = require('@azure/storage-blob')
 const memoryCache = require('memory-cache')
 const { Readable } = require('stream')
 const URL = require('url')
 
 class AzureStorageDocStore {
-  constructor(blobService, name, options) {
-    this.service = blobService
-    this.name = name
+  /**
+   * @param {ContainerClient} containerClient
+   * @param {object} options
+   */
+  constructor(containerClient, options) {
+    this.containerClient = containerClient
     this.options = options
     this._getBlobNameFromKey = this.options.blobKey === 'url' ? this._getBlobNameFromUrl : this._getBlobNameFromUrn
   }
 
   async connect() {
-    return this._createContainer(this.name)
+    await this._createContainer(this.containerClient)
   }
 
-  async _createContainer(name) {
-    return new Promise((resolve, reject) => {
-      this.service.createContainerIfNotExists(name, error => {
-        if (error) {
-          return reject(error)
-        }
-        resolve(this.service)
-      })
-    })
+  async _createContainer(containerClient) {
+    await containerClient.createIfNotExists()
   }
 
   async upsert(document) {
@@ -43,85 +40,47 @@ class AzureStorageDocStore {
     if (document._metadata.extra) {
       blobMetadata.extra = JSON.stringify(document._metadata.extra)
     }
-    const options = { metadata: blobMetadata, contentSettings: { contentType: 'application/json' } }
+    const options = { metadata: blobMetadata, blobHTTPHeaders: { blobContentType: 'application/json' } }
     const dataStream = new Readable()
     dataStream.push(JSON.stringify(document))
     dataStream.push(null)
-    return new Promise((resolve, reject) => {
-      dataStream
-        .pipe(this.service.createWriteStreamToBlockBlob(this.name, blobName, options))
-        .on('error', error => {
-          return reject(error)
-        })
-        .on('finish', () => {
-          resolve(blobName)
-        })
-    })
+    const blockBlobClient = this.containerClient.getBlockBlobClient(blobName)
+    await blockBlobClient.uploadStream(dataStream, 8 << 20, 5, options)
+    return blobName
   }
 
-  // TODO: Consistency on whether key is a URL or URN
   async get(type, key) {
     const blobName = this._getBlobNameFromKey(type, key)
-    return new Promise((resolve, reject) => {
-      this.service.getBlobToText(this.name, blobName, (error, text) => {
-        if (error) {
-          return reject(error)
-        }
-        const result = JSON.parse(text)
-        resolve(result)
-      })
-    })
+    const blockBlobClient = this.containerClient.getBlockBlobClient(blobName)
+    const downloadBlockBlobResponse = await blockBlobClient.download(0)
+    const downloaded = await this._streamToString(downloadBlockBlobResponse.readableStreamBody)
+    return JSON.parse(downloaded)
   }
 
-  // TODO: Consistency on whether key is a URL or URN
   async etag(type, key) {
     const blobName = this._getBlobNameFromKey(type, key)
-    return new Promise(resolve => {
-      this.service.getBlobMetadata(this.name, blobName, (error, blob) => {
-        resolve(error ? null : blob.metadata.etag)
-      })
-    })
+    const blockBlobClient = this.containerClient.getBlockBlobClient(blobName)
+    const properties = await blockBlobClient.getProperties()
+    return properties.etag
   }
 
   // This API can only be used for the 'deadletter' store because we cannot look up documents by type performantly
   async list(type) {
     this._ensureDeadletter(type)
     let entries = []
-    let continuationToken = null
-    do {
-      const result = await new Promise((resolve, reject) => {
-        this.service.listBlobsSegmented(
-          this.name,
-          continuationToken,
-          {
-            include: azure.BlobUtilities.BlobListingDetails.METADATA,
-            location: azure.StorageUtilities.LocationMode.PRIMARY_THEN_SECONDARY
-          },
-          (error, response) => {
-            if (error) {
-              continuationToken = null
-              reject(error)
-            }
-            return resolve(response)
-          }
-        )
+    for await (const blob of this.containerClient.listBlobsFlat({ includeMetadata: true })) {
+      const blobMetadata = blob.metadata
+      entries.push({
+        version: blobMetadata.version,
+        etag: blobMetadata.etag,
+        type: blobMetadata.type,
+        url: blobMetadata.url,
+        urn: blobMetadata.urn,
+        fetchedAt: blobMetadata.fetchedat,
+        processedAt: blobMetadata.processedat,
+        extra: blobMetadata.extra ? JSON.parse(blobMetadata.extra) : undefined
       })
-      entries = entries.concat(
-        result.entries.map(entry => {
-          const blobMetadata = entry.metadata
-          return {
-            version: blobMetadata.version,
-            etag: blobMetadata.etag,
-            type: blobMetadata.type,
-            url: blobMetadata.url,
-            urn: blobMetadata.urn,
-            fetchedAt: blobMetadata.fetchedat,
-            processedAt: blobMetadata.processedat,
-            extra: blobMetadata.extra ? JSON.parse(blobMetadata.extra) : undefined
-          }
-        })
-      )
-    } while (continuationToken && entries.length < 10000)
+    }
     return entries
   }
 
@@ -129,20 +88,14 @@ class AzureStorageDocStore {
   async delete(type, key) {
     this._ensureDeadletter(type)
     const blobName = this._getBlobNameFromKey(type, key)
-    return new Promise((resolve, reject) => {
-      this.service.deleteBlob(this.name, blobName, error => {
-        if (error) {
-          return reject(error)
-        }
-        resolve(true)
-      })
-    })
+    const blockBlobClient = this.containerClient.getBlockBlobClient(blobName)
+    await blockBlobClient.delete()
   }
 
   // This API can only be used for the 'deadletter' store because we cannot look up documents by type performantly
   async count(type, force = false) {
     this._ensureDeadletter(type)
-    const key = `${this.name}:count:${type || ''}`
+    const key = `${this.options.container}:count:${type || ''}`
     if (!force) {
       const cachedCount = memoryCache.get(key)
       if (cachedCount) {
@@ -150,24 +103,11 @@ class AzureStorageDocStore {
       }
     }
     let entryCount = 0
-    let continuationToken = null
-    do {
-      const result = await new Promise((resolve, reject) => {
-        this.service.listBlobsSegmented(
-          this.name,
-          continuationToken,
-          { location: azure.StorageUtilities.LocationMode.PRIMARY_THEN_SECONDARY },
-          (error, response) => {
-            if (error) {
-              continuationToken = null
-              reject(error)
-            }
-            return resolve(response)
-          }
-        )
-      })
-      entryCount += result.entries.length
-    } while (continuationToken)
+    for await (const page of this.containerClient.listBlobsFlat().byPage({ maxPageSize: 1000 })) {
+      if (page.segment.blobItems) {
+        entryCount += page.segment.blobItems.length()
+      }
+    }
     memoryCache.put(key, entryCount, 60000)
     return entryCount
   }
@@ -215,6 +155,19 @@ class AzureStorageDocStore {
       return urn
     }
     return `${this._getBlobPathFromUrn(type, urn)}.json`
+  }
+
+  async _streamToString(readableStream) {
+    return new Promise((resolve, reject) => {
+      const chunks = []
+      readableStream.on('data', data => {
+        chunks.push(data.toString())
+      })
+      readableStream.on('end', () => {
+        resolve(chunks.join(''))
+      })
+      readableStream.on('error', reject)
+    })
   }
 }
 

@@ -1,0 +1,36 @@
+# This workflow will build a docker image, push it to ghcr.io, and deploy it to an Azure WebApp.
+name: Build and Deploy -- DEV
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+
+jobs:
+  upload-package-lock-json:
+    name: Upload package-lock.json from this repo
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.1.1
+
+      - name: Upload package-lock.json
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-lock.json
+          path: package-lock.json
+
+  build-and-deploy:
+    name: Build and Deploy
+    needs: upload-package-lock-json
+    uses: clearlydefined/operations/.github/workflows/app-build-and-deploy.yml@v3.2.0
+    secrets:
+      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      AZURE_WEBAPP_PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_DEV }}
+      DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+      PRODUCTION_DEPLOYERS: ${{ secrets.PRODUCTION_DEPLOYERS }}
+    with:
+      deploy-env: dev
+      application-type: worker
+      azure-app-base-name: cdcrawler
+      azure-app-name-postfix: -dev
