@@ -54,7 +54,8 @@ class AzureStorageQueue {
 
   async upsert(document) {
     const message = Buffer.from(JSON.stringify({ _metadata: document._metadata })).toString('base64')
-    return await this.queueService.sendMessage(message)
+    const options = { visibilityTimeout: this.options.visibilityTimeout || 0 }
+    return await this.queueService.sendMessage(message, options)
   }
 
   get() {
