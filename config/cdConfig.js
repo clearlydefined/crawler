@@ -20,6 +20,11 @@ const crawlerStoreProvider = config.get('CRAWLER_STORE_PROVIDER') || 'cd(file)'
 const maxRequeueAttemptCount = config.get('CRAWLER_MAX_REQUEUE_ATTEMPTS') || 5
 const fetchedCacheTtlSeconds = config.get('CRAWLER_FETCHED_CACHE_TTL_SECONDS') || 60 * 60 * 8 //8 hours
 
+function getLicenseeParallelism() {
+  const num = Number(config.get('CRAWLER_LICENSEE_PARALLELISM') || process.env.CRAWLER_LICENSEE_PARALLELISM)
+  return num > 0 ? num : 10;
+}
+
 module.exports = {
   provider: 'memory', // change this to redis if/when we want distributed config
   searchPath: [module],
@@ -67,7 +72,9 @@ module.exports = {
     },
     gem: { githubToken },
     go: { githubToken },
-    licensee: {},
+    licensee: {
+      processes: getLicenseeParallelism()
+    },
     maven: { githubToken },
     npm: { githubToken },
     nuget: { githubToken },
