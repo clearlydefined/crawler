@@ -73,7 +73,7 @@ module.exports = {
     gem: { githubToken },
     go: { githubToken },
     licensee: {
-      processes: getLicenseeParallelism()
+      processes: getPositiveNum(CRAWLER_LICENSEE_PARALLELISM,10)
     },
     maven: { githubToken },
     npm: { githubToken },
