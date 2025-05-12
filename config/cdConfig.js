@@ -19,6 +19,7 @@ const cd_file = {
 const crawlerStoreProvider = config.get('CRAWLER_STORE_PROVIDER') || 'cd(file)'
 const maxRequeueAttemptCount = config.get('CRAWLER_MAX_REQUEUE_ATTEMPTS') || 5
 const fetchedCacheTtlSeconds = config.get('CRAWLER_FETCHED_CACHE_TTL_SECONDS') || 60 * 60 * 8 //8 hours
+const azqueueVisibilityTimeoutSeconds = parseInt(config.get('CRAWLER_HARVESTS_QUEUE_VISIBILITY_TIMEOUT_SECONDS'))
 
 module.exports = {
   provider: 'memory', // change this to redis if/when we want distributed config
@@ -117,7 +118,8 @@ module.exports = {
       account: cd_azblob.account,
       queueName: config.get('CRAWLER_HARVESTS_QUEUE_NAME') || 'harvests',
       spnAuth: config.get('CRAWLER_HARVESTS_QUEUE_SPN_AUTH'),
-      isSpnAuth: config.get('CRAWLER_HARVESTS_QUEUE_IS_SPN_AUTH') || false
+      isSpnAuth: config.get('CRAWLER_HARVESTS_QUEUE_IS_SPN_AUTH') || false,
+      visibilityTimeout: isNaN(azqueueVisibilityTimeoutSeconds) ? 5 * 60 : azqueueVisibilityTimeoutSeconds // 5 minutes default
     },
     'cd(azblob)': cd_azblob,
     'cd(file)': cd_file
