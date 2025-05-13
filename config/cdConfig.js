@@ -21,6 +21,11 @@ const maxRequeueAttemptCount = config.get('CRAWLER_MAX_REQUEUE_ATTEMPTS') || 5
 const fetchedCacheTtlSeconds = config.get('CRAWLER_FETCHED_CACHE_TTL_SECONDS') || 60 * 60 * 8 //8 hours
 const azqueueVisibilityTimeoutSeconds = parseInt(config.get('CRAWLER_HARVESTS_QUEUE_VISIBILITY_TIMEOUT_SECONDS'))
 
+function getPositiveNum(configName, defaultValue) {
+  const num = Number(config.get(configName))
+  return num > 0 ? num : defaultValue
+}
+
 module.exports = {
   provider: 'memory', // change this to redis if/when we want distributed config
   searchPath: [module],
@@ -68,7 +73,9 @@ module.exports = {
     },
     gem: { githubToken },
     go: { githubToken },
-    licensee: {},
+    licensee: {
+      processes: getPositiveNum('CRAWLER_LICENSEE_PARALLELISM', 10)
+    },
     maven: { githubToken },
     npm: { githubToken },
     nuget: { githubToken },

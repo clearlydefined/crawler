@@ -50,9 +50,10 @@ class LicenseeProcessor extends AbstractProcessor {
     const root = request.document.location
     const subfolders = await this.getFolders(root, ['/.git'])
     const paths = ['', ...trimAllParents(subfolders, root)]
+    const { processes } = this.options
     try {
       const results = (
-        await Promise.all(paths.map(throat(10, path => this._runOnFolder(path, root, parameters))))
+        await Promise.all(paths.map(throat(processes, path => this._runOnFolder(path, root, parameters))))
       ).filter(x => x)
       const licenses = uniqBy(flatten(results.map(result => result.licenses)), 'spdx_id')
       const matched_files = flatten(results.map(result => result.matched_files))
