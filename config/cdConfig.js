@@ -126,7 +126,7 @@ module.exports = {
       queueName: config.get('CRAWLER_HARVESTS_QUEUE_NAME') || 'harvests',
       spnAuth: config.get('CRAWLER_HARVESTS_QUEUE_SPN_AUTH'),
       isSpnAuth: config.get('CRAWLER_HARVESTS_QUEUE_IS_SPN_AUTH') || false,
-      visibilityTimeout: isNaN(azqueueVisibilityTimeoutSeconds) ? 5 * 60 : azqueueVisibilityTimeoutSeconds // 5 minutes default
+      visibilityTimeout: isNaN(azqueueVisibilityTimeoutSeconds) ? 0 : azqueueVisibilityTimeoutSeconds
     },
     'cd(azblob)': cd_azblob,
     'cd(file)': cd_file
