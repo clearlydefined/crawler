@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 # SPDX-License-Identifier: MIT
 
-FROM node:18-bullseye
+FROM node:20-bullseye
 ENV APPDIR=/opt/service
 
 # Set environment variables from build arguments
@@ -62,6 +62,6 @@ RUN mkdir -p "${APPDIR}" && cp -a /tmp/node_modules "${APPDIR}"
 WORKDIR "${APPDIR}"
 COPY . "${APPDIR}"
 
-ENV PORT 5000
+ENV PORT=5000
 EXPOSE 5000
 ENTRYPOINT ["node", "index.js"]
