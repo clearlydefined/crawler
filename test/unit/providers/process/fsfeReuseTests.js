@@ -112,7 +112,7 @@ describe('FSFE REUSE software process', () => {
 })
 
 function setup(fixture, error, versionError) {
-  const options = { logger: { log: sinon.stub() } }
+  const options = { logger: { log: sinon.stub(), error: sinon.stub() } }
   const testRequest = new request('reuse', 'cd:/git/github/SAP/ospo/424242')
   testRequest.document = { _metadata: { links: {} }, location: path.resolve(`test/fixtures/fsfeReuse/${fixture}`) }
   testRequest.crawler = { storeDeadletter: sinon.stub() }

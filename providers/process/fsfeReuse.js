@@ -15,6 +15,10 @@ class FsfeReuseProcessor extends AbstractProcessor {
     super(options)
     // Kick off version detection but don't wait. We'll wait before processing anything...
     this._versionPromise = this._detectVersion()
+    // Log the resolved version when it's available
+    this._versionPromise.then(version => {
+      this.logger.info(`Detecting REUSE version: ${version}`)
+    })
   }
 
   get toolVersion() {
@@ -136,26 +140,39 @@ class FsfeReuseProcessor extends AbstractProcessor {
         })
       })
     } catch (error) {
-      this.logger.log(`Error reading LICENSES directory: ${error.message}`)
+      this.logger.error('Error reading LICENSES directory', { error: error.message })
     }
     return licenses
   }
 
   _detectVersion() {
     if (this._versionPromise !== undefined) return this._versionPromise
+
     this._versionPromise = execFile('reuse', ['--version'])
       .then(result => {
-        const reuseRegex = /reuse\s+(\d+\.\d+(\.\d+)?)/i
-        this._toolVersion = result.stdout.trim().match(reuseRegex)[1]
+        const reuseRegex = /reuse[^\d]*(\d+\.\d+(?:\.\d+)?)/i
+        const match = result.stdout.trim().match(reuseRegex)
+
+        if (!match) {
+          throw new Error(`Could not parse version from output: ${result.stdout}`)
+        }
+
+        this._toolVersion = match[1]
         this._schemaVersion = this.aggregateVersions(
           [this._schemaVersion, this.toolVersion, this.configVersion],
           'Invalid REUSE version'
         )
+
         return this._schemaVersion
       })
       .catch(error => {
-        if (error) this.logger.log(`Could not detect version of REUSE: ${error.message}`)
+        this.logger.error('Could not detect version of REUSE', {
+          error: error.message || error,
+          stdout: error.stdout,
+          stderr: error.stderr
+        })
       })
+
     return this._versionPromise
   }
 }
