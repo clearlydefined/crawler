@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 # SPDX-License-Identifier: MIT
 
-FROM node:20-bullseye
+FROM node:24-bullseye
 ENV APPDIR=/opt/service
 
 # Set environment variables from build arguments
