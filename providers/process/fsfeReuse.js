@@ -17,7 +17,7 @@ class FsfeReuseProcessor extends AbstractProcessor {
     this._versionPromise = this._detectVersion()
     // Log the resolved version when it's available
     this._versionPromise.then(version => {
-      this.logger.info(`Detecting REUSE version: ${version}`)
+      this.logger?.info(`Detected REUSE version: ${version}`)
     })
   }
 
@@ -71,6 +71,12 @@ class FsfeReuseProcessor extends AbstractProcessor {
       return results
     } catch (error) {
       request.markDead('Error', error ? error.message : 'REUSE run failed')
+      this.logger?.error(`REUSE run failed for ${request.toString()}`, {
+        error: error.message || error,
+        stdout: error.stdout,
+        stderr: error.stderr
+      })
+      return null
     }
   }
 
@@ -140,7 +146,10 @@ class FsfeReuseProcessor extends AbstractProcessor {
         })
       })
     } catch (error) {
-      this.logger.error('Error reading LICENSES directory', { error: error.message })
+      this.logger.error(
+        'Error: Could not read the LICENSES directory. Project is not REUSE compliant. Please check the list of compliant projects here: https://api.reuse.software/projects',
+        { error: error.message }
+      )
     }
     return licenses
   }
@@ -166,7 +175,7 @@ class FsfeReuseProcessor extends AbstractProcessor {
         return this._schemaVersion
       })
       .catch(error => {
-        this.logger.error('Could not detect version of REUSE', {
+        this.logger?.error('Could not detect version of REUSE', {
           error: error.message || error,
           stdout: error.stdout,
           stderr: error.stderr
