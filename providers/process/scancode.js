@@ -12,7 +12,9 @@ class ScanCodeProcessor extends AbstractProcessor {
 
     // Kick off version detection but don't wait. We'll wait before processing anything
     this._versionPromise = this._detectVersion().then(version => {
-      this.logger.info(`Detected SCANCODE version: ${this._toolVersion}, Aggregated handler version: ${this._schemaVersion}`)
+      this.logger.info(
+        `Detected SCANCODE version: ${this._toolVersion}, Aggregated handler version: ${this._schemaVersion}`
+      )
       return version
     })
   }

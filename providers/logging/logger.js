@@ -6,7 +6,6 @@ const appInsights = require('applicationinsights')
 const winston = require('winston')
 const insights = require('./insights')
 
-
 /**
  * Factory function to create a Winston logger instance.
  * @param {Object} [options] - Configuration options for the logger.
@@ -23,16 +22,16 @@ function factory(options = {}) {
 
   insights.setup({}, realOptions.key || 'mock', realOptions.echo)
 
-    const logFormat = winston.format.combine(
+  const logFormat = winston.format.combine(
     winston.format.timestamp(),
     winston.format.errors({ stack: true }),
     winston.format.printf(
       ({ timestamp, level, message, ...meta }) =>
         `${timestamp} [${level}]: ${message} ${Object.keys(meta).length ? JSON.stringify(meta) : ''}`
     )
-    )
+  )
 
-    const consoleFormat = winston.format.combine(
+  const consoleFormat = winston.format.combine(
     winston.format.colorize(),
     winston.format.printf(
       ({ timestamp, level, message, ...meta }) =>
@@ -67,7 +66,6 @@ function factory(options = {}) {
   return logger
 }
 
-
 /**
  * Maps Winston log levels to Application Insights severity levels
  * @param {string} level - The Winston log level
@@ -91,5 +89,3 @@ function mapLevel(level) {
 }
 
 module.exports = factory
-
-

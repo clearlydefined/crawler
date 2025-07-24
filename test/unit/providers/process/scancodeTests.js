@@ -39,7 +39,7 @@ describe('ScanCode misc', () => {
     const handlerFactory = proxyquire('../../../../providers/process/scancode', {
       fs: fsStub
     })
-    Handler = handlerFactory({ logger: { log: () => { } } })
+    Handler = handlerFactory({ logger: { log: () => {} } })
     Handler._resultBox = resultBox
   })
 
@@ -87,11 +87,9 @@ describe('ScanCode _detectVersion', () => {
       processor.logger.info,
       'Detected SCANCODE version: 32.3.2, Aggregated handler version: 32.5.2'
     )
-
   })
 
   it('should return null and log error if version parsing fails', async () => {
-
     execFileStub.resolves({ stdout: 'garbage' })
 
     const processor = ScanCodeProcessor({
@@ -171,7 +169,7 @@ function setup(fixture, error, versionError) {
     timeout: 200,
     processes: 2,
     format: 'json',
-    logger: { log: sinon.stub(), info: sinon.stub(), error: sinon.stub(), }
+    logger: { log: sinon.stub(), info: sinon.stub(), error: sinon.stub() }
   }
   const testRequest = new request('npm', 'cd:/npm/npmjs/-/test/1.1')
   testRequest.document = { _metadata: { links: {} }, location: '/test' }
