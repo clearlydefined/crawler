@@ -239,6 +239,9 @@ class Crawler {
     //    else release
     //      if release fails abandon as everyone will think it is still in the queue
     //      else delete
+    if (request && typeof request.toUniqueString !== 'function') {
+      request = Request.adopt(request)
+    }
     const loopName = request.meta ? request.meta.loopName : ''
     debug(`_completeRequest(${loopName}:${request.toUniqueString()}): enter (force: ${forceRequeue})`)
     const self = this
