@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 # SPDX-License-Identifier: MIT
 
-FROM node:18-bullseye
+FROM node:24-bullseye
 ENV APPDIR=/opt/service
 
 # Set environment variables from build arguments
@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends --no-install-su
   gem install bundler -v 2.5.4 --no-document
 
 # Scancode
-ARG SCANCODE_VERSION="32.1.0"
+ARG SCANCODE_VERSION="32.3.3"
 RUN pip3 install --upgrade pip setuptools wheel && \
   curl -Os https://raw.githubusercontent.com/nexB/scancode-toolkit/v$SCANCODE_VERSION/requirements.txt && \
   pip3 install --constraint requirements.txt scancode-toolkit==$SCANCODE_VERSION && \
@@ -40,7 +40,7 @@ RUN gem install nokogiri:1.16.0 --no-document && \
 
 # REUSE
 RUN pip3 install setuptools
-RUN pip3 install reuse==3.0.1
+RUN pip3 install reuse==5.0.2
 
 # Crawler config
 ENV CRAWLER_DEADLETTER_PROVIDER=cd(azblob)
@@ -62,6 +62,6 @@ RUN mkdir -p "${APPDIR}" && cp -a /tmp/node_modules "${APPDIR}"
 WORKDIR "${APPDIR}"
 COPY . "${APPDIR}"
 
-ENV PORT 5000
+ENV PORT=5000
 EXPOSE 5000
 ENTRYPOINT ["node", "index.js"]

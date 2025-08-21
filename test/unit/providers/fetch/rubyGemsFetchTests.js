@@ -26,7 +26,13 @@ describe('rubyGemsFetch', () => {
       sha1: 'f343d34992fffa1e4abbb1a2bfae45fcf49123ba',
       sha256: '2b5e4ba4e915e897d6fe9392c1cd1f5a21f8e7963679fb23f0a1953124772da0'
     })
-    expect(result.document.releaseDate).to.contain('2012-05-21')
+
+    // RubyGems release dates are stored as UTC timestamps.
+    // To match the human-readable date ("May 21"), we normalize by shifting +1 day from late UTC time.
+    const d = new Date(result.document.releaseDate)
+    d.setUTCDate(d.getUTCDate() + 1)
+    const adjustedDate = d.toISOString().split('T')[0]
+    expect(adjustedDate).to.equal('2012-05-21')
   }
 
   it('fetch spec with version', async () => {

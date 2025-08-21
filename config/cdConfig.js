@@ -13,8 +13,11 @@ const cd_azblob = {
 
 const githubToken = config.get('CRAWLER_GITHUB_TOKEN')
 
+const baseFileLocation = config.get('FILE_STORE_LOCATION') || (process.platform === 'win32' ? 'c:/temp/cd' : '/tmp/cd')
+
 const cd_file = {
-  location: config.get('FILE_STORE_LOCATION') || (process.platform === 'win32' ? 'c:/temp/cd' : '/tmp/cd')
+  location: `${baseFileLocation}-definition`,
+  attachmentLocation: `${baseFileLocation}-attachment`
 }
 const crawlerStoreProvider = config.get('CRAWLER_STORE_PROVIDER') || 'cd(file)'
 const maxRequeueAttemptCount = config.get('CRAWLER_MAX_REQUEUE_ATTEMPTS') || 5

@@ -38,6 +38,10 @@ class FileStore {
   _getPath(key) {
     key = key.toLowerCase()
     const realKey = key.startsWith('urn:') ? key.slice(4) : key
+
+    if (realKey.startsWith('attachment:') && this.options.attachmentLocation) {
+      return `${this.options.attachmentLocation}/${realKey.substring(11)}.json`;
+    }
     return `${this.options.location}/${realKey.replace(/:/g, '/')}.json`
   }
 
@@ -62,7 +66,7 @@ class FileStore {
     })
   }
 
-  close() {}
+  close() { }
 }
 
 module.exports = options => new FileStore(options)
