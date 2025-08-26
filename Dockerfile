@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends --no-install-su
   gem install bundler -v 2.5.4 --no-document
 
 # Scancode
-ARG SCANCODE_VERSION="32.1.0"
+ARG SCANCODE_VERSION="32.4.1"
 RUN pip3 install --upgrade pip setuptools wheel && \
   curl -Os https://raw.githubusercontent.com/nexB/scancode-toolkit/v$SCANCODE_VERSION/requirements.txt && \
   pip3 install --constraint requirements.txt scancode-toolkit==$SCANCODE_VERSION && \
