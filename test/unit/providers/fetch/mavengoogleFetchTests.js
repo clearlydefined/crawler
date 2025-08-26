@@ -76,17 +76,17 @@ describe('MavenGoogle fetching', () => {
       const content = fs.readFileSync(`test/fixtures/maven/${file}`)
       return options.json ? JSON.parse(content) : content
     }
-    const getStub = (url, callback) => {
+    const getStub = url => {
       const response = new PassThrough()
       const file = `test/fixtures/maven/${pickArtifact(url)}`
       if (file) {
         response.write(fs.readFileSync(file))
-        callback(null, { statusCode: 200 })
+        response.statusCode = 200
       } else {
-        callback(new Error(url.includes('error') ? 'Error' : 'Code'))
+        Promise.reject(new Error(url.includes('error') ? 'Error' : 'Code'))
       }
       response.end()
-      return response
+      return Promise.resolve(response)
     }
 
     handler = MavenGoogleFetch({
