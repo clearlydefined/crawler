@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractFetch = require('./abstractFetch')
-const nodeRequest = require('request')
+const { getStream: nodeRequest } = require('../../lib/fetch')
 const requestRetry = require('requestretry').defaults({ maxAttempts: 3, fullResponse: true })
 const fs = require('fs')
 const zlib = require('zlib')
@@ -58,12 +58,14 @@ class RubyGemsFetch extends AbstractFetch {
     const fullName = spec.namespace ? `${spec.namespace}/${spec.name}` : spec.name
     const gemUrl = `${providerMap.rubyGems}/gems/${fullName}-${spec.revision}.gem`
     return new Promise((resolve, reject) => {
-      nodeRequest
-        .get(gemUrl, (error, response) => {
-          if (error) return reject(error)
-          if (response.statusCode !== 200) reject(new Error(`${response.statusCode} ${response.statusMessage}`))
+      nodeRequest(gemUrl)
+        .then(response => {
+          if (response.statusCode !== 200) reject(new Error(`${response.statusCode} ${response.message}`))
+          response.pipe(fs.createWriteStream(destination)).on('finish', () => resolve(null))
         })
-        .pipe(fs.createWriteStream(destination).on('finish', () => resolve(null)))
+        .catch(error => {
+          reject(error)
+        })
     })
   }
 
