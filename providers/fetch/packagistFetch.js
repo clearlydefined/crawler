@@ -5,11 +5,10 @@ const AbstractFetch = require('./abstractFetch')
 const requestRetry = require('requestretry').defaults({ maxAttempts: 3, fullResponse: true })
 const fs = require('fs')
 const { get } = require('lodash')
-const nodeRequest = require('request')
+const { defaultHeaders, getStream: nodeRequest } = require('../../lib/fetch')
 const { promisify } = require('util')
 const readdir = promisify(fs.readdir)
 const FetchResult = require('../../lib/fetchResult')
-const { defaultHeaders } = require('../../lib/fetch')
 
 const providerMap = {
   packagist: 'https://repo.packagist.org/'
@@ -65,12 +64,14 @@ class PackagistFetch extends AbstractFetch {
         url: distUrl,
         headers: defaultHeaders
       }
-      nodeRequest
-        .get(options, (error, response) => {
-          if (error) return reject(error)
-          if (response.statusCode !== 200) reject(new Error(`${response.statusCode} ${response.statusMessage}`))
+      nodeRequest(options)
+        .then(response => {
+          if (response.statusCode !== 200) reject(new Error(`${response.statusCode} ${response.message}`))
+          response.pipe(fs.createWriteStream(destination)).on('finish', () => resolve(null))
         })
-        .pipe(fs.createWriteStream(destination).on('finish', () => resolve(null)))
+        .catch(error => {
+          return reject(error)
+        })
     })
   }
 
