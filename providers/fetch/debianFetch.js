@@ -8,7 +8,7 @@ const domain = require('domain')
 const fs = require('fs')
 const linebyline = require('linebyline')
 const memCache = require('memory-cache')
-const nodeRequest = require('request')
+const { getStream: nodeRequest } = require('../../lib/fetch')
 const path = require('path')
 const { promisify } = require('util')
 const { callFetch: requestPromise } = require('../../lib/fetch')
@@ -104,16 +104,17 @@ class DebianFetch extends AbstractFetch {
           return reject(error)
         })
         dom.run(() => {
-          nodeRequest
-            .get(packageFileMap.url)
-            .pipe(bz2())
-            .pipe(fs.createWriteStream(this.packageMapFileLocation))
-            .on('finish', () => {
-              this.logger.info(
-                `Debian: retrieved ${packageFileMap.url}. Stored map file at ${this.packageMapFileLocation}`
-              )
-              return resolve()
-            })
+          nodeRequest(packageFileMap.url).then(response => {
+            response
+              .pipe(bz2())
+              .pipe(fs.createWriteStream(this.packageMapFileLocation))
+              .on('finish', () => {
+                this.logger.info(
+                  `Debian: retrieved ${packageFileMap.url}. Stored map file at ${this.packageMapFileLocation}`
+                )
+                return resolve()
+              })
+          })
         })
       })
     }
@@ -214,14 +215,16 @@ class DebianFetch extends AbstractFetch {
       const dom = domain.create()
       dom.on('error', error => reject(error))
       dom.run(() => {
-        nodeRequest
-          .get(downloadUrl, (error, response) => {
-            if (error) return reject(error)
-            if (response.statusCode !== 200)
-              return reject(new Error(`${response.statusCode} ${response.statusMessage}`))
+        nodeRequest(downloadUrl)
+          .then(response => {
+            if (response.statusCode !== 200) {
+              return reject(new Error(`${response.statusCode} ${response.message}`))
+            }
+            response.pipe(fs.createWriteStream(destination)).on('finish', () => resolve())
           })
-          .pipe(fs.createWriteStream(destination))
-          .on('finish', () => resolve())
+          .catch(error => {
+            return reject(error)
+          })
       })
     })
   }
