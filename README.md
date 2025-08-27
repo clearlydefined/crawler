@@ -6,22 +6,33 @@ A service that crawls projects and packages for information relevant to ClearlyD
 
 The quickest way to get a fully functional local ClearlyDefined set up (including the crawler) is to use the [Dockerized ClearlyDefined environment setup](https://github.com/clearlydefined/docker_dev_env_experiment). This runs all services locally and does not require access to the ClearlyDefined Azure account.
 
+**THIS IS THE SUGGEST DEV WORKFLOW AS LOCAL INSTALL/SETUP IS VERY ANGRY RIGHT NOW.**
+
 ## Alternative Setup
 
-Some parts of this set up may require access to the ClearlyDefined Azure Account.
+Some parts of this set up may require access to the ClearlyDefined Azure Account or proper setup of [Azurite](https://learn.microsoft.com/en-us/azure/storage/common/storage-use-azurite) for local storage management.
 
 1.  Clone this repo
-1.  `cd` to the repo dir and run `npm install`
-1.  Copy the `template.env.json` file to the **parent** directory of the repo and rename it to `env.json`. Ideally this repo is colocated with the other ClearlyDefined repos. You can share the `env.json` file. Just merge the two files. Some properties are meant to be shared.
-1.  After copying/merging, update the file to have the property values for your system. See the [Configuration](#configuration) section for more details.
-1.  Install [ScanCode](https://github.com/nexB/scancode-toolkit) if desired (see below).
-1.  Run `npm start`
+2.  `cd` to the repo dir and run `npm install`
+3.  Copy the `template.env.json` file to the **parent** directory of the repo and rename it to `env.json`. Ideally this repo is colocated with the other ClearlyDefined repos. You can share the `env.json` file. Just merge the two files. Some properties are meant to be shared.
+4.  After copying/merging, update the file to have the property values for your system. See the [Configuration](#configuration) section for more details.
+5.  Install [ScanCode](https://github.com/nexB/scancode-toolkit) if desired (see below).
+6.  Run `npm start`
 
 That results in the ClearlyDefined crawler starting up and listening for POSTs on port 5000. See the [Configuration](#configuration) section for info on how to change the port.
 
 ### ScanCode install notes
 
 Due to an issue with ScanCode's install configuration on Windows, you may need to **replace** the `bin` folder (actually a "junction") with the contents of the `Scripts` folder. That is, delete `bin` and copy `Scripts` to `bin`. See https://github.com/nexB/scancode-toolkit/issues/1129 for more details.
+
+## Setup for running tests
+
+If you are just interested in running the tests for the crawler then you need to be using Node v18.20.8 on your local system to get `npm install` and the tests to run safely. This will be fixed as we upgrade the dependencies but for now this is the best solution. If you are using [nvm](https://github.com/nvm-sh/nvm) you can follow the instructions below, using the lowest working node version, to get things setup to run tests.
+
+1. Clone this repo
+2. cd into the `crawler` directory
+3. run `nvm install v18.20.8; nvm use v18.20.8` to instal the correct node version
+4. run `npm run test` and profit
 
 ## Queuing work with the crawler
 
