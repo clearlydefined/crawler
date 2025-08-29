@@ -1,7 +1,6 @@
 const { clone } = require('lodash')
-const { callFetch: requestPromise } = require('../../lib/fetch')
+const { callFetch: requestPromise, getStream: nodeRequest } = require('../../lib/fetch')
 const AbstractFetch = require('./abstractFetch')
-const { getStream: nodeRequest } = require('../../lib/fetch')
 const fs = require('fs')
 const axios = require('axios')
 const { default: axiosRetry, exponentialDelay, isNetworkOrIdempotentRequestError } = require('axios-retry')
