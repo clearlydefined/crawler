@@ -169,9 +169,7 @@ class CondaFetch extends AbstractFetch {
       nodeRequest
         .getStream(options)
         .then(response => {
-          if (response.statusCode !== 200) {
-            return reject(new Error(`${response.statusCode} ${response.message}`))
-          }
+          if (response.statusCode !== 200) return reject(new Error(`${response.statusCode} ${response.message}`))
           response.pipe(fs.createWriteStream(destination)).on('finish', resolve)
         })
         .catch(error => {
