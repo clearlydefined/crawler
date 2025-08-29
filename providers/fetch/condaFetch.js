@@ -166,8 +166,7 @@ class CondaFetch extends AbstractFetch {
   async _downloadPackage(downloadUrl, destination) {
     return new Promise((resolve, reject) => {
       const options = { url: downloadUrl, headers: this.headers }
-      nodeRequest
-        .getStream(options)
+      nodeRequest(options)
         .then(response => {
           if (response.statusCode !== 200) return reject(new Error(`${response.statusCode} ${response.message}`))
           response.pipe(fs.createWriteStream(destination)).on('finish', resolve)
@@ -181,20 +180,19 @@ class CondaFetch extends AbstractFetch {
   async _cachedDownload(cacheKey, sourceUrl, cacheDuration, fileDstLocation) {
     if (!memCache.get(cacheKey)) {
       return new Promise((resolve, reject) => {
-        const options = { url: sourceUrl, headers: this.headers }
-        nodeRequest.getStream(options).then(response => {
+        const options = { url: sourceUrl, headers: this.headers, resolveWithFullResponse: true }
+        nodeRequest(options).then(response => {
           if (response.statusCode !== 200) return reject(new Error(`${response.statusCode} ${response.message}`))
-          response
-            .pipe(
+          response.data.pipe(
               fs.createWriteStream(fileDstLocation).on('finish', () => {
                 memCache.put(cacheKey, true, cacheDuration)
                 this.logger.info(`Conda: retrieved ${sourceUrl}. Stored data file at ${fileDstLocation}`)
                 return resolve()
               })
             )
-            .catch(error => {
-              return reject(error)
-            })
+        })
+        .catch(error => {
+          return reject(error)
         })
       })
     }
