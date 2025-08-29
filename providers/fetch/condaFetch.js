@@ -182,19 +182,20 @@ class CondaFetch extends AbstractFetch {
     if (!memCache.get(cacheKey)) {
       return new Promise((resolve, reject) => {
         const options = { url: sourceUrl, headers: this.headers }
-        nodeRequest
-          .get(options, (error, response) => {
-            if (error) return reject(error)
-            if (response.statusCode !== 200)
-              return reject(new Error(`${response.statusCode} ${response.statusMessage}`))
-          })
-          .pipe(
-            fs.createWriteStream(fileDstLocation).on('finish', () => {
-              memCache.put(cacheKey, true, cacheDuration)
-              this.logger.info(`Conda: retrieved ${sourceUrl}. Stored data file at ${fileDstLocation}`)
-              return resolve()
+        nodeRequest.getStream(options).then(response => {
+          if (response.statusCode !== 200) return reject(new Error(`${response.statusCode} ${response.message}`))
+          response
+            .pipe(
+              fs.createWriteStream(fileDstLocation).on('finish', () => {
+                memCache.put(cacheKey, true, cacheDuration)
+                this.logger.info(`Conda: retrieved ${sourceUrl}. Stored data file at ${fileDstLocation}`)
+                return resolve()
+              })
+            )
+            .catch(error => {
+              return reject(error)
             })
-          )
+        })
       })
     }
   }
