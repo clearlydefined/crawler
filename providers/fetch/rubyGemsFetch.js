@@ -3,7 +3,7 @@
 
 const AbstractFetch = require('./abstractFetch')
 const { getStream: nodeRequest } = require('../../lib/fetch')
-const requestRetry = require('requestretry').defaults({ maxAttempts: 3, fullResponse: true })
+const requestRetry = require('../../lib/fetch').callFetchWithRetry
 const fs = require('fs')
 const zlib = require('zlib')
 const path = require('path')
@@ -48,7 +48,7 @@ class RubyGemsFetch extends AbstractFetch {
 
   async _getRegistryData(spec) {
     const baseUrl = providerMap.rubyGems
-    const { body, statusCode } = await requestRetry.get(`${baseUrl}/api/v1/gems/${spec.name}.json`, {
+    const { body, statusCode } = await requestRetry(`${baseUrl}/api/v1/gems/${spec.name}.json`, {
       json: true
     })
     return statusCode === 200 && body ? body : null
