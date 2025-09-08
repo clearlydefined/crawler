@@ -33,19 +33,39 @@ class Request {
     // }
   }
 
+  // static adopt(object) {
+  //   if (object.__proto__ !== Request.prototype) {
+  //     object.__proto__ = Request.prototype
+  //   }
+  //   if (object.policy) {
+  //     object.policy = Request._getResolvedPolicy(object)
+  //     Policy.adopt(object.policy)
+  //   } else {
+  //     Policy.default(this.type)
+  //   }
+  //   return object
+  // }
+
   static adopt(object) {
-    if (object.__proto__ !== Request.prototype) {
-      object.__proto__ = Request.prototype
-    }
-    if (object.policy) {
-      object.policy = Request._getResolvedPolicy(object)
-      Policy.adopt(object.policy)
-    } else {
-      Policy.default(this.type)
-    }
-    return object
+  console.log(`[DEBUG] Request.adopt called for ${object ? object.type : 'undefined'}@${object ? object.url : 'undefined'}`);
+  console.log(`[DEBUG] Before adoption: hasProto=${!!object}, isRequestProto=${object && object.__proto__ === Request.prototype}`);
+
+  if (object && object.__proto__ !== Request.prototype) {
+    console.log(`[DEBUG] Restoring prototype chain to Request`);
+    object.__proto__ = Request.prototype;
   }
 
+  if (object && object.policy) {
+    object.policy = Request._getResolvedPolicy(object);
+    Policy.adopt(object.policy);
+  } else if (object && object.type) {
+    object.policy = Policy.default(object.type);
+  }
+
+  console.log(`[DEBUG] After adoption: hasToUniqueString=${object && typeof object.toUniqueString === 'function'}`);
+
+  return object;
+}
   static _getResolvedPolicy(request) {
     let policyOrSpec = request.policy
     if (typeof policyOrSpec !== 'string') {

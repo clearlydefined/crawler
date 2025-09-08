@@ -240,6 +240,7 @@ class Crawler {
     //      if release fails abandon as everyone will think it is still in the queue
     //      else delete
     if (request && typeof request.toUniqueString !== 'function') {
+      console.log(`[DEBUG] Calling adopt in _completeRequest for ${request ? request.type : 'undefined'}@${request ? request.url : 'undefined'}`);
       request = Request.adopt(request)
     }
     const loopName = request.meta ? request.meta.loopName : ''
