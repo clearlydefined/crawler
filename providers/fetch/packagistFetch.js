@@ -2,10 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractFetch = require('./abstractFetch')
-const requestRetry = require('requestretry').defaults({ maxAttempts: 3, fullResponse: true })
 const fs = require('fs')
 const { get } = require('lodash')
-const { defaultHeaders, getStream: nodeRequest } = require('../../lib/fetch')
+const { defaultHeaders, getStream: nodeRequest, callFetchWithRetry: requestRetry } = require('../../lib/fetch')
 const { promisify } = require('util')
 const readdir = promisify(fs.readdir)
 const FetchResult = require('../../lib/fetchResult')
@@ -41,7 +40,7 @@ class PackagistFetch extends AbstractFetch {
   async _getRegistryData(spec) {
     let registryData
     const baseUrl = providerMap.packagist
-    const { body, statusCode } = await requestRetry.get(`${baseUrl}/p/${spec.namespace}/${spec.name}.json`, {
+    const { body, statusCode } = await requestRetry(`${baseUrl}/p/${spec.namespace}/${spec.name}.json`, {
       json: true
     })
     if (statusCode !== 200 || !body) return null

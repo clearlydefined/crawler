@@ -10,7 +10,8 @@ const ghrequestor = require('ghrequestor')
 const linebyline = require('linebyline')
 const path = require('path')
 const Request = require('../../ghcrawler').request
-const requestRetry = require('requestretry').defaults({ json: true, maxAttempts: 3, fullResponse: false })
+const requestRetry = require('../../lib/fetch')
+const defaultOptions = { json: true, fullResponse: false }
 
 class TopProcessor extends AbstractProcessor {
   canHandle(request) {
@@ -89,7 +90,8 @@ class TopProcessor extends AbstractProcessor {
     if (!end || end - start <= 0) end = start + 1000
     const initialOffset = Math.floor(start / 36) * 36
     for (let offset = initialOffset; offset < end; offset += 36) {
-      const response = await requestRetry.get(`https://www.npmjs.com/browse/depended?offset=${offset}`, {
+      const response = await requestRetry(`https://www.npmjs.com/browse/depended?offset=${offset}`, {
+        ...defaultOptions,
         headers: { 'x-spiferack': 1 }
       })
       const packages = response.packages || []
@@ -154,8 +156,9 @@ class TopProcessor extends AbstractProcessor {
     if (!end || end - start <= 0) end = start + 1000
     for (let offset = start; offset < end; offset += 100) {
       const page = offset / 100 + 1
-      const response = await requestRetry.get(
-        `https://crates.io/api/v1/crates?page=${page}&per_page=100&sort=downloads`
+      const response = await requestRetry(
+        `https://crates.io/api/v1/crates?page=${page}&per_page=100&sort=downloads`,
+        defaultOptions
       )
       const requestsPage = response.crates.map(
         x => new Request('package', `cd:/crate/cratesio/-/${x.name}/${x.max_version}`)
@@ -316,8 +319,9 @@ class TopProcessor extends AbstractProcessor {
     if (!start || start < 0) start = 0
     if (!end || end - start <= 0) end = start + 1000
     for (let offset = start; offset < end; offset += pageSize) {
-      const topComponents = await requestRetry.get(
-        `https://api-v2v3search-0.nuget.org/query?prerelease=false&skip=${offset}&take=${pageSize}`
+      const topComponents = await requestRetry(
+        `https://api-v2v3search-0.nuget.org/query?prerelease=false&skip=${offset}&take=${pageSize}`,
+        defaultOptions
       )
       const requests = topComponents.data.map(component => {
         return new Request('package', `cd:/nuget/nuget/-/${component.id}`)
@@ -349,7 +353,8 @@ class TopProcessor extends AbstractProcessor {
     })
     const requests = []
     for (let i = 0; i < repos.length; i++) {
-      const commits = await requestRetry.get(`https://api.github.com/repos/${namespace}/${repos[i].name}/commits`, {
+      const commits = await requestRetry(`https://api.github.com/repos/${namespace}/${repos[i].name}/commits`, {
+        ...defaultOptions,
         headers
       })
       if (commits.length > 0) {
