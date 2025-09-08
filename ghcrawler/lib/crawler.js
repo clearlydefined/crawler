@@ -239,8 +239,17 @@ class Crawler {
     //    else release
     //      if release fails abandon as everyone will think it is still in the queue
     //      else delete
+
+    if (!request.type || !request.url) {
+      console.log(`[ERROR] Request object corrupted: type=${request.type}, url=${request.url}`)
+      console.log(`[ERROR] Request keys:`, Object.keys(request).slice(0, 10))
+      request = Request.adopt(request)
+    }
+
     if (request && typeof request.toUniqueString !== 'function') {
-      console.log(`[DEBUG] Calling adopt in _completeRequest for ${request ? request.type : 'undefined'}@${request ? request.url : 'undefined'}`);
+      console.log(
+        `[DEBUG] Calling adopt in _completeRequest for ${request ? request.type : 'undefined'}@${request ? request.url : 'undefined'}`
+      )
       request = Request.adopt(request)
     }
     const loopName = request.meta ? request.meta.loopName : ''

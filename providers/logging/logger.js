@@ -5,6 +5,7 @@ const config = require('painless-config')
 const appInsights = require('applicationinsights')
 const winston = require('winston')
 const insights = require('./insights')
+const stringify = require('safe-stable-stringify')
 
 /**
  * Factory function to create a Winston logger instance.
@@ -27,7 +28,7 @@ function factory(options = {}) {
     winston.format.errors({ stack: true }),
     winston.format.printf(
       ({ timestamp, level, message, ...meta }) =>
-        `${timestamp} [${level}]: ${message} ${Object.keys(meta).length ? JSON.stringify(meta) : ''}`
+        `${timestamp} [${level}]: ${message} ${Object.keys(meta).length ? stringify(meta) : ''}`
     )
   )
 
@@ -35,7 +36,7 @@ function factory(options = {}) {
     winston.format.colorize(),
     winston.format.printf(
       ({ timestamp, level, message, ...meta }) =>
-        `${timestamp} [${level}]: ${message} ${Object.keys(meta).length ? JSON.stringify(meta) : ''}`
+        `${timestamp} [${level}]: ${message} ${Object.keys(meta).length ? stringify(meta) : ''}`
     )
   )
 
@@ -66,26 +67,22 @@ function factory(options = {}) {
   return logger
 }
 
+const levelMap = new Map([
+  ['error', appInsights.Contracts.SeverityLevel.Error],
+  ['warn', appInsights.Contracts.SeverityLevel.Warning],
+  ['info', appInsights.Contracts.SeverityLevel.Information],
+  ['verbose', appInsights.Contracts.SeverityLevel.Verbose],
+  ['debug', appInsights.Contracts.SeverityLevel.Verbose],
+  ['silly', appInsights.Contracts.SeverityLevel.Verbose]
+])
+
 /**
  * Maps Winston log levels to Application Insights severity levels
  * @param {string} level - The Winston log level
  * @returns {number} - The corresponding Application Insights severity level
  */
 function mapLevel(level) {
-  switch (level) {
-    case 'error':
-      return appInsights.Contracts.SeverityLevel.Error
-    case 'warn':
-      return appInsights.Contracts.SeverityLevel.Warning
-    case 'info':
-      return appInsights.Contracts.SeverityLevel.Information
-    case 'verbose':
-    case 'debug':
-    case 'silly':
-      return appInsights.Contracts.SeverityLevel.Verbose
-    default:
-      return appInsights.Contracts.SeverityLevel.Information
-  }
+  return levelMap.get(level) ?? appInsights.Contracts.SeverityLevel.Information
 }
 
 module.exports = factory
