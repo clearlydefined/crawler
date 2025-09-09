@@ -8,8 +8,14 @@ const fs = require('fs')
 const { clone, get } = require('lodash')
 const FetchResult = require('../../lib/fetchResult')
 
+
+// TODO Elaine - add this back later
+// const providerMap = {
+//   npmjs: 'https://registry.npmjs.com'
+// }
+
 const providerMap = {
-  npmjs: 'https://registry.npmjs.com'
+  npmjs: process.env.NPM_REGISTRY_URL || 'https://registry.npmjs.com'
 }
 
 class NpmFetch extends AbstractFetch {
