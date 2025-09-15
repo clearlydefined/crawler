@@ -10,8 +10,8 @@ const ghrequestor = require('ghrequestor')
 const linebyline = require('linebyline')
 const path = require('path')
 const Request = require('../../ghcrawler').request
-const requestRetry = require('../../lib/fetch')
-const defaultOptions = { json: true, fullResponse: false }
+const requestRetry = require('../../lib/fetch').callFetchWithRetry
+const defaultOptions = { json: true, resolveWithFullResponse: false }
 
 class TopProcessor extends AbstractProcessor {
   canHandle(request) {
@@ -90,7 +90,7 @@ class TopProcessor extends AbstractProcessor {
     if (!end || end - start <= 0) end = start + 1000
     const initialOffset = Math.floor(start / 36) * 36
     for (let offset = initialOffset; offset < end; offset += 36) {
-      const response = await requestRetry(`https://www.npmjs.com/browse/depended?offset=${offset}`, {
+      const response = await requestRetry(`https://www.npmjs.com/browse/depended/npm?offset=${offset}`, {
         ...defaultOptions,
         headers: { 'x-spiferack': 1 }
       })
