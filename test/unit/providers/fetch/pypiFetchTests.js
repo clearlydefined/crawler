@@ -19,9 +19,8 @@ describe('pypiFetch handle function', () => {
   let nodeRequestStub
 
   beforeEach(function () {
-    let nodeFetchStub = sandbox.stub(nodeFetch)
-    requestGetStub = nodeFetchStub.callFetchWithRetry
-    nodeRequestStub = nodeFetchStub.getStream
+    requestGetStub = sandbox.stub(requestRetryWithDefaults, 'get')
+    nodeRequestStub = sandbox.stub(nodeFetch).getStream
     fetch = PypiFetch(pypiFetchOptions)
   })
 

@@ -3,11 +3,12 @@
 
 const { clone, get } = require('lodash')
 const AbstractFetch = require('./abstractFetch')
-const { callFetch: request, callFetchWithRetry: requestRetry } = require('../../lib/fetch')
+const { callFetch: request } = require('../../lib/fetch')
 const fs = require('fs')
 const path = require('path')
 const crypto = require('crypto')
 const { exec } = require('child_process')
+const requestRetry = require('requestretry').defaults({ maxAttempts: 3, fullResponse: true })
 const FetchResult = require('../../lib/fetchResult')
 
 const services = {
@@ -130,7 +131,7 @@ class PodFetch extends AbstractFetch {
 
   async _getVersion(spec) {
     // Example: https://trunk.cocoapods.org/api/v1/pods/SwiftLCS
-    const { body, statusCode } = await requestRetry(`${services.trunk}/pods/${spec.name}`, {
+    const { body, statusCode } = await requestRetry.get(`${services.trunk}/pods/${spec.name}`, {
       json: true
     })
 
