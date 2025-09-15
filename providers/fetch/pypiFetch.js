@@ -46,7 +46,7 @@ class PyPiFetch extends AbstractFetch {
 
   async _getRegistryData(spec) {
     const baseUrl = providerMap.pypi
-    const { body, statusCode } = await requestRetry.callFetchWithRetry(`${baseUrl}/pypi/${spec.name}/json`, {
+    const { body, statusCode } = await requestRetry.get(`${baseUrl}/pypi/${spec.name}/json`, {
       json: true
     })
     if (statusCode !== 200 || !body) return null

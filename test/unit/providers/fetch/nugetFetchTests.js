@@ -8,7 +8,6 @@ const proxyquire = require('proxyquire')
 const Request = require('../../../../ghcrawler').request
 const PassThrough = require('stream').PassThrough
 const fs = require('fs')
-const { callFetchWithRetry } = require('../../../../lib/fetch')
 
 describe('NuGet fetch', () => {
   it('should normalize version correctly', () => {
@@ -56,18 +55,20 @@ describe('', () => {
         if (url.includes('missing')) throw { statusCode: 404 }
       }
       const body = fs.readFileSync(`test/fixtures/nuget/${pickFile(url)}`)
-      if (options && options.json) return Promise.resolve({ body: JSON.parse(body), statusCode: 200 })
+      if (options && options.json) return { body: JSON.parse(body), statusCode: 200 }
       const response = new PassThrough()
       response.body = body
       response.write(response.body)
       response.end()
       response.statusCode = 200
-      if (options?.encoding === null) return Promise.resolve({ body: response, statusCode: 200 })
       return response
     }
-    Fetch = proxyquire('../../../../providers/fetch/nugetFetch', {
-      '../../lib/fetch': { callFetchWithRetry: get }
-    })
+    const requestRetryStub = {
+      defaults: () => {
+        return { get }
+      }
+    }
+    Fetch = proxyquire('../../../../providers/fetch/nugetFetch', { requestretry: requestRetryStub })
   })
 
   afterEach(() => {

@@ -364,21 +364,24 @@ describe('fetchDispatcher cache fetch result', () => {
 
     const requestPromiseStub = (url, options) => {
       const body = fs.readFileSync(`test/fixtures/${fileSupplier(url)}`)
-      if (options?.json) return Promise.resolve({ body: JSON.parse(body), statusCode: 200 })
+      if (options?.json) return { body: JSON.parse(body), statusCode: 200 }
       const response = new PassThrough()
       response.body = body
       response.write(body)
       response.statusCode = 200
       response.end()
-      if (options?.encoding === null) return Promise.resolve({ body: response, statusCode: 200 })
-      return Promise.resolve(response)
+      return response
     }
 
     let fetchDispatcher
 
     beforeEach(() => {
       const NugetFetch = proxyquire('../../../../providers/fetch/nugetFetch', {
-        '../../lib/fetch': { callFetchWithRetry: requestPromiseStub }
+        requestretry: {
+          defaults: () => {
+            return { get: requestPromiseStub }
+          }
+        }
       })
       const fetch = NugetFetch({ logger: { info: sinon.stub() } })
       fetchDispatcher = setupDispatcher(fetch)
@@ -393,10 +396,12 @@ describe('fetchDispatcher cache fetch result', () => {
 
     beforeEach(() => {
       const PodFetch = proxyquire('../../../../providers/fetch/podFetch', {
-        '../../lib/fetch': {
-          callFetch: sinon.stub().resolves(loadJson('pod/registryData.json')),
-          callFetchWithRetry: sinon.stub().resolves({ body: loadJson('pod/versions.json'), statusCode: 200 })
-        }
+        requestretry: {
+          defaults: () => {
+            return { get: sinon.stub().resolves({ body: loadJson('pod/versions.json'), statusCode: 200 }) }
+          }
+        },
+        '../../lib/fetch': { callFetch: sinon.stub().resolves(loadJson('pod/registryData.json')) }
       })
       const fetch = PodFetch({ logger: { info: sinon.stub() } })
       fetch._getPackage = sinon.stub().resolves('/tmp/cd-pYKk9q/SwiftLCS-1.0')
