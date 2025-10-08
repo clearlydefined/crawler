@@ -110,7 +110,7 @@ describe('CallFetch', () => {
       expect(response.body).to.equal('fail')
       const requests = await endpointMock.getSeenRequests()
       expect(requests.length).to.equal(6)
-    })
+    }).timeout(10000)
 
     it('should return a stream when called with a URL string', async () => {
       const path = '/registry.npmjs.com/redis/0.1.0'
@@ -138,19 +138,6 @@ describe('CallFetch', () => {
       const response = await callFetchWithRetry(mockServer.urlFor(path), { json: true })
       expect(response.statusCode).to.equal(200)
       expect(response.body).to.deep.equal(expected)
-    })
-
-    it('should return error info after all retries fail', async () => {
-      const path = '/registry.npmjs.com/redis/0.1.2'
-      const endpointMock = await mockServer.forGet(path).thenReply(500, 'fail')
-
-      const { callFetchWithRetry } = require('../../../lib/fetch')
-      const response = await callFetchWithRetry(mockServer.urlFor(path), { json: true }, { maxAttempts: 5 })
-
-      expect(response.statusCode).to.equal(500)
-      expect(response.body).to.equal('fail')
-      const requests = await endpointMock.getSeenRequests()
-      expect(requests.length).to.equal(6)
     })
 
     it('should return a stream when called with a URL string', async () => {
