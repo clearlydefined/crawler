@@ -90,7 +90,7 @@ class TopProcessor extends AbstractProcessor {
     if (!end || end - start <= 0) end = start + 1000
     const initialOffset = Math.floor(start / 36) * 36
     for (let offset = initialOffset; offset < end; offset += 36) {
-      const response = await requestRetry(`https://www.npmjs.com/browse/depended/npm?offset=${offset}`, {
+      const response = await requestRetry(`https://www.npmjs.com/browse/depended?offset=${offset}`, {
         ...defaultOptions,
         headers: { 'x-spiferack': 1 }
       })
