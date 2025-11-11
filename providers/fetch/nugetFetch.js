@@ -7,7 +7,7 @@ const fs = require('fs')
 const mkdirp = require('mkdirp')
 const path = require('path')
 const { promisify } = require('util')
-const requestRetry = require('requestretry').defaults({ maxAttempts: 3, fullResponse: true })
+const { callFetchWithRetry: requestRetry } = require('../../lib/fetch')
 const FetchResult = require('../../lib/fetchResult')
 
 const providerMap = {
@@ -69,7 +69,7 @@ class NuGetFetch extends AbstractFetch {
     // https://docs.microsoft.com/en-us/nuget/api/registration-base-url-resource
     // Example: https://api.nuget.org/v3/registration5/moq/4.8.2.json and follow catalogEntry
     // https://api.nuget.org/v3/registration5-gz-semver2/microsoft.powershell.native/7.0.0-preview.1.json
-    const { body, statusCode } = await requestRetry.get(
+    const { body, statusCode } = await requestRetry(
       `${baseUrl}/v3/registration5-gz-semver2/${spec.name.toLowerCase()}/${spec.revision}.json`,
       { gzip: true }
     )
@@ -87,7 +87,7 @@ class NuGetFetch extends AbstractFetch {
     // https://docs.microsoft.com/en-us/nuget/api/package-base-address-resource
     // Example: https://api.nuget.org/v3-flatcontainer/moq/index.json
     const baseUrl = providerMap.nuget
-    const { body, statusCode } = await requestRetry.get(`${baseUrl}/v3-flatcontainer/${name}/index.json`, {
+    const { body, statusCode } = await requestRetry(`${baseUrl}/v3-flatcontainer/${name}/index.json`, {
       json: true
     })
     // If statusCode is not 200, XML may be returned
@@ -100,17 +100,18 @@ class NuGetFetch extends AbstractFetch {
 
   async _getPackage(zip, packageContentUrl) {
     return new Promise((resolve, reject) => {
-      requestRetry
-        .get(packageContentUrl, { json: false, encoding: null })
-        .pipe(fs.createWriteStream(zip))
-        .on('finish', () => resolve(null))
-        .on('error', reject)
+      requestRetry(packageContentUrl, { json: false, encoding: null }).then(response => {
+        response.body
+          .pipe(fs.createWriteStream(zip))
+          .on('finish', () => resolve(null))
+          .on('error', reject)
+      })
     })
   }
 
   async _getManifest(catalogEntryUrl) {
     // Example: https://api.nuget.org/v3/catalog0/data/2018.10.29.04.23.22/xunit.core.2.4.1.json
-    const { body, statusCode } = await requestRetry.get(catalogEntryUrl)
+    const { body, statusCode } = await requestRetry(catalogEntryUrl)
     if (statusCode !== 200) return null
     return JSON.parse(body)
   }
@@ -119,7 +120,7 @@ class NuGetFetch extends AbstractFetch {
   async _getNuspec(spec) {
     // https://docs.microsoft.com/en-us/nuget/api/package-base-address-resource#download-package-manifest-nuspec
     // Example: https://api.nuget.org/v3-flatcontainer/newtonsoft.json/11.0.1/newtonsoft.json.nuspec
-    const { body, statusCode } = await requestRetry.get(
+    const { body, statusCode } = await requestRetry(
       `https://api.nuget.org/v3-flatcontainer/${spec.name.toLowerCase()}/${spec.revision}/${spec.name.toLowerCase()}.nuspec`
     )
     if (statusCode !== 200) return null
@@ -146,7 +147,7 @@ class NuGetFetch extends AbstractFetch {
     if (licenseUrl.toLowerCase().includes('license_url_here_or_delete_this_line')) return
     const downloadedLicenseDirName = path.join(dirName, 'clearlydefined', 'downloaded')
     await promisify(mkdirp)(downloadedLicenseDirName)
-    const { body, statusCode } = await requestRetry.get(licenseUrl)
+    const { body, statusCode } = await requestRetry(licenseUrl)
     if (statusCode !== 200) return
     await promisify(fs.writeFile)(path.join(downloadedLicenseDirName, 'LICENSE'), body)
   }

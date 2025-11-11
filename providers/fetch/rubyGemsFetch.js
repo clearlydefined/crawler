@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractFetch = require('./abstractFetch')
-const nodeRequest = require('request')
-const requestRetry = require('requestretry').defaults({ maxAttempts: 3, fullResponse: true })
+const { getStream: nodeRequest } = require('../../lib/fetch')
+const requestRetry = require('../../lib/fetch').callFetchWithRetry
 const fs = require('fs')
 const zlib = require('zlib')
 const path = require('path')
@@ -48,7 +48,7 @@ class RubyGemsFetch extends AbstractFetch {
 
   async _getRegistryData(spec) {
     const baseUrl = providerMap.rubyGems
-    const { body, statusCode } = await requestRetry.get(`${baseUrl}/api/v1/gems/${spec.name}.json`, {
+    const { body, statusCode } = await requestRetry(`${baseUrl}/api/v1/gems/${spec.name}.json`, {
       json: true
     })
     return statusCode === 200 && body ? body : null
@@ -58,12 +58,14 @@ class RubyGemsFetch extends AbstractFetch {
     const fullName = spec.namespace ? `${spec.namespace}/${spec.name}` : spec.name
     const gemUrl = `${providerMap.rubyGems}/gems/${fullName}-${spec.revision}.gem`
     return new Promise((resolve, reject) => {
-      nodeRequest
-        .get(gemUrl, (error, response) => {
-          if (error) return reject(error)
-          if (response.statusCode !== 200) reject(new Error(`${response.statusCode} ${response.statusMessage}`))
+      nodeRequest(gemUrl)
+        .then(response => {
+          if (response.statusCode !== 200) reject(new Error(`${response.statusCode} ${response.message}`))
+          response.pipe(fs.createWriteStream(destination)).on('finish', () => resolve(null))
         })
-        .pipe(fs.createWriteStream(destination).on('finish', () => resolve(null)))
+        .catch(error => {
+          reject(error)
+        })
     })
   }
 

@@ -3,7 +3,7 @@
 
 const AbstractFetch = require('./abstractFetch')
 const requestRetry = require('./requestRetryWithDefaults')
-const nodeRequest = require('request')
+const nodeRequest = require('../../lib/fetch')
 const fs = require('fs')
 const spdxCorrect = require('spdx-correct')
 const { findLastKey, get, find, clone } = require('lodash')
@@ -46,7 +46,7 @@ class PyPiFetch extends AbstractFetch {
 
   async _getRegistryData(spec) {
     const baseUrl = providerMap.pypi
-    const { body, statusCode } = await requestRetry.get(`${baseUrl}/pypi/${spec.name}/json`, {
+    const { body, statusCode } = await requestRetry.callFetchWithRetry(`${baseUrl}/pypi/${spec.name}/json`, {
       json: true
     })
     if (statusCode !== 200 || !body) return null
@@ -106,11 +106,14 @@ class PyPiFetch extends AbstractFetch {
 
     return new Promise((resolve, reject) => {
       nodeRequest
-        .get(release.url, (error, response) => {
-          if (error) return reject(error)
-          if (response.statusCode !== 200) reject(new Error(`${response.statusCode} ${response.statusMessage}`))
+        .getStream(release.url)
+        .then(response => {
+          if (response.statusCode !== 200) reject(new Error(`${response.statusCode} ${response.message}`))
+          response.pipe(fs.createWriteStream(destination)).on('finish', () => resolve(true))
         })
-        .pipe(fs.createWriteStream(destination).on('finish', () => resolve(true)))
+        .catch(error => {
+          reject(error)
+        })
     })
   }
 }

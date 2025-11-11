@@ -5,7 +5,7 @@ const AbstractFetch = require('./abstractFetch')
 const { clone } = require('lodash')
 const fs = require('fs')
 const memCache = require('memory-cache')
-const nodeRequest = require('request')
+const { getStream: nodeRequest } = require('../../lib/fetch')
 const FetchResult = require('../../lib/fetchResult')
 
 class CondaFetch extends AbstractFetch {
@@ -167,11 +167,16 @@ class CondaFetch extends AbstractFetch {
     return new Promise((resolve, reject) => {
       const options = { url: downloadUrl, headers: this.headers }
       nodeRequest
-        .get(options, (error, response) => {
-          if (error) return reject(error)
-          if (response.statusCode !== 200) return reject(new Error(`${response.statusCode} ${response.statusMessage}`))
+        .getStream(options)
+        .then(response => {
+          if (response.statusCode !== 200) {
+            return reject(new Error(`${response.statusCode} ${response.message}`))
+          }
+          response.pipe(fs.createWriteStream(destination)).on('finish', resolve)
         })
-        .pipe(fs.createWriteStream(destination).on('finish', () => resolve()))
+        .catch(error => {
+          return reject(error)
+        })
     })
   }
 
