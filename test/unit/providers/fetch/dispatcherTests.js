@@ -255,9 +255,20 @@ describe('fetchDispatcher cache fetch result', () => {
 
     beforeEach(() => {
       const packagistFetch = PackagistFetch({ logger: { log: sinon.stub() } })
-      packagistFetch._getRegistryData = sinon
-        .stub()
-        .resolves(JSON.parse(fs.readFileSync('test/fixtures/packagist/registryData.json')))
+
+      // Create the processed registry data that _getRegistryData actually returns
+      const rawData = JSON.parse(fs.readFileSync('test/fixtures/packagist/registryData.json'))
+      const packageVersions = rawData.packages['symfony/polyfill-mbstring']
+      const manifest = packageVersions.find(pkg => pkg.version === 'v1.11.0' || pkg.version === '1.11.0')
+      const processedRegistryData = {
+        manifest,
+        releaseDate: manifest.time,
+        minified: rawData.minified,
+        'security-advisories': rawData['security-advisories']
+        // packages property is deleted in the real method
+      }
+
+      packagistFetch._getRegistryData = sinon.stub().resolves(processedRegistryData)
       packagistFetch._getPackage = sinon
         .stub()
         .callsFake(
