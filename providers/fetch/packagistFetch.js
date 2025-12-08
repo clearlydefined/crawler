@@ -42,7 +42,7 @@ class PackagistFetch extends AbstractFetch {
   async _getRegistryData(spec) {
     let registryData
     const baseUrl = providerMap.packagist
-    const { body, statusCode } = await requestRetry.get(`${baseUrl}/p2/${spec.namespace}/${spec.name}.json`, {
+    const { body, statusCode } = await requestRetry.get(`${baseUrl}p2/${spec.namespace}/${spec.name}.json`, {
       json: true
     })
     if (statusCode !== 200 || !body) return null
