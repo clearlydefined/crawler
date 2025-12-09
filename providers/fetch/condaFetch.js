@@ -5,7 +5,7 @@ const AbstractFetch = require('./abstractFetch')
 const { clone } = require('lodash')
 const fs = require('fs')
 const memCache = require('memory-cache')
-const { getStream: nodeRequest } = require('../../lib/fetch')
+const { getStream } = require('../../lib/fetch')
 const FetchResult = require('../../lib/fetchResult')
 
 class CondaFetch extends AbstractFetch {
@@ -16,9 +16,6 @@ class CondaFetch extends AbstractFetch {
       'anaconda-main': 'https://repo.anaconda.com/pkgs/main',
       'anaconda-r': 'https://repo.anaconda.com/pkgs/r',
       'conda-forge': 'https://conda.anaconda.org/conda-forge'
-    }
-    this.headers = {
-      'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)'
     }
     this.CACHE_DURATION = 8 * 60 * 60 * 1000 // 8 hours
   }
@@ -164,37 +161,27 @@ class CondaFetch extends AbstractFetch {
   }
 
   async _downloadPackage(downloadUrl, destination) {
-    return new Promise((resolve, reject) => {
-      const options = { url: downloadUrl, headers: this.headers }
-      nodeRequest(options)
-        .then(response => {
-          if (response.statusCode !== 200) return reject(new Error(`${response.statusCode} ${response.message}`))
-          response.pipe(fs.createWriteStream(destination)).on('finish', resolve)
-        })
-        .catch(error => {
-          return reject(error)
-        })
+    const options = { url: downloadUrl }
+    const response = await getStream(options)
+    if (response.statusCode !== 200) throw new Error(`${response.statusCode} ${response.message}`)
+    return new Promise(resolve => {
+      response.pipe(fs.createWriteStream(destination)).on('finish', resolve)
     })
   }
 
   async _cachedDownload(cacheKey, sourceUrl, cacheDuration, fileDstLocation) {
     if (!memCache.get(cacheKey)) {
-      return new Promise((resolve, reject) => {
-        const options = { url: sourceUrl, headers: this.headers, resolveWithFullResponse: true }
-        nodeRequest(options)
-          .then(response => {
-            if (response.statusCode !== 200) return reject(new Error(`${response.statusCode} ${response.message}`))
-            response.data.pipe(
-              fs.createWriteStream(fileDstLocation).on('finish', () => {
-                memCache.put(cacheKey, true, cacheDuration)
-                this.logger.info(`Conda: retrieved ${sourceUrl}. Stored data file at ${fileDstLocation}`)
-                return resolve()
-              })
-            )
+      const options = { url: sourceUrl }
+      const response = await getStream(options)
+      if (response.statusCode !== 200) throw new Error(`${response.statusCode} ${response.message}`)
+      return new Promise(resolve => {
+        response.pipe(
+          fs.createWriteStream(fileDstLocation).on('finish', () => {
+            memCache.put(cacheKey, true, cacheDuration)
+            this.logger.info(`Conda: retrieved ${sourceUrl}. Stored data file at ${fileDstLocation}`)
+            return resolve()
           })
-          .catch(error => {
-            return reject(error)
-          })
+        )
       })
     }
   }

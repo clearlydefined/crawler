@@ -10,7 +10,7 @@ const linebyline = require('linebyline')
 const memCache = require('memory-cache')
 const path = require('path')
 const { promisify } = require('util')
-const { callFetch: requestPromise, getStream: nodeRequest } = require('../../lib/fetch')
+const { callFetch: requestPromise, getStream } = require('../../lib/fetch')
 const tmp = require('tmp')
 const unixArchive = require('ar-async')
 const FetchResult = require('../../lib/fetchResult')
@@ -96,6 +96,7 @@ class DebianFetch extends AbstractFetch {
   async _getPackageMapFile() {
     if (!memCache.get(packageFileMap.cacheKey)) {
       memCache.put(packageFileMap.cacheKey, true, packageFileMap.cacheDuration)
+      const response = await getStream(packageFileMap.url)
       return new Promise((resolve, reject) => {
         const dom = domain.create()
         dom.on('error', error => {
@@ -103,19 +104,17 @@ class DebianFetch extends AbstractFetch {
           return reject(error)
         })
         dom.run(() => {
-          nodeRequest(packageFileMap.url).then(response => {
-            response
-              .pipe(bz2())
-              .pipe(fs.createWriteStream(this.packageMapFileLocation))
-              .on('finish', () => {
-                this.logger.info(
-                  `Debian: retrieved ${packageFileMap.url}. Stored map file at ${this.packageMapFileLocation}`
-                )
-                return resolve()
-              })
-          })
+          response
+            .pipe(bz2())
+            .pipe(fs.createWriteStream(this.packageMapFileLocation))
+            .on('finish', () => {
+              this.logger.info(
+                `Debian: retrieved ${packageFileMap.url}. Stored map file at ${this.packageMapFileLocation}`
+              )
+              return resolve()
+            })
         })
-      })
+        })
     }
   }
 
@@ -210,18 +209,15 @@ class DebianFetch extends AbstractFetch {
   }
 
   async _download(downloadUrl, destination) {
+    const response = await getStream(downloadUrl)
+    if (response.statusCode !== 200) throw new Error(`${response.statusCode} ${response.message}`)
     return new Promise((resolve, reject) => {
       const dom = domain.create()
       dom.on('error', error => reject(error))
       dom.run(() => {
-        nodeRequest(downloadUrl)
-          .then(response => {
-            if (response.statusCode !== 200) return reject(new Error(`${response.statusCode} ${response.message}`))
-            response.pipe(fs.createWriteStream(destination)).on('finish', () => resolve())
-          })
-          .catch(error => {
-            return reject(error)
-          })
+        response
+          .pipe(fs.createWriteStream(destination))
+          .on('finish', () => resolve())
       })
     })
   }

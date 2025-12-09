@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractFetch = require('./abstractFetch')
-const { getStream: nodeRequest } = require('../../lib/fetch')
+const { getStream } = require('../../lib/fetch')
 const requestRetry = require('requestretry').defaults({ maxAttempts: 3, fullResponse: true })
 const fs = require('fs')
 const zlib = require('zlib')
@@ -57,15 +57,10 @@ class RubyGemsFetch extends AbstractFetch {
   async _getPackage(spec, destination) {
     const fullName = spec.namespace ? `${spec.namespace}/${spec.name}` : spec.name
     const gemUrl = `${providerMap.rubyGems}/gems/${fullName}-${spec.revision}.gem`
-    return new Promise((resolve, reject) => {
-      nodeRequest(gemUrl)
-        .then(response => {
-          if (response.statusCode !== 200) reject(new Error(`${response.statusCode} ${response.message}`))
-          response.pipe(fs.createWriteStream(destination)).on('finish', () => resolve(null))
-        })
-        .catch(error => {
-          reject(error)
-        })
+    const response = await getStream(gemUrl)
+    if (response.statusCode !== 200) throw new Error(`${response.statusCode} ${response.message}`)
+    await new Promise(resolve => {
+      response.pipe(fs.createWriteStream(destination)).on('finish', () => resolve(null))
     })
   }
 

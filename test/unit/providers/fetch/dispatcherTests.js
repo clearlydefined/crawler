@@ -439,13 +439,20 @@ const createRequestPromiseStub = fileSupplier => {
 
 const createGetStub = fileSupplier => {
   return url => {
+    const baseURL = typeof url === 'string' ? url : url.url
+    const resolveWithFullResponse = url.resolveWithFullResponse || false
     const response = new PassThrough()
-    const file = `test/fixtures/${fileSupplier(url)}`
+    const file = `test/fixtures/${fileSupplier(baseURL)}`
     if (file) {
+      if (resolveWithFullResponse) {
+        response.data = new PassThrough()
+        response.data.write(fs.readFileSync(file))
+        response.data.end()
+      } else
       response.write(fs.readFileSync(file))
       response.statusCode = 200
     } else {
-      return Promise.reject(new Error(url.includes('error') ? 'Error' : 'Code'))
+      return Promise.reject(new Error(baseURL.includes('error') ? 'Error' : 'Code'))
     }
     response.end()
     return Promise.resolve(response)

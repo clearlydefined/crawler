@@ -57,7 +57,7 @@ describe('CallFetch', () => {
         .forGet(path)
         .thenStream(200, fs.createReadStream('test/fixtures/fetch/redis-0.1.0.json'))
 
-      const { getStream, defaultHeaders } = require('../../../lib/fetch')
+      const { getStream } = require('../../../lib/fetch')
       await getStream({ url: mockServer.urlFor(path) })
       const requests = await endpointMock.getSeenRequests()
       for (const [key, value] of Object.entries(defaultHeaders)) {

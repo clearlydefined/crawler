@@ -82,8 +82,11 @@ describe('Gradle plugin fetch', () => {
         return options.json ? JSON.parse(content) : content
       }
       const getStub = url => {
+        const baseURL = typeof url === 'string' ? url : url.url
         const response = new PassThrough()
-        response.write(contentFromFile(url))
+        response.data = new PassThrough()
+        response.data.write(contentFromFile(baseURL))
+        response.data.end()
         response.statusCode = 200
         response.end()
         return Promise.resolve(response)

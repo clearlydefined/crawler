@@ -77,10 +77,13 @@ describe('MavenGoogle fetching', () => {
       return options.json ? JSON.parse(content) : content
     }
     const getStub = url => {
+      const baseURL = typeof url === 'string' ? url : url.url
       const response = new PassThrough()
-      const file = `test/fixtures/maven/${pickArtifact(url)}`
+      const file = `test/fixtures/maven/${pickArtifact(baseURL)}`
       if (file) {
-        response.write(fs.readFileSync(file))
+        response.data = new PassThrough()
+        response.data.write(fs.readFileSync(file))
+        response.data.end()
         response.statusCode = 200
       } else {
         Promise.reject(new Error(url.includes('error') ? 'Error' : 'Code'))
