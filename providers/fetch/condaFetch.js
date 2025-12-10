@@ -165,7 +165,7 @@ class CondaFetch extends AbstractFetch {
     const response = await getStream(options)
     if (response.statusCode !== 200) throw new Error(`${response.statusCode} ${response.message}`)
     return new Promise(resolve => {
-      response.pipe(fs.createWriteStream(destination)).on('finish', resolve)
+      response.data.pipe(fs.createWriteStream(destination)).on('finish', resolve)
     })
   }
 
@@ -175,7 +175,7 @@ class CondaFetch extends AbstractFetch {
       const response = await getStream(options)
       if (response.statusCode !== 200) throw new Error(`${response.statusCode} ${response.message}`)
       return new Promise(resolve => {
-        response.pipe(
+        response.data.pipe(
           fs.createWriteStream(fileDstLocation).on('finish', () => {
             memCache.put(cacheKey, true, cacheDuration)
             this.logger.info(`Conda: retrieved ${sourceUrl}. Stored data file at ${fileDstLocation}`)

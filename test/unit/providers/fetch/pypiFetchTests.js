@@ -206,7 +206,9 @@ describe('pypiFetch handle function', () => {
 const getCompressedFile = () => {
   const response = new PassThrough()
   const file = 'test/fixtures/maven/swt-3.3.0-v3346.jar'
-  response.write(fs.readFileSync(file))
+  response.data = new PassThrough()
+  response.data.write(fs.readFileSync(file))
+  response.data.end()
   response.statusCode = 200
   response.end()
   return response

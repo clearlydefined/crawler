@@ -104,9 +104,9 @@ class PyPiFetch extends AbstractFetch {
     const release = find(releaseTypes, entry => entry.url?.endsWith('tar.gz') || entry.url?.endsWith('zip'))
     if (!release) return false
     const response = await nodeRequest.getStream(release.url)
-    if (response.statusCode !== 200) reject(new Error(`${response.statusCode} ${response.message}`))
+    if (response.statusCode !== 200) throw new Error(`${response.statusCode} ${response.message}`)
     return new Promise(resolve => {
-      response.pipe(fs.createWriteStream(destination)).on('finish', () => resolve(true))
+      response.data.pipe(fs.createWriteStream(destination)).on('finish', () => resolve(true))
     })
   }
 }

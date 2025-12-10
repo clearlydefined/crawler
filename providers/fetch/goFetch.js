@@ -109,13 +109,16 @@ class GoFetch extends AbstractFetch {
 
   async _getArtifact(spec, destination) {
     const url = this._buildUrl(spec)
-    const response = await getStream(url)
-    if (response.statusCode !== 200) {
+    let response
+    try {
+      response = await getStream(url)
+      if (!response || response.statusCode !== 200) return false
+    } catch (error) {
       this.logger.error(this._google_proxy_error_string(error))
       return false
     }
     const status = await new Promise(resolve => {
-      response.pipe(fs.createWriteStream(destination)).on('finish', () => resolve(true))
+      response.data.pipe(fs.createWriteStream(destination)).on('finish', () => resolve(true))
     })
     if (status) return true
   }

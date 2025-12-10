@@ -63,7 +63,9 @@ describe('', () => {
     const getStub = url => {
       const response = new PassThrough()
       if (url.includes('redie')) {
-        response.write(fs.readFileSync('test/fixtures/npm/redie-0.3.0.tgz'))
+        response.data = new PassThrough()
+        response.data.write(fs.readFileSync('test/fixtures/npm/redie-0.3.0.tgz'))
+        response.data.end()
         response.statusCode = 200
       } else {
         return Promise.reject(new Error(url.includes('error') ? 'Error' : 'Code'))

@@ -43,7 +43,7 @@ class NpmFetch extends AbstractFetch {
     const response = await getStream(this._buildUrl(spec))
     if (response.statusCode !== 200) throw new Error(`${response.statusCode} ${response.message}`)
     await new Promise(resolve => {
-      response.pipe(fs.createWriteStream(destination)).on('finish', () => resolve(true))
+      response.data.pipe(fs.createWriteStream(destination)).on('finish', () => resolve(null))
     })
   }
 

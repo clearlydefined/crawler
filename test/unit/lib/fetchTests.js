@@ -21,11 +21,11 @@ describe('CallFetch', () => {
 
       const { getStream } = require('../../../lib/fetch')
       const response = await getStream(mockServer.urlFor(path))
-      expect(response.readable).to.be.true
+      expect(response.data.readable).to.be.true
       // Optionally, pipe and check content
       const destination = 'test/fixtures/fetch/temp-stream.json'
       await new Promise(resolve => {
-        response.pipe(fs.createWriteStream(destination).on('finish', () => resolve(true)))
+        response.data.pipe(fs.createWriteStream(destination).on('finish', () => resolve(true)))
       })
       const downloaded = JSON.parse(fs.readFileSync(destination))
       const expected = JSON.parse(fs.readFileSync('test/fixtures/fetch/redis-0.1.0.json'))
@@ -39,11 +39,11 @@ describe('CallFetch', () => {
 
       const { getStream } = require('../../../lib/fetch')
       const response = await getStream({ url: mockServer.urlFor(path) })
-      expect(response.readable).to.be.true
+      expect(response.data.readable).to.be.true
       // Optionally, pipe and check content
       const destination = 'test/fixtures/fetch/temp-stream2.json'
       await new Promise(resolve => {
-        response.pipe(fs.createWriteStream(destination).on('finish', () => resolve(true)))
+        response.data.pipe(fs.createWriteStream(destination).on('finish', () => resolve(true)))
       })
       const downloaded = JSON.parse(fs.readFileSync(destination))
       const expected = JSON.parse(fs.readFileSync('test/fixtures/fetch/redis-0.1.0.json'))

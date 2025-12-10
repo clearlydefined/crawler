@@ -104,7 +104,7 @@ class DebianFetch extends AbstractFetch {
           return reject(error)
         })
         dom.run(() => {
-          response
+          response.data
             .pipe(bz2())
             .pipe(fs.createWriteStream(this.packageMapFileLocation))
             .on('finish', () => {
@@ -114,7 +114,7 @@ class DebianFetch extends AbstractFetch {
               return resolve()
             })
         })
-        })
+      })
     }
   }
 
@@ -215,9 +215,7 @@ class DebianFetch extends AbstractFetch {
       const dom = domain.create()
       dom.on('error', error => reject(error))
       dom.run(() => {
-        response
-          .pipe(fs.createWriteStream(destination))
-          .on('finish', () => resolve())
+        response.data.pipe(fs.createWriteStream(destination)).on('finish', () => resolve())
       })
     })
   }

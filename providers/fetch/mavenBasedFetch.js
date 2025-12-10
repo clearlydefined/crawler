@@ -92,7 +92,7 @@ class MavenBasedFetch extends AbstractFetch {
     for (let extension of extensions) {
       const url = this._buildUrl(spec, extension)
       const status = await new Promise(resolve => {
-        this._handleRequestStream({ url, resolveWithFullResponse: true })
+        this._handleRequestStream(url)
           .then(response => {
             if (response.statusCode !== 200) return resolve(false)
             response.data.pipe(fs.createWriteStream(destination)).on('finish', () => resolve(true))

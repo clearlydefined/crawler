@@ -83,7 +83,7 @@ describe('MavenCentral fetching', () => {
       const response = new PassThrough()
       const file = `test/fixtures/maven/${pickArtifact(baseURL)}`
       if (file) {
-        response.data = new PassThrough
+        response.data = new PassThrough()
         response.data.write(fs.readFileSync(file))
         response.data.end()
         response.statusCode = 200

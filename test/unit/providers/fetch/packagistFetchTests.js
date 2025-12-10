@@ -34,7 +34,9 @@ describe('packagistFetch', () => {
     const getStub = url_hash => {
       const response = new PassThrough()
       if (url_hash.url.includes('symfony/polyfill-mbstring')) {
-        response.write(fs.readFileSync('test/fixtures/composer/symfony-polyfill-mbstring-v1.11.0-0-gfe5e94c.zip'))
+        response.data = new PassThrough()
+        response.data.write(fs.readFileSync('test/fixtures/composer/symfony-polyfill-mbstring-v1.11.0-0-gfe5e94c.zip'))
+        response.data.end()
         response.statusCode = 200
       } else {
         return Promise.reject(new Error(url_hash.includes('error') ? 'Error' : 'Code'))

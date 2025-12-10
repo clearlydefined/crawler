@@ -60,7 +60,7 @@ class RubyGemsFetch extends AbstractFetch {
     const response = await getStream(gemUrl)
     if (response.statusCode !== 200) throw new Error(`${response.statusCode} ${response.message}`)
     await new Promise(resolve => {
-      response.pipe(fs.createWriteStream(destination)).on('finish', () => resolve(null))
+      response.data.pipe(fs.createWriteStream(destination)).on('finish', () => resolve(null))
     })
   }
 
