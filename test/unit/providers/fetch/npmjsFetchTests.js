@@ -60,20 +60,21 @@ describe('', () => {
       }
       return resultBox.result
     }
-    const getStub = (url, callback) => {
+    const getStub = url => {
       const response = new PassThrough()
       if (url.includes('redie')) {
-        response.write(fs.readFileSync('test/fixtures/npm/redie-0.3.0.tgz'))
-        callback(null, { statusCode: 200 })
+        response.data = new PassThrough()
+        response.data.write(fs.readFileSync('test/fixtures/npm/redie-0.3.0.tgz'))
+        response.data.end()
+        response.statusCode = 200
       } else {
-        callback(new Error(url.includes('error') ? 'Error' : 'Code'))
+        return Promise.reject(new Error(url.includes('error') ? 'Error' : 'Code'))
       }
       response.end()
-      return response
+      return Promise.resolve(response)
     }
     Fetch = proxyquire('../../../../providers/fetch/npmjsFetch', {
-      request: { get: getStub },
-      '../../lib/fetch': { callFetch: requestPromiseStub }
+      '../../lib/fetch': { callFetch: requestPromiseStub, getStream: getStub }
     })
     Fetch._resultBox = resultBox
   })

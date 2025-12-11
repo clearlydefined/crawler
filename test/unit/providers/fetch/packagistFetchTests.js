@@ -31,20 +31,21 @@ describe('packagistFetch', () => {
         return { statusCode: 200, body: resultBox.result }
       }
     }
-    const getStub = (url_hash, callback) => {
+    const getStub = url_hash => {
       const response = new PassThrough()
       if (url_hash.url.includes('symfony/polyfill-mbstring')) {
-        response.write(fs.readFileSync('test/fixtures/composer/symfony-polyfill-mbstring-v1.11.0-0-gfe5e94c.zip'))
-        callback(null, { statusCode: 200 })
+        response.data = new PassThrough()
+        response.data.write(fs.readFileSync('test/fixtures/composer/symfony-polyfill-mbstring-v1.11.0-0-gfe5e94c.zip'))
+        response.data.end()
+        response.statusCode = 200
       } else {
-        callback(new Error(url_hash.includes('error') ? 'Error' : 'Code'))
+        return Promise.reject(new Error(url_hash.includes('error') ? 'Error' : 'Code'))
       }
       response.end()
-      return response
+      return Promise.resolve(response)
     }
     Fetch = proxyquire('../../../../providers/fetch/packagistFetch', {
-      request: { get: getStub },
-      requestretry: { defaults: () => requestRetryStub }
+      '../../lib/fetch': { callFetch: requestRetryStub, getStream: getStub }
     })
     Fetch._resultBox = resultBox
   })
