@@ -3,7 +3,7 @@
 
 const AbstractFetch = require('./abstractFetch')
 const requestRetry = require('./requestRetryWithDefaults')
-const nodeRequest = require('request')
+const nodeRequest = require('../../lib/fetch')
 const fs = require('fs')
 const spdxCorrect = require('spdx-correct')
 const { findLastKey, get, find, clone } = require('lodash')
@@ -103,14 +103,10 @@ class PyPiFetch extends AbstractFetch {
     const releaseTypes = get(registryData, ['releases', spec.revision])
     const release = find(releaseTypes, entry => entry.url?.endsWith('tar.gz') || entry.url?.endsWith('zip'))
     if (!release) return false
-
-    return new Promise((resolve, reject) => {
-      nodeRequest
-        .get(release.url, (error, response) => {
-          if (error) return reject(error)
-          if (response.statusCode !== 200) reject(new Error(`${response.statusCode} ${response.statusMessage}`))
-        })
-        .pipe(fs.createWriteStream(destination).on('finish', () => resolve(true)))
+    const response = await nodeRequest.getStream(release.url)
+    if (response.statusCode !== 200) throw new Error(`${response.statusCode} ${response.message}`)
+    return new Promise(resolve => {
+      response.data.pipe(fs.createWriteStream(destination)).on('finish', () => resolve(true))
     })
   }
 }

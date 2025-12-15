@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractFetch = require('./abstractFetch')
-const nodeRequest = require('request')
-const { callFetch: requestPromise } = require('../../lib/fetch')
+const { callFetch: requestPromise, getStream } = require('../../lib/fetch')
 const fs = require('fs')
 const { clone, get } = require('lodash')
 const FetchResult = require('../../lib/fetchResult')
@@ -41,13 +40,10 @@ class NpmFetch extends AbstractFetch {
   }
 
   async _getPackage(spec, destination) {
-    return new Promise((resolve, reject) => {
-      nodeRequest
-        .get(this._buildUrl(spec), (error, response) => {
-          if (error) return reject(error)
-          if (response.statusCode !== 200) reject(new Error(`${response.statusCode} ${response.statusMessage}`))
-        })
-        .pipe(fs.createWriteStream(destination).on('finish', () => resolve(null)))
+    const response = await getStream(this._buildUrl(spec))
+    if (response.statusCode !== 200) throw new Error(`${response.statusCode} ${response.message}`)
+    await new Promise(resolve => {
+      response.data.pipe(fs.createWriteStream(destination)).on('finish', () => resolve(null))
     })
   }
 

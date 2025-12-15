@@ -1,7 +1,6 @@
 const { clone } = require('lodash')
-const { callFetch: requestPromise } = require('../../lib/fetch')
+const { callFetch: requestPromise, getStream } = require('../../lib/fetch')
 const AbstractFetch = require('./abstractFetch')
-const nodeRequest = require('request')
 const fs = require('fs')
 const axios = require('axios')
 const { default: axiosRetry, exponentialDelay, isNetworkOrIdempotentRequestError } = require('axios-retry')
@@ -110,16 +109,17 @@ class GoFetch extends AbstractFetch {
 
   async _getArtifact(spec, destination) {
     const url = this._buildUrl(spec)
-
+    let response
+    try {
+      response = await getStream(url)
+      if (!response || response.statusCode !== 200) return false
+    } catch (error) {
+      this.logger.error(this._google_proxy_error_string(error))
+      return false
+    }
     const status = await new Promise(resolve => {
-      nodeRequest
-        .get(url, (error, response) => {
-          if (error) this.logger.error(this._google_proxy_error_string(error))
-          if (response.statusCode !== 200) return resolve(false)
-        })
-        .pipe(fs.createWriteStream(destination).on('finish', () => resolve(true)))
+      response.data.pipe(fs.createWriteStream(destination)).on('finish', () => resolve(true))
     })
-
     if (status) return true
   }
 
