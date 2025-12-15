@@ -4,7 +4,6 @@
 // eslint-disable-next-line no-unused-vars
 const { ContainerClient } = require('@azure/storage-blob')
 const memoryCache = require('memory-cache')
-const { Readable } = require('stream')
 const URL = require('url')
 
 class AzureStorageDocStore {
@@ -41,11 +40,23 @@ class AzureStorageDocStore {
       blobMetadata.extra = JSON.stringify(document._metadata.extra)
     }
     const options = { metadata: blobMetadata, blobHTTPHeaders: { blobContentType: 'application/json' } }
-    const dataStream = new Readable()
-    dataStream.push(JSON.stringify(document))
-    dataStream.push(null)
+    const data = JSON.stringify(document)
     const blockBlobClient = this.containerClient.getBlockBlobClient(blobName)
-    await blockBlobClient.uploadStream(dataStream, 8 << 20, 5, options)
+
+    // Use streaming for large documents (>100MB), direct upload for small
+    const SIZE_THRESHOLD = 100 * 1024 * 1024
+
+    if (data.length > SIZE_THRESHOLD) {
+      // Large documents: use streaming (note: still has multi-instance race condition risk)
+      const { Readable } = require('stream')
+      const dataStream = new Readable()
+      dataStream.push(data)
+      dataStream.push(null)
+      await blockBlobClient.uploadStream(dataStream, 8 << 20, 5, options)
+    } else {
+      // Small documents: atomic upload (eliminates race conditions)
+      await blockBlobClient.upload(data, data.length, options)
+    }
     return blobName
   }
 
