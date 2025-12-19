@@ -59,6 +59,10 @@ class ScanCodeProcessor extends AbstractProcessor {
         request.markDead('Error', error ? error.message : 'ScanCode run failed')
         throw error
       }
+      else {
+        this.logger.error(error, request.meta)
+        request.markRequeue('ScanCode Error', error.message)
+      }
     }
   }
 
@@ -91,19 +95,25 @@ class ScanCodeProcessor extends AbstractProcessor {
   // Scan the results file for any errors that are not just timeouts or other known errors
   // TODO do we need to do this anymore
   _hasRealErrors(resultFile) {
-    const results = JSON.parse(fs.readFileSync(resultFile))
-    return results.files.some(
-      file =>
-        file.scan_errors &&
-        file.scan_errors.some(error => {
-          return !(
-            error.includes('ERROR: Processing interrupted: timeout after') ||
-            error.includes('ValueError:') ||
-            error.includes('package.json') ||
-            error.includes('UnicodeDecodeError')
-          )
-        })
-    )
+    try{
+      const results = JSON.parse(fs.readFileSync(resultFile))
+      return results.files.some(
+        file =>
+          file.scan_errors &&
+          file.scan_errors.some(error => {
+            return !(
+              error.includes('ERROR: Processing interrupted: timeout after') ||
+              error.includes('ValueError:') ||
+              error.includes('package.json') ||
+              error.includes('UnicodeDecodeError')
+            )
+          })
+      )
+    } catch (e) {
+      // This might happen if the results file is >512mb, but regardless our error handling should not fail.
+      this.logger.error(`Could not parse ScanCode results file ${resultFile}: ${e.message}`)
+      return true
+    }
   }
 
   _detectVersion() {
