@@ -54,14 +54,11 @@ class ScanCodeProcessor extends AbstractProcessor {
         maxBuffer: 5 * 1024 * 1024
       })
     } catch (error) {
+      this.logger.error(error, request.meta)
       // TODO see if the new version of ScanCode has a better way of differentiating errors
       if (this._isRealError(error) || this._hasRealErrors(file.name)) {
         request.markDead('Error', error ? error.message : 'ScanCode run failed')
         throw error
-      }
-      else {
-        this.logger.error(error, request.meta)
-        request.markRequeue('ScanCode Error', error.message)
       }
     }
   }
@@ -112,6 +109,7 @@ class ScanCodeProcessor extends AbstractProcessor {
     } catch (e) {
       // This might happen if the results file is >512mb, but regardless our error handling should not fail.
       this.logger.error(`Could not parse ScanCode results file ${resultFile}: ${e.message}`)
+      // Assume it's broken if we could not parse it
       return true
     }
   }
