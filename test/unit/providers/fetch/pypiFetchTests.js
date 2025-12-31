@@ -5,7 +5,7 @@ const expect = require('chai').expect
 const fs = require('fs')
 const sinon = require('sinon')
 const PassThrough = require('stream').PassThrough
-const nodeRequest = require('request')
+const nodeFetch = require('../../../../lib/fetch')
 const PypiFetch = require('../../../../providers/fetch/pypiFetch')
 const requestRetryWithDefaults = require('../../../../providers/fetch/requestRetryWithDefaults')
 const Request = require('../../../../ghcrawler/lib/request.js')
@@ -16,10 +16,11 @@ describe('pypiFetch handle function', () => {
   let sandbox = sinon.createSandbox()
   let requestGetStub
   let fetch
+  let nodeRequestStub
 
   beforeEach(function () {
     requestGetStub = sandbox.stub(requestRetryWithDefaults, 'get')
-    sandbox.stub(nodeRequest, 'get').callsFake(getCompressedFile)
+    nodeRequestStub = sandbox.stub(nodeFetch).getStream
     fetch = PypiFetch(pypiFetchOptions)
   })
 
@@ -39,7 +40,7 @@ describe('pypiFetch handle function', () => {
   it('fetch success', async () => {
     const registryData = JSON.parse(fs.readFileSync('test/fixtures/pypi/registryData.json'))
     requestGetStub.resolves({ body: registryData, statusCode: 200 })
-
+    nodeRequestStub.resolves(getCompressedFile())
     const result = await fetch.handle(new Request('pypi', 'cd:/pypi/pypi/-/backports.ssl-match-hostname/3.7.0.1'))
     result.fetchResult.copyTo(result)
     expect(result.url).to.be.equal('cd:/pypi/pypi/-/backports.ssl-match-hostname/3.7.0.1')
@@ -202,11 +203,13 @@ describe('pypiFetch handle function', () => {
   })
 })
 
-const getCompressedFile = (url, callback) => {
+const getCompressedFile = () => {
   const response = new PassThrough()
   const file = 'test/fixtures/maven/swt-3.3.0-v3346.jar'
-  response.write(fs.readFileSync(file))
-  callback(null, { statusCode: 200 })
+  response.data = new PassThrough()
+  response.data.write(fs.readFileSync(file))
+  response.data.end()
+  response.statusCode = 200
   response.end()
   return response
 }
