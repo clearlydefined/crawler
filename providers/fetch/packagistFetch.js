@@ -5,11 +5,10 @@ const AbstractFetch = require('./abstractFetch')
 const requestRetry = require('requestretry').defaults({ maxAttempts: 3, fullResponse: true })
 const fs = require('fs')
 const { get } = require('lodash')
-const nodeRequest = require('request')
+const { getStream } = require('../../lib/fetch')
 const { promisify } = require('util')
 const readdir = promisify(fs.readdir)
 const FetchResult = require('../../lib/fetchResult')
-const { defaultHeaders } = require('../../lib/fetch')
 
 const providerMap = {
   packagist: 'https://repo.packagist.org/'
@@ -70,17 +69,10 @@ class PackagistFetch extends AbstractFetch {
   async _getPackage(request, registryData, destination) {
     const distUrl = get(registryData, 'manifest.dist.url')
     if (!distUrl) return request.markSkip('Missing dist.url ')
-    return new Promise((resolve, reject) => {
-      const options = {
-        url: distUrl,
-        headers: defaultHeaders
-      }
-      nodeRequest
-        .get(options, (error, response) => {
-          if (error) return reject(error)
-          if (response.statusCode !== 200) reject(new Error(`${response.statusCode} ${response.statusMessage}`))
-        })
-        .pipe(fs.createWriteStream(destination).on('finish', () => resolve(null)))
+    const response = await getStream({ url: distUrl })
+    if (response.statusCode !== 200) throw new Error(`${response.statusCode} ${response.message}`)
+    await new Promise(resolve => {
+      response.data.pipe(fs.createWriteStream(destination)).on('finish', () => resolve(null))
     })
   }
 
