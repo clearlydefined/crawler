@@ -27,11 +27,11 @@ Due to an issue with ScanCode's install configuration on Windows, you may need t
 
 ## Setup for running tests
 
-If you are just interested in running the tests for the crawler then you need to be using Node v18.20.8 on your local system to get `npm install` and the tests to run safely. This will be fixed as we upgrade the dependencies but for now this is the best solution. If you are using [nvm](https://github.com/nvm-sh/nvm) you can follow the instructions below, using the lowest working node version, to get things setup to run tests.
+If you are just interested in running the tests for the crawler then you need to be using Node v24 on your local system to get `npm install` and the tests to run safely. This will be fixed as we upgrade the dependencies but for now this is the best solution. If you are using [nvm](https://github.com/nvm-sh/nvm) you can follow the instructions below, using the lowest working node version, to get things setup to run tests.
 
 1. Clone this repo
 2. cd into the `crawler` directory
-3. run `nvm install v18.20.8; nvm use v18.20.8` to instal the correct node version
+3. run `nvm install v24; nvm use v24` to install the correct node version
 4. run `npm run test` and profit
 
 ## Queuing work with the crawler
