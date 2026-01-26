@@ -73,7 +73,7 @@
     "parse-github-url": "^1.0.2",
     "patch-package": "^8.0.1",
     "qlimit": "^0.1.1",
-    "requestretry": "^4.0.0",
+    "requestretry": "^7.0.0",
     "semver": "^7.6.0",
     "sha.js": "^2.4.12",
     "spdx-correct": "^3.2.0",
