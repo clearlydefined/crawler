@@ -4,7 +4,7 @@
 const AbstractFetch = require('./abstractFetch')
 const { trimStart, clone, get } = require('lodash')
 const fs = require('fs')
-const mkdirp = require('mkdirp')
+const { mkdirp } = require('mkdirp')
 const path = require('path')
 const { promisify } = require('util')
 const requestRetry = require('requestretry').defaults({ maxAttempts: 3, fullResponse: true })
@@ -145,7 +145,7 @@ class NuGetFetch extends AbstractFetch {
   async _downloadLicense({ dirName, licenseUrl }) {
     if (licenseUrl.toLowerCase().includes('license_url_here_or_delete_this_line')) return
     const downloadedLicenseDirName = path.join(dirName, 'clearlydefined', 'downloaded')
-    await promisify(mkdirp)(downloadedLicenseDirName)
+    await mkdirp(downloadedLicenseDirName)
     const { body, statusCode } = await requestRetry.get(licenseUrl)
     if (statusCode !== 200) return
     await promisify(fs.writeFile)(path.join(downloadedLicenseDirName, 'LICENSE'), body)

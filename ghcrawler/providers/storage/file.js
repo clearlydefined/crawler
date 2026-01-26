@@ -3,7 +3,7 @@
 
 const fs = require('fs')
 const path = require('path')
-const mkdirp = require('mkdirp')
+const { mkdirpSync } = require('mkdirp')
 
 // TODO finish the implementation of the relevant methods
 
@@ -22,7 +22,7 @@ class FileStore {
     // const type = document._metadata.type
     const urn = document._metadata.links.self.href
     const filePath = this._getPath(urn)
-    mkdirp.sync(path.dirname(filePath))
+    mkdirpSync(path.dirname(filePath))
     return new Promise((resolve, reject) =>
       fs.writeFile(filePath, JSON.stringify(document, null, 2), error => (error ? reject(error) : resolve(document)))
     )
