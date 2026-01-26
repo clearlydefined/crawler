@@ -80,8 +80,7 @@
     "throat": "^6.0.2",
     "tmp": "0.2.5",
     "unbzip2-stream": "^1.4.3",
-    "winston": "^2.3.0",
-    "winston-azure-application-insights": "^1.5.0",
+    "winston": "^3.17.0",
     "xml2js": "^0.6.2"
   },
   "devDependencies": {

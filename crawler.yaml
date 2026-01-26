@@ -59,11 +59,11 @@ spec:
                 secretKeyRef:
                   name: secrets
                   key: CRAWLER_GITHUB_TOKEN
-            - name: CRAWLER_INSIGHTS_KEY
+            - name: CRAWLER_INSIGHTS_CONNECTION_STRING
               valueFrom:
                 secretKeyRef:
                   name: secrets
-                  key: CRAWLER_INSIGHTS_KEY
+                  key: CRAWLER_INSIGHTS_CONNECTION_STRING
             - name: CRAWLER_WEBHOOK_TOKEN
               valueFrom:
                 secretKeyRef:
