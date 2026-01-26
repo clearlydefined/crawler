@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 # SPDX-License-Identifier: MIT
 
-FROM node:18-bullseye
+FROM node:24-trixie
 ENV APPDIR=/opt/service
 
 # Set environment variables from build arguments
@@ -20,9 +20,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends --no-install-su
 
 # Scancode
 ARG SCANCODE_VERSION="32.4.1"
-RUN pip3 install --upgrade pip setuptools wheel && \
-  curl -Os https://raw.githubusercontent.com/nexB/scancode-toolkit/v$SCANCODE_VERSION/requirements.txt && \
-  pip3 install --constraint requirements.txt scancode-toolkit==$SCANCODE_VERSION && \
+RUN curl -Os https://raw.githubusercontent.com/nexB/scancode-toolkit/v$SCANCODE_VERSION/requirements.txt && \
+  pip3 install --break-system-packages --constraint requirements.txt scancode-toolkit==$SCANCODE_VERSION && \
   rm requirements.txt && \
   scancode-reindex-licenses && \
   scancode --version
@@ -39,8 +38,8 @@ RUN gem install nokogiri:1.16.0 --no-document && \
   gem install licensee:9.16.1 --no-document
 
 # REUSE
-RUN pip3 install setuptools
-RUN pip3 install reuse==3.0.1
+RUN pip3 install --break-system-packages setuptools
+RUN pip3 install --break-system-packages reuse==3.0.1
 
 # Crawler config
 ENV CRAWLER_DEADLETTER_PROVIDER=cd(azblob)
