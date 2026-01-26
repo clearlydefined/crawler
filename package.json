@@ -36,7 +36,7 @@
   },
   "dependencies": {
     "@azure/identity": "^4.5.0",
-    "@azure/storage-blob": "^12.26.0",
+    "@azure/storage-blob": "^12.30.0",
     "@azure/storage-queue": "^12.25.0",
     "@clearlydefined/spdx": "github:clearlydefined/spdx#v0.1.10",
     "@microsoft/refreshing-config": "^0.1.3",
