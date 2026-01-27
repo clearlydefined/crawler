@@ -11,9 +11,16 @@ function checkDefaultHeaders(headers) {
 }
 describe('CallFetch', () => {
   describe('with mock server', () => {
-    const mockServer = mockttp.getLocal()
-    beforeEach(async () => await mockServer.start())
-    afterEach(async () => await mockServer.stop())
+    let mockServer
+    beforeEach(async () => {
+      mockServer = mockttp.getLocal()
+      await mockServer.start()
+    })
+    afterEach(async () => {
+      await mockServer.stop()
+      // Small delay to ensure port is released before next test
+      await new Promise(resolve => setTimeout(resolve, 50))
+    })
 
     it('should return a stream when called with a URL string', async () => {
       const path = '/registry.npmjs.com/redis/0.1.0'

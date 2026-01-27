@@ -189,7 +189,7 @@ class CondaFetch extends AbstractFetch {
   async _fetchCachedJSONFile(cacheKey, url, cacheDuration, fileLocation) {
     try {
       await this._cachedDownload(cacheKey, url, cacheDuration, fileLocation)
-    } catch (error) {
+    } catch (_error) {
       return null
     }
     return JSON.parse(fs.readFileSync(fileLocation))

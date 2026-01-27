@@ -79,7 +79,7 @@ describe('ScanCode process', () => {
     try {
       await processor.handle(request)
       expect(true).to.be.false
-    } catch (error) {
+    } catch (_error) {
       expect(request.processControl).to.equal('skip')
     }
   })

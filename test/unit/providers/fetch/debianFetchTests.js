@@ -145,7 +145,7 @@ describe('Debian fetching', () => {
     try {
       await handler.handle(request)
       expect(false).to.be.true
-    } catch (error) {
+    } catch (_error) {
       expect(request.getTrackedCleanups().length).to.be.equal(2)
     }
   })

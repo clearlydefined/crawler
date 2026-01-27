@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 const chai = require('chai')
-const spies = require('chai-spies')
 const sinon = require('sinon')
 const fs = require('fs')
 const PassThrough = require('stream').PassThrough
@@ -11,7 +10,6 @@ const proxyquire = require('proxyquire')
 const Request = require('../../../../ghcrawler').request
 const { promisify } = require('util')
 
-chai.use(spies)
 const expect = chai.expect
 
 const FetchDispatcher = require('../../../../providers/fetch/dispatcher')
@@ -30,10 +28,9 @@ describe('fetchDispatcher', () => {
   it('should call markNoSave if processor should not fetch', async () => {
     const processorsStub = [{ canHandle: () => true, shouldFetch: () => false }]
     const fetchDispatcher = FetchDispatcher({}, {}, {}, processorsStub)
-    const request = {}
-    chai.spy.on(request, 'markNoSave', () => {})
+    const request = { markNoSave: sinon.spy() }
     await fetchDispatcher.handle(request)
-    expect(request.markNoSave).to.have.been.called.once
+    expect(request.markNoSave.calledOnce).to.be.true
   })
 
   it('should markSkip request if missing from store and should not fetch missing', async () => {
