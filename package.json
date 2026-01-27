@@ -43,7 +43,7 @@
     "applicationinsights": "^3.13.0",
     "ar-async": "^0.1.4",
     "axios": "^1.13.3",
-    "axios-retry": "^3.2.5",
+    "axios-retry": "^4.5.0",
     "body-parser": "^2.2.2",
     "debug": "^4.3.4",
     "decompress": "^4.2.1",
