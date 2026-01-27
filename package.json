@@ -53,7 +53,7 @@
     "decompress-tarxz": "^3.0.0",
     "decompress-unzip": "github:clearlydefined/decompress-unzip#expose-opts",
     "du": "^1.0.0",
-    "express": "^4.22.1",
+    "express": "^5.2.1",
     "express-init": "^1.1.2",
     "extend": "^3.0.1",
     "extract-zip": "^2.0.1",
