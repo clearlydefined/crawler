@@ -51,7 +51,7 @@ describe('fetch result', () => {
     const request = new Request('licensee', 'cd:git/github/palantir/refreshable/2.0.0')
     try {
       await gitClient.handle(request)
-    } catch (error) {
+    } catch (_error) {
       expect(request.fetchResult).to.be.undefined
       expect(request.getTrackedCleanups().length).to.be.equal(1)
     }

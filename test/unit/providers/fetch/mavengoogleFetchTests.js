@@ -130,7 +130,7 @@ describe('MavenGoogle fetching', () => {
     try {
       const result = await handler.handle(new Request('test', 'cd:/maven/mavengoogle/org.eclipse/error/3.3.0-v3344'))
       expect(result.outcome).to.eq('Missing  ')
-    } catch (error) {
+    } catch (_error) {
       expect(true).to.be.equal(false)
     }
   })
