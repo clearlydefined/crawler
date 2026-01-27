@@ -44,7 +44,7 @@
     "ar-async": "^0.1.4",
     "axios": "^1.12.0",
     "axios-retry": "^3.2.5",
-    "body-parser": "^1.19.0",
+    "body-parser": "^2.2.2",
     "debug": "^4.3.4",
     "decompress": "^4.2.1",
     "decompress-tar": "^4.1.1",
