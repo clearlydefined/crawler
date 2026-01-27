@@ -92,7 +92,7 @@
     "chai-spies": "^1.1.0",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
-    "globals": "^17.1.0",
+    "globals": "^17.2.0",
     "mocha": "^11.7.5",
     "mockttp": "^4.2.1",
     "nyc": "^17.1.0",
