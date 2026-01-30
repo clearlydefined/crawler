@@ -92,7 +92,7 @@ class ScanCodeProcessor extends AbstractProcessor {
   // Scan the results file for any errors that are not just timeouts or other known errors
   // TODO do we need to do this anymore
   _hasRealErrors(resultFile) {
-    try{
+    try {
       const results = JSON.parse(fs.readFileSync(resultFile))
       return results.files.some(
         file =>
