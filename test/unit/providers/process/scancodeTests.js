@@ -39,7 +39,7 @@ describe('ScanCode misc', () => {
     const handlerFactory = proxyquire('../../../../providers/process/scancode', {
       fs: fsStub
     })
-    Handler = handlerFactory({ logger: { log: () => {} } })
+    Handler = handlerFactory({ logger: { log: () => {}, error: () => {} } })
     Handler._resultBox = resultBox
   })
 
@@ -108,7 +108,7 @@ function setup(fixture, error, versionError) {
     timeout: 200,
     processes: 2,
     format: 'json',
-    logger: { log: sinon.stub(), info: sinon.stub() }
+    logger: { log: sinon.stub(), info: sinon.stub(), error: sinon.stub() }
   }
   const testRequest = new request('npm', 'cd:/npm/npmjs/-/test/1.1')
   testRequest.document = { _metadata: { links: {} }, location: '/test' }
