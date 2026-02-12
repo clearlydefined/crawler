@@ -115,7 +115,10 @@ describe('packagistFetch', () => {
       expect(result.manifest.dist.url).to.include('zipball/fe5e94c604826c35a32fa832f35bd036b6799609')
       expect(result.releaseDate).to.equal('2019-02-06T07:57:58+00:00')
       expect(result.packages).to.be.undefined // Should be deleted
-      // Note: v1.11.0 entry in p2 format doesn't include name field, only version/dist/source/time
+
+      expect(result.manifest.name).to.equal('symfony/polyfill-mbstring')
+      expect(result.manifest.homepage).to.equal('https://symfony.com')
+      expect(result.manifest.license).to.deep.equal(['MIT'])
     })
 
     it('should handle version without v prefix in spec but find v prefix in data', async () => {
@@ -129,6 +132,21 @@ describe('packagistFetch', () => {
       expect(result.manifest.version).to.equal('v1.33.0')
       expect(result.manifest.time).to.equal('2024-12-23T08:48:59+00:00')
       expect(result.manifest.dist.url).to.exist
+    })
+
+    it('should combine fields from the newer versions', async () => {
+      const handler = setup(createRegistryData())
+      const spec = { namespace: 'symfony', name: 'polyfill-mbstring', revision: '1.32.0' }
+
+      const result = await handler._getRegistryData(spec)
+
+      expect(result).to.not.be.null
+      expect(result.manifest).to.exist
+      expect(result.manifest.version).to.equal('v1.32.0')
+      //These are in the newer versions and should be combined into the manifest for the older version
+      expect(result.manifest.source.url).to.exist
+      expect(result.manifest.dist.url).to.exist
+      expect(result.manifest.homepage).to.exist
     })
 
     it('should return null for missing version', async () => {
