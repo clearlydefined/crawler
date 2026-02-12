@@ -45,7 +45,8 @@ describe('packagistFetch', () => {
       return Promise.resolve(response)
     }
     Fetch = proxyquire('../../../../providers/fetch/packagistFetch', {
-      '../../lib/fetch': { callFetch: requestRetryStub, getStream: getStub }
+      requestretry: { defaults: () => requestRetryStub },
+      '../../lib/fetch': { getStream: getStub }
     })
     Fetch._resultBox = resultBox
   })
