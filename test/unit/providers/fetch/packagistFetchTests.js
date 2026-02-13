@@ -202,6 +202,69 @@ describe('packagistFetch', () => {
 
       expect(result).to.be.null
     })
+
+    describe('_extractManifest', () => {
+      let handler
+      const base = { name: 'foo/bar', type: 'library' }
+      const homepage = 'https://example.org'
+      const minifiedVersions = [
+        {
+          ...base,
+          version: '2.0.0',
+          version_normalized: '2.0.0.0',
+          scripts: { foo: ['bar'] },
+          license: ['MIT']
+        },
+        {
+          version: '1.2.0',
+          version_normalized: '1.2.0.0',
+          license: ['GPL'],
+          homepage,
+          scripts: '__unset'
+        },
+        {
+          version: '1.0.0',
+          version_normalized: '1.0.0.0',
+          homepage: '__unset'
+        }
+      ]
+
+      beforeEach(() => {
+        handler = setup(createRegistryData())
+      })
+
+      it('should expand minified version 2.0.0', () => {
+        const result = handler._extractManifest(minifiedVersions, { revision: '2.0.0' })
+        expect(result).to.deep.equal({
+          ...base,
+          version: '2.0.0',
+          version_normalized: '2.0.0.0',
+          scripts: { foo: ['bar'] },
+          license: ['MIT']
+        })
+      })
+
+      it('should expand minified version 1.2.0', () => {
+        const result = handler._extractManifest(minifiedVersions, { revision: '1.2.0' })
+        expect(result).to.deep.equal({
+          ...base,
+          version: '1.2.0',
+          version_normalized: '1.2.0.0',
+          license: ['GPL'],
+          homepage
+        })
+      })
+
+      it('should expand minified version 1.0.0', () => {
+        const result = handler._extractManifest(minifiedVersions, { revision: '1.0.0' })
+        expect(result).to.deep.equal({
+          ...base,
+          version: '1.0.0',
+          version_normalized: '1.0.0.0',
+          license: ['GPL']
+        })
+      })
+    })
   })
 })
 
