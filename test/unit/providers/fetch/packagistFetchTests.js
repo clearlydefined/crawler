@@ -45,7 +45,8 @@ describe('packagistFetch', () => {
       return Promise.resolve(response)
     }
     Fetch = proxyquire('../../../../providers/fetch/packagistFetch', {
-      '../../lib/fetch': { callFetch: requestRetryStub, getStream: getStub }
+      requestretry: { defaults: () => requestRetryStub },
+      '../../lib/fetch': { getStream: getStub }
     })
     Fetch._resultBox = resultBox
   })
@@ -115,7 +116,10 @@ describe('packagistFetch', () => {
       expect(result.manifest.dist.url).to.include('zipball/fe5e94c604826c35a32fa832f35bd036b6799609')
       expect(result.releaseDate).to.equal('2019-02-06T07:57:58+00:00')
       expect(result.packages).to.be.undefined // Should be deleted
-      // Note: v1.11.0 entry in p2 format doesn't include name field, only version/dist/source/time
+
+      expect(result.manifest.name).to.equal('symfony/polyfill-mbstring')
+      expect(result.manifest.homepage).to.equal('https://symfony.com')
+      expect(result.manifest.license).to.deep.equal(['MIT'])
     })
 
     it('should handle version without v prefix in spec but find v prefix in data', async () => {
@@ -129,6 +133,39 @@ describe('packagistFetch', () => {
       expect(result.manifest.version).to.equal('v1.33.0')
       expect(result.manifest.time).to.equal('2024-12-23T08:48:59+00:00')
       expect(result.manifest.dist.url).to.exist
+    })
+
+    it('should combine fields from the newer versions', async () => {
+      const handler = setup(createRegistryData())
+      const spec = { namespace: 'symfony', name: 'polyfill-mbstring', revision: '1.32.0' }
+
+      const result = await handler._getRegistryData(spec)
+
+      expect(result).to.not.be.null
+      expect(result.manifest).to.exist
+      expect(result.manifest.version).to.equal('v1.32.0')
+      //These are in the newer versions and should be combined into the manifest for the older version
+      expect(result.manifest.source.url).to.exist
+      expect(result.manifest.dist.url).to.exist
+      expect(result.manifest.homepage).to.exist
+    })
+
+    it('should remove fields with __unset', async () => {
+      const handler = setup(createRegistryData())
+      const spec = { namespace: 'symfony', name: 'polyfill-mbstring', revision: '1.23.1' }
+
+      const result = await handler._getRegistryData(spec)
+
+      // This is in this version's metadata and should be kept
+      expect(result.manifest.version).to.equal('v1.23.1')
+      expect(result.manifest.source.reference).to.equal('9174a3d80210dca8daa7f31fec659150bbeabfc6')
+      // This is in the latest and should be combined into the manifest
+      expect(result.manifest.homepage).to.equal('https://symfony.com')
+
+      // This field is in the newer versions but set to __unset in this version, so should be removed
+      expect(result.manifest.provide).to.not.exist
+      const manifestValuesSet = new Set(Object.values(result.manifest))
+      expect(manifestValuesSet.has('__unset')).to.be.false
     })
 
     it('should return null for missing version', async () => {
@@ -164,6 +201,69 @@ describe('packagistFetch', () => {
       const result = await handler._getRegistryData(spec)
 
       expect(result).to.be.null
+    })
+
+    describe('_extractManifest', () => {
+      let handler
+      const base = { name: 'foo/bar', type: 'library' }
+      const homepage = 'https://example.org'
+      const minifiedVersions = [
+        {
+          ...base,
+          version: '2.0.0',
+          version_normalized: '2.0.0.0',
+          scripts: { foo: ['bar'] },
+          license: ['MIT']
+        },
+        {
+          version: '1.2.0',
+          version_normalized: '1.2.0.0',
+          license: ['GPL'],
+          homepage,
+          scripts: '__unset'
+        },
+        {
+          version: '1.0.0',
+          version_normalized: '1.0.0.0',
+          homepage: '__unset'
+        }
+      ]
+
+      beforeEach(() => {
+        handler = setup(createRegistryData())
+      })
+
+      it('should expand minified version 2.0.0', () => {
+        const result = handler._extractManifest(minifiedVersions, { revision: '2.0.0' })
+        expect(result).to.deep.equal({
+          ...base,
+          version: '2.0.0',
+          version_normalized: '2.0.0.0',
+          scripts: { foo: ['bar'] },
+          license: ['MIT']
+        })
+      })
+
+      it('should expand minified version 1.2.0', () => {
+        const result = handler._extractManifest(minifiedVersions, { revision: '1.2.0' })
+        expect(result).to.deep.equal({
+          ...base,
+          version: '1.2.0',
+          version_normalized: '1.2.0.0',
+          license: ['GPL'],
+          homepage
+        })
+      })
+
+      it('should expand minified version 1.0.0', () => {
+        const result = handler._extractManifest(minifiedVersions, { revision: '1.0.0' })
+        expect(result).to.deep.equal({
+          ...base,
+          version: '1.0.0',
+          version_normalized: '1.0.0.0',
+          license: ['GPL']
+        })
+      })
     })
   })
 })

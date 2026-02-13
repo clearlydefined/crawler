@@ -39,31 +39,46 @@ class PackagistFetch extends AbstractFetch {
   }
 
   async _getRegistryData(spec) {
-    let registryData
     const baseUrl = providerMap.packagist
     const { body, statusCode } = await requestRetry.get(`${baseUrl}p2/${spec.namespace}/${spec.name}.json`, {
       json: true
     })
     if (statusCode !== 200 || !body) return null
-    registryData = body
+    const registryData = body
 
     // Get the array of versions for this package
     const packageVersions = registryData.packages[`${spec.namespace}/${spec.name}`]
+    registryData.manifest = this._extractManifest(packageVersions, spec)
+    if (!registryData.manifest) return null
+
+    registryData.releaseDate = get(registryData, 'manifest.time')
+    delete registryData['packages']
+    return registryData
+  }
+
+  _extractManifest(packageVersions, spec) {
     if (!packageVersions || !Array.isArray(packageVersions)) return null
 
     // Find the specific version in the array - handle both 'v1.0.0' and '1.0.0' formats
     const targetVersion = spec.revision
     const targetVersionWithV = `v${spec.revision}`
 
-    registryData.manifest = packageVersions.find(
+    const targetIndex = packageVersions.findIndex(
       versionObj => versionObj.version === targetVersion || versionObj.version === targetVersionWithV
     )
+    if (targetIndex === -1) return null
 
-    if (!registryData.manifest) return null
-
-    registryData.releaseDate = get(registryData, 'manifest.time')
-    delete registryData['packages']
-    return registryData
+    const combined = {}
+    for (let i = 0; i <= targetIndex; i++) {
+      for (const [key, value] of Object.entries(packageVersions[i])) {
+        if (value === '__unset') {
+          delete combined[key]
+        } else {
+          combined[key] = value
+        }
+      }
+    }
+    return combined
   }
 
   async _getPackage(request, registryData, destination) {
