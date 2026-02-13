@@ -70,7 +70,13 @@ class PackagistFetch extends AbstractFetch {
 
     const combined = {}
     for (let i = 0; i <= targetIndex; i++) {
-      Object.assign(combined, packageVersions[i])
+      for (const [key, value] of Object.entries(packageVersions[i])) {
+        if (value === '__unset') {
+          delete combined[key]
+        } else {
+          combined[key] = value
+        }
+      }
     }
     return combined
   }
