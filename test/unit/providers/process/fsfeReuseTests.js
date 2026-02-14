@@ -76,6 +76,17 @@ describe('FSFE REUSE software process', () => {
     expect(document.reuse.files.length).to.equal(0)
   })
 
+  it('should ignore missing LICENSES directory', async () => {
+    const { request, processor, logger } = setup('0.15.0/folder2')
+    const enoent = new Error('ENOENT: no such file or directory, scandir LICENSES')
+    enoent.code = 'ENOENT'
+    Handler._resultBox.licensesDirError = enoent
+    await processor.handle(request)
+    const { document } = request
+    expect(document.reuse.licenses).to.eql([])
+    expect(logger.warn.called).to.be.false
+  })
+
   it('should return an error properly', async () => {
     const { request, processor } = setup('0.15.0/folder2', new Error('REUSE encountered an error'))
     await processor.handle(request)
@@ -92,7 +103,13 @@ describe('FSFE REUSE software process', () => {
   })
 
   beforeEach(function () {
-    const resultBox = { error: null, versionResult: 'reuse 0.13.0', versionError: null, licensesDirectory: [] }
+    const resultBox = {
+      error: null,
+      versionResult: 'reuse 0.13.0',
+      versionError: null,
+      licensesDirectory: [],
+      licensesDirError: null
+    }
     const processStub = {
       execFile: (command, parameters, callbackOrOptions, callback) => {
         if (parameters.includes('--version')) {
@@ -101,7 +118,12 @@ describe('FSFE REUSE software process', () => {
         callback(resultBox.error, {})
       }
     }
-    const fsStub = { readdirSync: () => resultBox.licensesDirectory }
+    const fsStub = {
+      readdirSync: () => {
+        if (resultBox.licensesDirError) throw resultBox.licensesDirError
+        return resultBox.licensesDirectory
+      }
+    }
     Handler = proxyquire('../../../../providers/process/fsfeReuse', { child_process: processStub, fs: fsStub })
     Handler._resultBox = resultBox
   })
@@ -112,14 +134,16 @@ describe('FSFE REUSE software process', () => {
 })
 
 function setup(fixture, error, versionError) {
-  const options = { logger: { log: sinon.stub() } }
+  const logger = { log: sinon.stub(), warn: sinon.stub() }
+  const options = { logger }
   const testRequest = new request('reuse', 'cd:/git/github/SAP/ospo/424242')
   testRequest.document = { _metadata: { links: {} }, location: path.resolve(`test/fixtures/fsfeReuse/${fixture}`) }
   testRequest.crawler = { storeDeadletter: sinon.stub() }
   Handler._resultBox.error = error
   Handler._resultBox.versionError = versionError
+  Handler._resultBox.licensesDirError = null
   const processor = Handler(options)
   processor.createTempFile = sinon.stub().returns({ name: `test/fixtures/fsfeReuse/${fixture}/output.txt` })
   //processor.attachFiles = sinon.stub()
-  return { request: testRequest, processor }
+  return { request: testRequest, processor, logger }
 }
