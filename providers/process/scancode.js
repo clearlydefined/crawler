@@ -130,7 +130,7 @@ class ScanCodeProcessor extends AbstractProcessor {
         return this._schemaVersion
       })
       .catch(error => {
-        this.logger.log(`Could not detect version of ScanCode: ${error.message} `)
+        this.logger.warn(`Could not detect version of ScanCode: ${error.message} `)
       })
     return this._versionPromise
   }
