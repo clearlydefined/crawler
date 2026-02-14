@@ -69,7 +69,7 @@ describe('Licensee process', () => {
 })
 
 function setup(fixture, error, versionError) {
-  const options = { logger: { log: sinon.stub() }, processes: 10 }
+  const options = { logger: { log: sinon.stub(), warn: sinon.stub() }, processes: 10 }
   const testRequest = new request('npm', 'cd:/npm/npmjs/-/test/1.1')
   testRequest.document = { _metadata: { links: {} }, location: path.resolve(`test/fixtures/licensee/${fixture}`) }
   testRequest.crawler = { storeDeadletter: sinon.stub() }

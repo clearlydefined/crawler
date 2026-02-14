@@ -136,7 +136,9 @@ class FsfeReuseProcessor extends AbstractProcessor {
         })
       })
     } catch (error) {
-      this.logger.log(`Error reading LICENSES directory: ${error.message}`)
+      if (error && error.code !== 'ENOENT') {
+        this.logger.warn(`Error reading LICENSES directory: ${error.message}`)
+      }
     }
     return licenses
   }
@@ -154,7 +156,7 @@ class FsfeReuseProcessor extends AbstractProcessor {
         return this._schemaVersion
       })
       .catch(error => {
-        if (error) this.logger.log(`Could not detect version of REUSE: ${error.message}`)
+        if (error) this.logger.warn(`Could not detect version of REUSE: ${error.message}`)
       })
     return this._versionPromise
   }

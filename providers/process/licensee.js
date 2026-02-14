@@ -103,7 +103,7 @@ class LicenseeProcessor extends AbstractProcessor {
         return this._schemaVersion
       })
       .catch(error => {
-        if (error) this.logger.log(`Could not detect version of Licensee: ${error.message}`)
+        if (error) this.logger.warn(`Could not detect version of Licensee: ${error.message}`)
       })
     return this._versionPromise
   }
