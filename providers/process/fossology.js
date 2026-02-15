@@ -160,7 +160,7 @@ class FossologyProcessor extends AbstractProcessor {
       this._schemaVersion = this.aggregateVersions([this._schemaVersion, this.toolVersion, this.configVersion])
       return this._schemaVersion
     } catch (error) {
-      this.logger.log(`Could not find FOSSology tool version: ${error.message}`)
+      this.logger.warn(`Could not find FOSSology tool version: ${error.message}`)
       return null
     }
   }
