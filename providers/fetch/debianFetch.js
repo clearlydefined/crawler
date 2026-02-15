@@ -306,14 +306,13 @@ class DebianFetch extends AbstractFetch {
 
   async _getDeclaredLicenses(copyrightUrl) {
     if (!copyrightUrl) return []
-    let response = ''
     try {
-      response = await requestPromise({ url: copyrightUrl, json: false })
+      const response = await requestPromise({ url: copyrightUrl, json: false })
+      return this._parseDeclaredLicenses(response)
     } catch (error) {
       if (error.statusCode === 404) return []
       else throw error
     }
-    return this._parseDeclaredLicenses(response)
   }
 
   // https://wiki.debian.org/Proposals/CopyrightFormat

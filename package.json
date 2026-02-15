@@ -84,6 +84,7 @@
     "xml2js": "^0.6.2"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@tsconfig/node24": "24.0.4",
     "@tsconfig/strictest": "2.0.8",
     "@types/node": "25.2.3",
