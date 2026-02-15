@@ -88,15 +88,12 @@ class CrawlerFactory {
         // Any given subsytem may have a provider or may be a list of providers. If a particular provider is
         // identified then hook up just that set of options for refreshing.
         logger.info(`creating refreshing options ${subsystemName} with provider ${refreshingProvider}`)
-        let config = null
         const subDefaults = defaults[subsystemName] || {}
-        const subProvider = subDefaults && subDefaults.provider
-        // const uniqueName = `${subsystemName}${subProvider ? '-' + subProvider : ''}`
-        if (refreshingProvider === 'memory') {
-          config = CrawlerFactory.createInMemoryRefreshingConfig()
-        } else {
+        const subProvider = subDefaults?.provider
+        if (refreshingProvider !== 'memory') {
           throw new Error(`Invalid refreshing provider setting ${refreshingProvider}`)
         }
+        const config = CrawlerFactory.createInMemoryRefreshingConfig()
         return config.getAll().then(values => {
           logger.info(`got refreshingOption values for ${subsystemName}`)
           // grab the right defaults. May need to drill down a level if the subsystem has a provider

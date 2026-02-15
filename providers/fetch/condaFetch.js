@@ -120,11 +120,10 @@ class CondaFetch extends AbstractFetch {
       architecture = packageChannelData.subdirs.includes('noarch') ? 'noarch' : packageChannelData.subdirs[0]
       this.logger.info(`No binary architecture specified for ${spec.name}, using architecture: ${architecture}`)
     }
-    let repoData = undefined
     if (!packageChannelData.subdirs.find(x => x === architecture)) {
       return request.markSkip(`Missing architecture ${architecture} for package ${spec.name} in channel`)
     }
-    repoData = await this.getRepoData(this.channels[spec.provider], spec.provider, architecture)
+    const repoData = await this.getRepoData(this.channels[spec.provider], spec.provider, architecture)
     if (!repoData) {
       return request.markSkip(
         `failed to fetch and parse repodata json file for channel ${spec.provider} in architecture ${architecture}`
