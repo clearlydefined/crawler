@@ -140,7 +140,7 @@ describe('CallFetch', () => {
       expect(response.body).to.deep.equal(expected)
     })
 
-it('should return a stream when called with a URL string', async () => {
+    it('should return a stream when called with a URL string', async () => {
       const path = '/registry.npmjs.com/redis/0.1.0'
       await mockServer.forGet(path).thenStream(200, fs.createReadStream('test/fixtures/fetch/redis-0.1.0.json'))
 
@@ -156,7 +156,7 @@ it('should return a stream when called with a URL string', async () => {
       const expected = JSON.parse(fs.readFileSync('test/fixtures/fetch/redis-0.1.0.json'))
       expect(downloaded).to.deep.equal(expected)
       fs.unlinkSync(destination)
-})
+    })
 
     it('should return a stream when called with an options object', async () => {
       const path = '/registry.npmjs.com/redis/0.1.0'
