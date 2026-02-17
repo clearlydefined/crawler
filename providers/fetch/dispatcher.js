@@ -33,7 +33,7 @@ class FetchDispatcher extends AbstractFetch {
       request.document = document
       request.contentOrigin = 'storage'
       return this._dispatchFetch(request)
-    } catch (error) {
+    } catch (_error) {
       // TODO eating the error here. at least log
       return this._fetchMissing(request)
     }

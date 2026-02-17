@@ -26,9 +26,7 @@ class AbstractFetch extends BaseHandler {
   }
 
   unzip(source, destination) {
-    return new Promise((resolve, reject) =>
-      extract(source, { dir: destination }, error => (error ? reject(error) : resolve()))
-    )
+    return extract(source, { dir: destination })
   }
 
   decompress(source, destination) {

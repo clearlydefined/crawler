@@ -5,7 +5,7 @@ const AbstractFetch = require('./abstractFetch')
 const { clone } = require('lodash')
 const fs = require('fs')
 const memCache = require('memory-cache')
-const nodeRequest = require('request')
+const { getStream } = require('../../lib/fetch')
 const FetchResult = require('../../lib/fetchResult')
 
 class CondaFetch extends AbstractFetch {
@@ -16,9 +16,6 @@ class CondaFetch extends AbstractFetch {
       'anaconda-main': 'https://repo.anaconda.com/pkgs/main',
       'anaconda-r': 'https://repo.anaconda.com/pkgs/r',
       'conda-forge': 'https://conda.anaconda.org/conda-forge'
-    }
-    this.headers = {
-      'User-Agent': 'clearlydefined.io crawler (clearlydefined@outlook.com)'
     }
     this.CACHE_DURATION = 8 * 60 * 60 * 1000 // 8 hours
   }
@@ -123,11 +120,10 @@ class CondaFetch extends AbstractFetch {
       architecture = packageChannelData.subdirs.includes('noarch') ? 'noarch' : packageChannelData.subdirs[0]
       this.logger.info(`No binary architecture specified for ${spec.name}, using architecture: ${architecture}`)
     }
-    let repoData = undefined
     if (!packageChannelData.subdirs.find(x => x === architecture)) {
       return request.markSkip(`Missing architecture ${architecture} for package ${spec.name} in channel`)
     }
-    repoData = await this.getRepoData(this.channels[spec.provider], spec.provider, architecture)
+    const repoData = await this.getRepoData(this.channels[spec.provider], spec.provider, architecture)
     if (!repoData) {
       return request.markSkip(
         `failed to fetch and parse repodata json file for channel ${spec.provider} in architecture ${architecture}`
@@ -164,34 +160,27 @@ class CondaFetch extends AbstractFetch {
   }
 
   async _downloadPackage(downloadUrl, destination) {
-    return new Promise((resolve, reject) => {
-      const options = { url: downloadUrl, headers: this.headers }
-      nodeRequest
-        .get(options, (error, response) => {
-          if (error) return reject(error)
-          if (response.statusCode !== 200) return reject(new Error(`${response.statusCode} ${response.statusMessage}`))
-        })
-        .pipe(fs.createWriteStream(destination).on('finish', () => resolve()))
+    const options = { url: downloadUrl }
+    const response = await getStream(options)
+    if (response.statusCode !== 200) throw new Error(`${response.statusCode} ${response.message}`)
+    return new Promise(resolve => {
+      response.data.pipe(fs.createWriteStream(destination)).on('finish', resolve)
     })
   }
 
   async _cachedDownload(cacheKey, sourceUrl, cacheDuration, fileDstLocation) {
     if (!memCache.get(cacheKey)) {
-      return new Promise((resolve, reject) => {
-        const options = { url: sourceUrl, headers: this.headers }
-        nodeRequest
-          .get(options, (error, response) => {
-            if (error) return reject(error)
-            if (response.statusCode !== 200)
-              return reject(new Error(`${response.statusCode} ${response.statusMessage}`))
+      const options = { url: sourceUrl }
+      const response = await getStream(options)
+      if (response.statusCode !== 200) throw new Error(`${response.statusCode} ${response.message}`)
+      return new Promise(resolve => {
+        response.data.pipe(
+          fs.createWriteStream(fileDstLocation).on('finish', () => {
+            memCache.put(cacheKey, true, cacheDuration)
+            this.logger.info(`Conda: retrieved ${sourceUrl}. Stored data file at ${fileDstLocation}`)
+            return resolve()
           })
-          .pipe(
-            fs.createWriteStream(fileDstLocation).on('finish', () => {
-              memCache.put(cacheKey, true, cacheDuration)
-              this.logger.info(`Conda: retrieved ${sourceUrl}. Stored data file at ${fileDstLocation}`)
-              return resolve()
-            })
-          )
+        )
       })
     }
   }
@@ -199,7 +188,7 @@ class CondaFetch extends AbstractFetch {
   async _fetchCachedJSONFile(cacheKey, url, cacheDuration, fileLocation) {
     try {
       await this._cachedDownload(cacheKey, url, cacheDuration, fileLocation)
-    } catch (error) {
+    } catch (_error) {
       return null
     }
     return JSON.parse(fs.readFileSync(fileLocation))

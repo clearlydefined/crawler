@@ -5,11 +5,10 @@ const AbstractFetch = require('./abstractFetch')
 const requestRetry = require('requestretry').defaults({ maxAttempts: 3, fullResponse: true })
 const fs = require('fs')
 const { get } = require('lodash')
-const nodeRequest = require('request')
+const { getStream } = require('../../lib/fetch')
 const { promisify } = require('util')
 const readdir = promisify(fs.readdir)
 const FetchResult = require('../../lib/fetchResult')
-const { defaultHeaders } = require('../../lib/fetch')
 
 const providerMap = {
   packagist: 'https://repo.packagist.org/'
@@ -40,26 +39,16 @@ class PackagistFetch extends AbstractFetch {
   }
 
   async _getRegistryData(spec) {
-    let registryData
     const baseUrl = providerMap.packagist
     const { body, statusCode } = await requestRetry.get(`${baseUrl}p2/${spec.namespace}/${spec.name}.json`, {
       json: true
     })
     if (statusCode !== 200 || !body) return null
-    registryData = body
+    const registryData = body
 
     // Get the array of versions for this package
     const packageVersions = registryData.packages[`${spec.namespace}/${spec.name}`]
-    if (!packageVersions || !Array.isArray(packageVersions)) return null
-
-    // Find the specific version in the array - handle both 'v1.0.0' and '1.0.0' formats
-    const targetVersion = spec.revision
-    const targetVersionWithV = `v${spec.revision}`
-
-    registryData.manifest = packageVersions.find(
-      versionObj => versionObj.version === targetVersion || versionObj.version === targetVersionWithV
-    )
-
+    registryData.manifest = this._extractManifest(packageVersions, spec)
     if (!registryData.manifest) return null
 
     registryData.releaseDate = get(registryData, 'manifest.time')
@@ -67,20 +56,38 @@ class PackagistFetch extends AbstractFetch {
     return registryData
   }
 
+  _extractManifest(packageVersions, spec) {
+    if (!packageVersions || !Array.isArray(packageVersions)) return null
+
+    // Find the specific version in the array - handle both 'v1.0.0' and '1.0.0' formats
+    const targetVersion = spec.revision
+    const targetVersionWithV = `v${spec.revision}`
+
+    const targetIndex = packageVersions.findIndex(
+      versionObj => versionObj.version === targetVersion || versionObj.version === targetVersionWithV
+    )
+    if (targetIndex === -1) return null
+
+    const combined = {}
+    for (let i = 0; i <= targetIndex; i++) {
+      for (const [key, value] of Object.entries(packageVersions[i])) {
+        if (value === '__unset') {
+          delete combined[key]
+        } else {
+          combined[key] = value
+        }
+      }
+    }
+    return combined
+  }
+
   async _getPackage(request, registryData, destination) {
     const distUrl = get(registryData, 'manifest.dist.url')
     if (!distUrl) return request.markSkip('Missing dist.url ')
-    return new Promise((resolve, reject) => {
-      const options = {
-        url: distUrl,
-        headers: defaultHeaders
-      }
-      nodeRequest
-        .get(options, (error, response) => {
-          if (error) return reject(error)
-          if (response.statusCode !== 200) reject(new Error(`${response.statusCode} ${response.statusMessage}`))
-        })
-        .pipe(fs.createWriteStream(destination).on('finish', () => resolve(null)))
+    const response = await getStream({ url: distUrl })
+    if (response.statusCode !== 200) throw new Error(`${response.statusCode} ${response.message}`)
+    await new Promise(resolve => {
+      response.data.pipe(fs.createWriteStream(destination)).on('finish', () => resolve(null))
     })
   }
 

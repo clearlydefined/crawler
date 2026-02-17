@@ -265,9 +265,9 @@ class TopProcessor extends AbstractProcessor {
   async _processTopMavenCentrals(request) {
     const contents = fs.readFileSync(path.join(__dirname, '..', '..', 'data', 'mvn1.5k.csv'))
     const fileLines = contents.toString().split('\n')
-    let { start, end } = request.document
-    start = start && start >= 0 ? ++start : 1 // Exclude header from CSV file
-    end = end && end > 0 ? ++end : fileLines.length
+    const { start: rawStart, end: rawEnd } = request.document
+    const start = rawStart && rawStart >= 0 ? rawStart + 1 : 1 // Exclude header from CSV file
+    const end = rawEnd && rawEnd > 0 ? rawEnd + 1 : fileLines.length
     const lines = fileLines.slice(start, end)
     const requests = lines.map(line => {
       let [, groupId, artifactId] = line.split(',')
@@ -282,9 +282,9 @@ class TopProcessor extends AbstractProcessor {
   async _processTopMavenGoogle(request) {
     const contents = fs.readFileSync(path.join(__dirname, '..', '..', 'data', 'mvn1.5k.csv'))
     const fileLines = contents.toString().split('\n')
-    let { start, end } = request.document
-    start = start && start >= 0 ? ++start : 1 // Exclude header from CSV file
-    end = end && end > 0 ? ++end : fileLines.length
+    const { start: rawStart, end: rawEnd } = request.document
+    const start = rawStart && rawStart >= 0 ? rawStart + 1 : 1 // Exclude header from CSV file
+    const end = rawEnd && rawEnd > 0 ? rawEnd + 1 : fileLines.length
     const lines = fileLines.slice(start, end)
     const requests = lines.map(line => {
       let [, groupId, artifactId] = line.split(',')

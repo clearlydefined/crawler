@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 const chai = require('chai')
-const chaiAsPromised = require('chai-as-promised')
+const chaiAsPromised = require('chai-as-promised').default
 const sinon = require('sinon')
 const Request = require('../../../../ghcrawler/lib/request.js')
 const StorageBackedQueue = require('../../../../ghcrawler/providers/queuing/storageBackedQueue')

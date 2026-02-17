@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 # SPDX-License-Identifier: MIT
 
-FROM node:24-bullseye
+FROM node:24-trixie
 ENV APPDIR=/opt/service
 
 # Set environment variables from build arguments
@@ -11,18 +11,14 @@ ARG BUILD_SHA="UNKNOWN"
 ENV BUILD_SHA=$BUILD_SHA
 
 # Ruby and Python Dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends --no-install-suggests curl bzip2 build-essential libssl-dev libreadline-dev zlib1g-dev cmake python3 python3-dev python3-pip xz-utils libxml2-dev libxslt1-dev libpopt0 && \
+RUN apt-get update && apt-get install -y --no-install-recommends --no-install-suggests curl bzip2 build-essential libssl-dev libreadline-dev zlib1g-dev cmake python3 python3-dev python3-pip xz-utils libxml2-dev libxslt1-dev libpopt0 ruby ruby-dev && \
   rm -rf /var/lib/apt/lists/* && \
-  curl -L https://github.com/rbenv/ruby-build/archive/refs/tags/v20231012.tar.gz | tar -zxvf - -C /tmp/ && \
-  cd /tmp/ruby-build-* && ./install.sh && cd / && \
-  ruby-build -v 3.2.2 /usr/local && rm -rfv /tmp/ruby-build-* && \
   gem install bundler -v 2.5.4 --no-document
 
 # Scancode
-ARG SCANCODE_VERSION="32.4.1"
-RUN pip3 install --upgrade pip setuptools wheel && \
-  curl -Os https://raw.githubusercontent.com/nexB/scancode-toolkit/v$SCANCODE_VERSION/requirements.txt && \
-  pip3 install --constraint requirements.txt scancode-toolkit==$SCANCODE_VERSION && \
+ARG SCANCODE_VERSION="32.5.0"
+RUN curl -Os https://raw.githubusercontent.com/nexB/scancode-toolkit/v$SCANCODE_VERSION/requirements.txt && \
+  pip3 install --break-system-packages --constraint requirements.txt scancode-toolkit==$SCANCODE_VERSION && \
   rm requirements.txt && \
   scancode-reindex-licenses && \
   scancode --version
@@ -39,8 +35,8 @@ RUN gem install nokogiri:1.16.0 --no-document && \
   gem install licensee:9.16.1 --no-document
 
 # REUSE
-RUN pip3 install setuptools
-RUN pip3 install reuse==5.0.2
+RUN pip3 install --break-system-packages setuptools
+RUN pip3 install --break-system-packages reuse==5.0.2
 
 # Crawler config
 ENV CRAWLER_DEADLETTER_PROVIDER=cd(azblob)

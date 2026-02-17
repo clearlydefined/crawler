@@ -268,7 +268,7 @@ class Crawler {
         try {
           request = await self._releaseLock(request)
           request = await self._deleteFromQueue(request)
-        } catch (error) {
+        } catch (_error) {
           request = await self._abandonInQueue(request)
         }
       }

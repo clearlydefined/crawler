@@ -11,9 +11,66 @@ function checkDefaultHeaders(headers) {
 }
 describe('CallFetch', () => {
   describe('with mock server', () => {
-    const mockServer = mockttp.getLocal()
-    beforeEach(async () => await mockServer.start())
-    afterEach(async () => await mockServer.stop())
+    let mockServer
+    beforeEach(async () => {
+      mockServer = mockttp.getLocal()
+      await mockServer.start()
+    })
+    afterEach(async () => {
+      await mockServer.stop()
+      // Small delay to ensure port is released before next test
+      await new Promise(resolve => setTimeout(resolve, 50))
+    })
+
+    it('should return a stream when called with a URL string', async () => {
+      const path = '/registry.npmjs.com/redis/0.1.0'
+      await mockServer.forGet(path).thenStream(200, fs.createReadStream('test/fixtures/fetch/redis-0.1.0.json'))
+
+      const { getStream } = require('../../../lib/fetch')
+      const response = await getStream(mockServer.urlFor(path))
+      expect(response.data.readable).to.be.true
+      // Optionally, pipe and check content
+      const destination = 'test/fixtures/fetch/temp-stream.json'
+      await new Promise(resolve => {
+        response.data.pipe(fs.createWriteStream(destination).on('finish', () => resolve(true)))
+      })
+      const downloaded = JSON.parse(fs.readFileSync(destination))
+      const expected = JSON.parse(fs.readFileSync('test/fixtures/fetch/redis-0.1.0.json'))
+      expect(downloaded).to.deep.equal(expected)
+      fs.unlinkSync(destination)
+    })
+
+    it('should return a stream when called with an options object', async () => {
+      const path = '/registry.npmjs.com/redis/0.1.0'
+      await mockServer.forGet(path).thenStream(200, fs.createReadStream('test/fixtures/fetch/redis-0.1.0.json'))
+
+      const { getStream } = require('../../../lib/fetch')
+      const response = await getStream({ url: mockServer.urlFor(path) })
+      expect(response.data.readable).to.be.true
+      // Optionally, pipe and check content
+      const destination = 'test/fixtures/fetch/temp-stream2.json'
+      await new Promise(resolve => {
+        response.data.pipe(fs.createWriteStream(destination).on('finish', () => resolve(true)))
+      })
+      const downloaded = JSON.parse(fs.readFileSync(destination))
+      const expected = JSON.parse(fs.readFileSync('test/fixtures/fetch/redis-0.1.0.json'))
+      expect(downloaded).to.deep.equal(expected)
+      fs.unlinkSync(destination)
+    })
+
+    it('should apply default headers when called', async () => {
+      const path = '/registry.npmjs.com/redis/0.1.0'
+      const endpointMock = await mockServer
+        .forGet(path)
+        .thenStream(200, fs.createReadStream('test/fixtures/fetch/redis-0.1.0.json'))
+
+      const { getStream } = require('../../../lib/fetch')
+      await getStream({ url: mockServer.urlFor(path) })
+      const requests = await endpointMock.getSeenRequests()
+      for (const [key, value] of Object.entries(defaultHeaders)) {
+        expect(requests[0].headers).to.have.property(key.toLowerCase()).that.equals(value)
+      }
+    })
 
     it('checks if the response is JSON while sending GET request', async () => {
       const path = '/registry.npmjs.com/redis/0.1.0'
