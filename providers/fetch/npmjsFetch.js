@@ -7,8 +7,13 @@ const fs = require('fs')
 const { clone, get } = require('lodash')
 const FetchResult = require('../../lib/fetchResult')
 
+// TODO Elaine - add this back later
+// const providerMap = {
+//   npmjs: 'https://registry.npmjs.com'
+// }
+
 const providerMap = {
-  npmjs: 'https://registry.npmjs.com'
+  npmjs: process.env.NPM_REGISTRY_URL || 'https://registry.npmjs.com'
 }
 
 class NpmFetch extends AbstractFetch {
@@ -55,13 +60,22 @@ class NpmFetch extends AbstractFetch {
     const baseUrl = providerMap[spec.provider]
     if (!baseUrl) return null
     const fullName = `${spec.namespace ? spec.namespace + '/' : ''}${spec.name}`
+    const requestUrl = `${baseUrl}/${encodeURIComponent(fullName).replace('%40', '@')}`
+
+    console.log('==========================================')
+    console.log(`[DEBUG] Making npm registry request to: ${requestUrl}`)
+    console.log(`[DEBUG] Using registry base URL: ${baseUrl}`)
+    console.log(`[DEBUG] Request package spec:`, JSON.stringify(spec))
+
     let registryData
     try {
       registryData = await requestPromise({
-        url: `${baseUrl}/${encodeURIComponent(fullName).replace('%40', '@')}`, // npmjs doesn't handle the escaped version
+        url: requestUrl, // npmjs doesn't handle the escaped version
         json: true
       })
     } catch (exception) {
+      console.log(`[DEBUG] Request failed with status: ${exception.statusCode || 'unknown'}`);
+      console.log(`[DEBUG] Error message:`, exception.message);
       if (exception.statusCode !== 404) throw exception
       return null
     }

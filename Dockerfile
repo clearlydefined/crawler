@@ -36,7 +36,7 @@ RUN gem install nokogiri:1.16.0 --no-document && \
 
 # REUSE
 RUN pip3 install --break-system-packages setuptools
-RUN pip3 install --break-system-packages reuse==3.0.1
+RUN pip3 install --break-system-packages reuse==5.0.2
 
 # Crawler config
 ENV CRAWLER_DEADLETTER_PROVIDER=cd(azblob)
@@ -58,6 +58,6 @@ RUN mkdir -p "${APPDIR}" && cp -a /tmp/node_modules "${APPDIR}"
 WORKDIR "${APPDIR}"
 COPY . "${APPDIR}"
 
-ENV PORT 5000
+ENV PORT=5000
 EXPOSE 5000
 ENTRYPOINT ["node", "index.js"]

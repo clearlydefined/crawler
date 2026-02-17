@@ -2,7 +2,7 @@
   "headers": [
     {
       "tool_name": "scancode-toolkit",
-      "tool_version": "32.1.0",
+      "tool_version": "32.3.3",
       "options": {
         "input": [
           "/tmp/cd-K3JUa3/data"

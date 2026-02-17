@@ -6,12 +6,17 @@ const fs = require('fs')
 const { promisify } = require('util')
 const child_process = require('child_process')
 const execFile = promisify(child_process.execFile)
-
 class ScanCodeProcessor extends AbstractProcessor {
   constructor(options) {
     super(options)
+
     // Kick off version detection but don't wait. We'll wait before processing anything
-    this._versionPromise = this._detectVersion()
+    this._versionPromise = this._detectVersion().then(version => {
+      this.logger.info(
+        `Detected SCANCODE version: ${this._toolVersion}, Aggregated handler version: ${this._schemaVersion}`
+      )
+      return version
+    })
   }
 
   get toolVersion() {
@@ -57,6 +62,7 @@ class ScanCodeProcessor extends AbstractProcessor {
       this.logger.error(error, request.meta)
       // TODO see if the new version of ScanCode has a better way of differentiating errors
       if (this._isRealError(error) || this._hasRealErrors(file.name)) {
+        this.logger.error(`ScanCode run failed for ${request.toString()}`, { error: error.message })
         request.markDead('Error', error ? error.message : 'ScanCode run failed')
         throw error
       }
@@ -115,23 +121,36 @@ class ScanCodeProcessor extends AbstractProcessor {
   }
 
   _detectVersion() {
-    if (this._versionPromise) return this._versionPromise
-    this._versionPromise = execFile(`${this.options.installDir}/scancode`, ['--version'])
-      .then(result => {
-        this.logger.info('Detecting ScanCode version')
-
-        const raw_output = result.stdout
-        const scancode_line = raw_output.match(/ScanCode version: .*\n/)[0]
-        this._toolVersion = scancode_line.replace('ScanCode version: ', '').trim()
-        this._schemaVersion = this.aggregateVersions(
-          [this._schemaVersion, this.toolVersion, this.configVersion],
-          'Invalid ScanCode version'
-        )
-        return this._schemaVersion
-      })
-      .catch(error => {
-        this.logger.warn(`Could not detect version of ScanCode: ${error.message} `)
-      })
+    if (!this._versionPromise) {
+      this._versionPromise = execFile(`${this.options.installDir}/scancode`, ['--version'])
+        .then(result => {
+          const versionRegex = /ScanCode version:\s*([0-9]+\.[0-9]+(\.[0-9]+)?)/i
+          const lines = result.stdout.split('\n')
+          let version = null
+          for (const line of lines) {
+            const match = line.match(versionRegex)
+            if (match) {
+              version = match[1]
+              break
+            }
+          }
+          if (!version) {
+            throw new Error('Could not parse ScanCode version from output:\n' + result.stdout)
+          }
+          this._toolVersion = version
+          this._schemaVersion = this.aggregateVersions(
+            [this._schemaVersion, this.toolVersion, this.configVersion],
+            'Invalid ScanCode version'
+          )
+          return this._schemaVersion
+        })
+        .catch(error => {
+          if (this.logger && this.logger.error) {
+            this.logger.error('Could not detect version of ScanCode', { error: error.message })
+          }
+          return null
+        })
+    }
     return this._versionPromise
   }
 }

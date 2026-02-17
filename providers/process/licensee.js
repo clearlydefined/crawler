@@ -14,6 +14,9 @@ class LicenseeProcessor extends AbstractProcessor {
     super(options)
     // Kick off version detection but don't wait. We'll wait before processing anything
     this._versionPromise = this._detectVersion()
+    this._versionPromise.then(version => {
+      this.logger?.info(`Detected LICENSEE version: ${version}`)
+    })
   }
 
   get toolVersion() {

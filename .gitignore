@@ -1,9 +1,30 @@
+
+# Dependency directories
 node_modules/
+
+
+# Log files
 npm-debug.log
+
+
+# Coverage output (used by tools like Istanbul/nyc)
 coverage/
-.DS_Store
-.npmrc
 .nyc_output
+
+
+# System files
+.DS_Store
+
+
+# Editor and OS backup files
 *~
 \#*#
+
+
+# Configuration files
+.npmrc
+
+
+# Environment variable files
+.env
 env.json
