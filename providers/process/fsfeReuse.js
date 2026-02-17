@@ -15,6 +15,10 @@ class FsfeReuseProcessor extends AbstractProcessor {
     super(options)
     // Kick off version detection but don't wait. We'll wait before processing anything...
     this._versionPromise = this._detectVersion()
+    // Log the resolved version when it's available
+    this._versionPromise.then(schemaVersion => {
+      this.logger?.info(`Detected REUSE tool version: ${this._toolVersion}, schema version: ${schemaVersion}`)
+    })
   }
 
   get toolVersion() {
@@ -145,10 +149,17 @@ class FsfeReuseProcessor extends AbstractProcessor {
 
   _detectVersion() {
     if (this._versionPromise !== undefined) return this._versionPromise
+
     this._versionPromise = execFile('reuse', ['--version'])
       .then(result => {
-        const reuseRegex = /reuse\s+(\d+\.\d+(\.\d+)?)/i
-        this._toolVersion = result.stdout.trim().match(reuseRegex)[1]
+        const reuseRegex = /reuse[^\d]*(\d+\.\d+(?:\.\d+)?)/i
+        const match = result.stdout.trim().match(reuseRegex)
+
+        if (!match) {
+          throw new Error(`Could not parse version from output: ${result.stdout}`)
+        }
+
+        this._toolVersion = match[1]
         this._schemaVersion = this.aggregateVersions(
           [this._schemaVersion, this.toolVersion, this.configVersion],
           'Invalid REUSE version'
@@ -158,6 +169,7 @@ class FsfeReuseProcessor extends AbstractProcessor {
       .catch(error => {
         if (error) this.logger.warn(`Could not detect version of REUSE: ${error.message}`)
       })
+
     return this._versionPromise
   }
 }
