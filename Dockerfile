@@ -58,6 +58,6 @@ RUN mkdir -p "${APPDIR}" && cp -a /tmp/node_modules "${APPDIR}"
 WORKDIR "${APPDIR}"
 COPY . "${APPDIR}"
 
-ENV PORT 5000
+ENV PORT=5000
 EXPOSE 5000
 ENTRYPOINT ["node", "index.js"]
