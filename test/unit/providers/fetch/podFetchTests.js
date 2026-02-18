@@ -12,14 +12,10 @@ describe('podFetch', () => {
 
   const getVersionsStub = sinon.stub()
   const PodFetch = proxyquire('../../../../providers/fetch/podFetch', {
-    requestretry: {
-      defaults: () => {
-        return {
-          get: getVersionsStub
-        }
-      }
-    },
-    '../../lib/fetch': { callFetch: sinon.stub().resolves(loadJson('registryData.json')) }
+    '../../lib/fetch': {
+      callFetch: sinon.stub().resolves(loadJson('registryData.json')),
+      callFetchWithRetry: getVersionsStub
+    }
   })
 
   let fetch
