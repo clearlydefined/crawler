@@ -7,7 +7,6 @@ const sinon = require('sinon')
 const PassThrough = require('stream').PassThrough
 const nodeFetch = require('../../../../lib/fetch')
 const PypiFetch = require('../../../../providers/fetch/pypiFetch')
-const requestRetryWithDefaults = require('../../../../providers/fetch/requestRetryWithDefaults')
 const Request = require('../../../../ghcrawler/lib/request.js')
 const pypiFetchOptions = { logger: { info: sinon.stub() } }
 const spdxCorrect = require('spdx-correct')
