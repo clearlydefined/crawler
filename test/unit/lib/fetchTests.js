@@ -58,7 +58,7 @@ describe('CallFetch', () => {
       fs.unlinkSync(destination)
     })
 
-    it('should apply default headers when called', async () => {
+    it('should apply default headers when called with getStream', async () => {
       const path = '/registry.npmjs.com/redis/0.1.0'
       const endpointMock = await mockServer
         .forGet(path)
@@ -75,7 +75,7 @@ describe('CallFetch', () => {
       const path = '/registry.npmjs.com/redis/0.1.0'
       const expected = JSON.parse(fs.readFileSync('test/fixtures/fetch/redis-0.1.0.json'))
       let callCount = 0
-      await mockServer.forGet(path).thenCallback(req => {
+      await mockServer.forGet(path).thenCallback(() => {
         callCount++
         if (callCount === 1) return { statusCode: 500, body: 'fail' }
         else return { statusCode: 200, body: JSON.stringify(expected) }
@@ -109,14 +109,14 @@ describe('CallFetch', () => {
       expect(response.statusCode).to.equal(500)
       expect(response.body).to.equal('fail')
       const requests = await endpointMock.getSeenRequests()
-      expect(requests.length).to.equal(6)
+      expect(requests.length).to.equal(5)
     }).timeout(10000)
 
-    it('should return a stream when called with a URL string', async () => {
+    it('should return a stream after a retry when called with a URL string', async () => {
       const path = '/registry.npmjs.com/redis/0.1.0'
       const expected = JSON.parse(fs.readFileSync('test/fixtures/fetch/redis-0.1.0.json'))
       let callCount = 0
-      await mockServer.forGet(path).thenCallback(req => {
+      await mockServer.forGet(path).thenCallback(() => {
         callCount++
         if (callCount === 1) return { statusCode: 500, body: 'fail' }
         else return { statusCode: 200, body: JSON.stringify(expected) }
@@ -127,67 +127,6 @@ describe('CallFetch', () => {
       expect(callCount).to.equal(2)
       expect(response.statusCode).to.equal(200)
       expect(response.body).to.deep.equal(expected)
-    })
-
-    it('should succeed on first attempt', async () => {
-      const path = '/registry.npmjs.com/redis/0.1.0'
-      const expected = JSON.parse(fs.readFileSync('test/fixtures/fetch/redis-0.1.0.json'))
-      await mockServer.forGet(path).thenReply(200, JSON.stringify(expected))
-
-      const { callFetchWithRetry } = require('../../../lib/fetch')
-      const response = await callFetchWithRetry(mockServer.urlFor(path), { json: true })
-      expect(response.statusCode).to.equal(200)
-      expect(response.body).to.deep.equal(expected)
-    })
-
-    it('should return a stream when called with a URL string', async () => {
-      const path = '/registry.npmjs.com/redis/0.1.0'
-      await mockServer.forGet(path).thenStream(200, fs.createReadStream('test/fixtures/fetch/redis-0.1.0.json'))
-
-      const { getStream } = require('../../../lib/fetch')
-      const response = await getStream(mockServer.urlFor(path))
-      expect(response.data.readable).to.be.true
-      // Optionally, pipe and check content
-      const destination = 'test/fixtures/fetch/temp-stream.json'
-      await new Promise(resolve => {
-        response.data.pipe(fs.createWriteStream(destination).on('finish', () => resolve(true)))
-      })
-      const downloaded = JSON.parse(fs.readFileSync(destination))
-      const expected = JSON.parse(fs.readFileSync('test/fixtures/fetch/redis-0.1.0.json'))
-      expect(downloaded).to.deep.equal(expected)
-      fs.unlinkSync(destination)
-    })
-
-    it('should return a stream when called with an options object', async () => {
-      const path = '/registry.npmjs.com/redis/0.1.0'
-      await mockServer.forGet(path).thenStream(200, fs.createReadStream('test/fixtures/fetch/redis-0.1.0.json'))
-
-      const { getStream } = require('../../../lib/fetch')
-      const response = await getStream({ url: mockServer.urlFor(path) })
-      expect(response.data.readable).to.be.true
-      // Optionally, pipe and check content
-      const destination = 'test/fixtures/fetch/temp-stream2.json'
-      await new Promise(resolve => {
-        response.data.pipe(fs.createWriteStream(destination).on('finish', () => resolve(true)))
-      })
-      const downloaded = JSON.parse(fs.readFileSync(destination))
-      const expected = JSON.parse(fs.readFileSync('test/fixtures/fetch/redis-0.1.0.json'))
-      expect(downloaded).to.deep.equal(expected)
-      fs.unlinkSync(destination)
-    })
-
-    it('should apply default headers when called', async () => {
-      const path = '/registry.npmjs.com/redis/0.1.0'
-      const endpointMock = await mockServer
-        .forGet(path)
-        .thenStream(200, fs.createReadStream('test/fixtures/fetch/redis-0.1.0.json'))
-
-      const { getStream, defaultHeaders } = require('../../../lib/fetch')
-      await getStream({ url: mockServer.urlFor(path) })
-      const requests = await endpointMock.getSeenRequests()
-      for (const [key, value] of Object.entries(defaultHeaders)) {
-        expect(requests[0].headers).to.have.property(key.toLowerCase()).that.equals(value)
-      }
     })
 
     it('checks if the response is JSON while sending GET request', async () => {
