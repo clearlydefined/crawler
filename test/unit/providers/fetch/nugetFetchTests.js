@@ -8,7 +8,6 @@ const proxyquire = require('proxyquire')
 const Request = require('../../../../ghcrawler').request
 const PassThrough = require('stream').PassThrough
 const fs = require('fs')
-const { callFetchWithRetry } = require('../../../../lib/fetch')
 
 describe('NuGet fetch', () => {
   it('should normalize version correctly', () => {

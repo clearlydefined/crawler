@@ -99,13 +99,12 @@ class NuGetFetch extends AbstractFetch {
   }
 
   async _getPackage(zip, packageContentUrl) {
+    const response = await requestRetry(packageContentUrl, { json: false, encoding: null })
     return new Promise((resolve, reject) => {
-      requestRetry(packageContentUrl, { json: false, encoding: null }).then(response => {
-        response.body
-          .pipe(fs.createWriteStream(zip))
-          .on('finish', () => resolve(null))
-          .on('error', reject)
-      })
+      response.body
+        .pipe(fs.createWriteStream(zip))
+        .on('finish', () => resolve(null))
+        .on('error', reject)
     })
   }
 
