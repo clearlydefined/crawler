@@ -58,7 +58,7 @@ describe('CallFetch', () => {
       fs.unlinkSync(destination)
     })
 
-    it('should apply default headers when called', async () => {
+    it('should apply default headers when called with getStream', async () => {
       const path = '/registry.npmjs.com/redis/0.1.0'
       const endpointMock = await mockServer
         .forGet(path)
@@ -70,6 +70,63 @@ describe('CallFetch', () => {
       for (const [key, value] of Object.entries(defaultHeaders)) {
         expect(requests[0].headers).to.have.property(key.toLowerCase()).that.equals(value)
       }
+    })
+    it('should retry and succeed after a failure', async () => {
+      const path = '/registry.npmjs.com/redis/0.1.0'
+      const expected = JSON.parse(fs.readFileSync('test/fixtures/fetch/redis-0.1.0.json'))
+      let callCount = 0
+      await mockServer.forGet(path).thenCallback(() => {
+        callCount++
+        if (callCount === 1) return { statusCode: 500, body: 'fail' }
+        else return { statusCode: 200, body: JSON.stringify(expected) }
+      })
+
+      const { callFetchWithRetry } = require('../../../lib/fetch')
+      const response = await callFetchWithRetry(mockServer.urlFor(path), { json: true }, { maxAttempts: 3 })
+      expect(callCount).to.equal(2)
+      expect(response.statusCode).to.equal(200)
+      expect(response.body).to.deep.equal(expected)
+    })
+
+    it('should succeed on first attempt', async () => {
+      const path = '/registry.npmjs.com/redis/0.1.0'
+      const expected = JSON.parse(fs.readFileSync('test/fixtures/fetch/redis-0.1.0.json'))
+      await mockServer.forGet(path).thenReply(200, JSON.stringify(expected))
+
+      const { callFetchWithRetry } = require('../../../lib/fetch')
+      const response = await callFetchWithRetry(mockServer.urlFor(path), { json: true })
+      expect(response.statusCode).to.equal(200)
+      expect(response.body).to.deep.equal(expected)
+    })
+
+    it('should return error info after all retries fail', async () => {
+      const path = '/registry.npmjs.com/redis/0.1.2'
+      const endpointMock = await mockServer.forGet(path).thenReply(500, 'fail')
+
+      const { callFetchWithRetry } = require('../../../lib/fetch')
+      const response = await callFetchWithRetry(mockServer.urlFor(path), { json: true }, { maxAttempts: 5 })
+
+      expect(response.statusCode).to.equal(500)
+      expect(response.body).to.equal('fail')
+      const requests = await endpointMock.getSeenRequests()
+      expect(requests.length).to.equal(5)
+    }).timeout(10000)
+
+    it('should return a stream after a retry when called with a URL string', async () => {
+      const path = '/registry.npmjs.com/redis/0.1.0'
+      const expected = JSON.parse(fs.readFileSync('test/fixtures/fetch/redis-0.1.0.json'))
+      let callCount = 0
+      await mockServer.forGet(path).thenCallback(() => {
+        callCount++
+        if (callCount === 1) return { statusCode: 500, body: 'fail' }
+        else return { statusCode: 200, body: JSON.stringify(expected) }
+      })
+
+      const { callFetchWithRetry } = require('../../../lib/fetch')
+      const response = await callFetchWithRetry(mockServer.urlFor(path), { json: true }, { maxAttempts: 3 })
+      expect(callCount).to.equal(2)
+      expect(response.statusCode).to.equal(200)
+      expect(response.body).to.deep.equal(expected)
     })
 
     it('checks if the response is JSON while sending GET request', async () => {

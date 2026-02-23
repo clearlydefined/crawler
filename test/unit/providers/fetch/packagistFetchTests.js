@@ -21,15 +21,13 @@ const hashes = {
 describe('packagistFetch', () => {
   beforeEach(() => {
     const resultBox = {}
-    const requestRetryStub = {
-      get: url => {
-        if (url.includes('regError')) throw new Error('Invalid url')
-        if (url.includes('missing')) return { statusCode: 404, body: null }
-        if (url.includes('symfony/polyfill-mbstring')) {
-          return { statusCode: 200, body: resultBox.result }
-        }
+    const requestRetryStub = url => {
+      if (url.includes('regError')) throw new Error('Invalid url')
+      if (url.includes('missing')) return { statusCode: 404, body: null }
+      if (url.includes('symfony/polyfill-mbstring')) {
         return { statusCode: 200, body: resultBox.result }
       }
+      return { statusCode: 200, body: resultBox.result }
     }
     const getStub = url_hash => {
       const response = new PassThrough()
@@ -45,8 +43,7 @@ describe('packagistFetch', () => {
       return Promise.resolve(response)
     }
     Fetch = proxyquire('../../../../providers/fetch/packagistFetch', {
-      requestretry: { defaults: () => requestRetryStub },
-      '../../lib/fetch': { getStream: getStub }
+      '../../lib/fetch': { getStream: getStub, callFetchWithRetry: requestRetryStub }
     })
     Fetch._resultBox = resultBox
   })
