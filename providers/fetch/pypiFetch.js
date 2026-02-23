@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractFetch = require('./abstractFetch')
-const requestRetry = require('./requestRetryWithDefaults')
 const nodeRequest = require('../../lib/fetch')
 const fs = require('fs')
 const spdxCorrect = require('spdx-correct')
@@ -46,7 +45,7 @@ class PyPiFetch extends AbstractFetch {
 
   async _getRegistryData(spec) {
     const baseUrl = providerMap.pypi
-    const { body, statusCode } = await requestRetry.callFetchWithRetry(`${baseUrl}/pypi/${spec.name}/json`, {
+    const { body, statusCode } = await nodeRequest.callFetchWithRetry(`${baseUrl}/pypi/${spec.name}/json`, {
       json: true
     })
     if (statusCode !== 200 || !body) return null
