@@ -70,8 +70,7 @@ class NuGetFetch extends AbstractFetch {
     // Example: https://api.nuget.org/v3/registration5/moq/4.8.2.json and follow catalogEntry
     // https://api.nuget.org/v3/registration5-gz-semver2/microsoft.powershell.native/7.0.0-preview.1.json
     const { body, statusCode } = await requestRetry(
-      `${baseUrl}/v3/registration5-gz-semver2/${spec.name.toLowerCase()}/${spec.revision}.json`,
-      { gzip: true }
+      `${baseUrl}/v3/registration5-gz-semver2/${spec.name.toLowerCase()}/${spec.revision}.json`
     )
     return statusCode !== 200 || !body ? null : JSON.parse(body)
   }
