@@ -9,13 +9,7 @@ const Insights = require('./insights')
 const REDACTED = '[REDACTED]'
 const OMITTED_REQUEST = '[request omitted]'
 const OMITTED_RESPONSE = '[response omitted]'
-const SENSITIVE_HEADERS = new Set([
-  'authorization',
-  'proxy-authorization',
-  'cookie',
-  'set-cookie',
-  'x-api-key'
-])
+const SENSITIVE_HEADERS = new Set(['authorization', 'proxy-authorization', 'cookie', 'set-cookie', 'x-api-key'])
 
 const levelMap = new Map([
   ['error', appInsights.KnownSeverityLevel.Error],
