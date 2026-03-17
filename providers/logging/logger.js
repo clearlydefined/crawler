@@ -130,6 +130,37 @@ const sanitizeFormat = winston.format(info => {
   return info
 })
 
+/**
+ * AppInsights v3 internally accesses value.constructor.name when converting
+ * telemetry properties to log records. Objects with a null prototype (e.g.,
+ * Express req.params via Object.create(null)) lack .constructor, causing
+ * TypeError. This function rehydrates such objects into plain Objects.
+ * @param {Record<string, any>} info
+ * @returns {Record<string, any>}
+ */
+function buildProperties(info) {
+  return Object.fromEntries(
+    Object.entries(info || {}).map(([key, value]) => {
+      // Fix null-prototype objects
+      if (value && typeof value === 'object' && Object.getPrototypeOf(value) === null) {
+        // Rehydrate into a plain object with normal prototype
+        try {
+          value = Object.assign({}, value)
+        } catch {
+          // It is possible to have null‑prototype objects with throwing getters.
+          // As a last resort, stringify
+          try {
+            value = JSON.stringify(value)
+          } catch {
+            value = '[unserializable object]'
+          }
+        }
+      }
+      return [key, value]
+    })
+  )
+}
+
 function factory(tattoos) {
   const connectionString = config.get('CRAWLER_INSIGHTS_CONNECTION_STRING')
   const echo = config.get('CRAWLER_ECHO')
@@ -172,18 +203,19 @@ function factory(tattoos) {
   logger.on('data', info => {
     if (!aiClient) return
 
+    const properties = buildProperties(info)
     if (info.level === 'error') {
       if (info.stack) {
-        aiClient.trackException({ exception: new Error(info.message), properties: info })
+        aiClient.trackException({ exception: new Error(info.message), properties })
       } else {
         aiClient.trackTrace({
           message: info.message,
           severity: appInsights.KnownSeverityLevel.Error,
-          properties: info
+          properties
         })
       }
     } else {
-      aiClient.trackTrace({ message: info.message, severity: mapLevel(info.level), properties: info })
+      aiClient.trackTrace({ message: info.message, severity: mapLevel(info.level), properties })
     }
   })
 
@@ -193,5 +225,6 @@ function factory(tattoos) {
 factory.sanitizeHeaders = sanitizeHeaders
 factory.sanitizeMeta = sanitizeMeta
 factory.safeStringify = safeStringify
+factory.buildProperties = buildProperties
 
 module.exports = factory
