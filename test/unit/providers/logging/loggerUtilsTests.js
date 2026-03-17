@@ -1,8 +1,8 @@
-// Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
+// (c) Copyright 2026, SAP SE and ClearlyDefined contributors. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
 const { expect } = require('chai')
-const loggerFactory = require('../../../../providers/logging/logger')
+const { sanitizeHeaders, sanitizeMeta, buildProperties } = require('../../../../providers/logging/loggerUtils')
 
 describe('logger meta sanitization', () => {
   it('redacts sensitive headers', () => {
@@ -12,7 +12,7 @@ describe('logger meta sanitization', () => {
       cookie: 'cookie=1',
       other: 'ok'
     }
-    const sanitized = loggerFactory.sanitizeHeaders(headers)
+    const sanitized = sanitizeHeaders(headers)
     expect(sanitized.Authorization).to.equal('[REDACTED]')
     expect(sanitized['x-api-key']).to.equal('[REDACTED]')
     expect(sanitized.cookie).to.equal('[REDACTED]')
@@ -28,7 +28,7 @@ describe('logger meta sanitization', () => {
     req.socket = { parser: { socket: req } }
 
     const meta = { req }
-    const sanitized = loggerFactory.sanitizeMeta(meta)
+    const sanitized = sanitizeMeta(meta)
 
     expect(sanitized.req).to.include({ method: 'GET', url: '/test' })
     expect(() => JSON.stringify(sanitized)).to.not.throw()
@@ -44,7 +44,7 @@ describe('logger meta sanitization', () => {
       }
     }
 
-    const sanitized = loggerFactory.sanitizeMeta(meta)
+    const sanitized = sanitizeMeta(meta)
     expect(sanitized.config).to.deep.equal({
       method: 'get',
       url: 'https://example.com',
@@ -66,40 +66,40 @@ describe('buildProperties', () => {
 
   it('rehydrates null-prototype dictionary to plain object', () => {
     const info = { requestParams: createNullProtoDict({ foo: 'bar' }) }
-    const result = loggerFactory.buildProperties(info)
+    const result = buildProperties(info)
     expect(result.requestParams).to.deep.equal({ foo: 'bar' })
     expect(Object.getPrototypeOf(result.requestParams)).to.equal(Object.prototype)
   })
 
   it('leaves plain objects unchanged (by reference)', () => {
     const obj = { a: 1, b: 'x' }
-    const result = loggerFactory.buildProperties({ meta: obj })
+    const result = buildProperties({ meta: obj })
     expect(result.meta).to.equal(obj)
   })
 
   it('passes through arrays and primitives', () => {
     const info = { list: [1, 2, 3], s: 'str', n: 42, b: true, u: undefined, nl: null }
-    const result = loggerFactory.buildProperties(info)
+    const result = buildProperties(info)
     expect(result).to.deep.equal(info)
   })
 
   it('falls back to "[unserializable object]" when getter throws on null-prototype', () => {
     const dict = withThrowingGetter()
-    const result = loggerFactory.buildProperties({ requestParams: dict })
+    const result = buildProperties({ requestParams: dict })
     expect(result.requestParams).to.equal('[unserializable object]')
   })
 
   it('uses JSON.stringify via toJSON when assign fails but stringify succeeds', () => {
     const dict = withThrowingGetter()
     Object.defineProperty(dict, 'toJSON', { value: () => ({ safe: 'ok' }) })
-    const result = loggerFactory.buildProperties({ requestParams: dict })
+    const result = buildProperties({ requestParams: dict })
     expect(result.requestParams).to.equal(JSON.stringify({ safe: 'ok' }))
   })
 
   it('does not process nested null-prototype objects (shallow only)', () => {
     const nested = createNullProtoDict({ a: 'b' })
     const parent = { child: nested }
-    const result = loggerFactory.buildProperties({ parent })
+    const result = buildProperties({ parent })
     expect(result.parent.child).to.equal(nested)
   })
 })
