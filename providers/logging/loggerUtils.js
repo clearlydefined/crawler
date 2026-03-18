@@ -58,11 +58,11 @@ function sanitizeMeta(meta) {
       sanitized[key] = summarizeResponse(value)
       return
     }
-    if (key === 'request' && !meta.req) {
+    if (key === 'request') {
       sanitized[key] = OMITTED_REQUEST
       return
     }
-    if (key === 'response' && !meta.res) {
+    if (key === 'response') {
       sanitized[key] = OMITTED_RESPONSE
       return
     }

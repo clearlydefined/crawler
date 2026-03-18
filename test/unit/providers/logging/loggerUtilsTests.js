@@ -52,6 +52,54 @@ describe('logger meta sanitization', () => {
       headers: { Authorization: '[REDACTED]' }
     })
   })
+
+  it('omits request even when req exists', () => {
+    const req = {
+      method: 'GET',
+      url: '/test',
+      headers: { 'x-request-id': '123' }
+    }
+    const circularRequest = {}
+    circularRequest.self = circularRequest
+
+    const sanitized = sanitizeMeta({ req, request: circularRequest })
+
+    expect(sanitized.req).to.include({ method: 'GET', url: '/test', requestId: '123' })
+    expect(sanitized.request).to.equal('[request omitted]')
+    expect(() => JSON.stringify(sanitized)).to.not.throw()
+  })
+
+  it('omits response even when res exists', () => {
+    const res = { statusCode: 200, statusMessage: 'OK' }
+    const circularResponse = {}
+    circularResponse.self = circularResponse
+
+    const sanitized = sanitizeMeta({ res, response: circularResponse })
+
+    expect(sanitized.res).to.deep.equal({ statusCode: 200, statusMessage: 'OK' })
+    expect(sanitized.response).to.equal('[response omitted]')
+    expect(() => JSON.stringify(sanitized)).to.not.throw()
+  })
+
+  it('omits request when only request exists', () => {
+    const circularRequest = {}
+    circularRequest.self = circularRequest
+
+    const sanitized = sanitizeMeta({ request: circularRequest })
+
+    expect(sanitized.request).to.equal('[request omitted]')
+    expect(() => JSON.stringify(sanitized)).to.not.throw()
+  })
+
+  it('omits response when only response exists', () => {
+    const circularResponse = {}
+    circularResponse.self = circularResponse
+
+    const sanitized = sanitizeMeta({ response: circularResponse })
+
+    expect(sanitized.response).to.equal('[response omitted]')
+    expect(() => JSON.stringify(sanitized)).to.not.throw()
+  })
 })
 
 describe('buildProperties', () => {
