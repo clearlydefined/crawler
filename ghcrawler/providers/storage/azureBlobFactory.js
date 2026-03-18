@@ -40,25 +40,25 @@ module.exports = options => {
       pipelineOptions
     )
   } else {
-  if (isSpnAuth) {
-    options.logger.info('using service principal credentials in azureBlobFactory')
-    const authParsed = JSON.parse(spnAuth)
-    blobServiceClient = new BlobServiceClient(
-      `https://${account}.queue.core.windows.net`,
-      new ClientSecretCredential(authParsed.tenantId, authParsed.clientId, authParsed.clientSecret),
-      pipelineOptions
-    )
-  } else {
-    if (connection) {
-      options.logger.info('using connection string in azureBlobFactory')
-      blobServiceClient = BlobServiceClient.fromConnectionString(connection, pipelineOptions)
-    } else {
-      options.logger.info('using default credentials in azureBlobFactory')
+    if (isSpnAuth) {
+      options.logger.info('using service principal credentials in azureBlobFactory')
+      const authParsed = JSON.parse(spnAuth)
       blobServiceClient = new BlobServiceClient(
         `https://${account}.queue.core.windows.net`,
-        new DefaultAzureCredential(),
+        new ClientSecretCredential(authParsed.tenantId, authParsed.clientId, authParsed.clientSecret),
         pipelineOptions
       )
+    } else {
+      if (connection) {
+        options.logger.info('using connection string in azureBlobFactory')
+        blobServiceClient = BlobServiceClient.fromConnectionString(connection, pipelineOptions)
+      } else {
+        options.logger.info('using default credentials in azureBlobFactory')
+        blobServiceClient = new BlobServiceClient(
+          `https://${account}.queue.core.windows.net`,
+          new DefaultAzureCredential(),
+          pipelineOptions
+        )
       }
     }
   }
