@@ -14,10 +14,12 @@ const { DefaultAzureCredential, ClientSecretCredential } = require('@azure/ident
  * @param {object} options.logger
  * @param {object} options.spnAuth
  * @param {object} options.isSpnAuth
+ * @param {boolean|string} options.useManagedIdentity
  */
 module.exports = options => {
   options.logger.info('creating azure storage store')
-  const { account, connection, container, spnAuth, isSpnAuth } = options
+  const { account, connection, container, spnAuth, isSpnAuth, useManagedIdentity } = options
+  const useManagedIdentityEnabled = useManagedIdentity === true || useManagedIdentity === 'true'
 
   const pipelineOptions = {
     retryOptions: {
@@ -30,6 +32,14 @@ module.exports = options => {
   }
   let blobServiceClient
 
+  if (useManagedIdentityEnabled) {
+    options.logger.info('using managed identity in azureBlobFactory')
+    blobServiceClient = new BlobServiceClient(
+      `https://${account}.queue.core.windows.net`,
+      new DefaultAzureCredential(),
+      pipelineOptions
+    )
+  } else {
   if (isSpnAuth) {
     options.logger.info('using service principal credentials in azureBlobFactory')
     const authParsed = JSON.parse(spnAuth)
@@ -49,6 +59,7 @@ module.exports = options => {
         new DefaultAzureCredential(),
         pipelineOptions
       )
+      }
     }
   }
 

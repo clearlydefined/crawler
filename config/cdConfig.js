@@ -8,7 +8,8 @@ const cd_azblob = {
   container: config.get('CRAWLER_AZBLOB_CONTAINER_NAME'),
   account: config.get('CRAWLER_AZBLOB_ACCOUNT_NAME'),
   spnAuth: config.get('CRAWLER_AZBLOB_SPN_AUTH'),
-  isSpnAuth: config.get('CRAWLER_AZBLOB_IS_SPN_AUTH') || false
+  isSpnAuth: config.get('CRAWLER_AZBLOB_IS_SPN_AUTH') || false,
+  useManagedIdentity: config.get('CRAWLER_AZBLOB_USE_MANAGED_IDENTITY') || false
 }
 
 const githubToken = config.get('CRAWLER_GITHUB_TOKEN')
@@ -126,6 +127,7 @@ module.exports = {
       queueName: config.get('CRAWLER_HARVESTS_QUEUE_NAME') || 'harvests',
       spnAuth: config.get('CRAWLER_HARVESTS_QUEUE_SPN_AUTH'),
       isSpnAuth: config.get('CRAWLER_HARVESTS_QUEUE_IS_SPN_AUTH') || false,
+      useManagedIdentity: config.get('CRAWLER_HARVESTS_QUEUE_USE_MANAGED_IDENTITY') || false,
       visibilityTimeout: isNaN(azqueueVisibilityTimeoutSeconds) ? 0 : azqueueVisibilityTimeoutSeconds
     },
     'cd(azblob)': cd_azblob,
@@ -153,7 +155,8 @@ module.exports = {
       },
       spnAuth: config.get('CRAWLER_QUEUE_AZURE_SPN_AUTH') || cd_azblob.spnAuth,
       account: config.get('CRAWLER_QUEUE_AZURE_ACCOUNT_NAME') || cd_azblob.account,
-      isSpnAuth: config.get('CRAWLER_QUEUE_AZURE_IS_SPN_AUTH') || false
+      isSpnAuth: config.get('CRAWLER_QUEUE_AZURE_IS_SPN_AUTH') || false,
+      useManagedIdentity: config.get('CRAWLER_QUEUE_AZURE_USE_MANAGED_IDENTITY') || false
     },
     appVersion: config.get('APP_VERSION'),
     buildsha: config.get('BUILD_SHA')
