@@ -19,7 +19,19 @@ class StorageQueueManager {
       }
     }
 
-    const { account, spnAuth, isSpnAuth } = options
+    const { account, spnAuth, isSpnAuth, useManagedIdentity } = options
+    const useManagedIdentityEnabled = useManagedIdentity === true || useManagedIdentity === 'true'
+
+    if (useManagedIdentityEnabled) {
+      options.logger.info('using managed identity in storageQueueManager')
+      this.client = new QueueServiceClient(
+        `https://${account}.queue.core.windows.net`,
+        new DefaultAzureCredential(),
+        pipelineOptions
+      )
+      return
+    }
+
     if (isSpnAuth) {
       options.logger.info('using service principal credentials in storageQueueManager')
       const authParsed = JSON.parse(spnAuth)

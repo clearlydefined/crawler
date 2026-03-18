@@ -169,6 +169,17 @@ queues.
 Set env var `CRAWLER_QUEUE_AZURE_CONNECTION_STRING` with a connection string
 obtained from Azure.
 
+To force managed identity for Azure-backed queue/blob providers (and explicitly
+skip SPN + connection-string auth branches), set one or more of:
+
+- `CRAWLER_QUEUE_AZURE_USE_MANAGED_IDENTITY=true` (`queue.storageQueue`)
+- `CRAWLER_HARVESTS_QUEUE_USE_MANAGED_IDENTITY=true` (`store.azqueue`)
+- `CRAWLER_AZBLOB_USE_MANAGED_IDENTITY=true` (`store.cd(azblob)`)
+
+When a `*_USE_MANAGED_IDENTITY` flag is set, the provider uses
+`DefaultAzureCredential` directly even if SPN or connection-string values are
+also configured.
+
 ## Build and run Docker image locally
 
 `docker build --platform linux/amd64 -t cdcrawler:latest .`
