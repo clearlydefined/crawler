@@ -10,7 +10,8 @@ class AzureStorageQueue {
     this.queueName = options.queueName
     this.logger = options.logger
 
-    const { connectionString, account, spnAuth, isSpnAuth } = options
+    const { connectionString, account, spnAuth, isSpnAuth, useManagedIdentity } = options
+    const useManagedIdentityEnabled = useManagedIdentity === true || useManagedIdentity === 'true'
 
     const pipelineOptions = {
       retryOptions: {
@@ -20,6 +21,16 @@ class AzureStorageQueue {
         tryTimeoutInMs: 30000,
         retryPolicyType: StorageRetryPolicyType.FIXED
       }
+    }
+
+    if (useManagedIdentityEnabled) {
+      options.logger.info('using managed identity in azureQueueStore')
+      this.client = new QueueServiceClient(
+        `https://${account}.queue.core.windows.net`,
+        new DefaultAzureCredential(),
+        pipelineOptions
+      )
+      return
     }
 
     if (isSpnAuth) {
