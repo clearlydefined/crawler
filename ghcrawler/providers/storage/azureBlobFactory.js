@@ -14,10 +14,12 @@ const { DefaultAzureCredential, ClientSecretCredential } = require('@azure/ident
  * @param {object} options.logger
  * @param {object} options.spnAuth
  * @param {object} options.isSpnAuth
+ * @param {boolean|string} options.useManagedIdentity
  */
 module.exports = options => {
   options.logger.info('creating azure storage store')
-  const { account, connection, container, spnAuth, isSpnAuth } = options
+  const { account, connection, container, spnAuth, isSpnAuth, useManagedIdentity } = options
+  const useManagedIdentityEnabled = useManagedIdentity === true || useManagedIdentity === 'true'
 
   const pipelineOptions = {
     retryOptions: {
@@ -30,25 +32,34 @@ module.exports = options => {
   }
   let blobServiceClient
 
-  if (isSpnAuth) {
-    options.logger.info('using service principal credentials in azureBlobFactory')
-    const authParsed = JSON.parse(spnAuth)
+  if (useManagedIdentityEnabled) {
+    options.logger.info('using managed identity in azureBlobFactory')
     blobServiceClient = new BlobServiceClient(
       `https://${account}.queue.core.windows.net`,
-      new ClientSecretCredential(authParsed.tenantId, authParsed.clientId, authParsed.clientSecret),
+      new DefaultAzureCredential(),
       pipelineOptions
     )
   } else {
-    if (connection) {
-      options.logger.info('using connection string in azureBlobFactory')
-      blobServiceClient = BlobServiceClient.fromConnectionString(connection, pipelineOptions)
-    } else {
-      options.logger.info('using default credentials in azureBlobFactory')
+    if (isSpnAuth) {
+      options.logger.info('using service principal credentials in azureBlobFactory')
+      const authParsed = JSON.parse(spnAuth)
       blobServiceClient = new BlobServiceClient(
         `https://${account}.queue.core.windows.net`,
-        new DefaultAzureCredential(),
+        new ClientSecretCredential(authParsed.tenantId, authParsed.clientId, authParsed.clientSecret),
         pipelineOptions
       )
+    } else {
+      if (connection) {
+        options.logger.info('using connection string in azureBlobFactory')
+        blobServiceClient = BlobServiceClient.fromConnectionString(connection, pipelineOptions)
+      } else {
+        options.logger.info('using default credentials in azureBlobFactory')
+        blobServiceClient = new BlobServiceClient(
+          `https://${account}.queue.core.windows.net`,
+          new DefaultAzureCredential(),
+          pipelineOptions
+        )
+      }
     }
   }
 
