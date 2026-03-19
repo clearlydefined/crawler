@@ -273,9 +273,7 @@ class Crawler {
     const trackedPromises = request.getTrackedPromises()
     let completedPromises = 0
     let failedPromises = 0
-    for (let i = 0; i < trackedPromises.length; i++) {
-      const originalPromise = trackedPromises[i]
-
+    const loggedPromises = trackedPromises.map(originalPromise =>
       originalPromise.then(
         result => {
           completedPromises++
@@ -297,9 +295,9 @@ class Crawler {
           throw error
         }
       )
-    }
+    )
     debug(`_completeRequest(${loopName}:${request.toUniqueString()}): ${trackedPromises.length} tracked promises`)
-    const completeWork = Promise.all(trackedPromises).then(
+    const completeWork = Promise.all(loggedPromises).then(
       () => {
         debug(`_completeRequest(${loopName}:${request.toUniqueString()}): resolved tracked promises`)
         return self._releaseLock(request).then(
