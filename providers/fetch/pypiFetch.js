@@ -84,7 +84,20 @@ class PyPiFetch extends AbstractFetch {
     return null
   }
 
+  _extractLicenseExpression(registryData) {
+    const licenseExpression = get(registryData, 'info.license_expression')
+    if (licenseExpression && typeof licenseExpression === 'string' && licenseExpression !== '') {
+      return licenseExpression
+    }
+    return null
+  }
+
   _extractDeclaredLicense(registryData) {
+    const licenseExpression = this._extractLicenseExpression(registryData)
+    if (licenseExpression) {
+      return licenseExpression
+    }
+
     const licenseInMetadata = get(registryData, 'info.license')
     const hasVersionInMeta = /\d+/.test(licenseInMetadata)
     const licenseInClassifiers = this._extractLicenseFromClassifiers(registryData)

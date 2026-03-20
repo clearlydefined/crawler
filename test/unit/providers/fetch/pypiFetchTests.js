@@ -68,7 +68,85 @@ describe('pypiFetch handle function', () => {
     expect(result.outcome).to.be.equal('Missing  ')
   })
 
+  describe('extractLicenseExpression (PEP-639)', () => {
+    it('returns license_expression when present', () => {
+      const registryData = { info: { license_expression: 'MIT' } }
+      const result = fetch._extractLicenseExpression(registryData)
+      expect(result).to.be.equal('MIT')
+    })
+
+    it('returns compound SPDX expressions as-is', () => {
+      const registryData = { info: { license_expression: 'MIT AND Apache-2.0' } }
+      const result = fetch._extractLicenseExpression(registryData)
+      expect(result).to.be.equal('MIT AND Apache-2.0')
+    })
+
+    it('returns expressions with WITH clause as-is', () => {
+      const registryData = { info: { license_expression: 'GPL-2.0-or-later WITH Classpath-exception-2.0' } }
+      const result = fetch._extractLicenseExpression(registryData)
+      expect(result).to.be.equal('GPL-2.0-or-later WITH Classpath-exception-2.0')
+    })
+
+    it('returns null when license_expression is missing', () => {
+      const registryData = { info: { license: 'MIT' } }
+      const result = fetch._extractLicenseExpression(registryData)
+      expect(result).to.be.null
+    })
+
+    it('returns null when license_expression is null', () => {
+      const registryData = { info: { license_expression: null } }
+      const result = fetch._extractLicenseExpression(registryData)
+      expect(result).to.be.null
+    })
+
+    it('returns null when license_expression is empty string', () => {
+      const registryData = { info: { license_expression: '' } }
+      const result = fetch._extractLicenseExpression(registryData)
+      expect(result).to.be.null
+    })
+
+    it('returns null when license_expression is not a string', () => {
+      const registryData = { info: { license_expression: 123 } }
+      const result = fetch._extractLicenseExpression(registryData)
+      expect(result).to.be.null
+    })
+  })
+
   describe('extractDeclaredLicense', () => {
+    it('prioritizes license_expression over info.license (PEP-639)', () => {
+      const registryData = {
+        info: {
+          license_expression: 'MIT',
+          license: 'Apache-2.0'
+        }
+      }
+      const declared = fetch._extractDeclaredLicense(registryData)
+      expect(declared).to.be.equal('MIT')
+    })
+
+    it('prioritizes license_expression over classifiers (PEP-639)', () => {
+      const registryData = {
+        info: {
+          license_expression: 'BSD-3-Clause',
+          license: null,
+          classifiers: ['License :: OSI Approved :: MIT License']
+        }
+      }
+      const declared = fetch._extractDeclaredLicense(registryData)
+      expect(declared).to.be.equal('BSD-3-Clause')
+    })
+
+    it('falls back to info.license when license_expression is missing', () => {
+      const registryData = {
+        info: {
+          license: 'MIT',
+          classifiers: []
+        }
+      }
+      const declared = fetch._extractDeclaredLicense(registryData)
+      expect(declared).to.be.equal('MIT')
+    })
+
     it('parses LGPL-2.1-only: info.license over classifiers (crawler/issues/523)', () => {
       const registryData = JSON.parse(fs.readFileSync('test/fixtures/pypi/registryData_lgpl2.json'))
       const declared = fetch._extractDeclaredLicense(registryData)
