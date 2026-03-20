@@ -86,10 +86,7 @@ function factory(tattoos) {
   Insights.setup(tattoos, connectionString, echo)
   const aiClient = Insights.getClient()
 
-  const logFormat = winston.format.combine(
-    sanitizeFormat(),
-    winston.format.errors({ stack: true }),
-  )
+  const logFormat = winston.format.combine(sanitizeFormat(), winston.format.errors({ stack: true }))
 
   const consoleFormat = winston.format.combine(
     winston.format.timestamp(),
