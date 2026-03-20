@@ -42,7 +42,7 @@ class LicenseeProcessor extends AbstractProcessor {
     const location = request.document.location
     request.document = merge(this.clone(request.document), { licensee: record })
     const toAttach = record.output.content.matched_files.map(file => file.filename)
-    this.attachFiles(request.document, toAttach, location)
+    await this.attachFiles(request.document, toAttach, location)
   }
 
   async _run(request) {

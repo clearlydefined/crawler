@@ -548,7 +548,7 @@ class Crawler {
     }
 
     const start = Date.now()
-    const documentToStore = this._buildDocumentToStore(request.document)
+    const documentToStore = await this._buildDocumentToStore(request.document)
     return this.store.upsert(documentToStore).then(upsert => {
       request.upsert = upsert
       request.addMeta({ write: Date.now() - start })
@@ -557,14 +557,14 @@ class Crawler {
     })
   }
 
-  _buildDocumentToStore(document) {
+  async _buildDocumentToStore(document) {
     const contentLocation = document._metadata.contentLocation
     if (!contentLocation)
       // no location indicates the content is inline in the document
       return document
 
     const contentType = document._metadata.contentType
-    const buffer = fs.readFileSync(contentLocation)
+    const buffer = await fs.promises.readFile(contentLocation)
     // if the content is JSON, embed it, otherwise encode
     const content = contentType === 'application/json' ? JSON.parse(buffer) : buffer.toString('base64')
     // trim the content prop out as it has local machine state that is uninteresting

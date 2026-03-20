@@ -67,6 +67,12 @@ describe('AbstractProcessor attach files', () => {
       readFileSync: path => {
         path = path.replace(/\\/g, '/')
         return `${path.startsWith('/test') ? path.slice(6) : path} attachment`
+      },
+      promises: {
+        readFile: async (path, _encoding) => {
+          path = path.replace(/\\/g, '/')
+          return `${path.startsWith('/test') ? path.slice(6) : path} attachment`
+        }
       }
     }
     const handlerClass = proxyquire('../../../../providers/process/abstractProcessor', {
