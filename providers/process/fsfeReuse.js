@@ -46,7 +46,7 @@ class FsfeReuseProcessor extends AbstractProcessor {
     if (!record) return
     const location = request.document.location
     request.document = merge(this.clone(request.document), { reuse: record })
-    this.attachFiles(
+    await this.attachFiles(
       request.document,
       record.licenses.map(file => file.filePath),
       location
