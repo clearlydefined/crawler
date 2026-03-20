@@ -4,6 +4,7 @@
 const config = require('painless-config')
 const appInsights = require('applicationinsights')
 const winston = require('winston')
+const Transport = require('winston-transport')
 const Insights = require('./insights')
 const safeStringify = require('safe-stable-stringify')
 const { sanitizeMeta, buildProperties } = require('./loggerUtils')
@@ -26,6 +27,45 @@ function mapLevel(level) {
   return levelMap.get(level) ?? appInsights.KnownSeverityLevel.Information
 }
 
+class ApplicationInsightsTransport extends Transport {
+  constructor({ aiClient, level, format } = {}) {
+    super({ level, format })
+    this.aiClient = aiClient
+  }
+
+  log(info, callback) {
+    setImmediate(() => this.emit('logged', info))
+
+    if (!this.aiClient || !info) {
+      callback()
+      return
+    }
+
+    const properties = buildProperties(info)
+    if (info.level === 'error') {
+      if (info.stack) {
+        const err = new Error(info.message)
+        err.stack = info.stack
+        this.aiClient.trackException({ exception: err, properties })
+      } else {
+        this.aiClient.trackTrace({
+          message: info.message,
+          severity: appInsights.KnownSeverityLevel.Error,
+          properties
+        })
+      }
+    } else {
+      this.aiClient.trackTrace({
+        message: info.message,
+        severity: mapLevel(info.level),
+        properties
+      })
+    }
+
+    callback()
+  }
+}
+
 const sanitizeFormat = winston.format(info => {
   if (!info || typeof info !== 'object') return info
   const meta = {}
@@ -40,22 +80,18 @@ const sanitizeFormat = winston.format(info => {
 
 function factory(tattoos) {
   const connectionString = config.get('CRAWLER_INSIGHTS_CONNECTION_STRING')
-  const echo = config.get('CRAWLER_ECHO')
+  const rawEcho = config.get('CRAWLER_ECHO')
+  const echo = rawEcho === undefined ? undefined : rawEcho === 'true'
 
   Insights.setup(tattoos, connectionString, echo)
+  const aiClient = Insights.getClient()
 
   const logFormat = winston.format.combine(
     sanitizeFormat(),
-    winston.format.timestamp(),
     winston.format.errors({ stack: true }),
-    winston.format.printf(
-      ({ timestamp, level, message, ...meta }) =>
-        `${timestamp} [${level}]: ${message} ${Object.keys(meta).length ? safeStringify(meta) : ''}`
-    )
   )
 
   const consoleFormat = winston.format.combine(
-    sanitizeFormat(),
     winston.format.timestamp(),
     winston.format.colorize(),
     winston.format.printf(
@@ -71,30 +107,11 @@ function factory(tattoos) {
       new winston.transports.Console({
         format: consoleFormat,
         silent: !echo
+      }),
+      new ApplicationInsightsTransport({
+        aiClient
       })
     ]
-  })
-
-  const aiClient = Insights.getClient()
-
-  // Pipe Winston logs to Application Insights
-  logger.on('data', info => {
-    if (!aiClient) return
-
-    const properties = buildProperties(info)
-    if (info.level === 'error') {
-      if (info.stack) {
-        aiClient.trackException({ exception: new Error(info.message), properties })
-      } else {
-        aiClient.trackTrace({
-          message: info.message,
-          severity: appInsights.KnownSeverityLevel.Error,
-          properties
-        })
-      }
-    } else {
-      aiClient.trackTrace({ message: info.message, severity: mapLevel(info.level), properties })
-    }
   })
 
   return logger
