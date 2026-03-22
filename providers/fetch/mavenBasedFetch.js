@@ -89,7 +89,7 @@ class MavenBasedFetch extends AbstractFetch {
 
   async _getArtifact(spec, destination) {
     const extensions = spec.type === 'sourcearchive' ? [extensionMap.sourcesJar] : [extensionMap.jar, extensionMap.aar]
-    for (let extension of extensions) {
+    for (const extension of extensions) {
       const url = this._buildUrl(spec, extension)
       const status = await new Promise(resolve => {
         this._handleRequestStream(url)

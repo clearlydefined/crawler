@@ -4,7 +4,7 @@
 import NestedQueue = require('./nestedQueue')
 import StorageQueue = require('./storageQueue')
 import Request = require('../../lib/request')
-import { CrawlQueue } from './nestedQueue'
+import type { CrawlQueue } from './nestedQueue'
 
 interface StorageBackedQueueOptions {
   visibilityTimeout_remainLocal?: number

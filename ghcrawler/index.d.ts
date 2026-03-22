@@ -8,7 +8,7 @@ import TraversalPolicy = require('./lib/traversalPolicy')
 import QueueSet = require('./providers/queuing/queueSet')
 import Request = require('./lib/request')
 import VisitorMap = require('./lib/visitorMap')
-import { CrawlerOptions } from './lib/crawler'
+import type { CrawlerOptions } from './lib/crawler'
 
 export {
   Crawler as crawler,

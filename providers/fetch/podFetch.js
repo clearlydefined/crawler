@@ -110,7 +110,7 @@ class PodFetch extends AbstractFetch {
       return null
     }
 
-    let cloneOptions = ['--quiet']
+    const cloneOptions = ['--quiet']
     if (get(podspec, 'source.submodules', false)) {
       cloneOptions.push('--recursive')
     }
@@ -156,7 +156,7 @@ class PodFetch extends AbstractFetch {
     let prefixes
     if (prefixLengths.length > 0) {
       let hashedName = crypto.createHash('md5').update(spec.name).digest('hex')
-      prefixes = prefixLengths.map(function (length) {
+      prefixes = prefixLengths.map(length => {
         const prefix = hashedName.slice(0, length)
         hashedName = hashedName.substring(length)
         return prefix

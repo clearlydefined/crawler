@@ -30,7 +30,9 @@
       "suspicious": {
         "noConsoleLog": "off",
         "noAssignInExpressions": "off",
+        "noConfusingVoidType": "off",
         "noDoubleEquals": "off",
+        "noExplicitAny": "off",
         "noGlobalIsNan": "off"
       },
       "correctness": {

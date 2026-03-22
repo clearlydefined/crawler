@@ -72,4 +72,4 @@ declare class Crawler {
 }
 
 export = Crawler
-export { CrawlerOptions, DocStore, Handler, Locker, RunContext, StoredDocument }
+export { type CrawlerOptions, DocStore, type Handler, type Locker, type RunContext, StoredDocument }

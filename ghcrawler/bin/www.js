@@ -46,7 +46,7 @@ function run(service, logger) {
    */
 
   function normalizePort(val) {
-    const normalizedPort = parseInt(val, 10)
+    const normalizedPort = Number.parseInt(val, 10)
 
     if (isNaN(normalizedPort)) {
       // named pipe

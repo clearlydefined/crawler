@@ -31,4 +31,4 @@ interface DocStore {
   close(): void
 }
 
-export { DocStore, DocumentMetadata, StoredDocument }
+export type { DocStore, DocumentMetadata, StoredDocument }

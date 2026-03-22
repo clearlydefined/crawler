@@ -32,7 +32,7 @@ class VisitorMap {
     /** @type {any} */
     const result = Array.isArray(node) ? [] : {}
     seen.set(node, result)
-    for (let key in node) {
+    for (const key in node) {
       const value = node[key]
       if (typeof value === 'function') {
         result[key] = value
@@ -122,7 +122,7 @@ class VisitorMap {
     }
     path = this._resolvePath(path)
     let current = map
-    let currentPath = []
+    const currentPath = []
     for (let i = 0; i < path.length; i++) {
       const segment = path[i]
       currentPath.push(segment)

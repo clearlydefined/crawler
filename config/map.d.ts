@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-import { MapNode } from '../ghcrawler/lib/visitorMap'
+import type { MapNode } from '../ghcrawler/lib/visitorMap'
 
 interface VisitorMapScenario {
   self: Record<string, never>

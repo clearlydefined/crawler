@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 import Request = require('../../lib/request')
-import { CrawlQueue } from './nestedQueue'
+import type { CrawlQueue } from './nestedQueue'
 
 declare class ScopedQueueSets {
   constructor(globalQueues: import('./queueSet'), localQueues: import('./queueSet'))

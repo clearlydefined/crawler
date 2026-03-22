@@ -43,7 +43,7 @@ describe('crateFetch workflow', () => {
     })
   })
 
-  afterEach(function () {
+  afterEach(() => {
     sinon.restore()
   })
 

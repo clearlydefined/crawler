@@ -102,7 +102,7 @@ describe('FSFE REUSE software process', () => {
     expect(request.processControl).to.equal('skip')
   })
 
-  beforeEach(function () {
+  beforeEach(() => {
     const resultBox = {
       error: null,
       versionResult: 'reuse 0.13.0',
@@ -128,7 +128,7 @@ describe('FSFE REUSE software process', () => {
     Handler._resultBox = resultBox
   })
 
-  afterEach(function () {
+  afterEach(() => {
     sandbox.restore()
   })
 })

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 import Request = require('../../lib/request')
-import { CrawlQueue } from './nestedQueue'
+import type { CrawlQueue } from './nestedQueue'
 
 interface QueueSetOptions {
   weights?: Record<string, number>
