@@ -86,18 +86,18 @@ class AbstractProcessor extends BaseHandler {
    * @param {[string]} files - Relative paths to the attachment files
    * @param {string} location - Root filesystem path that hosts the files to be attached
    */
-  attachFiles(document, files, location = '') {
+  async attachFiles(document, files, location = '') {
     if (!files || !files.length) return
     if (!document._attachments) Object.defineProperty(document, '_attachments', { value: [], enumerable: false })
     document.attachments = document.attachments || []
-    files.forEach(file => {
+    for (const file of files) {
       const fullPath = path.join(location, file)
-      const attachment = fs.readFileSync(fullPath, 'utf8')
+      const attachment = await fs.promises.readFile(fullPath, 'utf8')
       const token = this._computeToken(attachment)
       // Stash the actual content on a hidden prop on the document and note the file in the list of attachments
       document._attachments.push({ path: file, token, attachment })
       document.attachments.push({ path: file, token })
-    })
+    }
   }
 
   /**

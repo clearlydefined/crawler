@@ -56,19 +56,19 @@ class ScanCodeProcessor extends AbstractProcessor {
     } catch (error) {
       this.logger.error(error, request.meta)
       // TODO see if the new version of ScanCode has a better way of differentiating errors
-      if (this._isRealError(error) || this._hasRealErrors(file.name)) {
+      if (this._isRealError(error) || (await this._hasRealErrors(file.name))) {
         request.markDead('Error', error ? error.message : 'ScanCode run failed')
         throw error
       }
     }
   }
 
-  _attachInterestingFiles(document, outputFile, root) {
-    const output = JSON.parse(fs.readFileSync(outputFile))
+  async _attachInterestingFiles(document, outputFile, root) {
+    const output = JSON.parse(await fs.promises.readFile(outputFile, 'utf8'))
     // Pick files that are potentially whole licenses. We can be reasonably agressive here
     // and the summarizers etc will further refine what makes it into the final definitions
     const licenses = output.files.filter(file => file.is_license_text).map(file => file.path)
-    this.attachFiles(document, licenses, root)
+    await this.attachFiles(document, licenses, root)
 
     // Pick files that represent whole packages. We can be reasonably agressive here
     // and the summarizers etc will further refine what makes it into the final definitions
@@ -81,7 +81,7 @@ class ScanCodeProcessor extends AbstractProcessor {
       })
       return result
     }, [])
-    this.attachFiles(document, packages, root)
+    await this.attachFiles(document, packages, root)
   }
 
   // Workaround until https://github.com/nexB/scancode-toolkit/issues/983 is resolved
@@ -91,9 +91,9 @@ class ScanCodeProcessor extends AbstractProcessor {
 
   // Scan the results file for any errors that are not just timeouts or other known errors
   // TODO do we need to do this anymore
-  _hasRealErrors(resultFile) {
+  async _hasRealErrors(resultFile) {
     try {
-      const results = JSON.parse(fs.readFileSync(resultFile))
+      const results = JSON.parse(await fs.promises.readFile(resultFile, 'utf8'))
       return results.files.some(
         file =>
           file.scan_errors &&
