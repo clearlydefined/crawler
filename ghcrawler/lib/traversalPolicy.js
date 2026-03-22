@@ -65,6 +65,7 @@ const { DateTime } = require('luxon')
 const VisitorMap = require('./visitorMap')
 
 class TraversalPolicy {
+  /** @param {any} object */
   static adopt(object) {
     if (object && object.__proto__ !== TraversalPolicy.prototype) {
       object.__proto__ = TraversalPolicy.prototype
@@ -75,6 +76,7 @@ class TraversalPolicy {
     return object
   }
 
+  /** @param {any} spec */
   static _resolveMapSpec(spec) {
     if (!spec) {
       return null
@@ -86,8 +88,18 @@ class TraversalPolicy {
     return VisitorMap.getMap(mapName, path)
   }
 
+  /**
+   * @param {string} processedAt
+   * @param {number} [expiration]
+   * @param {import('luxon').DurationUnit} [unit]
+   */
   static _hasExpired(processedAt, expiration = 0, unit = 'hours') {
-    return !processedAt || DateTime.now().diff(DateTime.fromISO(processedAt), unit)[unit] > expiration
+    return (
+      !processedAt ||
+      DateTime.now()
+        .diff(DateTime.fromISO(processedAt), unit)
+        .as(/** @type {any} */ (unit)) > expiration
+    )
   }
   /**
    * A policy spec has the following form:  <policyName>[:<[scenario/]mapName[@path]].  That means a spec can be just
@@ -96,6 +108,7 @@ class TraversalPolicy {
    * and do things like 'default:self' which is a policy that only processes the referenced entity itself and
    * none of the entities it references.
    */
+  /** @param {string} policySpec */
   static getPolicy(policySpec) {
     const [policyName, mapSpec] = policySpec.split(':')
     const map = TraversalPolicy._resolveMapSpec(mapSpec)
@@ -103,60 +116,80 @@ class TraversalPolicy {
       return null
     }
 
-    const definition = TraversalPolicy[policyName]
+    const definition = /** @type {Record<string, any>} */ (/** @type {any} */ (TraversalPolicy))[policyName]
     return definition ? definition(map) : null
   }
 
+  /** @param {any} map */
   static default(map) {
     return new TraversalPolicy('mutables', 'match', TraversalPolicy._resolveMapSpec(map))
   }
 
+  /** @param {any} map */
   static event(map) {
     return new TraversalPolicy('mutables', 'match', TraversalPolicy._resolveMapSpec(map))
   }
 
+  /** @param {any} map */
   static refresh(map) {
     return new TraversalPolicy('mutables', 'match', TraversalPolicy._resolveMapSpec(map))
   }
 
+  /** @param {any} map */
   static reload(map) {
     return new TraversalPolicy('originStorage', 'match', TraversalPolicy._resolveMapSpec(map))
   }
 
+  /** @param {any} map */
   static reprocess(map) {
     return new TraversalPolicy('storageOnly', 'version', TraversalPolicy._resolveMapSpec(map))
   }
 
+  /** @param {any} map */
   static reprocessAndDiscover(map) {
     return new TraversalPolicy('storageOriginIfMissing', 'version', TraversalPolicy._resolveMapSpec(map))
   }
 
+  /** @param {any} map */
   static reprocessAndUpdate(map) {
     return new TraversalPolicy('mutables', 'matchOrVersion', TraversalPolicy._resolveMapSpec(map))
   }
 
+  /** @param {any} map */
   static always(map) {
     return new TraversalPolicy('originOnly', 'always', TraversalPolicy._resolveMapSpec(map))
   }
 
+  /** @param {any} map */
   static reprocessAlways(map) {
     return new TraversalPolicy('storageOnly', 'always', TraversalPolicy._resolveMapSpec(map))
   }
 
+  /** @param {any} map */
   static reharvestAlways(map) {
     return new TraversalPolicy('mutables', 'always', TraversalPolicy._resolveMapSpec(map))
   }
 
+  /** @param {TraversalPolicy} policy */
   static clone(policy) {
     return new TraversalPolicy(policy.fetch, policy.freshness, policy.map)
   }
 
+  /**
+   * @param {string} fetch
+   * @param {string | number} freshness
+   * @param {any} map
+   */
   constructor(fetch, freshness, map) {
     this.fetch = fetch
     this.freshness = freshness
     this.map = typeof map === 'string' ? new VisitorMap(map) : map
   }
 
+  /**
+   * @param {string} name
+   * @param {any} [map]
+   */
   getNextPolicy(name, map = null) {
     const newMap = (map || this.map).getNextMap(name)
     if (!newMap) {
@@ -172,6 +205,10 @@ class TraversalPolicy {
   /**
    * Given a request for which the requisite content has been fetched, determine whether or not it needs to be
    * processed.
+   */
+  /**
+   * @param {any} request
+   * @param {number} version
    */
   shouldProcess(request, version) {
     if (this.freshness === 'always') {
@@ -206,6 +243,7 @@ class TraversalPolicy {
     return this.map.hasNextStep()
   }
 
+  /** @param {string} type */
   isImmutable(type) {
     return ['commit'].includes(type)
   }
@@ -213,6 +251,7 @@ class TraversalPolicy {
   /**
    * Return the source from which to perform the initial fetch for the given request's resource.
    */
+  /** @param {any} request */
   initialFetch(request) {
     const mutablesValue = this.isImmutable(request.type) ? 'storage' : 'etag'
     const result = {
@@ -255,7 +294,7 @@ class TraversalPolicy {
     ]
     let freshness = { always: 'A', match: 'M', version: 'V', matchOrVersion: 'm' }[this.freshness]
     if (!freshness) {
-      if (typeof this.policy.freshness === 'number') {
+      if (typeof this.freshness === 'number') {
         freshness = 'N'
       }
     }

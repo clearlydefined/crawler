@@ -6,7 +6,30 @@
     "noEmit": true,
     "strictNullChecks": false,
     "exactOptionalPropertyTypes": false,
+    "noPropertyAccessFromIndexSignature": false,
     "verbatimModuleSyntax": false
   },
-  "include": ["types/**/*"]
+  "include": [
+    "types/**/*",
+    "lib/entitySpec.d.ts",
+    "lib/entitySpec.js",
+    "lib/sourceSpec.d.ts",
+    "lib/fetchResult.d.ts",
+    "lib/fetchResult.js",
+    "lib/baseHandler.d.ts",
+    "lib/baseHandler.js",
+    "lib/utils.d.ts",
+    "lib/utils.js",
+    "lib/fetch.d.ts",
+    "lib/fetch.js",
+    "lib/memoryCache.d.ts",
+    "lib/memoryCache.js",
+    "lib/sourceDiscovery.d.ts",
+    "ghcrawler/lib/visitorMap.d.ts",
+    "ghcrawler/lib/visitorMap.js",
+    "ghcrawler/lib/traversalPolicy.d.ts",
+    "ghcrawler/lib/traversalPolicy.js",
+    "ghcrawler/lib/request.d.ts",
+    "ghcrawler/lib/request.js"
+  ]
 }
