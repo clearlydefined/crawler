@@ -34,7 +34,6 @@ describe('ScanCode misc', () => {
   beforeEach(() => {
     const resultBox = {}
     const fsStub = {
-      readFileSync: () => JSON.stringify(resultBox.result),
       promises: {
         readFile: async () => JSON.stringify(resultBox.result)
       }
