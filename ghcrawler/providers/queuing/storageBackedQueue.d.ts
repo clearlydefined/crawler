@@ -26,7 +26,11 @@ declare class StorageBackedQueue extends NestedQueue {
   unsubscribe(): Promise<void>
   flush(): Promise<void>
 
-  static create(queue: CrawlQueue, storageQueue: StorageQueue, options?: Partial<StorageBackedQueueOptions>): StorageBackedQueue
+  static create(
+    queue: CrawlQueue,
+    storageQueue: StorageQueue,
+    options?: Partial<StorageBackedQueueOptions>
+  ): StorageBackedQueue
 }
 
 export = StorageBackedQueue

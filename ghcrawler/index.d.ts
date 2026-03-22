@@ -10,7 +10,16 @@ import Request = require('./lib/request')
 import VisitorMap = require('./lib/visitorMap')
 import { CrawlerOptions } from './lib/crawler'
 
-export { Crawler as crawler, CrawlerFactory as crawlerFactory, CrawlerService as crawlerService, TraversalPolicy as policy, QueueSet as queueSet, Request as request, TraversalPolicy as traversalPolicy, VisitorMap as visitorMap }
+export {
+  Crawler as crawler,
+  CrawlerFactory as crawlerFactory,
+  CrawlerService as crawlerService,
+  TraversalPolicy as policy,
+  QueueSet as queueSet,
+  Request as request,
+  TraversalPolicy as traversalPolicy,
+  VisitorMap as visitorMap
+}
 export const providers: Record<string, Record<string, (...args: unknown[]) => unknown>>
 
 export function run(

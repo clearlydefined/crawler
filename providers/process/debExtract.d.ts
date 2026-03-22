@@ -1,6 +1,6 @@
-import AbstractProcessor = require("./abstractProcessor")
-import SourceSpec = require("../../lib/sourceSpec")
-import { BaseHandlerOptions } from "../../lib/baseHandler"
+import AbstractProcessor = require('./abstractProcessor')
+import SourceSpec = require('../../lib/sourceSpec')
+import { BaseHandlerOptions } from '../../lib/baseHandler'
 
 declare function createProcessor(
   options: BaseHandlerOptions,

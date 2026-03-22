@@ -17,4 +17,4 @@ interface CrawlerConfig {
 declare const config: CrawlerConfig
 
 export = config
-export { CrawlerConfig };
+export { CrawlerConfig }

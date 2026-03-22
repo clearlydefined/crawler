@@ -10,7 +10,11 @@ interface StorageQueueOptions {
   visibilityTimeout?: number
   maxDequeueCount?: number
   queueName: string
-  logger: { info(message: string): void; verbose(message: string): void; error(message: string, ...args: unknown[]): void }
+  logger: {
+    info(message: string): void
+    verbose(message: string): void
+    error(message: string, ...args: unknown[]): void
+  }
   [key: string]: unknown
 }
 

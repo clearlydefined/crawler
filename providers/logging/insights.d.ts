@@ -3,7 +3,11 @@ declare class Insights {
   client: import('applicationinsights').TelemetryClient | null
   echo: boolean
 
-  constructor(tattoos: Record<string, string>, client?: import('applicationinsights').TelemetryClient | null, echo?: boolean)
+  constructor(
+    tattoos: Record<string, string>,
+    client?: import('applicationinsights').TelemetryClient | null,
+    echo?: boolean
+  )
 
   static getClient(): Insights | null
   static setup(tattoos: Record<string, string>, connectionString?: string, echo?: boolean): void
