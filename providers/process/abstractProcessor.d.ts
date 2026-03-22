@@ -4,6 +4,7 @@
 import BaseHandler = require('../../lib/baseHandler')
 import Request = require('../../ghcrawler/lib/request')
 import EntitySpec = require('../../lib/entitySpec')
+import { StoredDocument } from '../../ghcrawler/providers/storage/inmemoryDocStore'
 
 declare class AbstractProcessor extends BaseHandler {
   get toolVersion(): string
@@ -12,7 +13,7 @@ declare class AbstractProcessor extends BaseHandler {
 
   aggregateVersions(versions: (string | undefined)[], errorRoot?: string): string
 
-  attachFiles(document: Record<string, any>, files: string[], location?: string): Promise<void>
+  attachFiles(document: StoredDocument, files: string[], location?: string): Promise<void>
   getFiles(location: string): Promise<string[]>
   getFolders(location: string, ignorePaths?: string[]): Promise<string[]>
   filterFiles(location: string): Promise<string[]>
@@ -24,7 +25,7 @@ declare class AbstractProcessor extends BaseHandler {
   isProcessing(request: Request): boolean
 
   handle(request: Request): Request | Promise<Request>
-  clone(document: Record<string, any>): Record<string, any>
+  clone(document: StoredDocument): StoredDocument
 
   addSelfLink(request: Request, urn?: string | null): void
   addBasicToolLinks(request: Request, spec: EntitySpec): void

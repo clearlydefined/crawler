@@ -1,8 +1,10 @@
 import AbstractProcessor = require("./abstractProcessor")
+import SourceSpec = require("../../lib/sourceSpec")
+import { BaseHandlerOptions } from "../../lib/baseHandler"
 
 declare function createProcessor(
-  options: Record<string, any>,
-  sourceFinder?: (...args: any[]) => Promise<any>
+  options: BaseHandlerOptions,
+  sourceFinder?: (version: string, candidates: string[], options: Record<string, unknown>) => Promise<SourceSpec | null>
 ): AbstractProcessor
 
 export = createProcessor

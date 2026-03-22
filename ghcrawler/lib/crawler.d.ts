@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 import Request = require('./request')
-import { DocStore } from '../providers/storage/inmemoryDocStore'
+import { DocStore, StoredDocument } from '../providers/storage/inmemoryDocStore'
 
 interface CrawlerOptions {
   name?: string
@@ -20,8 +20,8 @@ interface CrawlerOptions {
 }
 
 interface Locker {
-  lock(resource: string, ttl: number): Promise<any>
-  unlock(lock: any): Promise<void>
+  lock(resource: string, ttl: number): Promise<string | null>
+  unlock(lock: string | null): Promise<void>
 }
 
 interface Handler {
@@ -72,4 +72,4 @@ declare class Crawler {
 }
 
 export = Crawler
-export { CrawlerOptions, Locker, Handler, RunContext, DocStore }
+export { CrawlerOptions, DocStore, Handler, Locker, RunContext, StoredDocument }

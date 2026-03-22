@@ -1,5 +1,6 @@
 import AbstractFetch = require("./abstractFetch")
+import { BaseHandlerOptions } from "../../lib/baseHandler"
 
-declare function createFetcher(options: Record<string, any>): AbstractFetch
+declare function createFetcher(options: BaseHandlerOptions): AbstractFetch
 
 export = createFetcher

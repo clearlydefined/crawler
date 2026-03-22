@@ -11,7 +11,7 @@ interface InMemoryQueueOptions {
 
 declare class InMemoryCrawlQueue implements CrawlQueue {
   name: string
-  queue: Record<string, any>[]
+  queue: Request[]
   options: InMemoryQueueOptions
   logger: InMemoryQueueOptions['logger']
 

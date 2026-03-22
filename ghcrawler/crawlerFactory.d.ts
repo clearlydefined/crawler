@@ -5,8 +5,11 @@ import Crawler = require('./lib/crawler')
 import CrawlerService = require('./lib/crawlerService')
 import QueueSet = require('./providers/queuing/queueSet')
 import ScopedQueueSets = require('./providers/queuing/scopedQueueSets')
-import { CrawlerOptions, Handler, Locker, DocStore } from './lib/crawler'
+import { CrawlerOptions, DocStore, Handler, Locker } from './lib/crawler'
 import { CrawlQueue } from './providers/queuing/nestedQueue'
+
+/** Provider search path entries map namespace → provider name → factory function */
+type ProviderSearchPathEntry = Record<string, Record<string, (...args: unknown[]) => unknown>>
 
 interface QueueManager {
   createQueueChain(name: string, options: Record<string, unknown>): CrawlQueue
@@ -14,13 +17,13 @@ interface QueueManager {
 
 declare class CrawlerFactory {
   static createService(
-    defaults: Record<string, any>,
+    defaults: Record<string, unknown>,
     appLogger: CrawlerOptions['logger'],
-    searchPath?: any[]
+    searchPath?: ProviderSearchPathEntry[]
   ): CrawlerService
 
   static createCrawler(
-    options: Record<string, any>,
+    options: Record<string, unknown>,
     overrides?: {
       queues?: ScopedQueueSets | null
       store?: DocStore | null
@@ -35,34 +38,34 @@ declare class CrawlerFactory {
   static createRefreshingOptions(
     crawlerName: string,
     subsystemNames: string[],
-    defaults: Record<string, any>,
+    defaults: Record<string, unknown>,
     refreshingProvider?: string
-  ): Promise<Record<string, any>>
+  ): Promise<Record<string, unknown>>
 
   static initializeSubsystemOptions(
-    config: Record<string, any>,
-    defaults: Record<string, any>
-  ): Promise<Record<string, any>>
-  static createInMemoryRefreshingConfig(values?: Record<string, any>): any
+    config: Record<string, unknown>,
+    defaults: Record<string, unknown>
+  ): Promise<Record<string, unknown>>
+  static createInMemoryRefreshingConfig(values?: Record<string, unknown>): unknown
 
-  static getProvider(namespace: string, ...params: unknown[]): any
-  static createFilter(options: Record<string, any>, processors: Handler[]): Handler
-  static createStore(options: Record<string, any>, provider?: string): DocStore
-  static createDeadLetterStore(options: Record<string, any>, provider?: string): DocStore
+  static getProvider(namespace: string, ...params: unknown[]): unknown
+  static createFilter(options: Record<string, unknown>, processors: Handler[]): Handler
+  static createStore(options: Record<string, unknown>, provider?: string): DocStore
+  static createDeadLetterStore(options: Record<string, unknown>, provider?: string): DocStore
   static createFetchers(
-    options: Record<string, any>,
+    options: Record<string, unknown>,
     store: DocStore,
     processors: Handler[],
     filter: Handler
   ): Handler[]
-  static createProcessors(options: Record<string, any>): Handler[]
-  static createLocker(options: Record<string, any>, provider?: string): Locker
+  static createProcessors(options: Record<string, unknown>): Handler[]
+  static createLocker(options: Record<string, unknown>, provider?: string): Locker
   static createNolock(): Locker
-  static createQueues(options: Record<string, any>, provider?: string): ScopedQueueSets
-  static createQueueSet(manager: QueueManager, options: Record<string, any>): QueueSet
+  static createQueues(options: Record<string, unknown>, provider?: string): ScopedQueueSets
+  static createQueueSet(manager: QueueManager, options: Record<string, unknown>): QueueSet
   static createScopedQueueSets(
     managers: { globalManager: QueueManager; localManager: QueueManager },
-    queueOptions: Record<string, any>
+    queueOptions: Record<string, unknown>
   ): ScopedQueueSets
 }
 

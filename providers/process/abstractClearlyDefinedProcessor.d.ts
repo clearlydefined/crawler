@@ -4,9 +4,11 @@
 import AbstractProcessor = require('./abstractProcessor')
 import Request = require('../../ghcrawler/lib/request')
 
+import { StoredDocument } from '../../ghcrawler/providers/storage/inmemoryDocStore'
+
 declare class AbstractClearlyDefinedProcessor extends AbstractProcessor {
   handle(request: Request, location?: string, interestingRoot?: string): Promise<Request>
-  clone(document: Record<string, any>): Record<string, any>
+  clone(document: StoredDocument): StoredDocument
 }
 
 export = AbstractClearlyDefinedProcessor

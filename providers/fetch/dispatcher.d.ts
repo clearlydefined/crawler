@@ -3,8 +3,10 @@
 
 import AbstractFetch = require('./abstractFetch')
 import Request = require('../../ghcrawler/lib/request')
-import { DocStore } from '../../ghcrawler/lib/crawler'
-import { Handler } from '../../ghcrawler/lib/crawler'
+import FetchResult = require('../../lib/fetchResult')
+import MemoryCache = require('../../lib/memoryCache')
+import { DocStore, Handler } from '../../ghcrawler/lib/crawler'
+import { BaseHandlerOptions } from '../../lib/baseHandler'
 
 declare class FetchDispatcher extends AbstractFetch {
   store: DocStore
@@ -13,13 +15,13 @@ declare class FetchDispatcher extends AbstractFetch {
   filter: Handler
 
   constructor(
-    options: Record<string, any>,
+    options: BaseHandlerOptions & { fetched?: { defaultTtlSeconds: number }; [key: string]: unknown },
     store: DocStore,
     fetchers: Handler[],
     processors: Handler[],
     filter: Handler,
-    fetchResultCache?: any,
-    inProgressFetchCache?: Record<string, Promise<any>>
+    fetchResultCache?: MemoryCache,
+    inProgressFetchCache?: Record<string, Promise<FetchResult | undefined>>
   )
 
   canHandle(request: Request): boolean
@@ -27,13 +29,13 @@ declare class FetchDispatcher extends AbstractFetch {
 }
 
 declare function createFetchDispatcher(
-  options: Record<string, any>,
+  options: BaseHandlerOptions & { fetched?: { defaultTtlSeconds: number }; [key: string]: unknown },
   store: DocStore,
   fetchers: Handler[],
   processors: Handler[],
   filter: Handler,
-  fetchResultCache?: any,
-  inProgressFetchCache?: Record<string, Promise<any>>
+  fetchResultCache?: MemoryCache,
+  inProgressFetchCache?: Record<string, Promise<FetchResult | undefined>>
 ): FetchDispatcher
 
 export = createFetchDispatcher

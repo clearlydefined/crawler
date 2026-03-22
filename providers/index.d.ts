@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 declare const providers: {
-  filter: Record<string, (...args: any[]) => any>
-  fetch: Record<string, (...args: any[]) => any>
-  process: Record<string, (...args: any[]) => any>
-  store: Record<string, (...args: any[]) => any>
+  filter: Record<string, (...args: unknown[]) => unknown>
+  fetch: Record<string, (...args: unknown[]) => unknown>
+  process: Record<string, (...args: unknown[]) => unknown>
+  store: Record<string, (...args: unknown[]) => unknown>
 }
 
 export = providers

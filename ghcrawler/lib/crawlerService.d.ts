@@ -4,6 +4,8 @@
 import Crawler = require('./crawler')
 import Request = require('./request')
 
+import { StoredDocument } from '../providers/storage/inmemoryDocStore'
+
 interface CrawlerServiceOptions {
   crawler: {
     count: number | { value: number }
@@ -30,8 +32,8 @@ declare class CrawlerService {
   flushQueue(name: string, scope?: string | null): Promise<void | null>
   getQueueInfo(name: string, scope?: string | null): Promise<{ count: number; metricsName: string }>
   getRequests(name: string, count: number, remove?: boolean, scope?: string | null): Promise<Request[] | null>
-  listDeadletters(): Promise<Record<string, any>[]>
-  getDeadletter(urn: string): Promise<Record<string, any>>
+  listDeadletters(): Promise<StoredDocument[]>
+  getDeadletter(urn: string): Promise<StoredDocument>
   deleteDeadletter(urn: string): Promise<boolean | void>
   requeueDeadletter(url: string, queue: string): Promise<void>
   getDeadletterCount(): Promise<number>
