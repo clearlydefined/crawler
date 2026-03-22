@@ -48,6 +48,7 @@
     "ghcrawler/routes/requests.d.ts",
     "ghcrawler/app.d.ts",
     "ghcrawler/bin/www.d.ts",
-    "ghcrawler/index.d.ts"
+    "ghcrawler/index.d.ts",
+    "providers/**/*.d.ts"
   ]
 }
