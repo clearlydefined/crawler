@@ -6,15 +6,15 @@ We're gradually adding TypeScript to the ClearlyDefined crawler. The approach is
 
 We run TypeScript as a linter, not a compiler. `tsc` checks JavaScript files via `allowJs` and `checkJs`, and `noEmit` means it never produces output. This runs as part of `npm run lint`.
 
-The `include` array in tsconfig.json contains only `types/**/*` — custom type declarations for third-party packages. No source files are being type-checked yet. Files get checked when you add them to `include`.
-
-There are no `.d.ts` sidecar files for our own modules yet, and almost no JSDoc annotations. That's where to start.
+Every source module has a `.d.ts` sidecar file with type declarations. A handful of the core `.js` files (`lib/` and `ghcrawler/lib/`) also have JSDoc annotations and are type-checked directly. The rest have declarations available for consumers but their `.js` internals aren't checked yet — adding JSDoc to those can happen incrementally.
 
 Type information comes from three places:
 
-- `.d.ts` files sitting next to their corresponding `.js` modules (none yet)
+- `.d.ts` files sitting next to their corresponding `.js` modules
 - JSDoc annotations in the JavaScript itself
 - custom type definitions in `types/` for third-party packages that don't ship their own types and aren't covered by DefinitelyTyped (`@types/` packages)
+
+Tests can be `.ts` files. Mocha runs both `test/**/*.js` and `test/**/*.ts`, and the tsconfig includes the `.ts` glob.
 
 ### tsconfig.json
 
@@ -28,6 +28,7 @@ We override a few strict options because they don't play well with JavaScript:
 
 - `strictNullChecks: false`
 - `exactOptionalPropertyTypes: false`
+- `noPropertyAccessFromIndexSignature: false`
 
 We also set `verbatimModuleSyntax: false`, overriding the `node-ts` default. Without this, all our CommonJS `require()` calls would be errors. Once we migrate imports, we can flip it back.
 
@@ -41,38 +42,30 @@ Write a `.d.ts` file next to the JavaScript module. Add JSDoc annotations to the
 
 Run `npm run tsc` to check your work.
 
-## Where to start
+## Checking a .js file
 
-The codebase has about 70 source files organized into a plugin architecture: the `ghcrawler/` core engine handles queuing and request lifecycle, while `providers/` implements ClearlyDefined-specific fetching, processing, and storage.
+Most `.js` files have `.d.ts` sidecars but aren't in the `include` list themselves. To start type-checking the JavaScript:
 
-Type the core domain objects first — everything else depends on them:
+1. Add the `.js` file to `include` in tsconfig.json
+2. Run `npm run tsc` — you'll likely get `noImplicitAny` errors on parameters
+3. Add JSDoc `@param` and `@type` annotations until it passes
+4. The `.d.ts` file types the exports; JSDoc types the internals
 
-1. `ghcrawler/lib/request.js` — the `Request` class, passed to every handler
-2. `ghcrawler/lib/traversalPolicy.js` — used by Request
-3. `lib/entitySpec.js` — coordinates for a component (type/provider/namespace/name/revision)
-4. `lib/sourceSpec.js` — extends EntitySpec with source location info
-5. `lib/baseHandler.js` — base class for all fetch and process handlers
-
-Then do the abstract base classes:
-
-6. `providers/fetch/abstractFetch.js` — base for all 16 fetchers
-7. `providers/process/abstractProcessor.js` — base for all 22 processors
-
-After that, the concrete implementations are repetitive. Each fetcher and processor follows the same `handle(request)` pattern, so once the base class is typed, the rest go quickly.
+The core `lib/` and `ghcrawler/lib/` files are already done this way and can serve as examples.
 
 ## What's next
 
 ### Native TypeScript in Node.js
 
-Node 24 can run `.ts` files by stripping types at import time. The service has `erasableSyntaxOnly` enabled via `@tsconfig/node-ts` for this. Once we add that base config, new tests can be `.ts` files and the mocha glob can be updated to `test/unit/**/*.{js,ts}`.
+Node 24 can run `.ts` files by stripping types at import time. The tsconfig has `erasableSyntaxOnly` enabled via `@tsconfig/node-ts` for this. New tests can be `.ts` files — the mocha glob already picks them up.
 
 Writing source files in `.ts` (not just tests) needs more groundwork — see the [service migration doc][service-migration] for the open questions around `verbatimModuleSyntax` and import conventions.
 
 ## Getting started
 
-1. Find a `.js` file that doesn't have a `.d.ts` yet (that's all of them)
-2. Write the type definitions
-3. Add both files to `tsconfig.json`'s `include` list
+1. Pick a `.js` file that isn't in tsconfig's `include` yet
+2. Add it to the `include` list
+3. Fix type errors with JSDoc annotations
 4. Run `npm run tsc`
 5. If something in this doc is wrong, fix it
 

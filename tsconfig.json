@@ -49,6 +49,21 @@
     "ghcrawler/app.d.ts",
     "ghcrawler/bin/www.d.ts",
     "ghcrawler/index.d.ts",
-    "providers/**/*.d.ts"
+    "providers/**/*.d.ts",
+    "config/**/*.d.ts",
+    "ghcrawler/memoryConfig.d.ts",
+    "ghcrawler/providers/index.d.ts",
+    "ghcrawler/providers/queuing/memoryFactory.d.ts",
+    "ghcrawler/providers/queuing/storageQueue.d.ts",
+    "ghcrawler/providers/queuing/storageQueueFactory.d.ts",
+    "ghcrawler/providers/queuing/storageQueueManager.d.ts",
+    "ghcrawler/providers/queuing/storageBackedQueue.d.ts",
+    "ghcrawler/providers/queuing/storageBackedInMemoryQueueManager.d.ts",
+    "ghcrawler/providers/queuing/webhookFactory.d.ts",
+    "ghcrawler/providers/storage/azureBlobFactory.d.ts",
+    "ghcrawler/providers/storage/file.d.ts",
+    "ghcrawler/providers/storage/storageDocStore.d.ts",
+    "index.d.ts",
+    "test/**/*.ts"
   ]
 }

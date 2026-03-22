@@ -6,9 +6,9 @@
   "scripts": {
     "start": "node ./index.js",
     "test": "npm run mocha && npm run lint",
-    "mocha": "nyc mocha \"test/unit/**/*.js\"",
+    "mocha": "nyc mocha \"test/unit/**/*.{js,ts}\"",
     "local": "node --inspect-brk=0.0.0.0:9229 ./index.js",
-    "integration": "mocha \"test/integration/**/*.js\" --timeout 20000",
+    "integration": "mocha \"test/integration/**/*.{js,ts}\" --timeout 20000",
     "lint": "npm run tsc && npm run prettier:check && npm run eslint",
     "lint:fix": "npm run prettier:write && npm run eslint:fix",
     "eslint": "eslint .",
