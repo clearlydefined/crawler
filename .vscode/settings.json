@@ -2,7 +2,7 @@
 {
   "editor.folding": false,
   "editor.tabSize": 2,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.defaultFormatter": "biomejs.biome",
   "editor.detectIndentation": false,
   "editor.formatOnSave": false,
   "editor.formatOnType": true,
