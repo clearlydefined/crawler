@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // SPDX-License-Identifier: MIT
 
-type MapNode = string | ((...args: any[]) => any) | MapNode[] | { [key: string]: MapNode }
+type MapNode = string | ((segment: string) => MapNode | undefined) | MapNode[] | { [key: string]: MapNode }
 
 declare class VisitorMap {
   name: string
@@ -11,7 +11,7 @@ declare class VisitorMap {
 
   static register(name: string, value: MapNode): void
   static getCopy(name: string): MapNode
-  static copy(node: MapNode, seen?: Map<any, any>): MapNode
+  static copy(node: MapNode, seen?: Map<object, object>): MapNode
   static resolve(step: MapNode, segment: string): MapNode | undefined
   static getMap(name: string, path?: string): VisitorMap | null
 

@@ -6,6 +6,10 @@ import EntitySpec = require('../../lib/entitySpec')
 
 type ProcessControl = 'skip' | 'requeue' | 'defer'
 
+interface Logger {
+  log(level: string, message: string, meta?: Record<string, unknown>): void
+}
+
 interface DocumentMetadata {
   links: Record<string, { href?: string; hrefs?: string[]; type: string }>
   processedAt?: string
@@ -14,7 +18,7 @@ interface DocumentMetadata {
 }
 
 interface RequestDocument {
-  id?: any
+  id?: string | number
   _metadata: DocumentMetadata
   [key: string]: any
 }
@@ -32,10 +36,10 @@ interface RequestMeta {
 }
 
 interface Crawler {
-  queue(requests: Request | Request[], name?: string, scope?: string | null): Promise<any>[] | Promise<any>
-  storeDeadletter(request: Request, message: string): Promise<any>
+  queue(requests: Request | Request[], name?: string, scope?: string | null): Promise<void>[] | Promise<void>
+  storeDeadletter(request: Request, message: string): Promise<void>
   queues: { defer(request: Request): void }
-  logger: { log(level: string, message: string, meta?: any): void }
+  logger: Logger
 }
 
 declare class Request {
@@ -48,7 +52,7 @@ declare class Request {
   payload?: any
   crawler?: Crawler
   start?: number
-  promises?: Promise<any>[]
+  promises?: Promise<void>[]
   cleanups?: (() => void)[]
   save?: boolean
   processControl?: ProcessControl
@@ -61,19 +65,19 @@ declare class Request {
 
   constructor(type: string, url: string, context?: RequestContext | null)
 
-  static adopt(object: any): Request
+  static adopt(object: Record<string, any>): Request
   static _getResolvedPolicy(request: Request): TraversalPolicy
 
   open(crawler: Crawler): this
 
   hasSeen(request: Request): boolean
-  getTrackedPromises(): Promise<any>[]
+  getTrackedPromises(): Promise<void>[]
   getTrackedCleanups(): (() => void)[]
 
-  track(promises: Promise<any> | Promise<any>[] | null): this
+  track(promises: Promise<void> | Promise<void>[] | null): this
   trackCleanup(cleanups: (() => void) | (() => void)[] | null): this
   removeCleanup(cleanups: (() => void) | (() => void)[] | null): this
-  addMeta(data: Record<string, any>): this
+  addMeta(data: Record<string, unknown>): this
 
   addRootSelfLink(id?: string | null): void
   addSelfLink(key?: string): void

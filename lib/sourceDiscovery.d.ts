@@ -5,8 +5,8 @@ import SourceSpec = require('./sourceSpec')
 
 interface DiscoveryOptions {
   githubToken?: string
-  logger?: { error(...args: any[]): void; [key: string]: any }
-  [key: string]: any
+  logger?: { error(...args: unknown[]): void }
+  [key: string]: unknown
 }
 
 declare function searchForRevisions(

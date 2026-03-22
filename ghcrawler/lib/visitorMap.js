@@ -20,7 +20,7 @@ class VisitorMap {
 
   /**
    * @param {any} node
-   * @param {Map<any, any>} [seen]
+   * @param {Map<object, object>} [seen]
    */
   static copy(node, seen = new Map()) {
     if (typeof node === 'string' || typeof node === 'function') {

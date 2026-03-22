@@ -20,7 +20,7 @@ declare class TraversalPolicy {
 
   constructor(fetch: FetchPolicy, freshness: FreshnessPolicy, map: VisitorMap | string)
 
-  static adopt(object: any): TraversalPolicy
+  static adopt(object: Record<string, any>): TraversalPolicy
   static getPolicy(policySpec: string): TraversalPolicy | null
   static default(map: string | VisitorMap): TraversalPolicy
   static event(map: string | VisitorMap): TraversalPolicy

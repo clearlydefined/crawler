@@ -8,7 +8,7 @@ declare class FetchResult {
   url?: string
   readonly _cleanups: (() => void)[]
   readonly _meta: Record<string, any>
-  _dependents: any[];
+  _dependents: Request[];
   [key: string]: any
 
   constructor(url?: string)
@@ -20,11 +20,11 @@ declare class FetchResult {
   ): this
   cleanup(errorHandler?: (error: Error) => void): void
 
-  addMeta(data: Record<string, any>): this
+  addMeta(data: Record<string, unknown>): this
   copyTo(request: Request): void
 
-  trackDependents(...dependents: any[]): this
-  removeDependents(...toRemove: any[]): this
+  trackDependents(...dependents: Request[]): this
+  removeDependents(...toRemove: Request[]): this
   isInUse(): boolean
   decorate(request: Request): void
 }

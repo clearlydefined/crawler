@@ -18,9 +18,9 @@ interface FetchRequest {
 
 interface FetchResponse {
   statusCode: number
-  headers: Record<string, any>
-  body: any
-  request: any
+  headers: Record<string, string | string[]>
+  body: unknown
+  request: object
 }
 
 export const defaultHeaders: Readonly<{ 'User-Agent': string }>

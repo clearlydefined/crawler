@@ -20,17 +20,17 @@ class Request {
     this.context = context || {}
     /** @type {import('./traversalPolicy') | string} */
     this.policy = Policy.default(type)
-    /** @type {Record<string, any> | undefined} */
+    /** @type {Record<string, unknown> | undefined} */
     this.meta = undefined
-    /** @type {any} */
+    /** @type {{ id?: string | number, _metadata: any, [key: string]: any } | undefined} */
     this.document = undefined
     /** @type {any} */
     this.payload = undefined
-    /** @type {any} */
+    /** @type {{ queue: Function, storeDeadletter: Function, queues: { defer: Function }, logger: { log: Function } } | undefined} */
     this.crawler = undefined
     /** @type {number | undefined} */
     this.start = undefined
-    /** @type {Promise<any>[] | undefined} */
+    /** @type {Promise<void>[] | undefined} */
     this.promises = undefined
     /** @type {(() => void)[] | undefined} */
     this.cleanups = undefined
@@ -50,11 +50,11 @@ class Request {
     this.attemptCount = undefined
     /** @type {any} */
     this._originQueue = undefined
-    /** @type {any} */
+    /** @type {import('../../lib/entitySpec') | undefined} */
     this.casedSpec = undefined
   }
 
-  /** @param {any} object */
+  /** @param {Record<string, any>} object */
   static adopt(object) {
     if (object.__proto__ !== Request.prototype) {
       object.__proto__ = Request.prototype
@@ -78,7 +78,7 @@ class Request {
     return Policy.getPolicy(policyOrSpec)
   }
 
-  /** @param {any} crawler */
+  /** @param {{ queue: Function, storeDeadletter: Function, queues: { defer: Function }, logger: { log: Function } }} crawler */
   open(crawler) {
     this.crawler = crawler
     this.start = Date.now()
@@ -128,7 +128,7 @@ class Request {
     return this.cleanups || []
   }
 
-  /** @param {Promise<any> | Promise<any>[] | null} promises */
+  /** @param {Promise<void> | Promise<void>[] | null} promises */
   track(promises) {
     if (!promises) {
       return this
@@ -166,7 +166,7 @@ class Request {
     return this
   }
 
-  /** @param {Record<string, any>} data */
+  /** @param {Record<string, unknown>} data */
   addMeta(data) {
     this.meta = Object.assign({}, this.meta, data)
     return this

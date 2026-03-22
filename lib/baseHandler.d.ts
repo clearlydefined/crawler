@@ -5,8 +5,8 @@ import Request = require('../ghcrawler/lib/request')
 import EntitySpec = require('./entitySpec')
 
 interface BaseHandlerOptions {
-  logger: { log(level: string, message: string, meta?: any): void; [key: string]: any }
-  [key: string]: any
+  logger: import('../ghcrawler/lib/request').Logger
+  [key: string]: unknown
 }
 
 interface TmpFileResult {

@@ -65,7 +65,7 @@ const { DateTime } = require('luxon')
 const VisitorMap = require('./visitorMap')
 
 class TraversalPolicy {
-  /** @param {any} object */
+  /** @param {Record<string, any>} object */
   static adopt(object) {
     if (object && object.__proto__ !== TraversalPolicy.prototype) {
       object.__proto__ = TraversalPolicy.prototype
