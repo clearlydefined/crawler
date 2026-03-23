@@ -81,7 +81,10 @@ const sanitizeFormat = winston.format(info => {
 function factory(tattoos) {
   const connectionString = config.get('CRAWLER_INSIGHTS_CONNECTION_STRING')
   const rawEcho = config.get('CRAWLER_ECHO')
-  const echo = rawEcho === undefined ? undefined : rawEcho === 'true'
+  const echo =
+    String(rawEcho ?? '')
+      .trim()
+      .toLowerCase() === 'true'
 
   Insights.setup(tattoos, connectionString, echo)
   const aiClient = Insights.getClient()
