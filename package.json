@@ -35,7 +35,7 @@
     "url": "https://github.com/clearlydefined/crawler"
   },
   "dependencies": {
-    "@azure/identity": "^4.5.0",
+    "@azure/identity": "^4.13.1",
     "@azure/storage-blob": "^12.31.0",
     "@azure/storage-queue": "^12.29.0",
     "@clearlydefined/spdx": "github:clearlydefined/spdx#v0.1.10",
