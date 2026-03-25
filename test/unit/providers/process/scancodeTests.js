@@ -86,7 +86,7 @@ describe('ScanCode process', () => {
     }
   })
 
-  beforeEach(function () {
+  beforeEach(() => {
     const resultBox = { error: null, versionResult: 'ScanCode version: 1.2.0\n', versionError: null }
     const processStub = {
       execFile: (command, parameters, callbackOrOptions, callback) => {
@@ -99,7 +99,7 @@ describe('ScanCode process', () => {
     Handler._resultBox = resultBox
   })
 
-  afterEach(function () {
+  afterEach(() => {
     sandbox.restore()
   })
 })

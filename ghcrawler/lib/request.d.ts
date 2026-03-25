@@ -3,7 +3,7 @@
 
 import TraversalPolicy = require('./traversalPolicy')
 import EntitySpec = require('../../lib/entitySpec')
-import { DocumentMetadata } from '../types/docStore'
+import type { DocumentMetadata } from '../types/docStore'
 
 type ProcessControl = 'skip' | 'requeue' | 'defer'
 

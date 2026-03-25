@@ -464,14 +464,14 @@ function createScopedQueueSets(queueName, options) {
 }
 
 async function getQueueInfos(scopedQueues, queueName) {
-  let globalInfo = await scopedQueues.getQueue(queueName).getInfo()
-  let localQueueInfo = await scopedQueues.getQueue(queueName, 'local').getInfo()
+  const globalInfo = await scopedQueues.getQueue(queueName).getInfo()
+  const localQueueInfo = await scopedQueues.getQueue(queueName, 'local').getInfo()
   return { global: globalInfo, local: localQueueInfo }
 }
 
 async function cleanup(scopedQueues, queueName) {
   //remove request from the cache inside the AttenuatedQueue
-  let queueInfo = await getQueueInfos(scopedQueues, queueName)
+  const queueInfo = await getQueueInfos(scopedQueues, queueName)
   let count = queueInfo.global.count + queueInfo.local.count
   while (count) {
     const popped = await scopedQueues.pop()

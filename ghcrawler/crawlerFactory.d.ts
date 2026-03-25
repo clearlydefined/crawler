@@ -5,9 +5,9 @@ import Crawler = require('./lib/crawler')
 import CrawlerService = require('./lib/crawlerService')
 import QueueSet = require('./providers/queuing/queueSet')
 import ScopedQueueSets = require('./providers/queuing/scopedQueueSets')
-import { CrawlerOptions, Handler, Locker } from './lib/crawler'
-import { DocStore } from './types/docStore'
-import { CrawlQueue } from './providers/queuing/nestedQueue'
+import type { CrawlerOptions, Handler, Locker } from './lib/crawler'
+import type { CrawlQueue } from './providers/queuing/nestedQueue'
+import type { DocStore } from './types/docStore'
 
 /** Provider search path entries map namespace → provider name → factory function */
 type ProviderSearchPathEntry = Record<string, Record<string, (...args: unknown[]) => unknown>>

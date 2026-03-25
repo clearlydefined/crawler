@@ -51,7 +51,7 @@ describe('Licensee process', () => {
     expect(request.processControl).to.equal('skip')
   })
 
-  beforeEach(function () {
+  beforeEach(() => {
     const resultBox = { error: null, versionResult: '1.2.0', versionError: null }
     const processStub = {
       execFile: (command, parameters, callbackOrOptions) => {
@@ -63,7 +63,7 @@ describe('Licensee process', () => {
     Handler._resultBox = resultBox
   })
 
-  afterEach(function () {
+  afterEach(() => {
     sandbox.restore()
   })
 })

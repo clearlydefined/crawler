@@ -42,19 +42,19 @@ class PodExtract extends AbstractClearlyDefinedProcessor {
   }
 
   _discoverSource(registryData) {
-    let sources = []
+    const sources = []
 
     // these options are mutually exclusive, sources will have a single item
-    let httpSource = get(registryData, 'source.http')
+    const httpSource = get(registryData, 'source.http')
     if (httpSource) sources.push(httpSource)
 
-    let gitSource = get(registryData, 'source.git')
+    const gitSource = get(registryData, 'source.git')
     if (gitSource) sources.push(gitSource)
 
-    let svnSource = get(registryData, 'source.svn')
+    const svnSource = get(registryData, 'source.svn')
     if (svnSource) sources.push(svnSource)
 
-    let hgSource = get(registryData, 'source.hg')
+    const hgSource = get(registryData, 'source.hg')
     if (hgSource) sources.push(hgSource)
 
     // sourceFinder will detect the source only using the version,

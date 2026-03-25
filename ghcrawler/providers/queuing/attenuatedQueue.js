@@ -21,12 +21,11 @@ class AttenuatedQueue extends NestedQueue {
   }
 
   push(requests) {
-    const self = this
     requests = Array.isArray(requests) ? requests : [requests]
     return Promise.all(
       requests.map(
         qlimit(this.options.parallelPush || 1)(request => {
-          return self._pushOne(request)
+          return this._pushOne(request)
         })
       )
     )

@@ -78,7 +78,7 @@ class AzureStorageDocStore {
   // This API can only be used for the 'deadletter' store because we cannot look up documents by type performantly
   async list(type) {
     this._ensureDeadletter(type)
-    let entries = []
+    const entries = []
     for await (const blob of this.containerClient.listBlobsFlat({ includeMetadata: true })) {
       const blobMetadata = blob.metadata
       entries.push({

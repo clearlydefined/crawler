@@ -109,7 +109,7 @@ class Crawler {
    * return a spec describing any delays that should be in .
    */
   processOne(context) {
-    let requestBox = []
+    const requestBox = []
     requestBox.loopName = context.name
     return Promise.resolve()
       .then(this._getRequest.bind(this, requestBox, context))
@@ -241,21 +241,20 @@ class Crawler {
     //      else delete
     const loopName = request.meta ? request.meta.loopName : ''
     debug(`_completeRequest(${loopName}:${request.toUniqueString()}): enter (force: ${forceRequeue})`)
-    const self = this
 
     if (forceRequeue || (request.shouldRequeue() && request.url)) {
       try {
-        await self._requeue(request)
+        await this._requeue(request)
       } catch (error) {
         debug(`_completeRequest(${loopName}:${request.toUniqueString()}): catch force requeue`)
-        self.logger.error(error)
+        this.logger.error(error)
         throw error
       } finally {
         try {
-          request = await self._releaseLock(request)
-          request = await self._deleteFromQueue(request)
+          request = await this._releaseLock(request)
+          request = await this._deleteFromQueue(request)
         } catch (_error) {
-          request = await self._abandonInQueue(request)
+          request = await this._abandonInQueue(request)
         }
       }
       debug(`_completeRequest(${loopName}:${request.toUniqueString()}): exit (success - force requeue)`)
@@ -266,7 +265,7 @@ class Crawler {
       try {
         cleanup()
       } catch (error) {
-        self.logger.info(`Cleanup  Problem cleaning up after ${request.toUniqueString()} ${error.message}`)
+        this.logger.info(`Cleanup  Problem cleaning up after ${request.toUniqueString()} ${error.message}`)
       }
     })
 
@@ -300,21 +299,21 @@ class Crawler {
     const completeWork = Promise.all(loggedPromises).then(
       () => {
         debug(`_completeRequest(${loopName}:${request.toUniqueString()}): resolved tracked promises`)
-        return self._releaseLock(request).then(
+        return this._releaseLock(request).then(
           () => {
-            return self._deleteFromQueue(request)
+            return this._deleteFromQueue(request)
           },
           error => {
             debug(`_completeRequest(${loopName}:${request.toUniqueString()}): catch release lock`)
-            self.logger.error(error)
-            return self._abandonInQueue(request)
+            this.logger.error(error)
+            return this._abandonInQueue(request)
           }
         )
       },
       error => {
         debug(`_completeRequest(${loopName}:${request.toUniqueString()}): catch tracked promises`)
-        self.logger.error(error)
-        return self._completeRequest(request, true)
+        this.logger.error(error)
+        return this._completeRequest(request, true)
       }
     )
     return completeWork
@@ -394,7 +393,7 @@ class Crawler {
   }
 
   _getHandler(request, list) {
-    for (let handler of list) {
+    for (const handler of list) {
       if (handler.canHandle(request)) return handler
     }
     return null
