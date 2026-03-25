@@ -16,7 +16,7 @@ class WebhookDeltaStore {
 
   async upsert(document) {
     const uri = this.options.url
-    var options = {
+    const options = {
       method: 'POST',
       uri,
       json: true,

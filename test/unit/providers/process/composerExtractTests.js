@@ -146,7 +146,7 @@ describe('composerExtract source discovery', () => {
 })
 
 function sourceDiscovery() {
-  return (version, candidates) => {
+  return (_version, candidates) => {
     return githubResults[candidates[0]]
   }
 }

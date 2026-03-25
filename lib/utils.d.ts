@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-import type { SpawnOptions } from 'child_process'
+import type { SpawnOptions } from 'node:child_process'
 import type { DateTime } from 'luxon'
 
 export function normalizePath(path: string): string

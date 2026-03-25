@@ -3,7 +3,7 @@
 
 const appFactory = require('../app')
 const config = require('painless-config')
-const http = require('http')
+const http = require('node:http')
 const init = require('express-init')
 const CrawlerFactory = require('../crawlerFactory')
 
@@ -27,7 +27,7 @@ function run(service, logger) {
   // initialize the apps (if they have async init functions) and start listening
   init(app, error => {
     if (error) {
-      console.log('Error initializing the Express app: ' + error)
+      console.log(`Error initializing the Express app: ${error}`)
       throw new Error(error)
     }
     server.listen(port)
@@ -48,7 +48,7 @@ function run(service, logger) {
   function normalizePort(val) {
     const normalizedPort = Number.parseInt(val, 10)
 
-    if (isNaN(normalizedPort)) {
+    if (Number.isNaN(normalizedPort)) {
       // named pipe
       return val
     }
@@ -70,16 +70,16 @@ function run(service, logger) {
       throw error
     }
 
-    const bind = typeof port === 'string' ? 'Pipe ' + port : 'Port ' + port
+    const bind = typeof port === 'string' ? `Pipe ${port}` : `Port ${port}`
 
     // handle specific listen errors with friendly messages
     switch (error.code) {
       case 'EACCES':
-        console.error(bind + ' requires elevated privileges')
+        console.error(`${bind} requires elevated privileges`)
         process.exit(1)
         break
       case 'EADDRINUSE':
-        console.error(bind + ' is already in use')
+        console.error(`${bind} is already in use`)
         process.exit(1)
         break
       default:
@@ -92,7 +92,7 @@ function run(service, logger) {
    */
   function onListening() {
     const addr = server.address()
-    var bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port
+    const bind = typeof addr === 'string' ? `pipe ${addr}` : `port ${addr.port}`
     console.log(`Crawler service listening on ${bind}`)
   }
 

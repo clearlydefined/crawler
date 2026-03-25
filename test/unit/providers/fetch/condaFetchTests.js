@@ -1,7 +1,7 @@
 const expect = require('chai').expect
-const fs = require('fs')
+const fs = require('node:fs')
 const sinon = require('sinon')
-const { promisify } = require('util')
+const { promisify } = require('node:util')
 const CondaFetch = require('../../../../providers/fetch/condaFetch.js')
 const Request = require('../../../../ghcrawler/lib/request.js')
 

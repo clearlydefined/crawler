@@ -10,8 +10,8 @@ declare class ScopedQueueSets {
   addQueue(queue: CrawlQueue, location?: 'beginning' | 'end', scope?: string | null): void
   push(requests: Request | Request[], name: string, scope?: string | null): Promise<void>
   repush(original: Request, newRequest: Request): Promise<void>
-  subscribe(): Promise<void[][]>
-  unsubscribe(): Promise<void[][]>
+  subscribe(): Promise<undefined[][]>
+  unsubscribe(): Promise<undefined[][]>
   pop(): Promise<Request | null>
   done(request: Request): Promise<void>
   defer(request: Request): Promise<void>

@@ -3,7 +3,7 @@
 
 const AbstractFetch = require('./abstractFetch')
 const { clone } = require('lodash')
-const fs = require('fs')
+const fs = require('node:fs')
 const memCache = require('memory-cache')
 const { getStream } = require('../../lib/fetch')
 const FetchResult = require('../../lib/fetchResult')
@@ -49,9 +49,8 @@ class CondaFetch extends AbstractFetch {
     const packageChannelData = channelData.packages[spec.name]
     if (spec.type === 'condasrc') {
       return this._downloadCondaSourcePackage(spec, request, version, packageChannelData)
-    } else {
-      return this._downloadCondaPackage(spec, request, version, buildVersion, architecture, packageChannelData)
     }
+    return this._downloadCondaPackage(spec, request, version, buildVersion, architecture, packageChannelData)
   }
 
   async _downloadCondaSourcePackage(spec, request, version, packageChannelData) {
@@ -92,9 +91,9 @@ class CondaFetch extends AbstractFetch {
         (!buildVersion || packageData.build.startsWith(buildVersion))
       )
     }
-    if (repoData['packages']) {
+    if (repoData.packages) {
       packageRepoEntries = packageRepoEntries.concat(
-        Object.entries(repoData['packages'])
+        Object.entries(repoData.packages)
           .filter(packageMatches)
           .map(([packageFile, packageData]) => {
             return { packageFile, packageData }
@@ -138,7 +137,7 @@ class CondaFetch extends AbstractFetch {
     const packageRepoEntry = packageRepoEntries[0]
     const downloadUrl = new URL(`${this.channels[spec.provider]}/${architecture}/${packageRepoEntry.packageFile}`).href
     spec.namespace = architecture
-    spec.revision = packageRepoEntry.packageData.version + '-' + packageRepoEntry.packageData.build
+    spec.revision = `${packageRepoEntry.packageData.version}-${packageRepoEntry.packageData.build}`
     request.url = spec.toUrl()
     super.handle(request)
     const file = this.createTempFile(request)

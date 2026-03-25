@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 const expect = require('chai').expect
-const fs = require('fs')
+const fs = require('node:fs')
 const sinon = require('sinon')
-const PassThrough = require('stream').PassThrough
+const PassThrough = require('node:stream').PassThrough
 const GradlePluginFetch = require('../../../../providers/fetch/gradlePluginFetch')
 const Request = require('../../../../ghcrawler').request
 
@@ -66,8 +66,8 @@ describe('Gradle plugin fetch', () => {
     }
 
     function verifySuccess({ document, casedSpec }) {
-      expect(document.hashes.sha1).to.be.equal(hashes['swt-3.3.0-v3346.jar']['sha1'])
-      expect(document.hashes.sha256).to.be.equal(hashes['swt-3.3.0-v3346.jar']['sha256'])
+      expect(document.hashes.sha1).to.be.equal(hashes['swt-3.3.0-v3346.jar'].sha1)
+      expect(document.hashes.sha256).to.be.equal(hashes['swt-3.3.0-v3346.jar'].sha256)
       //date from manifest.mf modification date
       expect(document.releaseDate.startsWith('2007-06-25')).to.be.true
       expect(casedSpec.name).to.equal('swt')

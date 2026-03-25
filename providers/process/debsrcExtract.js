@@ -11,7 +11,7 @@ class DebSrcExtract extends AbstractClearlyDefinedProcessor {
 
   canHandle(request) {
     const spec = this.toSpec(request)
-    return request.type === 'clearlydefined' && spec && spec.type == 'debsrc'
+    return request.type === 'clearlydefined' && spec && spec.type === 'debsrc'
   }
 
   async handle(request) {

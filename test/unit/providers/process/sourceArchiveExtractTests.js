@@ -9,7 +9,8 @@ const pomsArray = [{ pom1: 'pom1' }, { pom2: 'pom2' }]
 const summaryObj = { version: '8.1.0' }
 
 describe('SourceArchiveExtract Tests', () => {
-  let processor, request
+  let processor
+  let request
   beforeEach(async () => {
     ;({ processor, request } = await setup())
   })

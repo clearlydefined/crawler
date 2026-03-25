@@ -29,12 +29,12 @@ declare class CrawlerService {
   stop(): Promise<void>
   queues(): import('../providers/queuing/scopedQueueSets')
   queue(requests: Request | Request[], name?: string): Promise<void>
-  flushQueue(name: string, scope?: string | null): Promise<void | null>
+  flushQueue(name: string, scope?: string | null): Promise<undefined | null>
   getQueueInfo(name: string, scope?: string | null): Promise<{ count: number; metricsName: string }>
   getRequests(name: string, count: number, remove?: boolean, scope?: string | null): Promise<Request[] | null>
   listDeadletters(): Promise<StoredDocument[]>
   getDeadletter(urn: string): Promise<StoredDocument>
-  deleteDeadletter(urn: string): Promise<boolean | void>
+  deleteDeadletter(urn: string): Promise<boolean | undefined>
   requeueDeadletter(url: string, queue: string): Promise<void>
   getDeadletterCount(): Promise<number>
 }

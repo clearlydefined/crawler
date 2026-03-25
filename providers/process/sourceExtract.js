@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractClearlyDefinedProcessor = require('./abstractClearlyDefinedProcessor')
-const { promisify } = require('util')
-const fs = require('fs')
-const path = require('path')
+const { promisify } = require('node:util')
+const fs = require('node:fs')
+const path = require('node:path')
 const yaml = require('js-yaml')
 const { merge } = require('lodash')
 

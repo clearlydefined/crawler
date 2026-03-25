@@ -1,7 +1,7 @@
 const expect = require('chai').expect
-const fs = require('fs')
+const fs = require('node:fs')
 const sinon = require('sinon')
-const { promisify } = require('util')
+const { promisify } = require('node:util')
 const RubyGemsFetch = require('../../../../providers/fetch/rubyGemsFetch')
 const Request = require('../../../../ghcrawler/lib/request.js')
 
@@ -16,7 +16,7 @@ describe('rubyGemsFetch', () => {
     })
     fetch._getPackage = sinon
       .stub()
-      .callsFake((spec, destination) => getPacakgeStub('test/fixtures/ruby/small-0.5.1.gem', destination))
+      .callsFake((_spec, destination) => getPacakgeStub('test/fixtures/ruby/small-0.5.1.gem', destination))
   })
 
   function verifyFetch(result) {

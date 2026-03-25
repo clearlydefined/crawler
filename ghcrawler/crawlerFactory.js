@@ -20,7 +20,7 @@ class CrawlerFactory {
     CrawlerFactory._initializeRedis(defaults)
 
     const optionsProvider = defaults.provider || 'memory'
-    const crawlerName = (defaults.crawler && defaults.crawler.name) || 'crawler'
+    const crawlerName = defaults.crawler?.name || 'crawler'
     searchPath.forEach(entry => providerSearchPath.push(entry))
     const subsystemNames = ['crawler', 'filter', 'fetch', 'process', 'queue', 'store', 'deadletter', 'lock']
     const crawlerPromise = CrawlerFactory.createRefreshingOptions(
@@ -38,11 +38,10 @@ class CrawlerFactory {
   }
 
   static _initializeRedis(defaults) {
-    if (defaults.redis && defaults.redis.provider)
-      CrawlerFactory._getProvider(defaults.redis || {}, defaults.redis.provider, 'redis')
+    if (defaults.redis?.provider) CrawlerFactory._getProvider(defaults.redis || {}, defaults.redis.provider, 'redis')
   }
 
-  static _decorateOptions(key, options) {
+  static _decorateOptions(_key, options) {
     if (!options.logger) options.logger = logger
   }
 
@@ -74,8 +73,11 @@ class CrawlerFactory {
   }
 
   static async _initialize() {
+    // biome-ignore lint/complexity/noThisInStatic: `this` is rebound via .bind(result) to a Crawler instance
     await this.queues.subscribe()
+    // biome-ignore lint/complexity/noThisInStatic: rebound via .bind(result)
     await this.store.connect()
+    // biome-ignore lint/complexity/noThisInStatic: rebound via .bind(result)
     await this.deadletters.connect()
   }
 
@@ -137,7 +139,7 @@ class CrawlerFactory {
     if (!provider) return null
     for (let i = 0; i < providerSearchPath.length; i++) {
       const entry = providerSearchPath[i]
-      const result = entry[namespace] && entry[namespace][provider]
+      const result = entry[namespace]?.[provider]
       if (result) return result(...params)
     }
     return require(provider)(...params)
@@ -149,7 +151,7 @@ class CrawlerFactory {
     subOptions.logger.info(`creating ${namespace}:${provider}`)
     for (let i = 0; i < providerSearchPath.length; i++) {
       const entry = providerSearchPath[i]
-      const result = entry[namespace] && entry[namespace][provider]
+      const result = entry[namespace]?.[provider]
       if (result) return result(subOptions, ...params)
     }
     return require(provider)(subOptions, ...params)

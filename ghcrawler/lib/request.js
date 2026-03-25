@@ -184,7 +184,7 @@ class Request {
 
   /** @param {string | null} [id] */
   getRootQualifier(id = null) {
-    return `urn:${this.type}:${this.document.id}${id ? ':' + id : ''}`
+    return `urn:${this.type}:${this.document.id}${id ? `:${id}` : ''}`
   }
 
   /** @param {string} [key] */
@@ -193,7 +193,7 @@ class Request {
     if (!qualifier || typeof qualifier !== 'string') {
       throw new Error('Need something on which to base the self link URN')
     }
-    qualifier = qualifier.endsWith(':') ? qualifier : qualifier + ':'
+    qualifier = qualifier.endsWith(':') ? qualifier : `${qualifier}:`
     return `${qualifier}${this.type}:${this.document[key]}`
   }
   // TODO -- consider moving to GitHub-specific crawler
@@ -268,7 +268,7 @@ class Request {
     newRequest.policy = policy
     // relations are not transitive so ensure any relation is stripped off
     if (pruneRelation) {
-      delete newRequest.context.relation
+      newRequest.context.relation = undefined
     }
     this.queueRequests(newRequest, _.get(this._originQueue, 'queue.name'), scope)
   }

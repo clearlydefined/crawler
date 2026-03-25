@@ -6,8 +6,8 @@ const sinon = require('sinon')
 const NuGetFetch = require('../../../../providers/fetch/nugetFetch')
 const proxyquire = require('proxyquire')
 const Request = require('../../../../ghcrawler').request
-const PassThrough = require('stream').PassThrough
-const fs = require('fs')
+const PassThrough = require('node:stream').PassThrough
+const fs = require('node:fs')
 
 describe('NuGet fetch', () => {
   it('should normalize version correctly', () => {
@@ -55,7 +55,7 @@ describe('', () => {
         if (url.includes('missing')) throw { statusCode: 404 }
       }
       const body = fs.readFileSync(`test/fixtures/nuget/${pickFile(url)}`)
-      if (options && options.json) return Promise.resolve({ body: JSON.parse(body), statusCode: 200 })
+      if (options?.json) return Promise.resolve({ body: JSON.parse(body), statusCode: 200 })
       const response = new PassThrough()
       response.body = body
       response.write(response.body)
@@ -77,8 +77,8 @@ describe('', () => {
     const handler = setup()
     const request = await handler.handle(new Request('test', 'cd:/nuget/nuget/-/xunit.core/2.4.1'))
     request.fetchResult.copyTo(request)
-    expect(request.document.hashes.sha1).to.be.equal(hashes['xunit.core.2.4.1.nupkg']['sha1'])
-    expect(request.document.hashes.sha256).to.be.equal(hashes['xunit.core.2.4.1.nupkg']['sha256'])
+    expect(request.document.hashes.sha1).to.be.equal(hashes['xunit.core.2.4.1.nupkg'].sha1)
+    expect(request.document.hashes.sha256).to.be.equal(hashes['xunit.core.2.4.1.nupkg'].sha256)
     expect(request.document.releaseDate).to.equal('2018-10-29T04:18:45.803Z')
     expect(request.document.metadataLocation).to.have.keys(['manifest', 'nuspec', 'latestNuspec'])
     expect(request.document.location).to.not.be.undefined
@@ -88,8 +88,8 @@ describe('', () => {
     const handler = setup()
     const request = await handler.handle(new Request('test', 'cd:/nuget/nuget/-/xunit.core'))
     request.fetchResult.copyTo(request)
-    expect(request.document.hashes.sha1).to.be.equal(hashes['xunit.core.2.4.1.nupkg']['sha1'])
-    expect(request.document.hashes.sha256).to.be.equal(hashes['xunit.core.2.4.1.nupkg']['sha256'])
+    expect(request.document.hashes.sha1).to.be.equal(hashes['xunit.core.2.4.1.nupkg'].sha1)
+    expect(request.document.hashes.sha256).to.be.equal(hashes['xunit.core.2.4.1.nupkg'].sha256)
     expect(request.document.releaseDate).to.equal('2018-10-29T04:18:45.803Z')
     expect(request.document.metadataLocation).to.have.keys(['manifest', 'nuspec', 'latestNuspec'])
     expect(request.document.location).to.not.be.undefined

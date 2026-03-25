@@ -22,11 +22,11 @@ interface StoredDocument {
 
 interface DocStore {
   connect(): Promise<void>
-  upsert(document: StoredDocument): Promise<StoredDocument | string | void>
+  upsert(document: StoredDocument): Promise<StoredDocument | string | undefined>
   get(type: string, key: string): Promise<StoredDocument>
   etag(type: string, key: string): Promise<string | null>
   list?(type: string): Promise<StoredDocument[]>
-  delete?(type: string, key: string): Promise<boolean | void>
+  delete?(type: string, key: string): Promise<boolean | undefined>
   count?(type: string): Promise<number>
   close(): void
 }

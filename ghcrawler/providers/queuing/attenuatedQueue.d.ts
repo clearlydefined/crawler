@@ -19,7 +19,7 @@ declare class AttenuatedQueue extends NestedQueue {
   constructor(queue: CrawlQueue, options: AttenuatedQueueOptions)
 
   done(request: Request): Promise<void>
-  push(requests: Request | Request[]): Promise<void[]>
+  push(requests: Request | Request[]): Promise<undefined[]>
 }
 
 export = AttenuatedQueue

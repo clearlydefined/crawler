@@ -128,7 +128,7 @@ module.exports = {
       spnAuth: config.get('CRAWLER_HARVESTS_QUEUE_SPN_AUTH'),
       isSpnAuth: config.get('CRAWLER_HARVESTS_QUEUE_IS_SPN_AUTH') || false,
       useManagedIdentity: config.get('CRAWLER_HARVESTS_QUEUE_USE_MANAGED_IDENTITY') || false,
-      visibilityTimeout: isNaN(azqueueVisibilityTimeoutSeconds) ? 0 : azqueueVisibilityTimeoutSeconds
+      visibilityTimeout: Number.isNaN(azqueueVisibilityTimeoutSeconds) ? 0 : azqueueVisibilityTimeoutSeconds
     },
     'cd(azblob)': cd_azblob,
     'cd(file)': cd_file

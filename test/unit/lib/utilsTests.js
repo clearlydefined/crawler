@@ -12,8 +12,8 @@ const {
   spawnPromisified,
   isGitFile
 } = require('../../../lib/utils')
-const { promisify } = require('util')
-const execFile = promisify(require('child_process').execFile)
+const { promisify } = require('node:util')
+const execFile = promisify(require('node:child_process').execFile)
 chai.use(chaiAsPromised)
 const expect = chai.expect
 

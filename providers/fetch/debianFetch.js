@@ -4,18 +4,18 @@
 const AbstractFetch = require('./abstractFetch')
 const bz2 = require('unbzip2-stream')
 const { clone, flatten } = require('lodash')
-const domain = require('domain')
-const fs = require('fs')
+const domain = require('node:domain')
+const fs = require('node:fs')
 const linebyline = require('linebyline')
 const memCache = require('memory-cache')
-const path = require('path')
-const { promisify } = require('util')
+const path = require('node:path')
+const { promisify } = require('node:util')
 const { callFetch: requestPromise, getStream } = require('../../lib/fetch')
 const tmp = require('tmp')
 const unixArchive = require('ar-async')
 const FetchResult = require('../../lib/fetchResult')
 
-const exec = promisify(require('child_process').exec)
+const exec = promisify(require('node:child_process').exec)
 const exists = promisify(fs.exists)
 const lstat = promisify(fs.lstat)
 const readdir = promisify(fs.readdir)
@@ -36,7 +36,7 @@ const metadataChangelogsUrl = 'https://metadata.ftp-master.debian.org/changelogs
 class DebianFetch extends AbstractFetch {
   constructor(options) {
     super(options)
-    this.packageMapFileLocation = this.options.cdFileLocation + '-package-file.map'
+    this.packageMapFileLocation = `${this.options.cdFileLocation}-package-file.map`
   }
 
   canHandle(request) {
@@ -158,9 +158,9 @@ class DebianFetch extends AbstractFetch {
   _ensureArchitecturePresenceForBinary(spec, registryData) {
     const { architecture } = this._fromSpec(spec)
     if (spec.type === 'deb' && !architecture) {
-      const randomBinaryArchitecture = (registryData.find(entry => entry.Architecture) || {}).Architecture
+      const randomBinaryArchitecture = registryData.find(entry => entry.Architecture)?.Architecture
       if (!randomBinaryArchitecture) return false
-      spec.revision += '_' + randomBinaryArchitecture
+      spec.revision += `_${randomBinaryArchitecture}`
     }
     return true
   }
@@ -170,9 +170,9 @@ class DebianFetch extends AbstractFetch {
     const { architecture } = this._fromSpec(spec)
     if (isSrc) {
       const sourceAndPatches = registryData.filter(entry => !entry.Architecture && !entry.Path.endsWith('.dsc'))
-      const sourcePath = (sourceAndPatches.find(entry => entry.Path.includes('.orig.tar.')) || {}).Path
+      const sourcePath = sourceAndPatches.find(entry => entry.Path.includes('.orig.tar.'))?.Path
       const source = sourcePath ? new URL(providerMap.debian + sourcePath).href : null
-      const patchPath = (sourceAndPatches.find(entry => !entry.Path.includes('.orig.tar.')) || {}).Path
+      const patchPath = sourceAndPatches.find(entry => !entry.Path.includes('.orig.tar.'))?.Path
       const patches = patchPath ? new URL(providerMap.debian + patchPath).href : null
       return { source, patches }
     }
@@ -311,7 +311,7 @@ class DebianFetch extends AbstractFetch {
       return this._parseDeclaredLicenses(response)
     } catch (error) {
       if (error.statusCode === 404) return []
-      else throw error
+      throw error
     }
   }
 
@@ -334,13 +334,13 @@ class DebianFetch extends AbstractFetch {
         // A or B and C => (A OR B AND C)
         licenseId = licenseId.replace(' or ', ' OR ')
         licenseId = licenseId.replace(' and ', ' AND ')
-        licensesSet.add('(' + licenseId + ')')
+        licensesSet.add(`(${licenseId})`)
       } else if (licenseId.includes(' or ') && licenseId.includes(',')) {
         // A or B, and C => (A OR B) AND C
         licenseId = licenseId.replace(' or ', ' OR ')
         licenseId.split(' and ').forEach(part => {
           if (part.includes('OR') && part.endsWith(',')) {
-            licensesSet.add('(' + part.replace(',', ')'))
+            licensesSet.add(`(${part.replace(',', ')')}`)
           } else {
             licensesSet.add(part)
           }

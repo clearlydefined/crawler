@@ -4,12 +4,12 @@
 const AbstractFetch = require('./abstractFetch')
 const { callFetch, getStream } = require('../../lib/fetch')
 const { clone, get } = require('lodash')
-const { promisify } = require('util')
-const fs = require('fs')
+const { promisify } = require('node:util')
+const fs = require('node:fs')
 const exists = promisify(fs.exists)
 const readdir = promisify(fs.readdir)
 const lstat = promisify(fs.lstat)
-const path = require('path')
+const path = require('node:path')
 const parseString = promisify(require('xml2js').parseString)
 const EntitySpec = require('../../lib/entitySpec')
 const { extractDate } = require('../../lib/utils')
@@ -121,11 +121,11 @@ class MavenBasedFetch extends AbstractFetch {
     if (!content) return null
     const pom = await parseString(content)
     // clean up some stuff we don't actually look at.
-    delete pom.project.build
-    delete pom.project.dependencies
-    delete pom.project.dependencyManagement
-    delete pom.project.modules
-    delete pom.project.profiles
+    pom.project.build = undefined
+    pom.project.dependencies = undefined
+    pom.project.dependencyManagement = undefined
+    pom.project.modules = undefined
+    pom.project.profiles = undefined
     return pom
   }
 
@@ -187,7 +187,7 @@ class MavenBasedFetch extends AbstractFetch {
       return await this._handleRequestPromise(options)
     } catch (error) {
       if (error.statusCode === 404) return null
-      else throw error
+      throw error
     }
   }
 }
