@@ -48,7 +48,14 @@ class Insights {
     if (!connectionString || connectionString === 'mock') {
       _client = new Insights(tattoos, null, echo)
     } else {
-      appInsights.setup(connectionString).setAutoCollectPerformance(false).setAutoCollectDependencies(false).start()
+      appInsights
+        .setup(connectionString)
+        .setAutoCollectPerformance(false)
+        .setAutoCollectDependencies(false)
+        // We emit telemetry via our custom Winston transport; disable console auto-collection
+        // to avoid duplicate traces with a reduced customProperties envelope.
+        .setAutoCollectConsole(false, false)
+        .start()
       _client = new Insights(tattoos, appInsights.defaultClient, echo)
     }
   }
