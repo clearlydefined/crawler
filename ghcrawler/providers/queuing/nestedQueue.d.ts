@@ -34,4 +34,4 @@ declare class NestedQueue implements CrawlQueue {
 }
 
 export = NestedQueue
-export { CrawlQueue }
+export type { CrawlQueue }

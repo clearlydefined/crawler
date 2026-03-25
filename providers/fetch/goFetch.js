@@ -95,7 +95,7 @@ class GoFetch extends AbstractFetch {
   }
 
   _buildUrl(spec, extension = '.zip') {
-    let initial_url = `${providerMap.golang}/${spec.namespace}/${spec.name}/@v/${spec.revision}${extension}`
+    const initial_url = `${providerMap.golang}/${spec.namespace}/${spec.name}/@v/${spec.revision}${extension}`
     return this._replace_encodings(this._remove_blank_fields(initial_url))
   }
 

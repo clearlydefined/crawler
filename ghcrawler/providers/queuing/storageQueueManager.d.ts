@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation and others. Made available under the MIT license.
 // SPDX-License-Identifier: MIT
 
-import { QueueServiceClient } from '@azure/storage-queue'
+import type { QueueServiceClient } from '@azure/storage-queue'
 import StorageQueue = require('./storageQueue')
 import AttenuatedQueue = require('./attenuatedQueue')
 import Request = require('../../lib/request')

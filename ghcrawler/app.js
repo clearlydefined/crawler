@@ -26,7 +26,7 @@ function configureApp(service, logger) {
 
   // Catch 404 and forward to error handler
   const requestHandler = (request, response, next) => {
-    let error = new Error('404 - Not Found')
+    const error = new Error('404 - Not Found')
     error.status = 404
     error.success = false
     next(error)
@@ -57,7 +57,7 @@ function configureApp(service, logger) {
       // https://feedback.azure.com/forums/169385-web-apps/suggestions/32120617-document-healthcheck-url-requirement-for-custom-co
       logger.error('SvcRequestFailure: ' + request.url, error)
     response.status(error.status || 500)
-    let propertiesToSerialize = ['success', 'message']
+    const propertiesToSerialize = ['success', 'message']
     if (app.get('env') !== 'production') {
       propertiesToSerialize.push('stack')
     }

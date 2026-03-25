@@ -1,0 +1,65 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "files": {
+    "ignore": [
+      ".github/workflows/*",
+      ".vscode/launch.json",
+      ".nyc_output",
+      "schemas/*.json",
+      "test/**/*.json",
+      "test/**/*.yaml"
+    ]
+  },
+  "formatter": {
+    "lineWidth": 120,
+    "indentStyle": "space",
+    "indentWidth": 2
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "semicolons": "asNeeded",
+      "trailingCommas": "none",
+      "arrowParentheses": "asNeeded"
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "suspicious": {
+        "noConsoleLog": "off",
+        "noAssignInExpressions": "off",
+        "noConfusingVoidType": "off",
+        "noDoubleEquals": "off",
+        "noExplicitAny": "off",
+        "noGlobalIsNan": "off"
+      },
+      "correctness": {
+        "noUnusedVariables": "warn",
+        "noInnerDeclarations": "off"
+      },
+      "style": {
+        "noParameterAssign": "off",
+        "noVar": "off",
+        "noUselessElse": "off",
+        "useNodejsImportProtocol": "off",
+        "useTemplate": "off",
+        "useSingleVarDeclarator": "off"
+      },
+      "complexity": {
+        "noForEach": "off",
+        "noStaticOnlyClass": "off",
+        "noThisInStatic": "off",
+        "noUselessConstructor": "off",
+        "noUselessTernary": "off",
+        "useOptionalChain": "off",
+        "useLiteralKeys": "off"
+      },
+      "performance": {
+        "noAccumulatingSpread": "off",
+        "noDelete": "off"
+      }
+    }
+  }
+}

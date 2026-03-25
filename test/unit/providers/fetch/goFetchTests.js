@@ -93,7 +93,7 @@ describe('Go Proxy fetching', () => {
     })
   })
 
-  afterEach(function () {
+  afterEach(() => {
     sinon.restore()
   })
 

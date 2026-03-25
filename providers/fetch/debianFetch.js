@@ -243,7 +243,7 @@ class DebianFetch extends AbstractFetch {
   async _getLatestFileDateFromDirectory(location) {
     let latestDate = null
     const fileLocations = await this._getFiles(location)
-    for (let location of fileLocations) {
+    for (const location of fileLocations) {
       const locationStat = await lstat(location)
       if (!locationStat.isDirectory()) {
         const { mtime } = locationStat
@@ -281,7 +281,7 @@ class DebianFetch extends AbstractFetch {
         .toString()
         .split('\n')
         .filter(patch => patch && !patch.trim().startsWith('#') && !patch.trim().startsWith('|'))
-      for (let patchFileName of orderedPatches) {
+      for (const patchFileName of orderedPatches) {
         const patchCommand = `patch -p01 -i ${path.join(patchesLocation, 'patches', patchFileName)}`
         try {
           const { stdout } = await exec(patchCommand, { cwd: sourceLocation })

@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation and others. Made available under the MIT license.
 // SPDX-License-Identifier: MIT
 
-import { QueueServiceClient } from '@azure/storage-queue'
-import { CrawlQueue } from './nestedQueue'
+import type { QueueServiceClient } from '@azure/storage-queue'
+import type { CrawlQueue } from './nestedQueue'
 import Request = require('../../lib/request')
 
 interface StorageQueueOptions {

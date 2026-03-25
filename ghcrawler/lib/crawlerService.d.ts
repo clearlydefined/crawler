@@ -4,7 +4,7 @@
 import Crawler = require('./crawler')
 import Request = require('./request')
 
-import { StoredDocument } from '../types/docStore'
+import type { StoredDocument } from '../types/docStore'
 
 interface CrawlerServiceOptions {
   crawler: {
@@ -52,4 +52,4 @@ declare class CrawlerLoop {
 }
 
 export = CrawlerService
-export { CrawlerLoop, CrawlerServiceOptions }
+export { CrawlerLoop, type CrawlerServiceOptions }

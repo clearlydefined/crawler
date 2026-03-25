@@ -6,12 +6,12 @@ const CondaFetch = require('../../../../providers/fetch/condaFetch.js')
 const Request = require('../../../../ghcrawler/lib/request.js')
 
 describe('condaFetch utilities', () => {
-  let fetch = CondaFetch({
+  const fetch = CondaFetch({
     logger: { info: sinon.stub() },
     cdFileLocation: 'test/fixtures/conda/fragment'
   })
 
-  let repoData = JSON.parse(fs.readFileSync('test/fixtures/conda/repodata.json'))
+  const repoData = JSON.parse(fs.readFileSync('test/fixtures/conda/repodata.json'))
 
   it('matches packages in repodata.packages correctly', () => {
     expect(fetch._matchPackage('21cmfast', '3.0.2', null, repoData).length).to.greaterThan(0)

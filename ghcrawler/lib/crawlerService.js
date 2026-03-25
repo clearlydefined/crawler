@@ -119,15 +119,14 @@ class CrawlerService {
   }
 
   requeueDeadletter(url, queue) {
-    const self = this
     return this.getDeadletter(url)
       .then(document => {
         const request = Request.adopt(document).createRequeuable()
         request.attemptCount = 0
-        return self.crawler.queues.push([request], queue)
+        return this.crawler.queues.push([request], queue)
       })
       .then(() => {
-        return self.deleteDeadletter(url)
+        return this.deleteDeadletter(url)
       })
   }
 

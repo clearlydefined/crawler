@@ -44,4 +44,4 @@ declare class BaseHandler {
 }
 
 export = BaseHandler
-export { BaseHandlerOptions, FileHashes, TmpDirResult, TmpFileResult }
+export type { BaseHandlerOptions, FileHashes, TmpDirResult, TmpFileResult }

@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import Request = require('../../lib/request')
-import { CrawlQueue } from './nestedQueue'
+import type { CrawlQueue } from './nestedQueue'
 
 interface InMemoryQueueOptions {
   logger: { [key: string]: unknown }

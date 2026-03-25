@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { ContainerClient } from '@azure/storage-blob'
-import { DocStore, StoredDocument } from '../../types/docStore'
+import type { ContainerClient } from '@azure/storage-blob'
+import type { DocStore, StoredDocument } from '../../types/docStore'
 
 interface AzureStorageDocStoreOptions {
   container: string

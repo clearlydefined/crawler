@@ -79,7 +79,7 @@ describe('', () => {
     Fetch._resultBox = resultBox
   })
 
-  afterEach(function () {
+  afterEach(() => {
     sinon.restore()
   })
 
