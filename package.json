@@ -75,7 +75,7 @@
     "xml2js": "^0.6.2"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.9.4",
+    "@biomejs/biome": "2.4.8",
     "@tsconfig/node-ts": "^23.6.4",
     "@tsconfig/node24": "24.0.4",
     "@tsconfig/strictest": "2.0.8",
@@ -88,7 +88,7 @@
     "@types/lodash": "^4.17.24",
     "@types/luxon": "^3.7.1",
     "@types/memory-cache": "^0.2.6",
-    "@types/mkdirp": "^1.0.2",
+    "@types/mkdirp": "^2.0.0",
     "@types/mocha": "^10.0.10",
     "@types/morgan": "^1.9.10",
     "@types/node": "25.5.0",
