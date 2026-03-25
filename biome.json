@@ -1,13 +1,14 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.4.8/schema.json",
   "files": {
-    "ignore": [
-      ".github/workflows/*",
-      ".vscode/launch.json",
-      ".nyc_output",
-      "schemas/*.json",
-      "test/**/*.json",
-      "test/**/*.yaml"
+    "includes": [
+      "**",
+      "!**/.github/workflows/**/*",
+      "!**/.vscode/launch.json",
+      "!**/.nyc_output",
+      "!**/schemas/**/*.json",
+      "!**/test/**/*.json",
+      "!**/test/**/*.yaml"
     ]
   },
   "formatter": {
@@ -28,12 +29,14 @@
     "rules": {
       "recommended": true,
       "suspicious": {
-        "noConsoleLog": "off",
         "noAssignInExpressions": "off",
         "noConfusingVoidType": "off",
         "noDoubleEquals": "off",
         "noExplicitAny": "off",
-        "noGlobalIsNan": "off"
+        "noGlobalIsNan": "off",
+        "noConsole": { "level": "off", "options": { "allow": ["log"] } },
+        "noVar": "off",
+        "useIterableCallbackReturn": "off"
       },
       "correctness": {
         "noUnusedVariables": "warn",
@@ -41,7 +44,6 @@
       },
       "style": {
         "noParameterAssign": "off",
-        "noVar": "off",
         "noUselessElse": "off",
         "useNodejsImportProtocol": "off",
         "useTemplate": "off",
