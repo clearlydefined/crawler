@@ -5,6 +5,7 @@ const AbstractFetch = require('./abstractFetch')
 const nodeRequest = require('../../lib/fetch')
 const fs = require('fs')
 const spdxCorrect = require('spdx-correct')
+const SPDX = require('@clearlydefined/spdx')
 const { findLastKey, get, find, clone } = require('lodash')
 const FetchResult = require('../../lib/fetchResult')
 
@@ -95,7 +96,7 @@ class PyPiFetch extends AbstractFetch {
   _extractDeclaredLicense(registryData) {
     const licenseExpression = this._extractLicenseExpression(registryData)
     if (licenseExpression) {
-      return licenseExpression
+      return SPDX.normalize(licenseExpression)
     }
 
     const licenseInMetadata = get(registryData, 'info.license')

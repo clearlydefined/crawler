@@ -75,18 +75,6 @@ describe('pypiFetch handle function', () => {
       expect(result).to.be.equal('MIT')
     })
 
-    it('returns compound SPDX expressions as-is', () => {
-      const registryData = { info: { license_expression: 'MIT AND Apache-2.0' } }
-      const result = fetch._extractLicenseExpression(registryData)
-      expect(result).to.be.equal('MIT AND Apache-2.0')
-    })
-
-    it('returns expressions with WITH clause as-is', () => {
-      const registryData = { info: { license_expression: 'GPL-2.0-or-later WITH Classpath-exception-2.0' } }
-      const result = fetch._extractLicenseExpression(registryData)
-      expect(result).to.be.equal('GPL-2.0-or-later WITH Classpath-exception-2.0')
-    })
-
     it('returns null when license_expression is missing', () => {
       const registryData = { info: { license: 'MIT' } }
       const result = fetch._extractLicenseExpression(registryData)
@@ -134,6 +122,28 @@ describe('pypiFetch handle function', () => {
       }
       const declared = fetch._extractDeclaredLicense(registryData)
       expect(declared).to.be.equal('BSD-3-Clause')
+    })
+
+    it('normalizes compound SPDX expressions with LicenseRef', () => {
+      const registryData = { info: { license_expression: 'MIT AND LicenseRef-proprietary' } }
+      const declared = fetch._extractDeclaredLicense(registryData)
+      expect(declared).to.be.equal('MIT AND LicenseRef-proprietary')
+    })
+
+    it('normalizes expressions with WITH clause', () => {
+      const registryData = { info: { license_expression: 'GPL-2.0-or-later WITH Classpath-exception-2.0' } }
+      const declared = fetch._extractDeclaredLicense(registryData)
+      expect(declared).to.be.equal('GPL-2.0-or-later WITH Classpath-exception-2.0')
+    })
+
+    it('returns NOASSERTION for invalid parts in compound license_expression', () => {
+      const registryData = {
+        info: {
+          license_expression: 'MIT OR UNKNOWN'
+        }
+      }
+      const declared = fetch._extractDeclaredLicense(registryData)
+      expect(declared).to.be.equal('MIT OR NOASSERTION')
     })
 
     it('falls back to info.license when license_expression is missing', () => {
