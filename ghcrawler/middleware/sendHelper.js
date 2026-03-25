@@ -5,7 +5,7 @@
 const htmlencode = require('htmlencode').htmlEncode
 
 function create() {
-  return function (request, response, next) {
+  return (request, response, next) => {
     response.helpers = response.helpers || {}
     response.helpers.send = {
       context: {

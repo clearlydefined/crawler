@@ -101,7 +101,7 @@ describe('MavenCentral fetching', () => {
     })
   })
 
-  afterEach(function () {
+  afterEach(() => {
     sinon.restore()
   })
 

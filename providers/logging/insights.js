@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 const appInsights = require('applicationinsights')
+const safeStringify = require('safe-stable-stringify')
 
 /**
  * Module-level client reference. In applicationinsights 3.x, defaultClient is read-only,
@@ -69,7 +70,7 @@ class Insights {
   trackTrace(traceTelemetry) {
     this.tattoo(traceTelemetry)
     const hasProperties = traceTelemetry.properties && Object.keys(traceTelemetry.properties).length > 0
-    const propertyString = hasProperties ? ` ${JSON.stringify(traceTelemetry.properties)}` : ''
+    const propertyString = hasProperties ? ` ${safeStringify(traceTelemetry.properties)}` : ''
     const severity = traceTelemetry.severity
     const severityChar = severityMap[severity] || '?'
     if (this.client) this.client.trackTrace(traceTelemetry)

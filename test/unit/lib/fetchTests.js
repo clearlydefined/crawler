@@ -261,7 +261,7 @@ describe('CallFetch', () => {
       expect(response).to.be.equal('done')
     })
 
-    it('should POST with JSON', async function () {
+    it('should POST with JSON', async () => {
       const path = '/webhook'
       const endpointMock = await mockServer.forPost(path).thenReply(200, 'done')
 

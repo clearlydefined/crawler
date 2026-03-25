@@ -33,7 +33,7 @@ class NpmExtract extends AbstractClearlyDefinedProcessor {
       const manifestLocation = this._getManifestLocation(location)
       const manifest = manifestLocation ? JSON.parse(fs.readFileSync(path.join(location, manifestLocation))) : null
       await this._createDocument(request, manifest, request.document.registryData)
-      if (manifest) this.attachFiles(request.document, [manifestLocation], location)
+      if (manifest) await this.attachFiles(request.document, [manifestLocation], location)
       else this.logger.info('NPM without package.json', { url: request.url })
     }
     this.addLocalToolTasks(request)

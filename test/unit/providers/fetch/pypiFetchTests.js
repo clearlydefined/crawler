@@ -12,19 +12,19 @@ const pypiFetchOptions = { logger: { info: sinon.stub() } }
 const spdxCorrect = require('spdx-correct')
 
 describe('pypiFetch handle function', () => {
-  let sandbox = sinon.createSandbox()
+  const sandbox = sinon.createSandbox()
   let requestGetStub
   let fetch
   let nodeRequestStub
 
-  beforeEach(function () {
-    let nodeFetchStub = sandbox.stub(nodeFetch)
+  beforeEach(() => {
+    const nodeFetchStub = sandbox.stub(nodeFetch)
     requestGetStub = nodeFetchStub.callFetchWithRetry
     nodeRequestStub = nodeFetchStub.getStream
     fetch = PypiFetch(pypiFetchOptions)
   })
 
-  afterEach(function () {
+  afterEach(() => {
     sandbox.restore()
   })
 
@@ -32,7 +32,7 @@ describe('pypiFetch handle function', () => {
     // Setup the stub to return an empty response (e.g. no body)
     requestGetStub.returns({})
 
-    let result = await fetch.handle(new Request('pypi', 'cd:/pypi/pypi/-/reuse/0.8.1'))
+    const result = await fetch.handle(new Request('pypi', 'cd:/pypi/pypi/-/reuse/0.8.1'))
 
     expect(result.outcome).to.be.equal('Missing  ')
   })
@@ -64,7 +64,7 @@ describe('pypiFetch handle function', () => {
       statusCode: 200
     })
 
-    let result = await fetch.handle(new Request('pypi', 'cd:/pypi/pypi/-/dnspython/1.10.0'))
+    const result = await fetch.handle(new Request('pypi', 'cd:/pypi/pypi/-/dnspython/1.10.0'))
     expect(result.outcome).to.be.equal('Missing  ')
   })
 

@@ -99,7 +99,7 @@ describe('MavenGoogle fetching', () => {
     })
   })
 
-  afterEach(function () {
+  afterEach(() => {
     sinon.restore()
   })
 

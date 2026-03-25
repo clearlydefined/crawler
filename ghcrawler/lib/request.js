@@ -8,31 +8,53 @@ const _ = require('lodash')
  * Requests describe a resource to capture and process as well as the context for that processing.
  */
 class Request {
+  /**
+   * @param {string} type
+   * @param {string} url
+   * @param {Record<string, any> | null} [context]
+   */
   constructor(type, url, context = null) {
     this.type = type
     this.url = url
+    /** @type {Record<string, any>} */
     this.context = context || {}
+    /** @type {import('./traversalPolicy') | string} */
     this.policy = Policy.default(type)
-    // this.meta = {}
-    // this.document
-    // this.payload
-
-    // this.execution = {
-    //   response
-    //   this.start
-    //   this.promises
-    //   this.crawler
-    //   this.outcome
-    //   this.message
-    //   this.save
-    //   this.contentOrigin
-    //   this.nextRequestTime
-    //   this.attemptCount
-    //   this.processControl
-
-    // }
+    /** @type {Record<string, unknown> | undefined} */
+    this.meta = undefined
+    /** @type {{ id?: string | number, _metadata: any, [key: string]: any } | undefined} */
+    this.document = undefined
+    /** @type {any} */
+    this.payload = undefined
+    /** @type {{ queue: Function, storeDeadletter: Function, queues: { defer: Function }, logger: { log: Function } } | undefined} */
+    this.crawler = undefined
+    /** @type {number | undefined} */
+    this.start = undefined
+    /** @type {Promise<void>[] | undefined} */
+    this.promises = undefined
+    /** @type {(() => void)[] | undefined} */
+    this.cleanups = undefined
+    /** @type {boolean | undefined} */
+    this.save = undefined
+    /** @type {string | undefined} */
+    this.processControl = undefined
+    /** @type {string | undefined} */
+    this.outcome = undefined
+    /** @type {string | undefined} */
+    this.message = undefined
+    /** @type {string | undefined} */
+    this.contentOrigin = undefined
+    /** @type {number | undefined} */
+    this.nextRequestTime = undefined
+    /** @type {number | undefined} */
+    this.attemptCount = undefined
+    /** @type {any} */
+    this._originQueue = undefined
+    /** @type {import('../../lib/entitySpec') | undefined} */
+    this.casedSpec = undefined
   }
 
+  /** @param {Record<string, any>} object */
   static adopt(object) {
     if (object.__proto__ !== Request.prototype) {
       object.__proto__ = Request.prototype
@@ -41,11 +63,12 @@ class Request {
       object.policy = Request._getResolvedPolicy(object)
       Policy.adopt(object.policy)
     } else {
-      Policy.default(this.type)
+      Policy.default(object.type)
     }
     return object
   }
 
+  /** @param {any} request */
   static _getResolvedPolicy(request) {
     let policyOrSpec = request.policy
     if (typeof policyOrSpec !== 'string') {
@@ -55,7 +78,7 @@ class Request {
     return Policy.getPolicy(policyOrSpec)
   }
 
-  // Setup some internal context and open this request for handling.
+  /** @param {{ queue: Function, storeDeadletter: Function, queues: { defer: Function }, logger: { log: Function } }} crawler */
   open(crawler) {
     this.crawler = crawler
     this.start = Date.now()
@@ -67,26 +90,31 @@ class Request {
     return this
   }
 
+  /** @returns {void} */
   _resolvePolicy() {
     if (!this.policy) {
-      return this.markDead('Bogus', 'No policy')
+      this.markDead('Bogus', 'No policy')
+      return
     }
     if (typeof this.policy === 'string') {
       // if the policy spec does not include a map, default to using the type of this request as the map name
       const spec = this.policy.includes(':') ? this.policy : `${this.policy}:${this.type}`
       const policy = Policy.getPolicy(spec)
       if (!policy) {
-        return this.markDead('Bogus', 'Unable to resolve policy')
+        this.markDead('Bogus', 'Unable to resolve policy')
+        return
       }
       this.policy = policy
     }
   }
 
+  /** @param {string | null} [message] */
   _addHistory(message = null) {
     this.context.history = this.context.history || []
     this.context.history.push((message || this).toString())
   }
 
+  /** @param {{ toString(): string }} request */
   hasSeen(request) {
     const history = this.context.history || []
     return history.includes(request.toString())
@@ -100,6 +128,7 @@ class Request {
     return this.cleanups || []
   }
 
+  /** @param {Promise<void> | Promise<void>[] | null} promises */
   track(promises) {
     if (!promises) {
       return this
@@ -113,6 +142,7 @@ class Request {
     return this
   }
 
+  /** @param {(() => void) | (() => void)[] | null} cleanups */
   trackCleanup(cleanups) {
     if (!cleanups) {
       return this
@@ -126,33 +156,38 @@ class Request {
     return this
   }
 
+  /** @param {(() => void) | (() => void)[] | null} cleanups */
   removeCleanup(cleanups) {
     if (!cleanups || !this.cleanups) {
       return this
     }
     const toRemove = Array.isArray(cleanups) ? cleanups : [cleanups]
-    this.cleanups = this.cleanups.filter(item => !toRemove.includes(item))
+    this.cleanups = this.cleanups.filter(/** @param {any} item */ item => !toRemove.includes(item))
     return this
   }
 
+  /** @param {Record<string, unknown>} data */
   addMeta(data) {
     this.meta = Object.assign({}, this.meta, data)
     return this
   }
 
-  // TODO -- consider moving to GitHub-specific crawler
+  /** @param {string | null} [id] */
   addRootSelfLink(id = null) {
     this.linkResource('self', this.getRootQualifier(id))
   }
 
+  /** @param {string} [key] */
   addSelfLink(key = 'id') {
     this.linkResource('self', this.getChildQualifier(key))
   }
 
+  /** @param {string | null} [id] */
   getRootQualifier(id = null) {
     return `urn:${this.type}:${this.document.id}${id ? ':' + id : ''}`
   }
 
+  /** @param {string} [key] */
   getChildQualifier(key = 'id') {
     let qualifier = this.context.qualifier
     if (!qualifier || typeof qualifier !== 'string') {
@@ -163,6 +198,10 @@ class Request {
   }
   // TODO -- consider moving to GitHub-specific crawler
 
+  /**
+   * @param {string} name
+   * @param {string | string[]} urn
+   */
   linkResource(name, urn) {
     const links = this.document._metadata.links
     const key = Array.isArray(urn) ? 'hrefs' : 'href'
@@ -171,31 +210,54 @@ class Request {
     links[name].type = 'resource'
   }
 
+  /** @param {string} href */
   linkSiblings(href) {
     const links = this.document._metadata.links
     links.siblings = { href: href, type: 'collection' }
   }
 
+  /**
+   * @param {string} name
+   * @param {string} href
+   */
   linkCollection(name, href) {
     const links = this.document._metadata.links
     links[name] = { href: href, type: 'collection' }
   }
 
+  /**
+   * @param {string} name
+   * @param {string} href
+   */
   linkRelation(name, href) {
     const links = this.document._metadata.links
     links[name] = { href: href, type: 'relation' }
   }
 
+  /** @param {string} name */
   getNextPolicy(name) {
-    return this.policy.getNextPolicy(name)
+    return /** @type {import('./traversalPolicy')} */ (this.policy).getNextPolicy(name)
   }
 
+  /**
+   * @param {any} requests
+   * @param {string | null} [name]
+   * @param {string | null} [scope]
+   */
   queueRequests(requests, name = null, scope = null) {
     requests = Array.isArray(requests) ? requests : [requests]
-    const toQueue = requests.filter(request => !this.hasSeen(request))
+    const toQueue = requests.filter(/** @param {any} request */ request => !this.hasSeen(request))
     this.track(this.crawler.queue(toQueue, name, scope))
   }
 
+  /**
+   * @param {string} type
+   * @param {string} url
+   * @param {any} policy
+   * @param {Record<string, any> | null} [context]
+   * @param {boolean} [pruneRelation]
+   * @param {string | null} [scope]
+   */
   queue(type, url, policy, context = null, pruneRelation = true, scope = null) {
     if (!policy) {
       return
@@ -211,25 +273,46 @@ class Request {
     this.queueRequests(newRequest, _.get(this._originQueue, 'queue.name'), scope)
   }
 
+  /**
+   * @param {string} outcome
+   * @param {string} message
+   */
   markDead(outcome, message) {
     this.track(this.crawler.storeDeadletter(this, message))
     return this.markSkip(outcome, message)
   }
 
+  /**
+   * @param {string} outcome
+   * @param {string} [message]
+   */
   markSkip(outcome, message) {
     return this._cutShort(outcome, message, 'skip')
   }
 
+  /**
+   * @param {string} outcome
+   * @param {string} message
+   */
   markRequeue(outcome, message) {
     this._addHistory(` Requeued: ${outcome} ${message}`)
     return this._cutShort(outcome, message, 'requeue')
   }
 
+  /**
+   * @param {string} outcome
+   * @param {string} message
+   */
   markDefer(outcome, message) {
     this.crawler.queues.defer(this)
     return this._cutShort(outcome, message, 'defer')
   }
 
+  /**
+   * @param {string} outcome
+   * @param {string} message
+   * @param {string} reason
+   */
   _cutShort(outcome, message, reason) {
     // if we are already skipping/requeuing, keep the original as the official outcome but log this new one so its not missed
     if (this.shouldSkip()) {
@@ -270,6 +353,7 @@ class Request {
     return this.processControl === 'defer'
   }
 
+  /** @param {number} time */
   delayUntil(time) {
     if (!this.nextRequestTime || this.nextRequestTime < time) {
       this.nextRequestTime = time
@@ -304,10 +388,16 @@ class Request {
     return `${this.type}@${this.url}:${policyName}`
   }
 
+  /** @param {string} url */
   _trimUrl(url) {
     return url ? url.replace('https://api.github.com', '') : ''
   }
 
+  /**
+   * @param {string} level
+   * @param {string} message
+   * @param {any} [meta]
+   */
   _log(level, message, meta = null) {
     if (this.crawler) {
       this.crawler.logger.log(level, message, meta)
