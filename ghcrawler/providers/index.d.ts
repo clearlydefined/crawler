@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 import ScopedQueueSets = require('./queuing/scopedQueueSets')
-import { DocStore, Locker } from '../lib/crawler'
+import { DocStore } from '../types/docStore'
+import { Locker } from '../lib/crawler'
 
 declare const providers: {
   queue: {

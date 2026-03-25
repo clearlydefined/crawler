@@ -5,7 +5,8 @@ import AbstractFetch = require('./abstractFetch')
 import Request = require('../../ghcrawler/lib/request')
 import FetchResult = require('../../lib/fetchResult')
 import MemoryCache = require('../../lib/memoryCache')
-import { DocStore, Handler } from '../../ghcrawler/lib/crawler'
+import { DocStore } from '../../ghcrawler/types/docStore'
+import { Handler } from '../../ghcrawler/lib/crawler'
 import { BaseHandlerOptions } from '../../lib/baseHandler'
 
 declare class FetchDispatcher extends AbstractFetch {

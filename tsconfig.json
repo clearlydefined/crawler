@@ -11,6 +11,7 @@
   },
   "include": [
     "types/**/*",
+    "ghcrawler/types/**/*",
     "lib/entitySpec.d.ts",
     "lib/entitySpec.js",
     "lib/sourceSpec.d.ts",

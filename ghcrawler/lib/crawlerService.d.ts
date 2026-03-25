@@ -4,7 +4,7 @@
 import Crawler = require('./crawler')
 import Request = require('./request')
 
-import { StoredDocument } from '../providers/storage/inmemoryDocStore'
+import { StoredDocument } from '../types/docStore'
 
 interface CrawlerServiceOptions {
   crawler: {

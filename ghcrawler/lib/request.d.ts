@@ -3,18 +3,12 @@
 
 import TraversalPolicy = require('./traversalPolicy')
 import EntitySpec = require('../../lib/entitySpec')
+import { DocumentMetadata } from '../types/docStore'
 
 type ProcessControl = 'skip' | 'requeue' | 'defer'
 
 interface Logger {
   log(level: string, message: string, meta?: Record<string, unknown>): void
-}
-
-interface DocumentMetadata {
-  links: Record<string, { href?: string; hrefs?: string[]; type: string }>
-  processedAt?: string
-  version?: number
-  [key: string]: any
 }
 
 interface RequestDocument {

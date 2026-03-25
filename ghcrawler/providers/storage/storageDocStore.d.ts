@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { ContainerClient } from '@azure/storage-blob'
-import { DocStore } from '../../lib/crawler'
+import { DocStore, StoredDocument } from '../../types/docStore'
 
 interface AzureStorageDocStoreOptions {
   container: string
@@ -18,10 +18,10 @@ declare class AzureStorageDocStore implements DocStore {
   constructor(containerClient: ContainerClient, options: AzureStorageDocStoreOptions)
 
   connect(): Promise<void>
-  upsert(document: import('../../providers/storage/inmemoryDocStore').StoredDocument): Promise<string>
-  get(type: string, key: string): Promise<import('../../providers/storage/inmemoryDocStore').StoredDocument>
+  upsert(document: StoredDocument): Promise<string>
+  get(type: string, key: string): Promise<StoredDocument>
   etag(type: string, key: string): Promise<string>
-  list(type: string): Promise<import('../../providers/storage/inmemoryDocStore').StoredDocument[]>
+  list(type: string): Promise<StoredDocument[]>
   delete(type: string, key: string): Promise<void>
   count(type: string, force?: boolean): Promise<number>
   close(): Promise<void>

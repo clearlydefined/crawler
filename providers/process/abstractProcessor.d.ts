@@ -4,7 +4,7 @@
 import BaseHandler = require('../../lib/baseHandler')
 import Request = require('../../ghcrawler/lib/request')
 import EntitySpec = require('../../lib/entitySpec')
-import { StoredDocument } from '../../ghcrawler/providers/storage/inmemoryDocStore'
+import { StoredDocument } from '../../ghcrawler/types/docStore'
 
 declare class AbstractProcessor extends BaseHandler {
   get toolVersion(): string
