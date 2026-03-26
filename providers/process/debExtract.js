@@ -46,7 +46,9 @@ class DebExtract extends AbstractClearlyDefinedProcessor {
       declaredLicenses
     })
     const sourceInfo = this._discoverSource(spec, registryData)
-    if (sourceInfo) request.document.sourceInfo = sourceInfo
+    if (sourceInfo) {
+      request.document.sourceInfo = sourceInfo
+    }
   }
 
   _discoverSource(spec, registryData) {

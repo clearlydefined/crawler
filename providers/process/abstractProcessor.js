@@ -63,11 +63,19 @@ class AbstractProcessor extends BaseHandler {
     return versions
       .reduce(
         (result, version) => {
-          if (!version) return result
-          if (typeof version !== 'string') throw new Error(`Invalid processor version ${version}`)
+          if (!version) {
+            return result
+          }
+          if (typeof version !== 'string') {
+            throw new Error(`Invalid processor version ${version}`)
+          }
           const parts = version.split('.')
-          if (parts.length !== 3 || parts.some(part => Number.isNaN(+part))) throw new Error(`${errorRoot}: ${version}`)
-          for (let i = 0; i < 3; i++) result[i] += +parts[i]
+          if (parts.length !== 3 || parts.some(part => Number.isNaN(+part))) {
+            throw new Error(`${errorRoot}: ${version}`)
+          }
+          for (let i = 0; i < 3; i++) {
+            result[i] += +parts[i]
+          }
           return result
         },
         [0, 0, 0]
@@ -87,8 +95,12 @@ class AbstractProcessor extends BaseHandler {
    * @param {string} location - Root filesystem path that hosts the files to be attached
    */
   async attachFiles(document, files, location = '') {
-    if (!files || !files.length) return
-    if (!document._attachments) Object.defineProperty(document, '_attachments', { value: [], enumerable: false })
+    if (!files || !files.length) {
+      return
+    }
+    if (!document._attachments) {
+      Object.defineProperty(document, '_attachments', { value: [], enumerable: false })
+    }
     document.attachments = document.attachments || []
     for (const file of files) {
       const fullPath = path.join(location, file)
@@ -108,8 +120,12 @@ class AbstractProcessor extends BaseHandler {
    */
   async getFiles(location) {
     const locationStat = await lstat(location)
-    if (locationStat.isSymbolicLink()) return []
-    if (!locationStat.isDirectory()) return [location]
+    if (locationStat.isSymbolicLink()) {
+      return []
+    }
+    if (!locationStat.isDirectory()) {
+      return [location]
+    }
     const subdirs = await readdir(location)
     const files = await Promise.all(
       subdirs.map(subdir => {
@@ -133,7 +149,9 @@ class AbstractProcessor extends BaseHandler {
       subdirs.map(async subdir => {
         const entry = path.resolve(location, subdir)
         const entryStat = await lstat(entry)
-        if (entryStat.isSymbolicLink() || !entryStat.isDirectory()) return []
+        if (entryStat.isSymbolicLink() || !entryStat.isDirectory()) {
+          return []
+        }
         return [entry, ...(await this.getFolders(entry))]
       })
     )
@@ -181,8 +199,9 @@ class AbstractProcessor extends BaseHandler {
 
   clone(document) {
     const newDocument = pick(document, ['_metadata', 'attachments'])
-    if (document._attachments)
+    if (document._attachments) {
       Object.defineProperty(newDocument, '_attachments', { value: document._attachments, enumerable: false })
+    }
     return newDocument
   }
 

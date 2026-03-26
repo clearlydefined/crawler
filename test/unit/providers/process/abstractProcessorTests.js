@@ -229,5 +229,7 @@ function validateAttachedFile(name, list, checkContent = false) {
   const entry = find(list, entry => entry.path === name)
   expect(!!entry).to.be.true
   expect(entry.token).to.eq(token)
-  if (checkContent) expect(entry.attachment).to.eq(attachment)
+  if (checkContent) {
+    expect(entry.attachment).to.eq(attachment)
+  }
 }

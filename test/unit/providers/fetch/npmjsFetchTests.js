@@ -55,8 +55,12 @@ describe('', () => {
     const resultBox = {}
     const requestPromiseStub = options => {
       if (options.url) {
-        if (options.url.includes('regError')) throw new Error('yikes')
-        if (options.url.includes('missing')) throw { statusCode: 404 }
+        if (options.url.includes('regError')) {
+          throw new Error('yikes')
+        }
+        if (options.url.includes('missing')) {
+          throw { statusCode: 404 }
+        }
       }
       return resultBox.result
     }

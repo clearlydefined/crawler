@@ -27,7 +27,9 @@ class ScanCodeProcessor extends AbstractProcessor {
   }
 
   async handle(request) {
-    if (!(await this._versionPromise)) return request.markSkip('ScanCode not found')
+    if (!(await this._versionPromise)) {
+      return request.markSkip('ScanCode not found')
+    }
     super.handle(request)
     const file = this.createTempFile(request)
     await this._runScancode(request, file)
@@ -75,9 +77,11 @@ class ScanCodeProcessor extends AbstractProcessor {
     const packages = output.files.reduce((result, file) => {
       file.package_data.forEach(entry => {
         // in this case the manifest_path contains a subpath pointing to the corresponding file
-        if (file.type === 'directory' && entry.manifest_path)
+        if (file.type === 'directory' && entry.manifest_path) {
           result.push(`${file.path ? `${file.path}/` : ''}${entry.manifest_path}`)
-        else result.push(file.path)
+        } else {
+          result.push(file.path)
+        }
       })
       return result
     }, [])
@@ -113,7 +117,9 @@ class ScanCodeProcessor extends AbstractProcessor {
   }
 
   _detectVersion() {
-    if (this._versionPromise) return this._versionPromise
+    if (this._versionPromise) {
+      return this._versionPromise
+    }
     this._versionPromise = execFile(`${this.options.installDir}/scancode`, ['--version'])
       .then(result => {
         this.logger.info('Detecting ScanCode version')

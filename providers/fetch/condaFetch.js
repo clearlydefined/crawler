@@ -161,7 +161,9 @@ class CondaFetch extends AbstractFetch {
   async _downloadPackage(downloadUrl, destination) {
     const options = { url: downloadUrl }
     const response = await getStream(options)
-    if (response.statusCode !== 200) throw new Error(`${response.statusCode} ${response.message}`)
+    if (response.statusCode !== 200) {
+      throw new Error(`${response.statusCode} ${response.message}`)
+    }
     return new Promise(resolve => {
       response.data.pipe(fs.createWriteStream(destination)).on('finish', resolve)
     })
@@ -171,7 +173,9 @@ class CondaFetch extends AbstractFetch {
     if (!memCache.get(cacheKey)) {
       const options = { url: sourceUrl }
       const response = await getStream(options)
-      if (response.statusCode !== 200) throw new Error(`${response.statusCode} ${response.message}`)
+      if (response.statusCode !== 200) {
+        throw new Error(`${response.statusCode} ${response.message}`)
+      }
       return new Promise(resolve => {
         response.data.pipe(
           fs.createWriteStream(fileDstLocation).on('finish', () => {

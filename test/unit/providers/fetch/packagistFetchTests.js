@@ -22,8 +22,12 @@ describe('packagistFetch', () => {
   beforeEach(() => {
     const resultBox = {}
     const requestRetryStub = url => {
-      if (url.includes('regError')) throw new Error('Invalid url')
-      if (url.includes('missing')) return { statusCode: 404, body: null }
+      if (url.includes('regError')) {
+        throw new Error('Invalid url')
+      }
+      if (url.includes('missing')) {
+        return { statusCode: 404, body: null }
+      }
       if (url.includes('symfony/polyfill-mbstring')) {
         return { statusCode: 200, body: resultBox.result }
       }

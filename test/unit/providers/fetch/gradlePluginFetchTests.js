@@ -54,10 +54,18 @@ describe('Gradle plugin fetch', () => {
     }
 
     function pickArtifact(url) {
-      if (url.endsWith('.pom')) return 'swt-3.3.0-v3346.pom'
-      if (url.endsWith('-sources.jar')) return 'swt-3.3.0-v3346.jar'
-      if (url.endsWith('.jar')) return 'swt-3.3.0-v3346.jar'
-      if (url.endsWith('maven-metadata.xml')) return 'maven-metadata.xml'
+      if (url.endsWith('.pom')) {
+        return 'swt-3.3.0-v3346.pom'
+      }
+      if (url.endsWith('-sources.jar')) {
+        return 'swt-3.3.0-v3346.jar'
+      }
+      if (url.endsWith('.jar')) {
+        return 'swt-3.3.0-v3346.jar'
+      }
+      if (url.endsWith('maven-metadata.xml')) {
+        return 'maven-metadata.xml'
+      }
       return null
     }
 

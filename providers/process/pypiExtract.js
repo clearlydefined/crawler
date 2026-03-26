@@ -36,7 +36,9 @@ class PyPiExtract extends AbstractClearlyDefinedProcessor {
   }
 
   async _discoverSource(revision, registryData) {
-    if (!registryData) return null
+    if (!registryData) {
+      return null
+    }
     const candidates = []
     candidates.push(get(registryData, 'info.bugtrack_url'))
     candidates.push(get(registryData, 'info.docs_url'))
@@ -55,7 +57,9 @@ class PyPiExtract extends AbstractClearlyDefinedProcessor {
       declaredLicense: request.document.declaredLicense
     })
     const sourceInfo = await this._discoverSource(spec.revision, registryData)
-    if (sourceInfo) request.document.sourceInfo = sourceInfo
+    if (sourceInfo) {
+      request.document.sourceInfo = sourceInfo
+    }
   }
 }
 

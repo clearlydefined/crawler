@@ -36,7 +36,9 @@ class CrateExtract extends AbstractClearlyDefinedProcessor {
   async _createDocument(request, manifest, registryData) {
     request.document = merge(this.clone(request.document), { manifest, registryData })
     const sourceInfo = await this._discoverSource(manifest, registryData)
-    if (sourceInfo) request.document.sourceInfo = sourceInfo
+    if (sourceInfo) {
+      request.document.sourceInfo = sourceInfo
+    }
   }
 
   _discoverSource(manifest, registryData) {

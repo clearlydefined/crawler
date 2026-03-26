@@ -34,8 +34,12 @@ class FsfeReuseProcessor extends AbstractProcessor {
   }
 
   async handle(request) {
-    if (this.options.disabled) return request.markSkip('Disabled  ')
-    if (!(await this._versionPromise)) return request.markSkip('REUSE tool not properly configured')
+    if (this.options.disabled) {
+      return request.markSkip('Disabled  ')
+    }
+    if (!(await this._versionPromise)) {
+      return request.markSkip('REUSE tool not properly configured')
+    }
     super.handle(request)
     await this._createDocument(request)
     return request
@@ -43,7 +47,9 @@ class FsfeReuseProcessor extends AbstractProcessor {
 
   async _createDocument(request) {
     const record = await this._run(request)
-    if (!record) return
+    if (!record) {
+      return
+    }
     const location = request.document.location
     request.document = merge(this.clone(request.document), { reuse: record })
     await this.attachFiles(
@@ -60,7 +66,9 @@ class FsfeReuseProcessor extends AbstractProcessor {
     try {
       await execFile('reuse', parameters, { cwd: root })
       const out = await readFile(outFileName, 'utf8')
-      if (!out) return
+      if (!out) {
+        return
+      }
       const results = { metadata: {}, files: [], licenses: this._getLicenses(request) }
       // REUSE SPDX results are grouped in sections that are separated with two newlines
       // The first result group contains generic result metadata, the following ones represent a file each. We process both variants in a single loop...
@@ -148,7 +156,9 @@ class FsfeReuseProcessor extends AbstractProcessor {
   }
 
   _detectVersion() {
-    if (this._versionPromise !== undefined) return this._versionPromise
+    if (this._versionPromise !== undefined) {
+      return this._versionPromise
+    }
 
     this._versionPromise = execFile('reuse', ['--version'])
       .then(result => {
@@ -167,7 +177,9 @@ class FsfeReuseProcessor extends AbstractProcessor {
         return this._schemaVersion
       })
       .catch(error => {
-        if (error) this.logger.warn(`Could not detect version of REUSE: ${error.message}`)
+        if (error) {
+          this.logger.warn(`Could not detect version of REUSE: ${error.message}`)
+        }
       })
 
     return this._versionPromise

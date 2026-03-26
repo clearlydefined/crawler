@@ -55,8 +55,9 @@ describe('Licensee process', () => {
     const resultBox = { error: null, versionResult: '1.2.0', versionError: null }
     const processStub = {
       execFile: (_command, parameters, callbackOrOptions) => {
-        if (parameters.includes('version'))
+        if (parameters.includes('version')) {
           return callbackOrOptions(resultBox.versionError, { stdout: resultBox.versionResult })
+        }
       }
     }
     Handler = proxyquire('../../../../providers/process/licensee', { 'node:child_process': processStub })

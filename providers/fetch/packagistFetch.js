@@ -22,7 +22,9 @@ class PackagistFetch extends AbstractFetch {
   async handle(request) {
     const spec = this.toSpec(request)
     const registryData = await this._getRegistryData(spec)
-    if (!registryData || !registryData.manifest) return this.markSkip(request)
+    if (!registryData || !registryData.manifest) {
+      return this.markSkip(request)
+    }
     super.handle(request)
     const file = this.createTempFile(request)
     await this._getPackage(request, registryData, file.name)
@@ -42,13 +44,17 @@ class PackagistFetch extends AbstractFetch {
     const { body, statusCode } = await requestRetry(`${baseUrl}p2/${spec.namespace}/${spec.name}.json`, {
       json: true
     })
-    if (statusCode !== 200 || !body) return null
+    if (statusCode !== 200 || !body) {
+      return null
+    }
     const registryData = body
 
     // Get the array of versions for this package
     const packageVersions = registryData.packages[`${spec.namespace}/${spec.name}`]
     registryData.manifest = this._extractManifest(packageVersions, spec)
-    if (!registryData.manifest) return null
+    if (!registryData.manifest) {
+      return null
+    }
 
     registryData.releaseDate = get(registryData, 'manifest.time')
     registryData.packages = undefined
@@ -56,7 +62,9 @@ class PackagistFetch extends AbstractFetch {
   }
 
   _extractManifest(packageVersions, spec) {
-    if (!packageVersions || !Array.isArray(packageVersions)) return null
+    if (!packageVersions || !Array.isArray(packageVersions)) {
+      return null
+    }
 
     // Find the specific version in the array - handle both 'v1.0.0' and '1.0.0' formats
     const targetVersion = spec.revision
@@ -65,7 +73,9 @@ class PackagistFetch extends AbstractFetch {
     const targetIndex = packageVersions.findIndex(
       versionObj => versionObj.version === targetVersion || versionObj.version === targetVersionWithV
     )
-    if (targetIndex === -1) return null
+    if (targetIndex === -1) {
+      return null
+    }
 
     const combined = {}
     for (let i = 0; i <= targetIndex; i++) {
@@ -82,9 +92,13 @@ class PackagistFetch extends AbstractFetch {
 
   async _getPackage(request, registryData, destination) {
     const distUrl = get(registryData, 'manifest.dist.url')
-    if (!distUrl) return request.markSkip('Missing dist.url ')
+    if (!distUrl) {
+      return request.markSkip('Missing dist.url ')
+    }
     const response = await getStream({ url: distUrl })
-    if (response.statusCode !== 200) throw new Error(`${response.statusCode} ${response.message}`)
+    if (response.statusCode !== 200) {
+      throw new Error(`${response.statusCode} ${response.message}`)
+    }
     await new Promise(resolve => {
       response.data.pipe(fs.createWriteStream(destination)).on('finish', () => resolve(null))
     })

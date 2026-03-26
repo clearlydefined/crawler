@@ -28,8 +28,9 @@ class WebhookDeltaStore {
     }
     try {
       const response = await request(options)
-      if (response.statusCode !== 200)
+      if (response.statusCode !== 200) {
         this.logger.info(`Failure  Firing webhook failed: ${response.statusCode} ${response.statusMessage}`)
+      }
     } catch (error) {
       this.logger.info(`Failure  Firing webhook failed: ${error.message}`)
     }

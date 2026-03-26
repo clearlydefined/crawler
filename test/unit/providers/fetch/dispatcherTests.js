@@ -111,10 +111,18 @@ describe('fetchDispatcher cache fetch result', () => {
     function setupMavenFetch() {
       const fileSupplier = url => {
         let fileName
-        if (url.includes('solrsearch')) fileName = 'swt-3.3.0-v3346.json'
-        if (url.endsWith('.pom')) fileName = 'swt-3.3.0-v3346.pom'
-        if (url.endsWith('-sources.jar')) fileName = 'swt-3.3.0-v3346.jar'
-        if (url.endsWith('.jar')) fileName = 'swt-3.3.0-v3346.jar'
+        if (url.includes('solrsearch')) {
+          fileName = 'swt-3.3.0-v3346.json'
+        }
+        if (url.endsWith('.pom')) {
+          fileName = 'swt-3.3.0-v3346.pom'
+        }
+        if (url.endsWith('-sources.jar')) {
+          fileName = 'swt-3.3.0-v3346.jar'
+        }
+        if (url.endsWith('.jar')) {
+          fileName = 'swt-3.3.0-v3346.jar'
+        }
         return `/maven/${fileName}`
       }
       return MavenFetch({
@@ -286,7 +294,9 @@ describe('fetchDispatcher cache fetch result', () => {
   describe('cache CrateioFetch result', () => {
     const requestPromiseStub = options => {
       const body = fs.readFileSync('test/fixtures/crates/bitflags.json')
-      if (options?.json) return JSON.parse(body)
+      if (options?.json) {
+        return JSON.parse(body)
+      }
       const response = new PassThrough()
       response.write(fs.readFileSync('test/fixtures/crates/bitflags-1.0.4.crate'))
       response.statusCode = 200
@@ -363,24 +373,40 @@ describe('fetchDispatcher cache fetch result', () => {
   describe('cache NugetFetch result', () => {
     const fileSupplier = url => {
       let fileName = null
-      if (url.includes('catalog')) fileName = 'xunit.core.2.4.1.catalog.json'
-      if (url.endsWith('index.json')) fileName = 'xunit.core.index.json'
-      if (url.endsWith('.json')) fileName = 'xunit.core.2.4.1.json'
-      if (url.endsWith('.nuspec')) fileName = 'xunit.core.2.4.1.nuspec'
-      if (url.endsWith('.nupkg')) fileName = 'xunit.core.2.4.1.nupkg'
-      if (url.endsWith('license.txt')) fileName = 'license.txt'
+      if (url.includes('catalog')) {
+        fileName = 'xunit.core.2.4.1.catalog.json'
+      }
+      if (url.endsWith('index.json')) {
+        fileName = 'xunit.core.index.json'
+      }
+      if (url.endsWith('.json')) {
+        fileName = 'xunit.core.2.4.1.json'
+      }
+      if (url.endsWith('.nuspec')) {
+        fileName = 'xunit.core.2.4.1.nuspec'
+      }
+      if (url.endsWith('.nupkg')) {
+        fileName = 'xunit.core.2.4.1.nupkg'
+      }
+      if (url.endsWith('license.txt')) {
+        fileName = 'license.txt'
+      }
       return `nuget/${fileName}`
     }
 
     const requestPromiseStub = (url, options) => {
       const body = fs.readFileSync(`test/fixtures/${fileSupplier(url)}`)
-      if (options?.json) return Promise.resolve({ body: JSON.parse(body), statusCode: 200 })
+      if (options?.json) {
+        return Promise.resolve({ body: JSON.parse(body), statusCode: 200 })
+      }
       const response = new PassThrough()
       response.body = body
       response.write(body)
       response.statusCode = 200
       response.end()
-      if (options?.encoding === null) return Promise.resolve({ body: response, statusCode: 200 })
+      if (options?.encoding === null) {
+        return Promise.resolve({ body: response, statusCode: 200 })
+      }
       return Promise.resolve(response)
     }
 
@@ -422,9 +448,15 @@ describe('fetchDispatcher cache fetch result', () => {
 const createRequestPromiseStub = fileSupplier => {
   return options => {
     if (options.url) {
-      if (options.url.includes('error')) throw new Error('yikes')
-      if (options.url.includes('code')) throw { statusCode: 500, message: 'Code' }
-      if (options.url.includes('missing')) throw { statusCode: 404 }
+      if (options.url.includes('error')) {
+        throw new Error('yikes')
+      }
+      if (options.url.includes('code')) {
+        throw { statusCode: 500, message: 'Code' }
+      }
+      if (options.url.includes('missing')) {
+        throw { statusCode: 404 }
+      }
     }
     const content = fs.readFileSync(`test/fixtures/${fileSupplier(options.url)}`)
     return options.json ? JSON.parse(content) : content

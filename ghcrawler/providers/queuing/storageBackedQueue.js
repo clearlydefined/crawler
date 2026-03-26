@@ -28,9 +28,13 @@ class StorageBackedQueue extends NestedQueue {
 
   async pop() {
     const request = await super.pop()
-    if (!request) return
+    if (!request) {
+      return
+    }
     const success = await this._hideInStorage(request)
-    if (success) return request
+    if (success) {
+      return request
+    }
     return await this.pop()
   }
 
@@ -40,7 +44,9 @@ class StorageBackedQueue extends NestedQueue {
       Object.assign(request, receipt)
       return true
     } catch (error) {
-      if (!this._sharedStorageQueue.isMessageNotFound(error)) throw error
+      if (!this._sharedStorageQueue.isMessageNotFound(error)) {
+        throw error
+      }
       // Message not found for the popReceipt and messageId stored in the request.  This means
       // that the message popReceipt (and possibly messageId) in the request is stale. This can
       // happen when the message visibility timeout expired and thus was visible and later
@@ -59,7 +65,9 @@ class StorageBackedQueue extends NestedQueue {
     try {
       await this._sharedStorageQueue.done(request)
     } catch (error) {
-      if (!this._sharedStorageQueue.isMessageNotFound(error)) throw error
+      if (!this._sharedStorageQueue.isMessageNotFound(error)) {
+        throw error
+      }
       // Message not found for the popReceipt and messageId stored in the request.  This means
       // that the message popReceipt (and possibly messageId) in the request is stale. This can
       // happen when the message visibility timeout expired and thus was visible and later
@@ -91,7 +99,9 @@ class StorageBackedQueue extends NestedQueue {
 
   _throwIfError(results, message) {
     const errors = results.filter(result => result.status === 'rejected').map(rejected => new Error(rejected.reason))
-    if (errors.length) throw new AggregateError(errors, message)
+    if (errors.length) {
+      throw new AggregateError(errors, message)
+    }
   }
 
   _log(actionMessage, request) {

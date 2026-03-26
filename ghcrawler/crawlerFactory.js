@@ -38,11 +38,15 @@ class CrawlerFactory {
   }
 
   static _initializeRedis(defaults) {
-    if (defaults.redis?.provider) CrawlerFactory._getProvider(defaults.redis || {}, defaults.redis.provider, 'redis')
+    if (defaults.redis?.provider) {
+      CrawlerFactory._getProvider(defaults.redis || {}, defaults.redis.provider, 'redis')
+    }
   }
 
   static _decorateOptions(_key, options) {
-    if (!options.logger) options.logger = logger
+    if (!options.logger) {
+      options.logger = logger
+    }
   }
 
   static createCrawler(
@@ -104,8 +108,11 @@ class CrawlerFactory {
             logger.info(`${subsystemName} options initialized`)
             // Hook the refreshing options into the right place in the result structure.
             // Be sure to retain the 'provider' setting
-            if (subProvider) result[subsystemName] = { provider: subProvider, [subProvider]: values }
-            else result[subsystemName] = values
+            if (subProvider) {
+              result[subsystemName] = { provider: subProvider, [subProvider]: values }
+            } else {
+              result[subsystemName] = values
+            }
           })
         })
       })
@@ -136,11 +143,15 @@ class CrawlerFactory {
 
   static getProvider(namespace, ...params) {
     const provider = finalOptions[namespace]
-    if (!provider) return null
+    if (!provider) {
+      return null
+    }
     for (let i = 0; i < providerSearchPath.length; i++) {
       const entry = providerSearchPath[i]
       const result = entry[namespace]?.[provider]
-      if (result) return result(...params)
+      if (result) {
+        return result(...params)
+      }
     }
     return require(provider)(...params)
   }
@@ -152,7 +163,9 @@ class CrawlerFactory {
     for (let i = 0; i < providerSearchPath.length; i++) {
       const entry = providerSearchPath[i]
       const result = entry[namespace]?.[provider]
-      if (result) return result(subOptions, ...params)
+      if (result) {
+        return result(subOptions, ...params)
+      }
     }
     return require(provider)(subOptions, ...params)
   }
@@ -172,7 +185,9 @@ class CrawlerFactory {
   }
 
   static createStore(options, provider = options.provider) {
-    if (provider) return CrawlerFactory._getProvider(options, provider, 'store')
+    if (provider) {
+      return CrawlerFactory._getProvider(options, provider, 'store')
+    }
     const names = options.dispatcher.split('+')
     const stores = CrawlerFactory._getNamedProviders(options, 'store', names.slice(1))
     const dispatcher = names[0]

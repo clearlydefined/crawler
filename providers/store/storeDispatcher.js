@@ -45,7 +45,9 @@ class StoreDispatcher {
       const store = this.stores[i]
       const opResult = await operation(store)
       result = result || opResult
-      if (result && first) return result
+      if (result && first) {
+        return result
+      }
     }
     return result
   }

@@ -19,7 +19,9 @@ const hashes = {
 }
 
 function pickFile(url) {
-  if (url.endsWith('download')) return 'bitflags-1.0.4.crate'
+  if (url.endsWith('download')) {
+    return 'bitflags-1.0.4.crate'
+  }
   return 'bitflags.json'
 }
 
@@ -27,11 +29,17 @@ describe('crateFetch workflow', () => {
   beforeEach(() => {
     const requestPromiseStub = options => {
       if (options?.url) {
-        if (options.url.includes('error')) throw new Error('yikes')
-        if (options.url.includes('missing')) throw { statusCode: 404 }
+        if (options.url.includes('error')) {
+          throw new Error('yikes')
+        }
+        if (options.url.includes('missing')) {
+          throw { statusCode: 404 }
+        }
       }
       const body = fs.readFileSync(`test/fixtures/crates/${pickFile(options.url)}`)
-      if (options?.json) return JSON.parse(body)
+      if (options?.json) {
+        return JSON.parse(body)
+      }
       const response = new PassThrough()
       response.write(body)
       response.statusCode = 200
@@ -160,7 +168,9 @@ describe('crateFetch', () => {
 
 function mockCrateFetch(options) {
   const crateFetch = CrateFetch({})
-  if (options.registryData) crateFetch._getRegistryData = options.registryData
+  if (options.registryData) {
+    crateFetch._getRegistryData = options.registryData
+  }
   crateFetch.createTempDir = () => {
     return { name: '/tmp' }
   }

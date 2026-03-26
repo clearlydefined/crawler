@@ -15,7 +15,9 @@ class AttachmentStore {
 
   upsert(document) {
     const documentPromise = this.baseStore.upsert(document)
-    if (!document._attachments) return documentPromise
+    if (!document._attachments) {
+      return documentPromise
+    }
     const attachmentPromises = document._attachments.map(entry => {
       return this.baseStore.upsert({
         _metadata: {

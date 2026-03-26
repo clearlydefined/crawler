@@ -39,7 +39,8 @@
         "noUnusedVariables": "warn"
       },
       "style": {
-        "noParameterAssign": "off"
+        "noParameterAssign": "off",
+        "useBlockStatements": "error"
       },
       "complexity": {
         "noForEach": "off",

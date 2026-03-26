@@ -394,7 +394,9 @@ class Crawler {
 
   _getHandler(request, list) {
     for (const handler of list) {
-      if (handler.canHandle(request)) return handler
+      if (handler.canHandle(request)) {
+        return handler
+      }
     }
     return null
   }
@@ -447,7 +449,9 @@ class Crawler {
     if (Array.isArray(request.document)) {
       request.document = { elements: request.document }
     }
-    if (typeof request.document === 'string') console.log('got a string document')
+    if (typeof request.document === 'string') {
+      console.log('got a string document')
+    }
     request.document._metadata = metadata
     debug(`_convertToDocument(${loopName}:${request.toUniqueString()}): exit (success)`)
     return request
@@ -556,9 +560,10 @@ class Crawler {
 
   async _buildDocumentToStore(document) {
     const contentLocation = document._metadata.contentLocation
-    if (!contentLocation)
+    if (!contentLocation) {
       // no location indicates the content is inline in the document
       return document
+    }
 
     const contentType = document._metadata.contentType
     const buffer = await fs.promises.readFile(contentLocation)
@@ -591,7 +596,9 @@ class Crawler {
     // If the request is a drain then mute the signal somewhat. Ensure we log the first drain
     // after any non-drain.
     if (request.type === '_blank') {
-      if (this.options.drainPulse && this.drainCount++ % this.options.drainPulse) return request
+      if (this.options.drainPulse && this.drainCount++ % this.options.drainPulse) {
+        return request
+      }
     } else {
       this.drainCount = 0
     }
