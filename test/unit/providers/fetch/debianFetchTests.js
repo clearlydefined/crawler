@@ -6,7 +6,7 @@ const sinon = require('sinon')
 const DebianFetch = require('../../../../providers/fetch/debianFetch')
 const memCache = require('memory-cache')
 const Request = require('../../../../ghcrawler').request
-const fs = require('fs')
+const fs = require('node:fs')
 
 const debianFetchOptions = { logger: { info: sinon.stub() }, cdFileLocation: 'test/fixtures/debian/fragment' }
 
@@ -118,7 +118,7 @@ describe('Debian fetching', () => {
 
   it('succeeds in download, decompress and hash', async () => {
     const handler = DebianFetch(debianFetchOptions)
-    handler._download = async (downloadUrl, destination) => {
+    handler._download = async (_downloadUrl, destination) => {
       fs.copyFileSync('test/fixtures/debian/0ad_0.0.17-1_armhf.deb', destination)
     }
     handler._getDeclaredLicenses = async () => {
@@ -126,8 +126,8 @@ describe('Debian fetching', () => {
     }
     const request = await handler.handle(new Request('test', 'cd:/deb/debian/-/0ad/0.0.17-1_armhf'))
     request.fetchResult.copyTo(request)
-    expect(request.document.hashes.sha1).to.be.equal(hashes['0ad_0.0.17-1_armhf.deb']['sha1'])
-    expect(request.document.hashes.sha256).to.be.equal(hashes['0ad_0.0.17-1_armhf.deb']['sha256'])
+    expect(request.document.hashes.sha1).to.be.equal(hashes['0ad_0.0.17-1_armhf.deb'].sha1)
+    expect(request.document.hashes.sha256).to.be.equal(hashes['0ad_0.0.17-1_armhf.deb'].sha256)
     expect(request.document.releaseDate.getFullYear()).to.be.equal(2014)
     expect(request.document.copyrightUrl).to.be.equal(
       'https://metadata.ftp-master.debian.org/changelogs/main/0/0ad/0ad_0.0.17-1_copyright'
@@ -137,7 +137,7 @@ describe('Debian fetching', () => {
 
   it('failed to get declared license', async () => {
     const handler = DebianFetch(debianFetchOptions)
-    handler._download = async (downloadUrl, destination) => {
+    handler._download = async (_downloadUrl, destination) => {
       fs.copyFileSync('test/fixtures/debian/0ad_0.0.17-1_armhf.deb', destination)
     }
     handler._getDeclaredLicenses = sinon.stub().rejects('failed')

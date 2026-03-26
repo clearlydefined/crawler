@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // SPDX-License-Identifier: MIT
 
-const fs = require('fs')
-const path = require('path')
+const fs = require('node:fs')
+const path = require('node:path')
 const { mkdirpSync } = require('mkdirp')
 
 // TODO finish the implementation of the relevant methods
@@ -28,7 +28,7 @@ class FileStore {
     )
   }
 
-  async get(type, key) {
+  async get(_type, key) {
     const path = this._getPath(key)
     return new Promise((resolve, reject) =>
       fs.readFile(path, (error, data) => (error ? reject(error) : resolve(JSON.parse(data))))

@@ -20,7 +20,7 @@ const cd_file = {
 const crawlerStoreProvider = config.get('CRAWLER_STORE_PROVIDER') || 'cd(file)'
 const maxRequeueAttemptCount = config.get('CRAWLER_MAX_REQUEUE_ATTEMPTS') || 5
 const fetchedCacheTtlSeconds = config.get('CRAWLER_FETCHED_CACHE_TTL_SECONDS') || 60 * 60 * 8 //8 hours
-const azqueueVisibilityTimeoutSeconds = parseInt(config.get('CRAWLER_HARVESTS_QUEUE_VISIBILITY_TIMEOUT_SECONDS'))
+const azqueueVisibilityTimeoutSeconds = Number.parseInt(config.get('CRAWLER_HARVESTS_QUEUE_VISIBILITY_TIMEOUT_SECONDS'))
 
 function getPositiveNum(configName, defaultValue) {
   const num = Number(config.get(configName))
@@ -128,7 +128,7 @@ module.exports = {
       spnAuth: config.get('CRAWLER_HARVESTS_QUEUE_SPN_AUTH'),
       isSpnAuth: config.get('CRAWLER_HARVESTS_QUEUE_IS_SPN_AUTH') || false,
       useManagedIdentity: config.get('CRAWLER_HARVESTS_QUEUE_USE_MANAGED_IDENTITY') || false,
-      visibilityTimeout: isNaN(azqueueVisibilityTimeoutSeconds) ? 0 : azqueueVisibilityTimeoutSeconds
+      visibilityTimeout: Number.isNaN(azqueueVisibilityTimeoutSeconds) ? 0 : azqueueVisibilityTimeoutSeconds
     },
     'cd(azblob)': cd_azblob,
     'cd(file)': cd_file

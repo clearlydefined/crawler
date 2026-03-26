@@ -11,7 +11,9 @@ chai.use(chaiAsPromised)
 const expect = chai.expect
 
 describe('storageBackedQueue', () => {
-  let memoryQueueStub, storageQueueStub, testQueue
+  let memoryQueueStub
+  let storageQueueStub
+  let testQueue
 
   const createTestQueue = (memoryQueue, storageQueue) => {
     const options = {

@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractProcessor = require('./abstractProcessor')
-const { promisify } = require('util')
-const child_process = require('child_process')
+const { promisify } = require('node:util')
+const child_process = require('node:child_process')
 const execFile = promisify(child_process.execFile)
 const spawn = child_process.spawn
-const path = require('path')
+const path = require('node:path')
 
 class FossologyProcessor extends AbstractProcessor {
   constructor(options) {
@@ -99,7 +99,7 @@ class FossologyProcessor extends AbstractProcessor {
     return { version: this._copyrightVersion, parameters, output }
   }
 
-  async _runCopyrightOnFile(request, file, parameters = []) {
+  async _runCopyrightOnFile(_request, file, parameters = []) {
     try {
       const { stdout } = await execFile(
         `${this.options.installDir}/copyright/agent/copyright`,

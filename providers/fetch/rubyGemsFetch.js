@@ -4,9 +4,9 @@
 const AbstractFetch = require('./abstractFetch')
 const { getStream } = require('../../lib/fetch')
 const requestRetry = require('../../lib/fetch').callFetchWithRetry
-const fs = require('fs')
-const zlib = require('zlib')
-const path = require('path')
+const fs = require('node:fs')
+const zlib = require('node:zlib')
+const path = require('node:path')
 const { clone, get } = require('lodash')
 const FetchResult = require('../../lib/fetchResult')
 const { extractDate } = require('../../lib/utils')
@@ -66,7 +66,7 @@ class RubyGemsFetch extends AbstractFetch {
 
   async _createDocument(dir, registryData, hashes) {
     const releaseDate = await this._extractReleaseDate(dir.name)
-    return { location: dir.name + '/data', registryData, releaseDate, hashes }
+    return { location: `${dir.name}/data`, registryData, releaseDate, hashes }
   }
 
   async _extractFiles(dirName) {

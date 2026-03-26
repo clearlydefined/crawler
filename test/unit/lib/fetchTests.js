@@ -1,7 +1,7 @@
-const { fail } = require('assert')
+const { fail } = require('node:assert')
 const { callFetch, withDefaults, defaultHeaders } = require('../../../lib/fetch')
 const { expect } = require('chai')
-const fs = require('fs')
+const fs = require('node:fs')
 const mockttp = require('mockttp')
 
 function checkDefaultHeaders(headers) {
@@ -78,7 +78,7 @@ describe('CallFetch', () => {
       await mockServer.forGet(path).thenCallback(() => {
         callCount++
         if (callCount === 1) return { statusCode: 500, body: 'fail' }
-        else return { statusCode: 200, body: JSON.stringify(expected) }
+        return { statusCode: 200, body: JSON.stringify(expected) }
       })
 
       const { callFetchWithRetry } = require('../../../lib/fetch')
@@ -119,7 +119,7 @@ describe('CallFetch', () => {
       await mockServer.forGet(path).thenCallback(() => {
         callCount++
         if (callCount === 1) return { statusCode: 500, body: 'fail' }
-        else return { statusCode: 200, body: JSON.stringify(expected) }
+        return { statusCode: 200, body: JSON.stringify(expected) }
       })
 
       const { callFetchWithRetry } = require('../../../lib/fetch')
@@ -261,7 +261,7 @@ describe('CallFetch', () => {
       expect(response).to.be.equal('done')
     })
 
-    it('should POST with JSON', async function () {
+    it('should POST with JSON', async () => {
       const path = '/webhook'
       const endpointMock = await mockServer.forPost(path).thenReply(200, 'done')
 

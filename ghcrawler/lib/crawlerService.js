@@ -119,15 +119,14 @@ class CrawlerService {
   }
 
   requeueDeadletter(url, queue) {
-    const self = this
     return this.getDeadletter(url)
       .then(document => {
         const request = Request.adopt(document).createRequeuable()
         request.attemptCount = 0
-        return self.crawler.queues.push([request], queue)
+        return this.crawler.queues.push([request], queue)
       })
       .then(() => {
-        return self.deleteDeadletter(url)
+        return this.deleteDeadletter(url)
       })
   }
 
@@ -135,7 +134,7 @@ class CrawlerService {
     return this.crawler.deadletters.count('deadletter')
   }
 
-  _reconfigure(current, changes) {
+  _reconfigure(_current, changes) {
     // if the loop count changed, make it so
     if (changes.some(patch => patch.path === '/count')) {
       return this.options.crawler.count.value > 0 ? this.run() : this.stop()

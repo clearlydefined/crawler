@@ -3,7 +3,7 @@
 
 const AbstractProcessor = require('./abstractProcessor')
 const throat = require('throat')
-const path = require('path')
+const path = require('node:path')
 const { pick, merge } = require('lodash')
 const du = require('du')
 const { trimParents, isGitFile } = require('../../lib/utils')

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 const proxyquire = require('proxyquire')
-const path = require('path')
+const path = require('node:path')
 const sinon = require('sinon')
 const sandbox = sinon.createSandbox()
 const chai = require('chai')
@@ -64,13 +64,15 @@ describe('AbstractProcessor aggregateVersions', () => {
 describe('AbstractProcessor attach files', () => {
   beforeEach(() => {
     const fsStub = {
-      readFileSync: path => {
-        path = path.replace(/\\/g, '/')
-        return `${path.startsWith('/test') ? path.slice(6) : path} attachment`
+      promises: {
+        readFile: async (path, _encoding) => {
+          path = path.replace(/\\/g, '/')
+          return `${path.startsWith('/test') ? path.slice(6) : path} attachment`
+        }
       }
     }
     const handlerClass = proxyquire('../../../../providers/process/abstractProcessor', {
-      fs: fsStub
+      'node:fs': fsStub
     })
     Handler = new handlerClass({})
   })

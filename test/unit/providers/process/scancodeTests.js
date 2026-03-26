@@ -12,32 +12,34 @@ const { flatten } = require('lodash')
 let Handler
 
 describe('ScanCode misc', () => {
-  it('differentiates real errors', () => {
+  it('differentiates real errors', async () => {
     Handler._resultBox.result = {
       files: [{ scan_errors: ['ValueError: this is a test'] }, { scan_errors: ['bogus package.json'] }]
     }
-    expect(Handler._hasRealErrors()).to.be.false
+    expect(await Handler._hasRealErrors()).to.be.false
     Handler._resultBox.result = {
       files: [{ scan_errors: ['Yikes. Tragedy has struck'] }, { scan_errors: ['Panic'] }]
     }
-    expect(Handler._hasRealErrors()).to.be.true
+    expect(await Handler._hasRealErrors()).to.be.true
     Handler._resultBox.result = {
       files: []
     }
-    expect(Handler._hasRealErrors()).to.be.false
+    expect(await Handler._hasRealErrors()).to.be.false
     Handler._resultBox.result = {
       files: [{}]
     }
-    expect(Handler._hasRealErrors()).to.be.false
+    expect(await Handler._hasRealErrors()).to.be.false
   })
 
   beforeEach(() => {
     const resultBox = {}
     const fsStub = {
-      readFileSync: () => JSON.stringify(resultBox.result)
+      promises: {
+        readFile: async () => JSON.stringify(resultBox.result)
+      }
     }
     const handlerFactory = proxyquire('../../../../providers/process/scancode', {
-      fs: fsStub
+      'node:fs': fsStub
     })
     Handler = handlerFactory({ logger: { log: () => {}, warn: () => {}, error: () => {} } })
     Handler._resultBox = resultBox
@@ -84,20 +86,20 @@ describe('ScanCode process', () => {
     }
   })
 
-  beforeEach(function () {
+  beforeEach(() => {
     const resultBox = { error: null, versionResult: 'ScanCode version: 1.2.0\n', versionError: null }
     const processStub = {
-      execFile: (command, parameters, callbackOrOptions, callback) => {
+      execFile: (_command, parameters, callbackOrOptions, callback) => {
         if (parameters.includes('--version'))
           return callbackOrOptions(resultBox.versionError, { stdout: resultBox.versionResult })
         callback(resultBox.error)
       }
     }
-    Handler = proxyquire('../../../../providers/process/scancode', { child_process: processStub })
+    Handler = proxyquire('../../../../providers/process/scancode', { 'node:child_process': processStub })
     Handler._resultBox = resultBox
   })
 
-  afterEach(function () {
+  afterEach(() => {
     sandbox.restore()
   })
 })

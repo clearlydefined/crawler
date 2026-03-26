@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractProcessor = require('./abstractProcessor')
-const fs = require('fs')
-const { promisify } = require('util')
-const child_process = require('child_process')
+const fs = require('node:fs')
+const { promisify } = require('node:util')
+const child_process = require('node:child_process')
 const execFile = promisify(child_process.execFile)
 
 class ScanCodeProcessor extends AbstractProcessor {
@@ -56,19 +56,19 @@ class ScanCodeProcessor extends AbstractProcessor {
     } catch (error) {
       this.logger.error(error, request.meta)
       // TODO see if the new version of ScanCode has a better way of differentiating errors
-      if (this._isRealError(error) || this._hasRealErrors(file.name)) {
+      if (this._isRealError(error) || (await this._hasRealErrors(file.name))) {
         request.markDead('Error', error ? error.message : 'ScanCode run failed')
         throw error
       }
     }
   }
 
-  _attachInterestingFiles(document, outputFile, root) {
-    const output = JSON.parse(fs.readFileSync(outputFile))
+  async _attachInterestingFiles(document, outputFile, root) {
+    const output = JSON.parse(await fs.promises.readFile(outputFile, 'utf8'))
     // Pick files that are potentially whole licenses. We can be reasonably agressive here
     // and the summarizers etc will further refine what makes it into the final definitions
     const licenses = output.files.filter(file => file.is_license_text).map(file => file.path)
-    this.attachFiles(document, licenses, root)
+    await this.attachFiles(document, licenses, root)
 
     // Pick files that represent whole packages. We can be reasonably agressive here
     // and the summarizers etc will further refine what makes it into the final definitions
@@ -76,35 +76,33 @@ class ScanCodeProcessor extends AbstractProcessor {
       file.package_data.forEach(entry => {
         // in this case the manifest_path contains a subpath pointing to the corresponding file
         if (file.type === 'directory' && entry.manifest_path)
-          result.push(`${file.path ? file.path + '/' : ''}${entry.manifest_path}`)
+          result.push(`${file.path ? `${file.path}/` : ''}${entry.manifest_path}`)
         else result.push(file.path)
       })
       return result
     }, [])
-    this.attachFiles(document, packages, root)
+    await this.attachFiles(document, packages, root)
   }
 
   // Workaround until https://github.com/nexB/scancode-toolkit/issues/983 is resolved
   _isRealError(error) {
-    return error && error.message && !error.message.includes('Some files failed to scan properly')
+    return error?.message && !error.message.includes('Some files failed to scan properly')
   }
 
   // Scan the results file for any errors that are not just timeouts or other known errors
   // TODO do we need to do this anymore
-  _hasRealErrors(resultFile) {
+  async _hasRealErrors(resultFile) {
     try {
-      const results = JSON.parse(fs.readFileSync(resultFile))
-      return results.files.some(
-        file =>
-          file.scan_errors &&
-          file.scan_errors.some(error => {
-            return !(
-              error.includes('ERROR: Processing interrupted: timeout after') ||
-              error.includes('ValueError:') ||
-              error.includes('package.json') ||
-              error.includes('UnicodeDecodeError')
-            )
-          })
+      const results = JSON.parse(await fs.promises.readFile(resultFile, 'utf8'))
+      return results.files.some(file =>
+        file.scan_errors?.some(error => {
+          return !(
+            error.includes('ERROR: Processing interrupted: timeout after') ||
+            error.includes('ValueError:') ||
+            error.includes('package.json') ||
+            error.includes('UnicodeDecodeError')
+          )
+        })
       )
     } catch (e) {
       // This might happen if the results file is >512mb, but regardless our error handling should not fail.

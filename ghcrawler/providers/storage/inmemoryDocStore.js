@@ -48,9 +48,7 @@ class InmemoryDocStore {
       collection = {}
     }
     return Object.keys(collection)
-      .filter(key => {
-        return key.startsWith('urn:') ? true : false
-      })
+      .filter(key => key.startsWith('urn:'))
       .map(key => {
         const metadata = collection[key]._metadata
         return {

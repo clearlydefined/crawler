@@ -3,7 +3,7 @@
 
 const AbstractFetch = require('./abstractFetch')
 const { callFetch: requestPromise, getStream } = require('../../lib/fetch')
-const fs = require('fs')
+const fs = require('node:fs')
 const { clone, get } = require('lodash')
 const FetchResult = require('../../lib/fetchResult')
 
@@ -54,7 +54,7 @@ class NpmFetch extends AbstractFetch {
     // The version-specific API (e.g. append /x.y.z to URL) does NOT work for scoped packages.
     const baseUrl = providerMap[spec.provider]
     if (!baseUrl) return null
-    const fullName = `${spec.namespace ? spec.namespace + '/' : ''}${spec.name}`
+    const fullName = `${spec.namespace ? `${spec.namespace}/` : ''}${spec.name}`
     let registryData
     try {
       registryData = await requestPromise({
@@ -70,8 +70,8 @@ class NpmFetch extends AbstractFetch {
     if (!registryData.versions[version]) return null
     const date = registryData.time ? registryData.time[version] : undefined
     const registryManifest = registryData.versions[version]
-    delete registryData.versions
-    delete registryData.time
+    registryData.versions = undefined
+    registryData.time = undefined
     registryData.manifest = registryManifest
     registryData.releaseDate = date
     return registryData

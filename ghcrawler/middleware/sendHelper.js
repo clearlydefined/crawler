@@ -5,7 +5,7 @@
 const htmlencode = require('htmlencode').htmlEncode
 
 function create() {
-  return function (request, response, next) {
+  return (request, response, next) => {
     response.helpers = response.helpers || {}
     response.helpers.send = {
       context: {
@@ -28,5 +28,5 @@ function partialHtml(title, html) {
   this.context.response
     .type('html')
     .status(200)
-    .end('<html><head><title>' + htmlencode(title) + '</title></head><body>' + html + '</body></html>')
+    .end(`<html><head><title>${htmlencode(title)}</title></head><body>${html}</body></html>`)
 }

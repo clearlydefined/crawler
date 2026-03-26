@@ -3,10 +3,10 @@
 
 const AbstractFetch = require('./abstractFetch')
 const { trimStart, clone, get } = require('lodash')
-const fs = require('fs')
+const fs = require('node:fs')
 const { mkdirp } = require('mkdirp')
-const path = require('path')
-const { promisify } = require('util')
+const path = require('node:path')
+const { promisify } = require('node:util')
 const { callFetchWithRetry: requestRetry } = require('../../lib/fetch')
 const FetchResult = require('../../lib/fetchResult')
 

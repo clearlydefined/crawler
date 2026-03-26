@@ -5,10 +5,10 @@ const expect = require('chai').expect
 const sinon = require('sinon')
 const NpmFetch = require('../../../../providers/fetch/npmjsFetch')
 const EntitySpec = require('../../../../lib/entitySpec')
-const PassThrough = require('stream').PassThrough
+const PassThrough = require('node:stream').PassThrough
 const proxyquire = require('proxyquire')
 const Request = require('../../../../ghcrawler').request
-const fs = require('fs')
+const fs = require('node:fs')
 
 const spec_nonnamespace = new EntitySpec('npm', 'npmjs', '-', 'name1', '1.0.0')
 const spec_namespace = new EntitySpec('npm', 'npmjs', '@namespace1', 'name1', '1.0.0')
@@ -79,7 +79,7 @@ describe('', () => {
     Fetch._resultBox = resultBox
   })
 
-  afterEach(function () {
+  afterEach(() => {
     sinon.restore()
   })
 
@@ -87,8 +87,8 @@ describe('', () => {
     const handler = setup(createRegistryData('0.3.0'))
     const request = await handler.handle(new Request('test', 'cd:/npm/npmjs/-/redie/0.3.0'))
     request.fetchResult.copyTo(request)
-    expect(request.document.hashes.sha1).to.be.equal(hashes['redie-0.3.0.tgz']['sha1'])
-    expect(request.document.hashes.sha256).to.be.equal(hashes['redie-0.3.0.tgz']['sha256'])
+    expect(request.document.hashes.sha1).to.be.equal(hashes['redie-0.3.0.tgz'].sha1)
+    expect(request.document.hashes.sha256).to.be.equal(hashes['redie-0.3.0.tgz'].sha256)
     expect(request.document.releaseDate).to.equal('42')
     expect(request.document.registryData.manifest.test).to.be.true
   })

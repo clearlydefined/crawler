@@ -3,12 +3,12 @@
 
 const chai = require('chai')
 const sinon = require('sinon')
-const fs = require('fs')
-const PassThrough = require('stream').PassThrough
+const fs = require('node:fs')
+const PassThrough = require('node:stream').PassThrough
 const proxyquire = require('proxyquire')
 
 const Request = require('../../../../ghcrawler').request
-const { promisify } = require('util')
+const { promisify } = require('node:util')
 
 const expect = chai.expect
 
@@ -172,7 +172,7 @@ describe('fetchDispatcher cache fetch result', () => {
 
     beforeEach(() => {
       pypiFetch = PypiFetch({ logger: { log: sinon.stub() } })
-      pypiFetch._getPackage = sinon.stub().callsFake(async (spec, registryData, destination) => {
+      pypiFetch._getPackage = sinon.stub().callsFake(async (_spec, _registryData, destination) => {
         await getPacakgeStub('test/fixtures/maven/swt-3.3.0-v3346.jar', destination)
         return true
       })
@@ -215,7 +215,7 @@ describe('fetchDispatcher cache fetch result', () => {
       const npmFetch = NpmFetch({ logger: { log: sinon.stub() } })
       npmFetch._getPackage = sinon
         .stub()
-        .callsFake(async (spec, destination) => await getPacakgeStub('test/fixtures/npm/redie-0.3.0.tgz', destination))
+        .callsFake(async (_spec, destination) => await getPacakgeStub('test/fixtures/npm/redie-0.3.0.tgz', destination))
 
       fetchDispatcher = setupDispatcher(npmFetch)
     })
@@ -237,7 +237,9 @@ describe('fetchDispatcher cache fetch result', () => {
       })
       rubyGemsFetch._getPackage = sinon
         .stub()
-        .callsFake(async (spec, destination) => await getPacakgeStub('test/fixtures/ruby/small-0.5.1.gem', destination))
+        .callsFake(
+          async (_spec, destination) => await getPacakgeStub('test/fixtures/ruby/small-0.5.1.gem', destination)
+        )
 
       fetchDispatcher = setupDispatcher(rubyGemsFetch)
     })
@@ -269,7 +271,7 @@ describe('fetchDispatcher cache fetch result', () => {
       packagistFetch._getPackage = sinon
         .stub()
         .callsFake(
-          async (spec, registryData, destination) =>
+          async (_spec, _registryData, destination) =>
             await getPacakgeStub('test/fixtures/composer/symfony-polyfill-mbstring-v1.11.0-0-gfe5e94c.zip', destination)
         )
 
@@ -284,7 +286,7 @@ describe('fetchDispatcher cache fetch result', () => {
   describe('cache CrateioFetch result', () => {
     const requestPromiseStub = options => {
       const body = fs.readFileSync('test/fixtures/crates/bitflags.json')
-      if (options && options.json) return JSON.parse(body)
+      if (options?.json) return JSON.parse(body)
       const response = new PassThrough()
       response.write(fs.readFileSync('test/fixtures/crates/bitflags-1.0.4.crate'))
       response.statusCode = 200
@@ -316,7 +318,7 @@ describe('fetchDispatcher cache fetch result', () => {
         'memory-cache': memCacheStub
       })
       const fetch = DebianFetch({ logger: { info: sinon.stub() }, cdFileLocation: 'test/fixtures/debian/fragment' })
-      fetch._download = async (downloadUrl, destination) =>
+      fetch._download = async (_downloadUrl, destination) =>
         getPacakgeStub('test/fixtures/debian/0ad_0.0.17-1_armhf.deb', destination)
       fetch._getDeclaredLicenses = async () => {
         return ['MIT', 'BSD-3-clause']

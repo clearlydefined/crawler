@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractClearlyDefinedProcessor = require('./abstractClearlyDefinedProcessor')
-const fs = require('fs')
-const path = require('path')
+const fs = require('node:fs')
+const path = require('node:path')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
 const SourceSpec = require('../../lib/sourceSpec')
 const { get, merge } = require('lodash')
@@ -34,7 +34,7 @@ class ComposerExtract extends AbstractClearlyDefinedProcessor {
       const manifestLocation = this._getManifestLocation(location, dirRoot)
       const manifest = manifestLocation ? JSON.parse(fs.readFileSync(path.join(location, manifestLocation))) : null
       await this._createDocument(request, manifest, request.document.registryData)
-      if (manifest) this.attachFiles(request.document, [manifestLocation], location)
+      if (manifest) await this.attachFiles(request.document, [manifestLocation], location)
       else this.logger.info('PHP package without composer.json', { url: request.url })
     }
     this.addLocalToolTasks(request)

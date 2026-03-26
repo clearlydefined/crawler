@@ -4,7 +4,7 @@
 // eslint-disable-next-line no-unused-vars
 const { ContainerClient } = require('@azure/storage-blob')
 const memoryCache = require('memory-cache')
-const URL = require('url')
+const URL = require('node:url')
 
 class AzureStorageDocStore {
   /**
@@ -48,7 +48,7 @@ class AzureStorageDocStore {
 
     if (data.length > SIZE_THRESHOLD) {
       // Large documents: use streaming (note: still has multi-instance race condition risk)
-      const { Readable } = require('stream')
+      const { Readable } = require('node:stream')
       const dataStream = new Readable()
       dataStream.push(data)
       dataStream.push(null)
@@ -78,7 +78,7 @@ class AzureStorageDocStore {
   // This API can only be used for the 'deadletter' store because we cannot look up documents by type performantly
   async list(type) {
     this._ensureDeadletter(type)
-    let entries = []
+    const entries = []
     for await (const blob of this.containerClient.listBlobsFlat({ includeMetadata: true })) {
       const blobMetadata = blob.metadata
       entries.push({
@@ -149,7 +149,7 @@ class AzureStorageDocStore {
     return `${type}${this.options.preserveCase ? parsed.path : parsed.path.toLowerCase()}.json`
   }
 
-  _getBlobPathFromUrn(type, urn) {
+  _getBlobPathFromUrn(_type, urn) {
     if (!urn) {
       return ''
     }

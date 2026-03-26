@@ -1,7 +1,7 @@
 const { clone } = require('lodash')
 const { callFetch: requestPromise, getStream } = require('../../lib/fetch')
 const AbstractFetch = require('./abstractFetch')
-const fs = require('fs')
+const fs = require('node:fs')
 const axios = require('axios')
 const { default: axiosRetry, exponentialDelay, isNetworkOrIdempotentRequestError } = require('axios-retry')
 const { parse: htmlParser } = require('node-html-parser')
@@ -20,7 +20,7 @@ class GoFetch extends AbstractFetch {
       retries: 5,
       retryDelay: exponentialDelay,
       retryCondition: err => {
-        return isNetworkOrIdempotentRequestError(err) || err.response?.status == 429
+        return isNetworkOrIdempotentRequestError(err) || err.response?.status === 429
       }
     })
     this.options.http = options.http || axios
@@ -95,7 +95,7 @@ class GoFetch extends AbstractFetch {
   }
 
   _buildUrl(spec, extension = '.zip') {
-    let initial_url = `${providerMap.golang}/${spec.namespace}/${spec.name}/@v/${spec.revision}${extension}`
+    const initial_url = `${providerMap.golang}/${spec.namespace}/${spec.name}/@v/${spec.revision}${extension}`
     return this._replace_encodings(this._remove_blank_fields(initial_url))
   }
 
@@ -131,7 +131,7 @@ class GoFetch extends AbstractFetch {
       content = await requestPromise({ url })
     } catch (error) {
       if (error.statusCode === 404) return null
-      else throw this._google_proxy_error_string(error)
+      throw this._google_proxy_error_string(error)
     }
 
     return JSON.parse(content.toString())
@@ -152,9 +152,8 @@ class GoFetch extends AbstractFetch {
         return {
           licenses
         }
-      } else {
-        this.logger.info(`Licenses from html could not be parsed. The licenses are ${JSON.stringify(licenses)}.`)
       }
+      this.logger.info(`Licenses from html could not be parsed. The licenses are ${JSON.stringify(licenses)}.`)
     } catch (err) {
       if (err.response?.status === 404) {
         // Based on https://pkg.go.dev/about#adding-a-package, packages on pkg.go.dev may be
@@ -190,10 +189,6 @@ class GoFetch extends AbstractFetch {
   }
 }
 
-class RequeueError extends Error {
-  constructor(message) {
-    super(message)
-  }
-}
+class RequeueError extends Error {}
 
 module.exports = options => new GoFetch(options)

@@ -4,10 +4,10 @@
 const expect = require('chai').expect
 const sinon = require('sinon')
 const CrateFetch = require('../../../../providers/fetch/cratesioFetch')
-const PassThrough = require('stream').PassThrough
+const PassThrough = require('node:stream').PassThrough
 const proxyquire = require('proxyquire')
 const Request = require('../../../../ghcrawler').request
-const fs = require('fs')
+const fs = require('node:fs')
 
 let Fetch
 
@@ -26,12 +26,12 @@ function pickFile(url) {
 describe('crateFetch workflow', () => {
   beforeEach(() => {
     const requestPromiseStub = options => {
-      if (options && options.url) {
+      if (options?.url) {
         if (options.url.includes('error')) throw new Error('yikes')
         if (options.url.includes('missing')) throw { statusCode: 404 }
       }
       const body = fs.readFileSync(`test/fixtures/crates/${pickFile(options.url)}`)
-      if (options && options.json) return JSON.parse(body)
+      if (options?.json) return JSON.parse(body)
       const response = new PassThrough()
       response.write(body)
       response.statusCode = 200
@@ -43,7 +43,7 @@ describe('crateFetch workflow', () => {
     })
   })
 
-  afterEach(function () {
+  afterEach(() => {
     sinon.restore()
   })
 
@@ -51,8 +51,8 @@ describe('crateFetch workflow', () => {
     const handler = setup()
     const request = await handler.handle(new Request('test', 'cd:/crate/cratesio/-/bitflags/1.0.4'))
     request.fetchResult.copyTo(request)
-    expect(request.document.hashes.sha1).to.be.equal(hashes['bitflags-1.0.4.crate']['sha1'])
-    expect(request.document.hashes.sha256).to.be.equal(hashes['bitflags-1.0.4.crate']['sha256'])
+    expect(request.document.hashes.sha1).to.be.equal(hashes['bitflags-1.0.4.crate'].sha1)
+    expect(request.document.hashes.sha256).to.be.equal(hashes['bitflags-1.0.4.crate'].sha256)
     expect(request.document.releaseDate).to.equal('2018-08-21T19:55:12.284583+00:00')
     expect(request.document.registryData.crate).to.equal('bitflags')
     expect(request.document.manifest.id).to.equal('bitflags')

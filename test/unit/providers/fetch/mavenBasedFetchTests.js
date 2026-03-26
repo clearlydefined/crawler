@@ -27,7 +27,7 @@ describe('MavenBasedFetch', () => {
     })
   })
 
-  describe('Integration test', function () {
+  describe('Integration test', () => {
     const path = '/remotecontent?filepath='
     const mockServer = mockttp.getLocal()
     let endpointMock

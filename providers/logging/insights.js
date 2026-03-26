@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 const appInsights = require('applicationinsights')
+const safeStringify = require('safe-stable-stringify')
 
 /**
  * Module-level client reference. In applicationinsights 3.x, defaultClient is read-only,
@@ -47,14 +48,21 @@ class Insights {
     if (!connectionString || connectionString === 'mock') {
       _client = new Insights(tattoos, null, echo)
     } else {
-      appInsights.setup(connectionString).setAutoCollectPerformance(false).setAutoCollectDependencies(false).start()
+      appInsights
+        .setup(connectionString)
+        .setAutoCollectPerformance(false)
+        .setAutoCollectDependencies(false)
+        // We emit telemetry via our custom Winston transport; disable console auto-collection
+        // to avoid duplicate traces with a reduced customProperties envelope.
+        .setAutoCollectConsole(false, false)
+        .start()
       _client = new Insights(tattoos, appInsights.defaultClient, echo)
     }
   }
 
   trackException(exceptionTelemetry) {
     this.tattoo(exceptionTelemetry)
-    if (exceptionTelemetry.exception && exceptionTelemetry.exception._type) {
+    if (exceptionTelemetry.exception?._type) {
       exceptionTelemetry.properties.type = exceptionTelemetry.exception._type
       exceptionTelemetry.properties.url = exceptionTelemetry.exception._url
       exceptionTelemetry.properties.cid = exceptionTelemetry.exception._cid
@@ -69,7 +77,7 @@ class Insights {
   trackTrace(traceTelemetry) {
     this.tattoo(traceTelemetry)
     const hasProperties = traceTelemetry.properties && Object.keys(traceTelemetry.properties).length > 0
-    const propertyString = hasProperties ? ` ${JSON.stringify(traceTelemetry.properties)}` : ''
+    const propertyString = hasProperties ? ` ${safeStringify(traceTelemetry.properties)}` : ''
     const severity = traceTelemetry.severity
     const severityChar = severityMap[severity] || '?'
     if (this.client) this.client.trackTrace(traceTelemetry)

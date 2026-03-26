@@ -35,7 +35,7 @@ class CondaExtract extends AbstractClearlyDefinedProcessor {
   }
 
   async _discoverSource(spec, registryData) {
-    let sourceCandidates = [
+    const sourceCandidates = [
       registryData.channelData.source_url,
       registryData.channelData.source_git_url,
       registryData.channelData.home,

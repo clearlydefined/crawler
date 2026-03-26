@@ -5,10 +5,10 @@ const AbstractProcessor = require('./abstractProcessor')
 const config = require('painless-config')
 const DebianFetch = require('../fetch/debianFetch')
 const CondaFetch = require('../fetch/condaFetch')
-const fs = require('fs')
+const fs = require('node:fs')
 const ghrequestor = require('ghrequestor')
 const linebyline = require('linebyline')
-const path = require('path')
+const path = require('node:path')
 const Request = require('../../ghcrawler').request
 const requestRetry = require('../../lib/fetch').callFetchWithRetry
 const defaultOptions = { json: true, resolveWithFullResponse: false }
@@ -192,14 +192,14 @@ class TopProcessor extends AbstractProcessor {
     })
 
     if (!condaFetch.channels[spec.provider]) return request.markSkip(`Unrecognized conda channel ${spec.provider}`)
-    let channelUrl = condaFetch.channels[spec.provider]
-    let channelData = await condaFetch.getChannelData(channelUrl, spec.provider)
+    const channelUrl = condaFetch.channels[spec.provider]
+    const channelData = await condaFetch.getChannelData(channelUrl, spec.provider)
     let packagesCoordinates = []
 
     if (spec.type === 'conda') {
-      for (let subdir of channelData.subdirs) {
-        let repoData = await condaFetch.getRepoData(channelUrl, spec.provider, subdir)
-        let repoCoordinates = Object.entries(repoData.packages).map(
+      for (const subdir of channelData.subdirs) {
+        const repoData = await condaFetch.getRepoData(channelUrl, spec.provider, subdir)
+        const repoCoordinates = Object.entries(repoData.packages).map(
           ([, packageData]) =>
             `cd:/conda/${spec.provider}/${subdir}/${packageData.name}/${packageData.version}-${packageData.build}/`
         )
@@ -214,7 +214,7 @@ class TopProcessor extends AbstractProcessor {
       )
     }
 
-    let slicedCoordinates = packagesCoordinates.slice(start, end)
+    const slicedCoordinates = packagesCoordinates.slice(start, end)
 
     this.logger.info(
       `Conda top - coordinates: ${packagesCoordinates.length}, start: ${start}, end: ${end}, sliced: ${slicedCoordinates.length}`
@@ -346,7 +346,7 @@ class TopProcessor extends AbstractProcessor {
       'User-Agent': 'clearlydefined/scanning'
     }
     const token = this.options.githubToken
-    if (token) headers.Authorization = 'token ' + token
+    if (token) headers.Authorization = `token ${token}`
     const repos = await ghrequestor.getAll(`https://api.github.com/orgs/${namespace}/repos`, {
       headers,
       tokenLowerBound: 10

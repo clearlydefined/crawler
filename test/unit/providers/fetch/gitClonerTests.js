@@ -9,16 +9,16 @@ const cloner = gitCloner({})
 describe('building git urls', () => {
   it('builds a gitlab url', () => {
     expect(cloner._buildUrl(spec('git', 'gitlab', 'namespace', 'repo', 'abc123'))).to.equal(
-      gitlab_stub + 'namespace/repo.git'
+      `${gitlab_stub}namespace/repo.git`
     )
     expect(cloner._buildUrl(spec('git', 'gitlab', 'name.space.thing', 'repo', 'abc123'))).to.equal(
-      gitlab_stub + 'name/space/thing/repo.git'
+      `${gitlab_stub}name/space/thing/repo.git`
     )
   })
 
   it('builds a github url', () => {
     expect(cloner._buildUrl(spec('git', 'github', 'namespace', 'repo', 'abc123'))).to.equal(
-      github_stub + 'namespace/repo.git'
+      `${github_stub}namespace/repo.git`
     )
   })
 })

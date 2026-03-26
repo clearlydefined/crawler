@@ -3,7 +3,7 @@
 
 const AbstractFetch = require('./abstractFetch')
 const { clone } = require('lodash')
-const fs = require('fs')
+const fs = require('node:fs')
 const memCache = require('memory-cache')
 const { getStream } = require('../../lib/fetch')
 const FetchResult = require('../../lib/fetchResult')
@@ -41,17 +41,16 @@ class CondaFetch extends AbstractFetch {
     if (!channelData) {
       return request.markSkip('failed to fetch and parse channelData.json')
     }
-    let architecture = spec.namespace
-    let [version, buildVersion] = (spec.revision || '').split('-')
+    const architecture = spec.namespace
+    const [version, buildVersion] = (spec.revision || '').split('-')
     if (channelData.packages[spec.name] === undefined) {
       return request.markSkip(`Missing package ${spec.name} in channel: ${spec.provider}`)
     }
     const packageChannelData = channelData.packages[spec.name]
     if (spec.type === 'condasrc') {
       return this._downloadCondaSourcePackage(spec, request, version, packageChannelData)
-    } else {
-      return this._downloadCondaPackage(spec, request, version, buildVersion, architecture, packageChannelData)
     }
+    return this._downloadCondaPackage(spec, request, version, buildVersion, architecture, packageChannelData)
   }
 
   async _downloadCondaSourcePackage(spec, request, version, packageChannelData) {
@@ -61,7 +60,7 @@ class CondaFetch extends AbstractFetch {
     if (!packageChannelData.source_url) {
       return request.markSkip(`Missing archive source file in repodata for package ${spec.name}`)
     }
-    let downloadUrl = new URL(`${packageChannelData.source_url}`).href
+    const downloadUrl = new URL(`${packageChannelData.source_url}`).href
     spec.revision = packageChannelData.version
     request.url = spec.toUrl()
     super.handle(request)
@@ -85,16 +84,16 @@ class CondaFetch extends AbstractFetch {
 
   _matchPackage(name, version, buildVersion, repoData) {
     let packageRepoEntries = []
-    let packageMatches = ([, packageData]) => {
+    const packageMatches = ([, packageData]) => {
       return (
         packageData.name === name &&
         (!version || version === packageData.version) &&
         (!buildVersion || packageData.build.startsWith(buildVersion))
       )
     }
-    if (repoData['packages']) {
+    if (repoData.packages) {
       packageRepoEntries = packageRepoEntries.concat(
-        Object.entries(repoData['packages'])
+        Object.entries(repoData.packages)
           .filter(packageMatches)
           .map(([packageFile, packageData]) => {
             return { packageFile, packageData }
@@ -129,16 +128,16 @@ class CondaFetch extends AbstractFetch {
         `failed to fetch and parse repodata json file for channel ${spec.provider} in architecture ${architecture}`
       )
     }
-    let packageRepoEntries = this._matchPackage(spec.name, version, buildVersion, repoData)
+    const packageRepoEntries = this._matchPackage(spec.name, version, buildVersion, repoData)
     if (packageRepoEntries.length === 0) {
       return request.markSkip(
         `Missing package with matching spec (version: ${version}, buildVersion: ${buildVersion}) in ${architecture} repository`
       )
     }
-    let packageRepoEntry = packageRepoEntries[0]
-    let downloadUrl = new URL(`${this.channels[spec.provider]}/${architecture}/${packageRepoEntry.packageFile}`).href
+    const packageRepoEntry = packageRepoEntries[0]
+    const downloadUrl = new URL(`${this.channels[spec.provider]}/${architecture}/${packageRepoEntry.packageFile}`).href
     spec.namespace = architecture
-    spec.revision = packageRepoEntry.packageData.version + '-' + packageRepoEntry.packageData.build
+    spec.revision = `${packageRepoEntry.packageData.version}-${packageRepoEntry.packageData.build}`
     request.url = spec.toUrl()
     super.handle(request)
     const file = this.createTempFile(request)
