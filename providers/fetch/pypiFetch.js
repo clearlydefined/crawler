@@ -3,7 +3,7 @@
 
 const AbstractFetch = require('./abstractFetch')
 const nodeRequest = require('../../lib/fetch')
-const fs = require('fs')
+const fs = require('node:fs')
 const spdxCorrect = require('spdx-correct')
 const { findLastKey, get, find, clone } = require('lodash')
 const FetchResult = require('../../lib/fetchResult')

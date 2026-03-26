@@ -4,8 +4,8 @@
 const { clone } = require('lodash')
 const AbstractFetch = require('./abstractFetch')
 const { callFetch: request } = require('../../lib/fetch')
-const fs = require('fs')
-const path = require('path')
+const fs = require('node:fs')
+const path = require('node:path')
 const FetchResult = require('../../lib/fetchResult')
 
 class CratesioFetch extends AbstractFetch {

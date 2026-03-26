@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractProcessor = require('./abstractProcessor')
-const { promisify } = require('util')
-const execFile = promisify(require('child_process').execFile)
+const { promisify } = require('node:util')
+const execFile = promisify(require('node:child_process').execFile)
 const { merge } = require('lodash')
 const {
   readdirSync,
   promises: { readFile }
-} = require('fs')
+} = require('node:fs')
 
 class FsfeReuseProcessor extends AbstractProcessor {
   constructor(options) {
@@ -132,10 +132,10 @@ class FsfeReuseProcessor extends AbstractProcessor {
     const licenses = []
     const licensesDir = 'LICENSES'
     try {
-      const licenseFiles = readdirSync(request.document.location + '/' + licensesDir)
+      const licenseFiles = readdirSync(`${request.document.location}/${licensesDir}`)
       licenseFiles.forEach(file => {
         licenses.push({
-          filePath: licensesDir + '/' + file,
+          filePath: `${licensesDir}/${file}`,
           spdxId: file.substring(0, file.indexOf('.txt'))
         })
       })

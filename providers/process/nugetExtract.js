@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractClearlyDefinedProcessor = require('./abstractClearlyDefinedProcessor')
-const fs = require('fs')
-const { promisify } = require('util')
+const fs = require('node:fs')
+const { promisify } = require('node:util')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
 const SourceSpec = require('../../lib/sourceSpec')
 const { parseString } = require('xml2js')
@@ -58,8 +58,7 @@ class NuGetExtract extends AbstractClearlyDefinedProcessor {
     // setup the manifest to be the new document for the request
     request.document = merge(this.clone(request.document), { manifest, registryData })
     // Add interesting info
-    if (registryData && registryData.published)
-      request.document.releaseDate = new Date(registryData.published).toISOString()
+    if (registryData?.published) request.document.releaseDate = new Date(registryData.published).toISOString()
     // Add source info
     const nuspec = await this._getNuspec(originalDocument.metadataLocation.nuspec)
     // Improve source location lookup by checking the latest version:
@@ -85,7 +84,7 @@ class NuGetExtract extends AbstractClearlyDefinedProcessor {
   _discoverCandidateSourceLocations(manifest) {
     const candidateUrls = []
     if (!manifest) return candidateUrls
-    if (manifest.repository && manifest.repository.url) candidateUrls.push(manifest.repository.url)
+    if (manifest.repository?.url) candidateUrls.push(manifest.repository.url)
     if (manifest.projectUrl) candidateUrls.push(manifest.projectUrl)
     if (manifest.licenseUrl) candidateUrls.push(manifest.licenseUrl)
     return candidateUrls

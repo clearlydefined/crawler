@@ -69,22 +69,21 @@ class StorageQueue {
         throw error
       }
       return null
-    } else {
-      try {
-        const decodedText = this._decodeXMLSafe(message.messageText)
-        message.body = JSON.parse(decodedText)
-      } catch (error) {
-        this.logger.error(`Failed to parse message ${message.messageId}:`)
-        this.logger.error(`Raw message: ${message.messageText}`)
-        this.logger.error(`Parse error: ${error.message}`)
-        await this.queueClient.deleteMessage(message.messageId, message.popReceipt)
-        return null
-      }
-      const request = this.messageFormatter(message)
-      request._message = message
-      this._log('Popped', message.body)
-      return request
     }
+    try {
+      const decodedText = this._decodeXMLSafe(message.messageText)
+      message.body = JSON.parse(decodedText)
+    } catch (error) {
+      this.logger.error(`Failed to parse message ${message.messageId}:`)
+      this.logger.error(`Raw message: ${message.messageText}`)
+      this.logger.error(`Parse error: ${error.message}`)
+      await this.queueClient.deleteMessage(message.messageId, message.popReceipt)
+      return null
+    }
+    const request = this.messageFormatter(message)
+    request._message = message
+    this._log('Popped', message.body)
+    return request
   }
 
   async done(request) {

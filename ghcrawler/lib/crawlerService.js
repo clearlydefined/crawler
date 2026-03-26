@@ -134,7 +134,7 @@ class CrawlerService {
     return this.crawler.deadletters.count('deadletter')
   }
 
-  _reconfigure(current, changes) {
+  _reconfigure(_current, changes) {
     // if the loop count changed, make it so
     if (changes.some(patch => patch.path === '/count')) {
       return this.options.crawler.count.value > 0 ? this.run() : this.stop()

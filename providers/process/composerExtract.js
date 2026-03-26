@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractClearlyDefinedProcessor = require('./abstractClearlyDefinedProcessor')
-const fs = require('fs')
-const path = require('path')
+const fs = require('node:fs')
+const path = require('node:path')
 const sourceDiscovery = require('../../lib/sourceDiscovery')
 const SourceSpec = require('../../lib/sourceSpec')
 const { get, merge } = require('lodash')

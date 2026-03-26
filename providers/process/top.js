@@ -5,10 +5,10 @@ const AbstractProcessor = require('./abstractProcessor')
 const config = require('painless-config')
 const DebianFetch = require('../fetch/debianFetch')
 const CondaFetch = require('../fetch/condaFetch')
-const fs = require('fs')
+const fs = require('node:fs')
 const ghrequestor = require('ghrequestor')
 const linebyline = require('linebyline')
-const path = require('path')
+const path = require('node:path')
 const Request = require('../../ghcrawler').request
 const requestRetry = require('../../lib/fetch').callFetchWithRetry
 const defaultOptions = { json: true, resolveWithFullResponse: false }
@@ -346,7 +346,7 @@ class TopProcessor extends AbstractProcessor {
       'User-Agent': 'clearlydefined/scanning'
     }
     const token = this.options.githubToken
-    if (token) headers.Authorization = 'token ' + token
+    if (token) headers.Authorization = `token ${token}`
     const repos = await ghrequestor.getAll(`https://api.github.com/orgs/${namespace}/repos`, {
       headers,
       tokenLowerBound: 10

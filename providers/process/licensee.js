@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractProcessor = require('./abstractProcessor')
-const { promisify } = require('util')
-const execFile = promisify(require('child_process').execFile)
+const { promisify } = require('node:util')
+const execFile = promisify(require('node:child_process').execFile)
 const { flatten, merge, uniqBy } = require('lodash')
 const { trimAllParents, spawnPromisified } = require('../../lib/utils')
-const path = require('path')
+const path = require('node:path')
 const throat = require('throat')
 
 class LicenseeProcessor extends AbstractProcessor {
@@ -76,7 +76,7 @@ class LicenseeProcessor extends AbstractProcessor {
       const stdout = await this._runLicensee(parameters, path.join(root, folder))
       if (!stdout.trim()) return
       const result = JSON.parse(stdout)
-      result.matched_files.forEach(file => (file.filename = `${folder ? folder + '/' : ''}${file.filename}`))
+      result.matched_files.forEach(file => (file.filename = `${folder ? `${folder}/` : ''}${file.filename}`))
       return result
     } catch (error) {
       // Licensee fails with code = 1 if there are no license files found in the given folder.

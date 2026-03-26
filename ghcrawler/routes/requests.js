@@ -27,7 +27,7 @@ async function queueRequests(requestSpecs, queueName) {
   try {
     return crawlerService.queue(requests, queueName)
   } catch (error) {
-    if (error.message && error.message.startsWith('Queue not found')) {
+    if (error.message?.startsWith('Queue not found')) {
       return null
     }
     throw error

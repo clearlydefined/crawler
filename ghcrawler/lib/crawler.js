@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 const debug = require('debug')('crawler:crawler')
-const fs = require('fs')
+const fs = require('node:fs')
 const { DateTime } = require('luxon')
 const Request = require('./request')
-const sleep = require('util').promisify(setTimeout)
+const sleep = require('node:util').promisify(setTimeout)
 const uuid = require('node-uuid')
 const _ = require('lodash')
 
@@ -84,7 +84,7 @@ class Crawler {
     }
   }
 
-  _panic(context, error) {
+  _panic(_context, error) {
     this.logger.error(new Error('PANIC, we should not have gotten here'))
     this.logger.error(error)
   }

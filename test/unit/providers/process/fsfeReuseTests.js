@@ -6,7 +6,7 @@ const expect = chai.expect
 const proxyquire = require('proxyquire')
 const sinon = require('sinon')
 const sandbox = sinon.createSandbox()
-const path = require('path')
+const path = require('node:path')
 const { request } = require('../../../../ghcrawler')
 
 let Handler
@@ -29,7 +29,7 @@ describe('FSFE REUSE software process', () => {
     let securityFound = false
     let helloWorldFound = false
     let testHelloWorldFound = false
-    for (var i = 0; i < document.reuse.files.length; i++) {
+    for (let i = 0; i < document.reuse.files.length; i++) {
       if (document.reuse.files[i].FileName === 'README.md') {
         readmeFound = true
         expect(document.reuse.files[i].LicenseConcluded).to.equal('NOASSERTION')
@@ -111,7 +111,7 @@ describe('FSFE REUSE software process', () => {
       licensesDirError: null
     }
     const processStub = {
-      execFile: (command, parameters, callbackOrOptions, callback) => {
+      execFile: (_command, parameters, callbackOrOptions, callback) => {
         if (parameters.includes('--version')) {
           return callbackOrOptions(resultBox.versionError, { stdout: resultBox.versionResult })
         }
@@ -124,7 +124,10 @@ describe('FSFE REUSE software process', () => {
         return resultBox.licensesDirectory
       }
     }
-    Handler = proxyquire('../../../../providers/process/fsfeReuse', { child_process: processStub, fs: fsStub })
+    Handler = proxyquire('../../../../providers/process/fsfeReuse', {
+      'node:child_process': processStub,
+      'node:fs': fsStub
+    })
     Handler._resultBox = resultBox
   })
 

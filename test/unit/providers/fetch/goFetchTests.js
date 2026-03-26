@@ -3,10 +3,10 @@
 const expect = require('chai').expect
 const sinon = require('sinon')
 const GoFetch = require('../../../../providers/fetch/goFetch')
-const PassThrough = require('stream').PassThrough
+const PassThrough = require('node:stream').PassThrough
 const proxyquire = require('proxyquire')
 const Request = require('../../../../ghcrawler').request
-const fs = require('fs')
+const fs = require('node:fs')
 const { merge } = require('lodash')
 
 const goBaseURL = 'https://proxy.golang.org/'
@@ -15,19 +15,19 @@ describe('Go utility functions', () => {
   it('builds URLs', () => {
     const fetch = GoFetch({})
     expect(fetch._buildUrl(spec('go', 'golang', 'cloud.google.com', 'go', 'v0.56.0'))).to.equal(
-      goBaseURL + 'cloud.google.com/go/@v/v0.56.0.zip'
+      `${goBaseURL}cloud.google.com/go/@v/v0.56.0.zip`
     )
     expect(fetch._buildUrl(spec('go', 'golang', 'cloud.google.com', 'go', 'v0.56.0'), '.mod')).to.equal(
-      goBaseURL + 'cloud.google.com/go/@v/v0.56.0.mod'
+      `${goBaseURL}cloud.google.com/go/@v/v0.56.0.mod`
     )
     expect(fetch._buildUrl(spec('go', 'golang', '-', 'collectd.org', 'v0.5.0'))).to.equal(
-      goBaseURL + 'collectd.org/@v/v0.5.0.zip'
+      `${goBaseURL}collectd.org/@v/v0.5.0.zip`
     )
     expect(fetch._buildUrl(spec('go', 'golang', 'github.com%2fAzure%2fazure-event-hubs-go', 'v3', 'v3.2.0'))).to.equal(
-      goBaseURL + 'github.com/Azure/azure-event-hubs-go/v3/@v/v3.2.0.zip'
+      `${goBaseURL}github.com/Azure/azure-event-hubs-go/v3/@v/v3.2.0.zip`
     )
     expect(fetch._buildUrl(spec('go', 'golang', 'github.com%2FAzure%2Fazure-event-hubs-go', 'v3', 'v3.2.0'))).to.equal(
-      goBaseURL + 'github.com/Azure/azure-event-hubs-go/v3/@v/v3.2.0.zip'
+      `${goBaseURL}github.com/Azure/azure-event-hubs-go/v3/@v/v3.2.0.zip`
     )
   })
 })
@@ -101,8 +101,8 @@ describe('Go Proxy fetching', () => {
     const handler = Fetch({ logger: { log: sinon.stub(), info: sinon.stub() }, http: successHttpStub })
     const request = await handler.handle(new Request('test', 'cd:/go/golang/rsc.io/quote/v1.3.0'))
     request.fetchResult.copyTo(request)
-    expect(request.document.hashes.sha1).to.be.equal(hashes['v1.3.0.zip']['sha1'])
-    expect(request.document.hashes.sha256).to.be.equal(hashes['v1.3.0.zip']['sha256'])
+    expect(request.document.hashes.sha1).to.be.equal(hashes['v1.3.0.zip'].sha1)
+    expect(request.document.hashes.sha256).to.be.equal(hashes['v1.3.0.zip'].sha256)
     expect(request.document.releaseDate).to.equal('2018-02-14T00:54:53Z')
     expect(request.document.registryData.licenses).to.be.deep.equal(['Apache-2.0', 'BSD-2-Clause, BSD-3-Clause, HPND'])
     expect(request.casedSpec.name).to.equal('quote')

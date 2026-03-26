@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractFetch = require('./abstractFetch')
-const fs = require('fs')
+const fs = require('node:fs')
 const { get } = require('lodash')
 const { getStream, callFetchWithRetry: requestRetry } = require('../../lib/fetch')
-const { promisify } = require('util')
+const { promisify } = require('node:util')
 const readdir = promisify(fs.readdir)
 const FetchResult = require('../../lib/fetchResult')
 
@@ -51,7 +51,7 @@ class PackagistFetch extends AbstractFetch {
     if (!registryData.manifest) return null
 
     registryData.releaseDate = get(registryData, 'manifest.time')
-    delete registryData['packages']
+    registryData.packages = undefined
     return registryData
   }
 

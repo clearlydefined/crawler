@@ -3,11 +3,11 @@
 
 const expect = require('chai').expect
 const sinon = require('sinon')
-const PassThrough = require('stream').PassThrough
+const PassThrough = require('node:stream').PassThrough
 const PackagistFetch = require('../../../../providers/fetch/packagistFetch')
 const proxyquire = require('proxyquire')
 const Request = require('../../../../ghcrawler').request
-const fs = require('fs')
+const fs = require('node:fs')
 
 let Fetch
 
@@ -61,9 +61,9 @@ describe('packagistFetch', () => {
     const handler = setup(createRegistryData())
     const request = await handler.handle(new Request('test', 'cd:/composer/packagist/symfony/polyfill-mbstring/1.11.0'))
     request.fetchResult.copyTo(request)
-    expect(request.document.hashes.sha1).to.be.equal(hashes['symfony-polyfill-mbstring-v1.11.0-0-gfe5e94c.zip']['sha1'])
+    expect(request.document.hashes.sha1).to.be.equal(hashes['symfony-polyfill-mbstring-v1.11.0-0-gfe5e94c.zip'].sha1)
     expect(request.document.hashes.sha256).to.be.equal(
-      hashes['symfony-polyfill-mbstring-v1.11.0-0-gfe5e94c.zip']['sha256']
+      hashes['symfony-polyfill-mbstring-v1.11.0-0-gfe5e94c.zip'].sha256
     )
     expect(request.document.dirRoot).to.be.equal('symfony-polyfill-mbstring-fe5e94c')
     expect(request.document.releaseDate).to.equal('2019-02-06T07:57:58+00:00')

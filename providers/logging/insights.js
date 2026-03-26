@@ -62,7 +62,7 @@ class Insights {
 
   trackException(exceptionTelemetry) {
     this.tattoo(exceptionTelemetry)
-    if (exceptionTelemetry.exception && exceptionTelemetry.exception._type) {
+    if (exceptionTelemetry.exception?._type) {
       exceptionTelemetry.properties.type = exceptionTelemetry.exception._type
       exceptionTelemetry.properties.url = exceptionTelemetry.exception._url
       exceptionTelemetry.properties.cid = exceptionTelemetry.exception._cid
