@@ -52,10 +52,13 @@ function configureApp(service, logger) {
 
   // Error handlers
   const handler = (error, request, response, next) => {
-    if (response.headersSent) return next(error)
-    if (!request?.url?.includes('robots933456.txt'))
+    if (response.headersSent) {
+      return next(error)
+    }
+    if (!request?.url?.includes('robots933456.txt')) {
       // https://feedback.azure.com/forums/169385-web-apps/suggestions/32120617-document-healthcheck-url-requirement-for-custom-co
       logger.error(`SvcRequestFailure: ${request.url}`, error)
+    }
     response.status(error.status || 500)
     const propertiesToSerialize = ['success', 'message']
     if (app.get('env') !== 'production') {

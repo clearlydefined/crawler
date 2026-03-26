@@ -77,7 +77,9 @@ describe('CallFetch', () => {
       let callCount = 0
       await mockServer.forGet(path).thenCallback(() => {
         callCount++
-        if (callCount === 1) return { statusCode: 500, body: 'fail' }
+        if (callCount === 1) {
+          return { statusCode: 500, body: 'fail' }
+        }
         return { statusCode: 200, body: JSON.stringify(expected) }
       })
 
@@ -118,7 +120,9 @@ describe('CallFetch', () => {
       let callCount = 0
       await mockServer.forGet(path).thenCallback(() => {
         callCount++
-        if (callCount === 1) return { statusCode: 500, body: 'fail' }
+        if (callCount === 1) {
+          return { statusCode: 500, body: 'fail' }
+        }
         return { statusCode: 200, body: JSON.stringify(expected) }
       })
 

@@ -67,14 +67,20 @@ class ApplicationInsightsTransport extends Transport {
 }
 
 const sanitizeFormat = winston.format(info => {
-  if (!info || typeof info !== 'object') return info
+  if (!info || typeof info !== 'object') {
+    return info
+  }
   const meta = {}
   Object.keys(info).forEach(key => {
-    if (['level', 'message', 'timestamp', 'stack'].includes(key)) return
+    if (['level', 'message', 'timestamp', 'stack'].includes(key)) {
+      return
+    }
     meta[key] = info[key]
     delete info[key]
   })
-  if (Object.keys(meta).length) Object.assign(info, sanitizeMeta(meta))
+  if (Object.keys(meta).length) {
+    Object.assign(info, sanitizeMeta(meta))
+  }
   return info
 })
 

@@ -38,7 +38,9 @@ class PodExtract extends AbstractClearlyDefinedProcessor {
   async _createDocument(request, registryData, releaseDate) {
     request.document = merge(this.clone(request.document), { registryData, releaseDate })
     const sourceInfo = await this._discoverSource(registryData)
-    if (sourceInfo) request.document.sourceInfo = sourceInfo
+    if (sourceInfo) {
+      request.document.sourceInfo = sourceInfo
+    }
   }
 
   _discoverSource(registryData) {
@@ -46,16 +48,24 @@ class PodExtract extends AbstractClearlyDefinedProcessor {
 
     // these options are mutually exclusive, sources will have a single item
     const httpSource = get(registryData, 'source.http')
-    if (httpSource) sources.push(httpSource)
+    if (httpSource) {
+      sources.push(httpSource)
+    }
 
     const gitSource = get(registryData, 'source.git')
-    if (gitSource) sources.push(gitSource)
+    if (gitSource) {
+      sources.push(gitSource)
+    }
 
     const svnSource = get(registryData, 'source.svn')
-    if (svnSource) sources.push(svnSource)
+    if (svnSource) {
+      sources.push(svnSource)
+    }
 
     const hgSource = get(registryData, 'source.hg')
-    if (hgSource) sources.push(hgSource)
+    if (hgSource) {
+      sources.push(hgSource)
+    }
 
     // sourceFinder will detect the source only using the version,
     // there is no way to pass the branch/tag/commit we have in the manifest

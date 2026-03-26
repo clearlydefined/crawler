@@ -56,9 +56,15 @@ const hashes = {
 }
 
 function pickArtifact(url) {
-  if (url.endsWith('.pom')) return 'swt-3.3.0-v3346.pom'
-  if (url.endsWith('-sources.jar')) return 'swt-3.3.0-v3346.jar'
-  if (url.endsWith('.jar')) return 'swt-3.3.0-v3346.jar'
+  if (url.endsWith('.pom')) {
+    return 'swt-3.3.0-v3346.pom'
+  }
+  if (url.endsWith('-sources.jar')) {
+    return 'swt-3.3.0-v3346.jar'
+  }
+  if (url.endsWith('.jar')) {
+    return 'swt-3.3.0-v3346.jar'
+  }
   return null
 }
 
@@ -68,9 +74,15 @@ describe('MavenGoogle fetching', () => {
   beforeEach(() => {
     const requestPromiseStub = options => {
       if (options.url) {
-        if (options.url.includes('error')) throw new Error('yikes')
-        if (options.url.includes('code')) throw { statusCode: 500, message: 'Code' }
-        if (options.url.includes('missing')) throw { statusCode: 404 }
+        if (options.url.includes('error')) {
+          throw new Error('yikes')
+        }
+        if (options.url.includes('code')) {
+          throw { statusCode: 500, message: 'Code' }
+        }
+        if (options.url.includes('missing')) {
+          throw { statusCode: 404 }
+        }
       }
       const file = options.url.includes('solrsearch') ? 'swt-3.3.0-v3346.json' : pickArtifact(options.url)
       const content = fs.readFileSync(`test/fixtures/maven/${file}`)

@@ -42,10 +42,18 @@ const hashes = {
 let Fetch
 
 function pickArtifact(url) {
-  if (url.endsWith('.mod')) return 'v1.3.0.mod'
-  if (url.endsWith('.info')) return 'v1.3.0.info'
-  if (url.endsWith('.zip')) return 'v1.3.0.zip'
-  if (url.endsWith('list')) return 'list'
+  if (url.endsWith('.mod')) {
+    return 'v1.3.0.mod'
+  }
+  if (url.endsWith('.info')) {
+    return 'v1.3.0.info'
+  }
+  if (url.endsWith('.zip')) {
+    return 'v1.3.0.zip'
+  }
+  if (url.endsWith('list')) {
+    return 'list'
+  }
   return null
 }
 
@@ -56,9 +64,15 @@ describe('Go Proxy fetching', () => {
     const requestPromiseStub = options => {
       if (options.url) {
         expect(options.url).to.contain(goBaseURL)
-        if (options.url.includes('error')) throw new Error('yikes')
-        if (options.url.includes('code')) throw { statusCode: 500, message: 'Code' }
-        if (options.url.includes('missing')) throw { statusCode: 404 }
+        if (options.url.includes('error')) {
+          throw new Error('yikes')
+        }
+        if (options.url.includes('code')) {
+          throw { statusCode: 500, message: 'Code' }
+        }
+        if (options.url.includes('missing')) {
+          throw { statusCode: 404 }
+        }
       }
 
       const file = pickArtifact(options.url)

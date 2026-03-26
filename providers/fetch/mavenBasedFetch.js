@@ -37,17 +37,25 @@ class MavenBasedFetch extends AbstractFetch {
 
   async handle(request) {
     const spec = this.toSpec(request)
-    if (!spec.revision) spec.revision = await this._getLatestVersion(spec)
-    if (!spec.namespace || !spec.revision) return this.markSkip(request)
+    if (!spec.revision) {
+      spec.revision = await this._getLatestVersion(spec)
+    }
+    if (!spec.namespace || !spec.revision) {
+      return this.markSkip(request)
+    }
     // rewrite the request URL as it is used throughout the system to derive locations and urns etc.
     request.url = spec.toUrl()
     super.handle(request)
     const poms = await this._getPoms(spec)
-    if (!poms.length) return this.markSkip(request)
+    if (!poms.length) {
+      return this.markSkip(request)
+    }
     const summary = this._mergePoms(poms)
     const artifact = this.createTempFile(request)
     const artifactResult = await this._getArtifact(spec, artifact.name)
-    if (!artifactResult) return this.markSkip(request)
+    if (!artifactResult) {
+      return this.markSkip(request)
+    }
     const dir = this.createTempDir(request)
     await this.decompress(artifact.name, dir.name)
     const hashes = await this.computeHashes(artifact.name)
@@ -69,7 +77,9 @@ class MavenBasedFetch extends AbstractFetch {
     //https://maven.apache.org/ref/3.2.5/maven-repository-metadata/repository-metadata.html#class_versioning
     const url = `${this._buildBaseUrl(spec)}/maven-metadata.xml`
     const response = await this._requestPromise({ url, json: false })
-    if (!response) return null
+    if (!response) {
+      return null
+    }
     const meta = await parseString(response)
     return get(meta, 'metadata.versioning[0].release[0]')
   }
@@ -94,7 +104,9 @@ class MavenBasedFetch extends AbstractFetch {
       const status = await new Promise(resolve => {
         this._handleRequestStream(url)
           .then(response => {
-            if (response.statusCode !== 200) return resolve(false)
+            if (response.statusCode !== 200) {
+              return resolve(false)
+            }
             response.data.pipe(fs.createWriteStream(destination)).on('finish', () => resolve(true))
           })
           .catch(error => {
@@ -102,7 +114,9 @@ class MavenBasedFetch extends AbstractFetch {
             resolve(false)
           })
       })
-      if (status) return true
+      if (status) {
+        return true
+      }
     }
     return false
   }
@@ -110,15 +124,21 @@ class MavenBasedFetch extends AbstractFetch {
   async _getPoms(spec, result = []) {
     const pom = await this._getPom(spec)
     const parentSpec = this._buildParentSpec(pom, spec)
-    if (parentSpec) await this._getPoms(parentSpec, result)
-    if (pom) result.push(pom)
+    if (parentSpec) {
+      await this._getPoms(parentSpec, result)
+    }
+    if (pom) {
+      result.push(pom)
+    }
     return result
   }
 
   async _getPom(spec) {
     const url = this._buildUrl(spec, extensionMap.pom)
     const content = await this._requestPromise({ url, json: false })
-    if (!content) return null
+    if (!content) {
+      return null
+    }
     const pom = await parseString(content)
     // clean up some stuff we don't actually look at.
     pom.project.build = undefined
@@ -130,7 +150,9 @@ class MavenBasedFetch extends AbstractFetch {
   }
 
   _buildParentSpec(pom, spec) {
-    if (!pom || !pom.project || !pom.project.parent) return null
+    if (!pom || !pom.project || !pom.project.parent) {
+      return null
+    }
     const parent = pom.project.parent[0]
     return new EntitySpec(
       spec.type,
@@ -142,7 +164,9 @@ class MavenBasedFetch extends AbstractFetch {
   }
 
   _mergePoms(poms) {
-    if (!poms) return null
+    if (!poms) {
+      return null
+    }
     return [...poms].reduce((result, pom) => {
       return { ...result, ...pom.project }
     }, {})
@@ -154,7 +178,9 @@ class MavenBasedFetch extends AbstractFetch {
       const pomProperties = (await promisify(fs.readFile)(location)).toString().split('\n')
       for (const line of pomProperties) {
         const releaseDate = extractDate(line.slice(1))
-        if (releaseDate) return releaseDate.toJSDate().toISOString()
+        if (releaseDate) {
+          return releaseDate.toJSDate().toISOString()
+        }
       }
     }
     //Get "File Data Last Modified" from the MANIFEST.MF file, and infer release date.
@@ -172,8 +198,12 @@ class MavenBasedFetch extends AbstractFetch {
 
   static async _findAnyFileStat(location) {
     const locationStat = await lstat(location)
-    if (locationStat.isSymbolicLink()) return
-    if (locationStat.isFile()) return locationStat
+    if (locationStat.isSymbolicLink()) {
+      return
+    }
+    if (locationStat.isFile()) {
+      return locationStat
+    }
 
     const subdirs = await readdir(location)
     return subdirs.reduce((prev, subdir) => {
@@ -186,7 +216,9 @@ class MavenBasedFetch extends AbstractFetch {
     try {
       return await this._handleRequestPromise(options)
     } catch (error) {
-      if (error.statusCode === 404) return null
+      if (error.statusCode === 404) {
+        return null
+      }
       throw error
     }
   }

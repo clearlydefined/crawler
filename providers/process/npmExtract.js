@@ -33,8 +33,11 @@ class NpmExtract extends AbstractClearlyDefinedProcessor {
       const manifestLocation = this._getManifestLocation(location)
       const manifest = manifestLocation ? JSON.parse(fs.readFileSync(path.join(location, manifestLocation))) : null
       await this._createDocument(request, manifest, request.document.registryData)
-      if (manifest) await this.attachFiles(request.document, [manifestLocation], location)
-      else this.logger.info('NPM without package.json', { url: request.url })
+      if (manifest) {
+        await this.attachFiles(request.document, [manifestLocation], location)
+      } else {
+        this.logger.info('NPM without package.json', { url: request.url })
+      }
     }
     this.addLocalToolTasks(request)
     if (request.document.sourceInfo) {
@@ -45,22 +48,33 @@ class NpmExtract extends AbstractClearlyDefinedProcessor {
   }
 
   _getManifestLocation(dir) {
-    if (fs.existsSync(path.join(dir, 'package/package.json'))) return 'package/package.json'
-    if (fs.existsSync(path.join(dir, 'package.json'))) return 'package.json'
+    if (fs.existsSync(path.join(dir, 'package/package.json'))) {
+      return 'package/package.json'
+    }
+    if (fs.existsSync(path.join(dir, 'package.json'))) {
+      return 'package.json'
+    }
     return null
   }
 
   _discoverCandidateSourceLocations(manifest) {
     const candidateUrls = []
-    if (!manifest) return candidateUrls
+    if (!manifest) {
+      return candidateUrls
+    }
     candidateUrls.push(get(manifest, 'repository.url'))
     candidateUrls.push(get(manifest, 'url'))
     let homepage = get(manifest, 'homepage')
-    if (homepage && isArray(homepage)) homepage = homepage[0]
+    if (homepage && isArray(homepage)) {
+      homepage = homepage[0]
+    }
     candidateUrls.push(homepage)
     if (manifest.bugs) {
-      if (typeof manifest.bugs === 'string' && manifest.bugs.startsWith('http')) candidateUrls.push(manifest.bugs)
-      else candidateUrls.push(manifest.bugs.url)
+      if (typeof manifest.bugs === 'string' && manifest.bugs.startsWith('http')) {
+        candidateUrls.push(manifest.bugs)
+      } else {
+        candidateUrls.push(manifest.bugs.url)
+      }
     }
     return candidateUrls.filter(e => e)
   }
@@ -81,7 +95,9 @@ class NpmExtract extends AbstractClearlyDefinedProcessor {
     // setup the manifest to be the new document for the request
     request.document = merge(this.clone(request.document), { 'package.json': manifest, registryData })
     const sourceInfo = await this._discoverSource(manifest, registryData.manifest)
-    if (sourceInfo) request.document.sourceInfo = sourceInfo
+    if (sourceInfo) {
+      request.document.sourceInfo = sourceInfo
+    }
   }
 }
 

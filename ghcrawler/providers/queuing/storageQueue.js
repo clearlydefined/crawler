@@ -144,7 +144,9 @@ class StorageQueue {
   }
 
   _encodeXMLSafe(text) {
-    if (typeof text !== 'string') return text
+    if (typeof text !== 'string') {
+      return text
+    }
 
     return (
       text
@@ -158,7 +160,9 @@ class StorageQueue {
   }
 
   _decodeXMLSafe(text) {
-    if (typeof text !== 'string') return text
+    if (typeof text !== 'string') {
+      return text
+    }
 
     return (
       text

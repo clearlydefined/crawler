@@ -52,7 +52,9 @@ class MavenExtract extends AbstractClearlyDefinedProcessor {
       githubToken: this.options.githubToken,
       logger: this.logger
     })
-    if (githubSource) return githubSource
+    if (githubSource) {
+      return githubSource
+    }
     // didn't find any source in GitHub so make up a sources url to try if the registry thinks there is source
     // Need to confirm the expectations here.
     const result = SourceSpec.fromObject(spec)
@@ -64,7 +66,9 @@ class MavenExtract extends AbstractClearlyDefinedProcessor {
     request.document = merge(this.clone(request.document), { manifest, releaseDate })
     // Add source info
     const sourceInfo = await this._discoverSource(spec, manifest)
-    if (sourceInfo) request.document.sourceInfo = sourceInfo
+    if (sourceInfo) {
+      request.document.sourceInfo = sourceInfo
+    }
   }
 }
 

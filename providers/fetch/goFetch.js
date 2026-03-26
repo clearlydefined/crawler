@@ -33,19 +33,27 @@ class GoFetch extends AbstractFetch {
 
   async handle(request) {
     const spec = this.toSpec(request)
-    if (!spec.revision) spec.revision = await this._getLatestVersion(spec)
-    if (!spec.revision) return this.markSkip(request)
+    if (!spec.revision) {
+      spec.revision = await this._getLatestVersion(spec)
+    }
+    if (!spec.revision) {
+      return this.markSkip(request)
+    }
 
     request.url = spec.toUrl()
 
     super.handle(request)
 
     const info = await this._getInfo(spec)
-    if (!info) return this.markSkip(request)
+    if (!info) {
+      return this.markSkip(request)
+    }
 
     const artifact = this.createTempFile(request)
     const artifactResult = await this._getArtifact(spec, artifact.name)
-    if (!artifactResult) return this.markSkip(request)
+    if (!artifactResult) {
+      return this.markSkip(request)
+    }
 
     const dir = this.createTempDir(request)
 
@@ -112,7 +120,9 @@ class GoFetch extends AbstractFetch {
     let response
     try {
       response = await getStream(url)
-      if (!response || response.statusCode !== 200) return false
+      if (!response || response.statusCode !== 200) {
+        return false
+      }
     } catch (error) {
       this.logger.error(this._google_proxy_error_string(error))
       return false
@@ -120,7 +130,9 @@ class GoFetch extends AbstractFetch {
     const status = await new Promise(resolve => {
       response.data.pipe(fs.createWriteStream(destination)).on('finish', () => resolve(true))
     })
-    if (status) return true
+    if (status) {
+      return true
+    }
   }
 
   async _getInfo(spec) {
@@ -130,7 +142,9 @@ class GoFetch extends AbstractFetch {
     try {
       content = await requestPromise({ url })
     } catch (error) {
-      if (error.statusCode === 404) return null
+      if (error.statusCode === 404) {
+        return null
+      }
       throw this._google_proxy_error_string(error)
     }
 

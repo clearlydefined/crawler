@@ -26,17 +26,23 @@ class PodFetch extends AbstractFetch {
 
     // Ensure we have a spec revision, we can't get the registry data without one
     const version = await this._getVersion(spec)
-    if (!version || !version.name) return request.markSkip('Missing  ')
+    if (!version || !version.name) {
+      return request.markSkip('Missing  ')
+    }
     spec.revision = version.name
 
     // Get the registry data/manifest
     const registryData = await this._getRegistryData(spec)
-    if (!registryData) return request.markSkip('Missing  ')
+    if (!registryData) {
+      return request.markSkip('Missing  ')
+    }
 
     // Download the package/source
     const dir = this.createTempDir(request)
     const location = await this._getPackage(dir, registryData)
-    if (!location) return request.markSkip('Missing  ')
+    if (!location) {
+      return request.markSkip('Missing  ')
+    }
 
     const fetchResult = new FetchResult(spec.toUrl())
     fetchResult.document = {
@@ -64,7 +70,9 @@ class PodFetch extends AbstractFetch {
         json: true
       })
     } catch (exception) {
-      if (exception.statusCode !== 404) throw exception
+      if (exception.statusCode !== 404) {
+        throw exception
+      }
       return null
     }
 

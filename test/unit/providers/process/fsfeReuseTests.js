@@ -120,7 +120,9 @@ describe('FSFE REUSE software process', () => {
     }
     const fsStub = {
       readdirSync: () => {
-        if (resultBox.licensesDirError) throw resultBox.licensesDirError
+        if (resultBox.licensesDirError) {
+          throw resultBox.licensesDirError
+        }
         return resultBox.licensesDirectory
       }
     }

@@ -22,8 +22,11 @@ class QueueSet {
   }
 
   addQueue(queue, location = 'beginning') {
-    if (location === 'beginning') this.queues.unshift(queue)
-    else this.queues.push(queue)
+    if (location === 'beginning') {
+      this.queues.unshift(queue)
+    } else {
+      this.queues.push(queue)
+    }
     this._configureQueues()
   }
 

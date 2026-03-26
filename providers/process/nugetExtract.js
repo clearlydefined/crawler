@@ -58,7 +58,9 @@ class NuGetExtract extends AbstractClearlyDefinedProcessor {
     // setup the manifest to be the new document for the request
     request.document = merge(this.clone(request.document), { manifest, registryData })
     // Add interesting info
-    if (registryData?.published) request.document.releaseDate = new Date(registryData.published).toISOString()
+    if (registryData?.published) {
+      request.document.releaseDate = new Date(registryData.published).toISOString()
+    }
     // Add source info
     const nuspec = await this._getNuspec(originalDocument.metadataLocation.nuspec)
     // Improve source location lookup by checking the latest version:
@@ -67,7 +69,9 @@ class NuGetExtract extends AbstractClearlyDefinedProcessor {
       latestNuspec = await this._getNuspec(originalDocument.metadataLocation.latestNuspec)
     }
     const sourceInfo = await this._discoverSource(manifest, nuspec, latestNuspec)
-    if (sourceInfo) request.document.sourceInfo = sourceInfo
+    if (sourceInfo) {
+      request.document.sourceInfo = sourceInfo
+    }
   }
 
   async _discoverSource(manifest, nuspec, latestNuspec) {
@@ -83,10 +87,18 @@ class NuGetExtract extends AbstractClearlyDefinedProcessor {
 
   _discoverCandidateSourceLocations(manifest) {
     const candidateUrls = []
-    if (!manifest) return candidateUrls
-    if (manifest.repository?.url) candidateUrls.push(manifest.repository.url)
-    if (manifest.projectUrl) candidateUrls.push(manifest.projectUrl)
-    if (manifest.licenseUrl) candidateUrls.push(manifest.licenseUrl)
+    if (!manifest) {
+      return candidateUrls
+    }
+    if (manifest.repository?.url) {
+      candidateUrls.push(manifest.repository.url)
+    }
+    if (manifest.projectUrl) {
+      candidateUrls.push(manifest.projectUrl)
+    }
+    if (manifest.licenseUrl) {
+      candidateUrls.push(manifest.licenseUrl)
+    }
     return candidateUrls
   }
 }

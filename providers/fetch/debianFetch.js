@@ -46,16 +46,26 @@ class DebianFetch extends AbstractFetch {
 
   async handle(request) {
     const spec = this.toSpec(request)
-    if (!spec.revision) spec.revision = await this._getLatestVersion(spec)
-    if (!spec.revision) return request.markSkip('Missing  ')
+    if (!spec.revision) {
+      spec.revision = await this._getLatestVersion(spec)
+    }
+    if (!spec.revision) {
+      return request.markSkip('Missing  ')
+    }
     const registryData = await this._getRegistryData(spec)
-    if (registryData.length === 0) return this.markSkip(request)
+    if (registryData.length === 0) {
+      return this.markSkip(request)
+    }
     const isArchitceturePresent = this._ensureArchitecturePresenceForBinary(spec, registryData)
-    if (!isArchitceturePresent) return request.markSkip('Missing architecture  ')
+    if (!isArchitceturePresent) {
+      return request.markSkip('Missing architecture  ')
+    }
     request.url = spec.toUrl()
     super.handle(request)
     const { binary, source, patches } = this._getDownloadUrls(spec, registryData)
-    if (!binary && !source) return request.markSkip('Missing  ')
+    if (!binary && !source) {
+      return request.markSkip('Missing  ')
+    }
     const { dir, releaseDate, hashes } = await this._getPackage(request, binary, source, patches)
     const copyrightUrl = this._getCopyrightUrl(registryData)
     const declaredLicenses = await this._getDeclaredLicenses(copyrightUrl)
@@ -159,7 +169,9 @@ class DebianFetch extends AbstractFetch {
     const { architecture } = this._fromSpec(spec)
     if (spec.type === 'deb' && !architecture) {
       const randomBinaryArchitecture = registryData.find(entry => entry.Architecture)?.Architecture
-      if (!randomBinaryArchitecture) return false
+      if (!randomBinaryArchitecture) {
+        return false
+      }
       spec.revision += `_${randomBinaryArchitecture}`
     }
     return true
@@ -190,10 +202,12 @@ class DebianFetch extends AbstractFetch {
     let releaseDate = null
     if (binary) {
       // The decompressed folder should contain control.tar.xz, data.tar.xz, debian-binary. The package is in data.tar.xz
-      if (await exists(path.join(dir.name, 'data.tar.xz')))
+      if (await exists(path.join(dir.name, 'data.tar.xz'))) {
         await this.decompress(path.join(dir.name, 'data.tar.xz'), path.join(dir.name, 'data'))
-      if (await exists(path.join(dir.name, 'data')))
+      }
+      if (await exists(path.join(dir.name, 'data'))) {
         releaseDate = await this._getLatestFileDateFromDirectory(path.join(dir.name, 'data'))
+      }
     }
     if (source && patches) {
       const sourceDirectoryName = await this._getSourceDirectoryName(dir.name)
@@ -210,7 +224,9 @@ class DebianFetch extends AbstractFetch {
 
   async _download(downloadUrl, destination) {
     const response = await getStream(downloadUrl)
-    if (response.statusCode !== 200) throw new Error(`${response.statusCode} ${response.message}`)
+    if (response.statusCode !== 200) {
+      throw new Error(`${response.statusCode} ${response.message}`)
+    }
     return new Promise((resolve, reject) => {
       const dom = domain.create()
       dom.on('error', error => reject(error))
@@ -257,8 +273,12 @@ class DebianFetch extends AbstractFetch {
 
   async _getFiles(location) {
     const locationStat = await lstat(location)
-    if (locationStat.isSymbolicLink()) return []
-    if (!locationStat.isDirectory()) return [location]
+    if (locationStat.isSymbolicLink()) {
+      return []
+    }
+    if (!locationStat.isDirectory()) {
+      return [location]
+    }
     const subdirs = await readdir(location)
     const files = await Promise.all(
       subdirs.map(subdir => {
@@ -295,7 +315,9 @@ class DebianFetch extends AbstractFetch {
 
   _getCopyrightUrl(registryData) {
     const entry = registryData.find(entry => entry.Source)
-    if (!entry) return null
+    if (!entry) {
+      return null
+    }
     // Example: ./pool/main/0/0ad/0ad_0.0.17-1.debian.tar.xz -> main/0
     const pathFragment = entry.Path.replace('./pool/', '').split('/').slice(0, 2).join('/')
     const name = entry.Source
@@ -305,12 +327,16 @@ class DebianFetch extends AbstractFetch {
   }
 
   async _getDeclaredLicenses(copyrightUrl) {
-    if (!copyrightUrl) return []
+    if (!copyrightUrl) {
+      return []
+    }
     try {
       const response = await requestPromise({ url: copyrightUrl, json: false })
       return this._parseDeclaredLicenses(response)
     } catch (error) {
-      if (error.statusCode === 404) return []
+      if (error.statusCode === 404) {
+        return []
+      }
       throw error
     }
   }
@@ -324,8 +350,12 @@ class DebianFetch extends AbstractFetch {
       .filter(line => line.startsWith('License: '))
       .map(line => line.replace('License:', '').trim())
       .map(licenseId => {
-        if (licenseId.includes('CPL') && !licenseId.includes('RSCPL')) licenseId = licenseId.replace('CPL', 'CPL-1.0')
-        if (licenseId.toLowerCase().includes('expat')) licenseId = licenseId.replace(/expat/i, 'MIT')
+        if (licenseId.includes('CPL') && !licenseId.includes('RSCPL')) {
+          licenseId = licenseId.replace('CPL', 'CPL-1.0')
+        }
+        if (licenseId.toLowerCase().includes('expat')) {
+          licenseId = licenseId.replace(/expat/i, 'MIT')
+        }
         return licenseId
       })
     // Over-simplified parsing of edge cases:

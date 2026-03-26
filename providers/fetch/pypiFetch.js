@@ -21,13 +21,17 @@ class PyPiFetch extends AbstractFetch {
   async handle(request) {
     const spec = this.toSpec(request)
     const registryData = await this._getRegistryData(spec)
-    if (!registryData) return request.markSkip('Missing  ')
+    if (!registryData) {
+      return request.markSkip('Missing  ')
+    }
     spec.revision = spec.revision ? spec.revision : this._getRevision(registryData)
     request.url = spec.toUrl()
     super.handle(request)
     const file = this.createTempFile(request)
     const downloaded = await this._getPackage(spec, registryData, file.name)
-    if (!downloaded) return request.markSkip('Missing  ')
+    if (!downloaded) {
+      return request.markSkip('Missing  ')
+    }
 
     const dir = this.createTempDir(request)
     await this.decompress(file.name, dir.name)
@@ -48,12 +52,16 @@ class PyPiFetch extends AbstractFetch {
     const { body, statusCode } = await nodeRequest.callFetchWithRetry(`${baseUrl}/pypi/${spec.name}/json`, {
       json: true
     })
-    if (statusCode !== 200 || !body) return null
+    if (statusCode !== 200 || !body) {
+      return null
+    }
     return body
   }
 
   _getRevision(registryData) {
-    if (!registryData || !registryData.releases) return null
+    if (!registryData || !registryData.releases) {
+      return null
+    }
     return findLastKey(registryData.releases)
   }
 
@@ -68,13 +76,17 @@ class PyPiFetch extends AbstractFetch {
     const release = find(releaseTypes, entry => {
       return entry.url && entry.url.length > 6 && entry.url.slice(-6) === 'tar.gz'
     })
-    if (!release) return
+    if (!release) {
+      return
+    }
     return release.upload_time
   }
 
   _extractLicenseFromClassifiers(registryData) {
     const classifiers = get(registryData, 'info.classifiers')
-    if (!classifiers) return null
+    if (!classifiers) {
+      return null
+    }
     for (const classifier in classifiers) {
       if (classifiers[classifier].includes('License :: OSI Approved ::')) {
         const lastColon = classifiers[classifier].lastIndexOf(':')
@@ -91,19 +103,27 @@ class PyPiFetch extends AbstractFetch {
     const hasVersionInClassifier = /\d+/.test(licenseInClassifiers)
 
     let licenses = [licenseInMetadata, licenseInClassifiers]
-    if (hasVersionInClassifier && !hasVersionInMeta) licenses = [licenseInClassifiers, licenseInMetadata]
+    if (hasVersionInClassifier && !hasVersionInMeta) {
+      licenses = [licenseInClassifiers, licenseInMetadata]
+    }
     for (const rawLicense of licenses) {
       const parsed = rawLicense && spdxCorrect(rawLicense)
-      if (parsed) return parsed
+      if (parsed) {
+        return parsed
+      }
     }
   }
 
   async _getPackage(spec, registryData, destination) {
     const releaseTypes = get(registryData, ['releases', spec.revision])
     const release = find(releaseTypes, entry => entry.url?.endsWith('tar.gz') || entry.url?.endsWith('zip'))
-    if (!release) return false
+    if (!release) {
+      return false
+    }
     const response = await nodeRequest.getStream(release.url)
-    if (response.statusCode !== 200) throw new Error(`${response.statusCode} ${response.message}`)
+    if (response.statusCode !== 200) {
+      throw new Error(`${response.statusCode} ${response.message}`)
+    }
     return new Promise(resolve => {
       response.data.pipe(fs.createWriteStream(destination)).on('finish', () => resolve(true))
     })

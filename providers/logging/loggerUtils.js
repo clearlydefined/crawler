@@ -7,7 +7,9 @@ const OMITTED_RESPONSE = '[response omitted]'
 const SENSITIVE_HEADERS = new Set(['authorization', 'proxy-authorization', 'cookie', 'set-cookie', 'x-api-key'])
 
 function sanitizeHeaders(headers) {
-  if (!headers || typeof headers !== 'object') return headers
+  if (!headers || typeof headers !== 'object') {
+    return headers
+  }
   return Object.keys(headers).reduce((result, key) => {
     const lowerKey = key.toLowerCase()
     result[key] = SENSITIVE_HEADERS.has(lowerKey) ? REDACTED : headers[key]
@@ -16,7 +18,9 @@ function sanitizeHeaders(headers) {
 }
 
 function summarizeRequest(request) {
-  if (!request || typeof request !== 'object') return request
+  if (!request || typeof request !== 'object') {
+    return request
+  }
   // Only non-sensitive IDs are extracted – no need to sanitize headers here
   const headers = request.headers
   return {
@@ -28,7 +32,9 @@ function summarizeRequest(request) {
 }
 
 function summarizeResponse(response) {
-  if (!response || typeof response !== 'object') return response
+  if (!response || typeof response !== 'object') {
+    return response
+  }
   return {
     statusCode: response.statusCode,
     statusMessage: response.statusMessage
@@ -36,7 +42,9 @@ function summarizeResponse(response) {
 }
 
 function sanitizeAxiosConfig(config) {
-  if (!config || typeof config !== 'object') return config
+  if (!config || typeof config !== 'object') {
+    return config
+  }
   return {
     method: config.method,
     url: config.url,
@@ -46,7 +54,9 @@ function sanitizeAxiosConfig(config) {
 }
 
 function sanitizeMeta(meta) {
-  if (!meta || typeof meta !== 'object') return meta
+  if (!meta || typeof meta !== 'object') {
+    return meta
+  }
   const sanitized = {}
   Object.keys(meta).forEach(key => {
     const value = meta[key]

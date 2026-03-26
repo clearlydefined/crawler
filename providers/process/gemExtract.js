@@ -35,7 +35,9 @@ class GemExtract extends AbstractClearlyDefinedProcessor {
   }
 
   async _discoverSource(version, registryData) {
-    if (!registryData) return null
+    if (!registryData) {
+      return null
+    }
     const candidates = []
     candidates.push(get(registryData, 'bug_tracker_uri'))
     candidates.push(get(registryData, 'changelog_uri'))
@@ -51,7 +53,9 @@ class GemExtract extends AbstractClearlyDefinedProcessor {
   async _createDocument(request, registryData) {
     request.document = merge(this.clone(request.document), { registryData })
     const sourceInfo = await this._discoverSource(this.toSpec(request).revision, registryData)
-    if (sourceInfo) request.document.sourceInfo = sourceInfo
+    if (sourceInfo) {
+      request.document.sourceInfo = sourceInfo
+    }
   }
 }
 

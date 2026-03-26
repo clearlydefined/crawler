@@ -20,7 +20,9 @@ class NpmFetch extends AbstractFetch {
   async handle(request) {
     const spec = this.toSpec(request)
     const registryData = await this._getRegistryData(spec)
-    if (!registryData) return this.markSkip(request)
+    if (!registryData) {
+      return this.markSkip(request)
+    }
     spec.revision = registryData.manifest.version
     // rewrite the request URL as it is used throughout the system to derive locations and urns etc.
     request.url = spec.toUrl()
@@ -34,14 +36,18 @@ class NpmFetch extends AbstractFetch {
     const fetchResult = new FetchResult(request.url)
     fetchResult.document = this._createDocument(dir, registryData, hashes)
     const casedSpec = this._getCasedSpec(spec, registryData)
-    if (casedSpec) fetchResult.casedSpec = casedSpec
+    if (casedSpec) {
+      fetchResult.casedSpec = casedSpec
+    }
     request.fetchResult = fetchResult.adoptCleanup(dir, request)
     return request
   }
 
   async _getPackage(spec, destination) {
     const response = await getStream(this._buildUrl(spec))
-    if (response.statusCode !== 200) throw new Error(`${response.statusCode} ${response.message}`)
+    if (response.statusCode !== 200) {
+      throw new Error(`${response.statusCode} ${response.message}`)
+    }
     await new Promise(resolve => {
       response.data.pipe(fs.createWriteStream(destination)).on('finish', () => resolve(null))
     })
@@ -53,7 +59,9 @@ class NpmFetch extends AbstractFetch {
     // Per https://github.com/npm/registry/issues/45 we should retrieve the whole package and get the version we want from that.
     // The version-specific API (e.g. append /x.y.z to URL) does NOT work for scoped packages.
     const baseUrl = providerMap[spec.provider]
-    if (!baseUrl) return null
+    if (!baseUrl) {
+      return null
+    }
     const fullName = `${spec.namespace ? `${spec.namespace}/` : ''}${spec.name}`
     let registryData
     try {
@@ -62,12 +70,18 @@ class NpmFetch extends AbstractFetch {
         json: true
       })
     } catch (exception) {
-      if (exception.statusCode !== 404) throw exception
+      if (exception.statusCode !== 404) {
+        throw exception
+      }
       return null
     }
-    if (!registryData || !registryData.versions) return null
+    if (!registryData || !registryData.versions) {
+      return null
+    }
     const version = spec.revision || this.getLatestVersion(Object.keys(registryData.versions))
-    if (!registryData.versions[version]) return null
+    if (!registryData.versions[version]) {
+      return null
+    }
     const date = registryData.time ? registryData.time[version] : undefined
     const registryManifest = registryData.versions[version]
     registryData.versions = undefined
@@ -88,7 +102,9 @@ class NpmFetch extends AbstractFetch {
   }
 
   _getCasedSpec(spec, registryData) {
-    if (!registryData || !registryData.name) return false
+    if (!registryData || !registryData.name) {
+      return false
+    }
     const parts = registryData.name.split('/')
     const casedSpec = clone(spec)
     switch (parts.length) {

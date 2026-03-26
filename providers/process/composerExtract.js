@@ -34,8 +34,11 @@ class ComposerExtract extends AbstractClearlyDefinedProcessor {
       const manifestLocation = this._getManifestLocation(location, dirRoot)
       const manifest = manifestLocation ? JSON.parse(fs.readFileSync(path.join(location, manifestLocation))) : null
       await this._createDocument(request, manifest, request.document.registryData)
-      if (manifest) await this.attachFiles(request.document, [manifestLocation], location)
-      else this.logger.info('PHP package without composer.json', { url: request.url })
+      if (manifest) {
+        await this.attachFiles(request.document, [manifestLocation], location)
+      } else {
+        this.logger.info('PHP package without composer.json', { url: request.url })
+      }
     }
     this.addLocalToolTasks(request)
     if (request.document.sourceInfo) {
@@ -46,20 +49,29 @@ class ComposerExtract extends AbstractClearlyDefinedProcessor {
   }
 
   _getManifestLocation(dir, dirRoot) {
-    if (fs.existsSync(path.join(dir, `${dirRoot}/composer.json`))) return `${dirRoot}/composer.json`
-    if (fs.existsSync(path.join(dir, 'composer.json'))) return 'composer.json'
+    if (fs.existsSync(path.join(dir, `${dirRoot}/composer.json`))) {
+      return `${dirRoot}/composer.json`
+    }
+    if (fs.existsSync(path.join(dir, 'composer.json'))) {
+      return 'composer.json'
+    }
     return null
   }
 
   _discoverCandidateSourceLocations(manifest) {
     const candidateUrls = []
-    if (!manifest) return candidateUrls
+    if (!manifest) {
+      return candidateUrls
+    }
     candidateUrls.push(get(manifest, 'source.url'))
     candidateUrls.push(get(manifest, 'dist.url'))
     candidateUrls.push(get(manifest, 'homepage'))
     if (manifest.bugs) {
-      if (typeof manifest.bugs === 'string' && manifest.bugs.startsWith('http')) candidateUrls.push(manifest.bugs)
-      else candidateUrls.push(manifest.bugs.url)
+      if (typeof manifest.bugs === 'string' && manifest.bugs.startsWith('http')) {
+        candidateUrls.push(manifest.bugs)
+      } else {
+        candidateUrls.push(manifest.bugs.url)
+      }
     }
     return candidateUrls.filter(e => e)
   }
@@ -80,7 +92,9 @@ class ComposerExtract extends AbstractClearlyDefinedProcessor {
     // setup the manifest to be the new document for the request
     request.document = merge(this.clone(request.document), { 'composer.json': manifest, registryData })
     const sourceInfo = await this._discoverSource(manifest, registryData.manifest)
-    if (sourceInfo) request.document.sourceInfo = sourceInfo
+    if (sourceInfo) {
+      request.document.sourceInfo = sourceInfo
+    }
   }
 }
 

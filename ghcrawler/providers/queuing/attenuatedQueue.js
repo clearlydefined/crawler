@@ -16,7 +16,9 @@ class AttenuatedQueue extends NestedQueue {
     return super.done(request).then(() => {
       const key = this._getCacheKey(request)
       const deleted = memoryCache.del(key)
-      if (deleted) this.logger.verbose(`Deleted ${key}`)
+      if (deleted) {
+        this.logger.verbose(`Deleted ${key}`)
+      }
     })
   }
 
