@@ -5,12 +5,12 @@ const config = require('painless-config')
 const defaults = require(config.get('CRAWLER_OPTIONS') || './config/cdConfig')
 const run = require('./ghcrawler').run
 const www = require('./ghcrawler/bin/www')
-const createInsightsContext = require('./providers/logging/insightsConfig')
+const createInsights = require('./providers/logging/insightsConfig')
 const createLogger = require('./providers/logging/logger')
 const searchPath = [require('./providers')]
 const maps = require('./config/map')
-const { aiClient, echo } = createInsightsContext(config)
-const logger = createLogger({ aiClient, echo })
+const aiClient = createInsights(config)
+const logger = createLogger({ aiClient })
 
 const service = run(defaults, logger, searchPath, maps)
 const { server, port } = www(service, logger)

@@ -1,10 +1,10 @@
-// Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
+// (c) Copyright 2026, SAP SE and ClearlyDefined contributors. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
 const uuid = require('node-uuid')
 const Insights = require('./insights')
 
-function createInsightsContext(config) {
+function createInsights(config) {
   const tattoos = {
     crawlerId: config.get('CRAWLER_ID') || uuid.v4(),
     crawlerHost: config.get('CRAWLER_HOST'),
@@ -18,9 +18,7 @@ function createInsightsContext(config) {
       .trim()
       .toLowerCase() === 'true'
 
-  const aiClient = Insights.create(tattoos, connectionString, echo)
-
-  return { aiClient, echo }
+  return Insights.create(tattoos, connectionString, echo)
 }
 
-module.exports = createInsightsContext
+module.exports = createInsights

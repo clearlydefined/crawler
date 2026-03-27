@@ -17,7 +17,7 @@ describe('logger', function () {
   beforeEach(() => {
     trackTrace = sinon.stub()
     trackException = sinon.stub()
-    aiClient = { trackTrace, trackException }
+    aiClient = { trackTrace, trackException, echo: false }
     clock = sinon.useFakeTimers({ toFake: ['setImmediate', 'setTimeout'] })
   })
 
@@ -26,7 +26,7 @@ describe('logger', function () {
   })
 
   it('does not forward debug or verbose when logger level is info', () => {
-    const logger = factory({ aiClient, echo: false })
+    const logger = factory({ aiClient })
     logger.debug('debug should not be sent')
     logger.verbose('verbose should not be sent')
     logger.info('info should be sent')
@@ -39,7 +39,7 @@ describe('logger', function () {
   })
 
   it('forwards errors to exception telemetry when stack is present', () => {
-    const logger = factory({ aiClient, echo: false })
+    const logger = factory({ aiClient })
     logger.log({
       level: 'error',
       message: 'boom',
@@ -54,7 +54,7 @@ describe('logger', function () {
   })
 
   it('forwards errors to trace telemetry with Error severity when no stack is present', () => {
-    const logger = factory({ aiClient, echo: false })
+    const logger = factory({ aiClient })
     logger.error('plain error without stack')
     clock.runAll()
 
