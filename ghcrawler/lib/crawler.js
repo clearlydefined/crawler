@@ -637,7 +637,8 @@ class Crawler {
 
   _createDeadletter(request, reason) {
     const deadDocument = request.createRequeuable()
-    const metadata = (deadDocument._metadata = {})
+    deadDocument._metadata = {}
+    const metadata = deadDocument._metadata
     if (request._error) {
       metadata.errorMessage = request._error.message
       metadata.errorStack = request._error.stack

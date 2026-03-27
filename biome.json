@@ -29,7 +29,6 @@
     "rules": {
       "recommended": true,
       "suspicious": {
-        "noAssignInExpressions": "off",
         "noExplicitAny": "off",
         "noConsole": { "level": "off", "options": { "allow": ["log"] } },
         "noVar": "off",

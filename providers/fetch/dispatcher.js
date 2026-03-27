@@ -81,10 +81,10 @@ class FetchDispatcher extends AbstractFetch {
   }
 
   _fetchPromise(handler, request, cacheKey) {
-    return (
-      this.inProgressFetches[cacheKey] ||
-      (this.inProgressFetches[cacheKey] = this._createFetchPromise(handler, request, cacheKey))
-    )
+    if (!this.inProgressFetches[cacheKey]) {
+      this.inProgressFetches[cacheKey] = this._createFetchPromise(handler, request, cacheKey)
+    }
+    return this.inProgressFetches[cacheKey]
   }
 
   _createFetchPromise(handler, request, cacheKey) {
