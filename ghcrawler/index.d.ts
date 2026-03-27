@@ -20,11 +20,11 @@ export {
   TraversalPolicy as traversalPolicy,
   VisitorMap as visitorMap
 }
-export const providers: Record<string, Record<string, (...args: unknown[]) => unknown>>
+export declare const providers: Record<string, Record<string, (...args: unknown[]) => unknown>>
 
 export function run(
   defaults: Record<string, unknown>,
   logger: CrawlerOptions['logger'],
   searchPath: Record<string, Record<string, (...args: unknown[]) => unknown>>[],
   maps: Record<string, unknown>
-): void
+): CrawlerService
