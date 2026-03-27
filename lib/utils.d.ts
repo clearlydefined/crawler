@@ -11,3 +11,4 @@ export function trimAllParents(paths: string[], parents: string): string[]
 export function isGitFile(file: string): boolean
 export function extractDate(dateAndTime: string, formats?: string[]): DateTime | null
 export function spawnPromisified(command: string, args: string[], options?: SpawnOptions): Promise<string>
+export function withTimeout(operation: () => Promise<void>, timeoutMs: number): Promise<void>

@@ -3,6 +3,7 @@
 
 const chai = require('chai')
 const chaiAsPromised = require('chai-as-promised').default
+const sinon = require('sinon')
 const {
   normalizePath,
   normalizePaths,
@@ -10,7 +11,8 @@ const {
   trimAllParents,
   extractDate,
   spawnPromisified,
-  isGitFile
+  isGitFile,
+  withTimeout
 } = require('../../../lib/utils')
 const { promisify } = require('node:util')
 const execFile = promisify(require('node:child_process').execFile)
@@ -151,3 +153,50 @@ async function getError(promise) {
     return error
   }
 }
+
+describe('withTimeout', () => {
+  let clock
+
+  afterEach(() => {
+    if (clock) {
+      clock.restore()
+      clock = null
+    }
+  })
+
+  it('resolves when operation completes before timeout', async () => {
+    const operation = sinon.stub().resolves()
+    await withTimeout(operation, 1000)
+    expect(operation.calledOnce).to.equal(true)
+  })
+
+  it('clears timer after successful completion', async () => {
+    clock = sinon.useFakeTimers()
+    const operation = sinon.stub().resolves()
+    await withTimeout(operation, 5000)
+    expect(clock.countTimers()).to.equal(0)
+  })
+
+  it('rejects with timeout error when operation exceeds timeout', async () => {
+    clock = sinon.useFakeTimers()
+    const operation = () => new Promise(() => {}) // never resolves
+    const promise = withTimeout(operation, 100)
+    clock.tick(100)
+    try {
+      await promise
+      expect.fail('should have rejected')
+    } catch (err) {
+      expect(err.message).to.equal('Operation timed out after 100ms')
+    }
+  })
+
+  it('propagates operation errors', async () => {
+    const operation = sinon.stub().rejects(new Error('operation failed'))
+    try {
+      await withTimeout(operation, 1000)
+      expect.fail('should have rejected')
+    } catch (err) {
+      expect(err.message).to.equal('operation failed')
+    }
+  })
+})
