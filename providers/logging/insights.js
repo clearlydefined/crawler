@@ -5,14 +5,6 @@ const appInsights = require('applicationinsights')
 const safeStringify = require('safe-stable-stringify')
 
 /**
- * Module-level client reference. In applicationinsights 3.x, defaultClient is read-only,
- * so we maintain our own reference to the configured client.
- *
- * @type {Insights | import('applicationinsights').TelemetryClient | null}
- */
-let _client = null
-
-/**
  * Mapping from KnownSeverityLevel string values to single-character abbreviations for console output.
  * In applicationinsights 3.x, severity is a string ('Verbose', 'Information', 'Warning', 'Error', 'Critical')
  * instead of a numeric enum.
@@ -32,23 +24,9 @@ class Insights {
     this.echo = echo
   }
 
-  /**
-   * Gets the configured telemetry client. Returns the module-level client that was set up
-   * via the setup() method.
-   *
-   * @returns {Insights | import('applicationinsights').TelemetryClient | null} The configured client or null if not set up
-   */
-  static getClient() {
-    return _client
-  }
-
-  static setup(tattoos, connectionString = 'mock', echo = true) {
-    // exit if we are already setup
-    if (_client instanceof Insights) {
-      return
-    }
+  static create(tattoos, connectionString = 'mock', echo = true) {
     if (!connectionString || connectionString === 'mock') {
-      _client = new Insights(tattoos, null, echo)
+      return new Insights(tattoos, null, echo)
     } else {
       appInsights
         .setup(connectionString)
@@ -58,7 +36,7 @@ class Insights {
         // to avoid duplicate traces with a reduced customProperties envelope.
         .setAutoCollectConsole(false, false)
         .start()
-      _client = new Insights(tattoos, appInsights.defaultClient, echo)
+      return new Insights(tattoos, appInsights.defaultClient, echo)
     }
   }
 
