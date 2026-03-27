@@ -70,12 +70,11 @@ class Insights {
     }
   }
 
-  flush() {
+  async flush() {
     if (!this.client || typeof this.client.flush !== 'function') {
-      return Promise.resolve()
+      return
     }
-
-    return this.client.flush()
+    await this.client.flush()
   }
 
   tattoo(telemetry) {

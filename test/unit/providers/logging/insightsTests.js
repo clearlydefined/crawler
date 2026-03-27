@@ -27,9 +27,14 @@ describe('insights flush', () => {
     expect(client.flush.calledOnce).to.equal(true)
   })
 
-  it('throws when underlying flush throws', () => {
-    client.flush.throws(new Error('flush failed'))
-    expect(() => insights.flush()).to.throw('flush failed')
+  it('rejects when client flush rejects', async () => {
+    client.flush.rejects(new Error('flush rejected'))
+    try {
+      await insights.flush()
+      expect.fail('should have rejected')
+    } catch (err) {
+      expect(err.message).to.equal('flush rejected')
+    }
     expect(client.flush.calledOnce).to.equal(true)
   })
 })
