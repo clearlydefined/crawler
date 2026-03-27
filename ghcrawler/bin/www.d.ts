@@ -6,8 +6,8 @@ import type { Server } from 'node:http'
 import type { Logger } from '../lib/request'
 
 declare function run(
-	service: CrawlerService | undefined,
-	logger: Logger
+  service: CrawlerService | undefined,
+  logger: Logger
 ): { server: Server; port: number | string | false | null }
 
 export = run

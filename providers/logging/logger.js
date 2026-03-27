@@ -83,7 +83,6 @@ const sanitizeFormat = winston.format(info => {
 })
 
 function factory({ aiClient, echo = false, level = 'info' } = {}) {
-
   const logFormat = winston.format.combine(sanitizeFormat(), winston.format.errors({ stack: true }))
 
   const consoleFormat = winston.format.combine(
