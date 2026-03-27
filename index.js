@@ -16,6 +16,7 @@ const service = run(defaults, logger, searchPath, maps)
 const { server, port } = www(service, logger)
 
 let shuttingDown = false
+const SHUTDOWN_TIMEOUT_MS = 5000
 
 server.on('error', onError)
 
@@ -53,8 +54,7 @@ async function onShutdown(signal) {
   console.log(`Received ${signal}`)
 
   try {
-    await closeServer(server)
-    await service.stop()
+    await withTimeout(performShutdownCleanup, SHUTDOWN_TIMEOUT_MS)
     console.log('Server closed.')
     process.exit(0)
   } catch (error) {
@@ -63,8 +63,34 @@ async function onShutdown(signal) {
   }
 }
 
-function closeServer(httpServer) {
-  return new Promise((resolve, reject) => {
+async function withTimeout(operation, timeoutMs) {
+  let timer
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => {
+      reject(new Error(`Shutdown timed out after ${timeoutMs}ms`))
+    }, timeoutMs)
+  })
+
+  try {
+    await Promise.race([Promise.resolve().then(operation), timeout])
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+async function performShutdownCleanup() {
+  await closeServer(server)
+  await service.stop()
+  try {
+    await aiClient.flush()
+  } catch (error) {
+    // Best effort to flush any remaining insights, but don't let it block shutdown.
+    console.error(`Flushing insights: ${error}`)
+  }
+}
+
+async function closeServer(httpServer) {
+  await new Promise((resolve, reject) => {
     httpServer.close(error => {
       if (error && error.code !== 'ERR_SERVER_NOT_RUNNING') {
         reject(error)
