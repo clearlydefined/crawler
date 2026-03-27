@@ -7,8 +7,12 @@ const run = require('./ghcrawler').run
 const www = require('./ghcrawler/bin/www')
 const createInsights = require('./providers/logging/insightsConfig')
 const createLogger = require('./providers/logging/logger')
+const { withTimeout } = require('./lib/utils')
 const searchPath = [require('./providers')]
 const maps = require('./config/map')
+
+const SHUTDOWN_TIMEOUT_MS = 5000
+
 const aiClient = createInsights(config)
 const logger = createLogger({ aiClient })
 
@@ -16,7 +20,6 @@ const service = run(defaults, logger, searchPath, maps)
 const { server, port } = www(service, logger)
 
 let shuttingDown = false
-const SHUTDOWN_TIMEOUT_MS = 5000
 
 server.on('error', onError)
 
@@ -60,21 +63,6 @@ async function onShutdown(signal) {
   } catch (error) {
     console.error(`Closing server: ${error}`)
     process.exit(1)
-  }
-}
-
-async function withTimeout(operation, timeoutMs) {
-  let timer
-  const timeout = new Promise((_, reject) => {
-    timer = setTimeout(() => {
-      reject(new Error(`Shutdown timed out after ${timeoutMs}ms`))
-    }, timeoutMs)
-  })
-
-  try {
-    await Promise.race([Promise.resolve().then(operation), timeout])
-  } finally {
-    clearTimeout(timer)
   }
 }
 
