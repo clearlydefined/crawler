@@ -13,6 +13,7 @@ declare class Insights {
 
   trackException(exceptionTelemetry: { exception: Error; properties?: Record<string, string> }): void
   trackTrace(traceTelemetry: { message: string; severity: string; properties?: Record<string, string> }): void
+  flush(): Promise<void>
   tattoo(telemetry: { properties?: Record<string, string> }): void
 }
 

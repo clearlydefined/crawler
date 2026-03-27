@@ -70,6 +70,14 @@ class Insights {
     }
   }
 
+  flush() {
+    if (!this.client || typeof this.client.flush !== 'function') {
+      return Promise.resolve()
+    }
+
+    return this.client.flush()
+  }
+
   tattoo(telemetry) {
     telemetry.properties = { ...(telemetry.properties || {}), ...this.tattoos }
   }
