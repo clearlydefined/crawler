@@ -5,7 +5,6 @@ const appFactory = require('../app')
 const config = require('painless-config')
 const http = require('node:http')
 const init = require('express-init')
-const CrawlerFactory = require('../crawlerFactory')
 
 function run(service, logger) {
   /**
@@ -14,11 +13,6 @@ function run(service, logger) {
   let port = normalizePort(config.get('CRAWLER_SERVICE_PORT') || process.env.PORT || '5000')
   port = port === 'random' ? null : port
 
-  if (!service) {
-    // Create a default service. Seems unlikely that it will do much but could be fun
-    const defaults = config.get('CRAWLER_OPTIONS') || './memoryConfig'
-    service = CrawlerFactory.createService(require(defaults), logger)
-  }
   const app = appFactory(service, logger)
   app.set('port', port)
 
