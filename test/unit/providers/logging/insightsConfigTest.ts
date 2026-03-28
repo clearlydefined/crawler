@@ -1,13 +1,23 @@
 // (c) Copyright 2026, SAP SE and ClearlyDefined contributors. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const { expect } = require('chai')
-const sinon = require('sinon')
-const Insights = require('../../../../providers/logging/insights')
-const createInsights = require('../../../../providers/logging/insightsConfig')
+/// <reference types="mocha" />
+
+import { expect } from 'chai'
+import sinon, { type SinonStub } from 'sinon'
+import Insights from '../../../../providers/logging/insights.js'
+import createInsights from '../../../../providers/logging/insightsConfig.js'
+
+type ConfigValues = {
+  CRAWLER_ID?: string
+  CRAWLER_HOST?: string
+  APP_VERSION?: string
+  CRAWLER_INSIGHTS_CONNECTION_STRING?: string
+  CRAWLER_ECHO?: string | null
+}
 
 describe('createInsights', () => {
-  let createStub
+  let createStub: SinonStub
 
   beforeEach(() => {
     createStub = sinon.stub(Insights, 'create').returns(new Insights({}, null, false))
@@ -17,8 +27,8 @@ describe('createInsights', () => {
     createStub.restore()
   })
 
-  function makeConfig(overrides = {}) {
-    const values = {
+  function makeConfig(overrides: Partial<ConfigValues> = {}) {
+    const values: ConfigValues = {
       CRAWLER_ID: 'test-id',
       CRAWLER_HOST: 'test-host',
       APP_VERSION: '1.0.0',
@@ -26,7 +36,7 @@ describe('createInsights', () => {
       CRAWLER_ECHO: 'false',
       ...overrides
     }
-    return { get: key => values[key] }
+    return { get: (key: string) => values[key as keyof ConfigValues] }
   }
 
   it('passes tattoos with config values to Insights.create', () => {
@@ -83,7 +93,7 @@ describe('createInsights', () => {
   })
 
   it('returns the Insights instance from Insights.create', () => {
-    const expected = new Insights({}, null, false)
+    const expected: InstanceType<typeof Insights> = new Insights({}, null, false)
     createStub.returns(expected)
     const result = createInsights(makeConfig())
     expect(result).to.equal(expected)
