@@ -5,7 +5,6 @@ const appFactory = require('../app')
 const config = require('painless-config')
 const http = require('node:http')
 const init = require('express-init')
-const CrawlerFactory = require('../crawlerFactory')
 
 function run(service, logger) {
   /**
@@ -14,11 +13,6 @@ function run(service, logger) {
   let port = normalizePort(config.get('CRAWLER_SERVICE_PORT') || process.env.PORT || '5000')
   port = port === 'random' ? null : port
 
-  if (!service) {
-    // Create a default service. Seems unlikely that it will do much but could be fun
-    const defaults = config.get('CRAWLER_OPTIONS') || './memoryConfig'
-    service = CrawlerFactory.createService(require(defaults), logger)
-  }
   const app = appFactory(service, logger)
   app.set('port', port)
 
@@ -33,13 +27,7 @@ function run(service, logger) {
     server.listen(port)
   })
 
-  server.on('error', onError)
   server.on('listening', onListening)
-  server.on('close', onClose)
-
-  process.on('SIGTERM', onShutdown)
-  process.on('SIGINT', onShutdown)
-  process.on('SIGHUP', onShutdown)
 
   /**
    * Normalize a port into a number, string, or false.
@@ -62,32 +50,6 @@ function run(service, logger) {
   }
 
   /**
-   * Event listener for HTTP server 'error' event.
-   */
-
-  function onError(error) {
-    if (error.syscall !== 'listen') {
-      throw error
-    }
-
-    const bind = typeof port === 'string' ? `Pipe ${port}` : `Port ${port}`
-
-    // handle specific listen errors with friendly messages
-    switch (error.code) {
-      case 'EACCES':
-        console.error(`${bind} requires elevated privileges`)
-        process.exit(1)
-        break
-      case 'EADDRINUSE':
-        console.error(`${bind} is already in use`)
-        process.exit(1)
-        break
-      default:
-        throw error
-    }
-  }
-
-  /**
    * Event listener for HTTP server 'listening' event.
    */
   function onListening() {
@@ -96,29 +58,7 @@ function run(service, logger) {
     console.log(`Crawler service listening on ${bind}`)
   }
 
-  /**
-   * Event listener for HTTP server 'close' event.
-   */
-  function onClose() {
-    service.stop().then(
-      () => {
-        console.log('Server closed.')
-        process.exit(0)
-      },
-      error => {
-        console.error(`Closing server: ${error}`)
-        process.exit(1)
-      }
-    )
-  }
-
-  /**
-   * Event listener for terminal signals
-   */
-  function onShutdown(signal) {
-    console.log(`Received ${signal}`)
-    server.close()
-  }
+  return { server, port }
 }
 
 module.exports = run
