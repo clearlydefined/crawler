@@ -24,7 +24,7 @@ class Insights {
     this.echo = echo
   }
 
-  static create(tattoos, connectionString = 'mock', echo = true) {
+  static create(tattoos, connectionString = 'mock', echo) {
     if (!connectionString || connectionString === 'mock') {
       return new Insights(tattoos, null, echo)
     } else {
@@ -71,7 +71,7 @@ class Insights {
   }
 
   async flush() {
-    if (!this.client || typeof this.client.flush !== 'function') {
+    if (!this.client) {
       return
     }
     await this.client.flush()

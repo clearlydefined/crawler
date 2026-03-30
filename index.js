@@ -11,7 +11,7 @@ const { withTimeout } = require('./lib/utils')
 const searchPath = [require('./providers')]
 const maps = require('./config/map')
 
-const SHUTDOWN_TIMEOUT_MS = 5000
+const shutdownTimeoutMs = defaults.crawler?.shutdownTimeoutMs ?? 60000
 
 const aiClient = createInsights(config)
 const logger = createLogger({ aiClient })
@@ -57,7 +57,7 @@ async function onShutdown(signal) {
   console.log(`Received ${signal}`)
 
   try {
-    await withTimeout(performShutdownCleanup, SHUTDOWN_TIMEOUT_MS)
+    await withTimeout(performShutdownCleanup, shutdownTimeoutMs)
     console.log('Server closed.')
     process.exit(0)
   } catch (error) {

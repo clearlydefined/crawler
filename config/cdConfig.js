@@ -25,8 +25,8 @@ const azqueueVisibilityTimeoutSeconds = Number.parseInt(
   10
 )
 
-function getPositiveNum(configName, defaultValue) {
-  const num = Number(config.get(configName))
+function getPositiveInteger(configName, defaultValue) {
+  const num = Number.parseInt(config.get(configName), 10)
   return num > 0 ? num : defaultValue
 }
 
@@ -35,7 +35,8 @@ module.exports = {
   searchPath: [module],
   crawler: {
     count: 2,
-    maxRequeueAttemptCount
+    maxRequeueAttemptCount,
+    shutdownTimeoutMs: getPositiveInteger('CRAWLER_SHUTDOWN_TIMEOUT_MS', 60000)
   },
   filter: {
     provider: 'filter',
@@ -78,7 +79,7 @@ module.exports = {
     gem: { githubToken },
     go: { githubToken },
     licensee: {
-      processes: getPositiveNum('CRAWLER_LICENSEE_PARALLELISM', 10)
+      processes: getPositiveInteger('CRAWLER_LICENSEE_PARALLELISM', 10)
     },
     maven: { githubToken },
     npm: { githubToken },
