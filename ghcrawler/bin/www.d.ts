@@ -5,6 +5,10 @@ import CrawlerService = require('../lib/crawlerService')
 import type { Server } from 'node:http'
 import type { Logger } from '../lib/request'
 
-declare function run(service: CrawlerService, logger: Logger): { server: Server; port: number | string | false | null }
+declare function run(
+  service: CrawlerService,
+  logger: Logger,
+  servicePort: string
+): { server: Server; port: number | string | false | null }
 
 export = run

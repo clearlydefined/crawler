@@ -2,15 +2,14 @@
 // SPDX-License-Identifier: MIT
 
 const appFactory = require('../app')
-const config = require('painless-config')
 const http = require('node:http')
 const init = require('express-init')
 
-function run(service, logger) {
+function run(service, logger, servicePort) {
   /**
    * Get port from environment and store in Express.
    */
-  let port = normalizePort(config.get('CRAWLER_SERVICE_PORT') || process.env.PORT || '5000')
+  let port = normalizePort(servicePort)
   port = port === 'random' ? null : port
 
   const app = appFactory(service, logger)

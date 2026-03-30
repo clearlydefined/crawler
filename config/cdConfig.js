@@ -33,10 +33,13 @@ function getPositiveInteger(configName, defaultValue) {
 module.exports = {
   provider: 'memory', // change this to redis if/when we want distributed config
   searchPath: [module],
+  service: {
+    port: config.get('CRAWLER_SERVICE_PORT') || config.get('PORT') || '5000',
+    shutdownTimeoutMs: getPositiveInteger('CRAWLER_SHUTDOWN_TIMEOUT_MS', 60000)
+  },
   crawler: {
     count: 2,
-    maxRequeueAttemptCount,
-    shutdownTimeoutMs: getPositiveInteger('CRAWLER_SHUTDOWN_TIMEOUT_MS', 60000)
+    maxRequeueAttemptCount
   },
   filter: {
     provider: 'filter',

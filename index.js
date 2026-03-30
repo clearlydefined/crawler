@@ -11,13 +11,13 @@ const { withTimeout } = require('./lib/utils')
 const searchPath = [require('./providers')]
 const maps = require('./config/map')
 
-const shutdownTimeoutMs = defaults.crawler?.shutdownTimeoutMs ?? 60000
+const shutdownTimeoutMs = defaults.service?.shutdownTimeoutMs ?? 60000
 
 const aiClient = createInsights(config)
 const logger = createLogger({ aiClient })
 
 const service = run(defaults, logger, searchPath, maps)
-const { server, port } = www(service, logger)
+const { server, port } = www(service, logger, defaults.service?.port ?? '5000')
 
 let shuttingDown = false
 
