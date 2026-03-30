@@ -1,7 +1,7 @@
 const { clone } = require('lodash')
 const { callFetch: requestPromise, getStream } = require('../../lib/fetch')
 const AbstractFetch = require('./abstractFetch')
-const fs = require('fs')
+const fs = require('node:fs')
 const axios = require('axios')
 const { default: axiosRetry, exponentialDelay, isNetworkOrIdempotentRequestError } = require('axios-retry')
 const { parse: htmlParser } = require('node-html-parser')
@@ -20,7 +20,7 @@ class GoFetch extends AbstractFetch {
       retries: 5,
       retryDelay: exponentialDelay,
       retryCondition: err => {
-        return isNetworkOrIdempotentRequestError(err) || err.response?.status == 429
+        return isNetworkOrIdempotentRequestError(err) || err.response?.status === 429
       }
     })
     this.options.http = options.http || axios
@@ -33,19 +33,27 @@ class GoFetch extends AbstractFetch {
 
   async handle(request) {
     const spec = this.toSpec(request)
-    if (!spec.revision) spec.revision = await this._getLatestVersion(spec)
-    if (!spec.revision) return this.markSkip(request)
+    if (!spec.revision) {
+      spec.revision = await this._getLatestVersion(spec)
+    }
+    if (!spec.revision) {
+      return this.markSkip(request)
+    }
 
     request.url = spec.toUrl()
 
     super.handle(request)
 
     const info = await this._getInfo(spec)
-    if (!info) return this.markSkip(request)
+    if (!info) {
+      return this.markSkip(request)
+    }
 
     const artifact = this.createTempFile(request)
     const artifactResult = await this._getArtifact(spec, artifact.name)
-    if (!artifactResult) return this.markSkip(request)
+    if (!artifactResult) {
+      return this.markSkip(request)
+    }
 
     const dir = this.createTempDir(request)
 
@@ -112,7 +120,9 @@ class GoFetch extends AbstractFetch {
     let response
     try {
       response = await getStream(url)
-      if (!response || response.statusCode !== 200) return false
+      if (!response || response.statusCode !== 200) {
+        return false
+      }
     } catch (error) {
       this.logger.error(this._google_proxy_error_string(error))
       return false
@@ -120,7 +130,9 @@ class GoFetch extends AbstractFetch {
     const status = await new Promise(resolve => {
       response.data.pipe(fs.createWriteStream(destination)).on('finish', () => resolve(true))
     })
-    if (status) return true
+    if (status) {
+      return true
+    }
   }
 
   async _getInfo(spec) {
@@ -130,8 +142,10 @@ class GoFetch extends AbstractFetch {
     try {
       content = await requestPromise({ url })
     } catch (error) {
-      if (error.statusCode === 404) return null
-      else throw this._google_proxy_error_string(error)
+      if (error.statusCode === 404) {
+        return null
+      }
+      throw this._google_proxy_error_string(error)
     }
 
     return JSON.parse(content.toString())
@@ -152,9 +166,8 @@ class GoFetch extends AbstractFetch {
         return {
           licenses
         }
-      } else {
-        this.logger.info(`Licenses from html could not be parsed. The licenses are ${JSON.stringify(licenses)}.`)
       }
+      this.logger.info(`Licenses from html could not be parsed. The licenses are ${JSON.stringify(licenses)}.`)
     } catch (err) {
       if (err.response?.status === 404) {
         // Based on https://pkg.go.dev/about#adding-a-package, packages on pkg.go.dev may be
@@ -190,10 +203,6 @@ class GoFetch extends AbstractFetch {
   }
 }
 
-class RequeueError extends Error {
-  constructor(message) {
-    super(message)
-  }
-}
+class RequeueError extends Error {}
 
 module.exports = options => new GoFetch(options)

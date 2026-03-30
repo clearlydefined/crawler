@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractProcessor = require('./abstractProcessor')
-const { promisify } = require('util')
-const execFile = promisify(require('child_process').execFile)
+const { promisify } = require('node:util')
+const execFile = promisify(require('node:child_process').execFile)
 const { flatten, merge, uniqBy } = require('lodash')
 const { trimAllParents, spawnPromisified } = require('../../lib/utils')
-const path = require('path')
+const path = require('node:path')
 const throat = require('throat')
 
 class LicenseeProcessor extends AbstractProcessor {
@@ -29,8 +29,12 @@ class LicenseeProcessor extends AbstractProcessor {
   }
 
   async handle(request) {
-    if (this.options.disabled) return request.markSkip('Disabled  ')
-    if (!(await this._versionPromise)) return request.markSkip('Licensee not properly configured')
+    if (this.options.disabled) {
+      return request.markSkip('Disabled  ')
+    }
+    if (!(await this._versionPromise)) {
+      return request.markSkip('Licensee not properly configured')
+    }
     super.handle(request)
     await this._createDocument(request)
     return request
@@ -38,7 +42,9 @@ class LicenseeProcessor extends AbstractProcessor {
 
   async _createDocument(request) {
     const record = await this._run(request)
-    if (!record) return
+    if (!record) {
+      return
+    }
     const location = request.document.location
     request.document = merge(this.clone(request.document), { licensee: record })
     const toAttach = record.output.content.matched_files.map(file => file.filename)
@@ -74,16 +80,20 @@ class LicenseeProcessor extends AbstractProcessor {
   async _runOnFolder(folder, root, parameters) {
     try {
       const stdout = await this._runLicensee(parameters, path.join(root, folder))
-      if (!stdout.trim()) return
+      if (!stdout.trim()) {
+        return
+      }
       const result = JSON.parse(stdout)
-      result.matched_files.forEach(file => (file.filename = `${folder ? folder + '/' : ''}${file.filename}`))
+      result.matched_files.forEach(file => (file.filename = `${folder ? `${folder}/` : ''}${file.filename}`))
       return result
     } catch (error) {
       // Licensee fails with code = 1 if there are no license files found in the given folder.
       // Not really an error. Just skip it.
       // TODO unclear what code will be returned if there is a real error so be resilient in the
       // handling of stdout
-      if (error && error.code !== 1) throw error
+      if (error && error.code !== 1) {
+        throw error
+      }
     }
   }
 
@@ -92,7 +102,9 @@ class LicenseeProcessor extends AbstractProcessor {
   }
 
   _detectVersion() {
-    if (this._versionPromise !== undefined) return this._versionPromise
+    if (this._versionPromise !== undefined) {
+      return this._versionPromise
+    }
     this._versionPromise = execFile('licensee', ['version'])
       .then(result => {
         this._toolVersion = result.stdout.trim()
@@ -103,7 +115,9 @@ class LicenseeProcessor extends AbstractProcessor {
         return this._schemaVersion
       })
       .catch(error => {
-        if (error) this.logger.warn(`Could not detect version of Licensee: ${error.message}`)
+        if (error) {
+          this.logger.warn(`Could not detect version of Licensee: ${error.message}`)
+        }
       })
     return this._versionPromise
   }

@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractClearlyDefinedProcessor = require('./abstractClearlyDefinedProcessor')
-const { promisify } = require('util')
-const fs = require('fs')
-const path = require('path')
+const { promisify } = require('node:util')
+const fs = require('node:fs')
+const path = require('node:path')
 const yaml = require('js-yaml')
 const { merge } = require('lodash')
 
@@ -23,7 +23,9 @@ class SourceExtract extends AbstractClearlyDefinedProcessor {
     const location = request.document.location
     request.document = merge(this.clone(request.document), { releaseDate: request.document.releaseDate })
     const clearlyFile = path.join(location, 'clearly.yaml')
-    if (!fs.existsSync(clearlyFile)) return
+    if (!fs.existsSync(clearlyFile)) {
+      return
+    }
     const content = await promisify(fs.readFileSync)(clearlyFile)
     request.document.description = yaml.safeLoad(content)
   }

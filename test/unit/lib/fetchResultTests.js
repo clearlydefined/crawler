@@ -117,7 +117,8 @@ describe('fetchResult', () => {
   })
 
   describe('dependents management', () => {
-    let request, anotherRequest
+    let request
+    let anotherRequest
 
     beforeEach(() => {
       request = {}

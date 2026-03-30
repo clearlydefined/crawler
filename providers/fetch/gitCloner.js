@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractFetch = require('./abstractFetch')
-const { exec } = require('child_process')
+const { exec } = require('node:child_process')
 const { clone } = require('lodash')
-const { rm } = require('fs').promises
+const { rm } = require('node:fs').promises
 const FetchResult = require('../../lib/fetchResult')
 
 const providerMap = {
@@ -34,7 +34,7 @@ class GitCloner extends AbstractFetch {
     await this._deleteGitDatabase(dir.name, spec.name)
 
     const fetchResult = new FetchResult(request.url).addMeta({ gitSize: repoSize })
-    fetchResult.document = this._createDocument(dir.name + '/' + spec.name, repoSize, releaseDate, options.version)
+    fetchResult.document = this._createDocument(`${dir.name}/${spec.name}`, repoSize, releaseDate, options.version)
     if (spec.provider === 'github') {
       fetchResult.casedSpec = clone(spec)
       fetchResult.casedSpec.namespace = spec.namespace.toLowerCase()

@@ -20,7 +20,7 @@ class CrawlerFactory {
     CrawlerFactory._initializeRedis(defaults)
 
     const optionsProvider = defaults.provider || 'memory'
-    const crawlerName = (defaults.crawler && defaults.crawler.name) || 'crawler'
+    const crawlerName = defaults.crawler?.name || 'crawler'
     searchPath.forEach(entry => providerSearchPath.push(entry))
     const subsystemNames = ['crawler', 'filter', 'fetch', 'process', 'queue', 'store', 'deadletter', 'lock']
     const crawlerPromise = CrawlerFactory.createRefreshingOptions(
@@ -38,12 +38,15 @@ class CrawlerFactory {
   }
 
   static _initializeRedis(defaults) {
-    if (defaults.redis && defaults.redis.provider)
+    if (defaults.redis?.provider) {
       CrawlerFactory._getProvider(defaults.redis || {}, defaults.redis.provider, 'redis')
+    }
   }
 
-  static _decorateOptions(key, options) {
-    if (!options.logger) options.logger = logger
+  static _decorateOptions(_key, options) {
+    if (!options.logger) {
+      options.logger = logger
+    }
   }
 
   static createCrawler(
@@ -74,8 +77,11 @@ class CrawlerFactory {
   }
 
   static async _initialize() {
+    // biome-ignore lint/complexity/noThisInStatic: `this` is rebound via .bind(result) to a Crawler instance
     await this.queues.subscribe()
+    // biome-ignore lint/complexity/noThisInStatic: rebound via .bind(result)
     await this.store.connect()
+    // biome-ignore lint/complexity/noThisInStatic: rebound via .bind(result)
     await this.deadletters.connect()
   }
 
@@ -102,8 +108,11 @@ class CrawlerFactory {
             logger.info(`${subsystemName} options initialized`)
             // Hook the refreshing options into the right place in the result structure.
             // Be sure to retain the 'provider' setting
-            if (subProvider) result[subsystemName] = { provider: subProvider, [subProvider]: values }
-            else result[subsystemName] = values
+            if (subProvider) {
+              result[subsystemName] = { provider: subProvider, [subProvider]: values }
+            } else {
+              result[subsystemName] = values
+            }
           })
         })
       })
@@ -134,11 +143,15 @@ class CrawlerFactory {
 
   static getProvider(namespace, ...params) {
     const provider = finalOptions[namespace]
-    if (!provider) return null
+    if (!provider) {
+      return null
+    }
     for (let i = 0; i < providerSearchPath.length; i++) {
       const entry = providerSearchPath[i]
-      const result = entry[namespace] && entry[namespace][provider]
-      if (result) return result(...params)
+      const result = entry[namespace]?.[provider]
+      if (result) {
+        return result(...params)
+      }
     }
     return require(provider)(...params)
   }
@@ -149,8 +162,10 @@ class CrawlerFactory {
     subOptions.logger.info(`creating ${namespace}:${provider}`)
     for (let i = 0; i < providerSearchPath.length; i++) {
       const entry = providerSearchPath[i]
-      const result = entry[namespace] && entry[namespace][provider]
-      if (result) return result(subOptions, ...params)
+      const result = entry[namespace]?.[provider]
+      if (result) {
+        return result(subOptions, ...params)
+      }
     }
     return require(provider)(subOptions, ...params)
   }
@@ -170,7 +185,9 @@ class CrawlerFactory {
   }
 
   static createStore(options, provider = options.provider) {
-    if (provider) return CrawlerFactory._getProvider(options, provider, 'store')
+    if (provider) {
+      return CrawlerFactory._getProvider(options, provider, 'store')
+    }
     const names = options.dispatcher.split('+')
     const stores = CrawlerFactory._getNamedProviders(options, 'store', names.slice(1))
     const dispatcher = names[0]

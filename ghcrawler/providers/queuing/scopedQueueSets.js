@@ -26,7 +26,9 @@ class ScopedQueueSets {
   async repush(original, newRequest) {
     //Always retry on the global queue
     const queue = original._retryQueue ? this.getQueue(original._retryQueue, 'global') : original._originQueue
-    if (queue !== original._originQueue) await original._originQueue.done(original)
+    if (queue !== original._originQueue) {
+      await original._originQueue.done(original)
+    }
     return queue.push(newRequest)
   }
 
@@ -95,7 +97,9 @@ class ScopedQueueSets {
 
     return Promise.allSettled(this._scopedQueues.local.queues.map(publishToGlobal)).then(results => {
       const found = results.find(result => result.status === 'rejected')
-      if (found) throw new Error(found.reason)
+      if (found) {
+        throw new Error(found.reason)
+      }
     })
   }
 }

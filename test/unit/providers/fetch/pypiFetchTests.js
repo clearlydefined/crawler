@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 const expect = require('chai').expect
-const fs = require('fs')
+const fs = require('node:fs')
 const sinon = require('sinon')
-const PassThrough = require('stream').PassThrough
+const PassThrough = require('node:stream').PassThrough
 const nodeFetch = require('../../../../lib/fetch')
 const PypiFetch = require('../../../../providers/fetch/pypiFetch')
 const Request = require('../../../../ghcrawler/lib/request.js')

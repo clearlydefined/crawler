@@ -20,8 +20,8 @@ declare class QueueSet {
 
   addQueue(queue: CrawlQueue, location?: 'beginning' | 'end'): void
   push(requests: Request | Request[], name: string): Promise<void>
-  subscribe(): Promise<void[]>
-  unsubscribe(): Promise<void[]>
+  subscribe(): Promise<undefined[]>
+  unsubscribe(): Promise<undefined[]>
   pop(startMap?: number[]): Promise<Request | null>
   getQueue(name: string): CrawlQueue
 }

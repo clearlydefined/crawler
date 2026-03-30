@@ -6,8 +6,8 @@ const expect = chai.expect
 const proxyquire = require('proxyquire')
 const sinon = require('sinon')
 const sandbox = sinon.createSandbox()
-const fs = require('fs')
-const path = require('path')
+const fs = require('node:fs')
+const path = require('node:path')
 const { request } = require('../../../../ghcrawler')
 
 let Handler
@@ -54,12 +54,13 @@ describe('Licensee process', () => {
   beforeEach(() => {
     const resultBox = { error: null, versionResult: '1.2.0', versionError: null }
     const processStub = {
-      execFile: (command, parameters, callbackOrOptions) => {
-        if (parameters.includes('version'))
+      execFile: (_command, parameters, callbackOrOptions) => {
+        if (parameters.includes('version')) {
           return callbackOrOptions(resultBox.versionError, { stdout: resultBox.versionResult })
+        }
       }
     }
-    Handler = proxyquire('../../../../providers/process/licensee', { child_process: processStub })
+    Handler = proxyquire('../../../../providers/process/licensee', { 'node:child_process': processStub })
     Handler._resultBox = resultBox
   })
 
@@ -78,7 +79,7 @@ function setup(fixture, error, versionError) {
   const processor = Handler(options)
   processor._runLicensee = error
     ? sinon.stub().rejects(error)
-    : (parameters, inputFolder) => Promise.resolve(fs.readFileSync(`${inputFolder}/output.json`).toString())
+    : (_parameters, inputFolder) => Promise.resolve(fs.readFileSync(`${inputFolder}/output.json`).toString())
   processor.attachFiles = sinon.stub()
   return { request: testRequest, processor }
 }

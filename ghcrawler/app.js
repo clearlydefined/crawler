@@ -25,7 +25,7 @@ function configureApp(service, logger) {
   app.use('/', require('./routes/index')(config.get('BUILD_SHA'), config.get('APP_VERSION')))
 
   // Catch 404 and forward to error handler
-  const requestHandler = (request, response, next) => {
+  const requestHandler = (_request, _response, next) => {
     const error = new Error('404 - Not Found')
     error.status = 404
     error.success = false
@@ -34,7 +34,7 @@ function configureApp(service, logger) {
   app.use(requestHandler)
 
   // Hang the service init code off a route middleware.  Doesn't really matter which one.
-  requestHandler.init = (app, callback) => {
+  requestHandler.init = (_app, callback) => {
     service.ensureInitialized().then(
       () => {
         service.run()
@@ -52,10 +52,13 @@ function configureApp(service, logger) {
 
   // Error handlers
   const handler = (error, request, response, next) => {
-    if (response.headersSent) return next(error)
-    if (!(request && request.url && request.url.includes('robots933456.txt')))
+    if (response.headersSent) {
+      return next(error)
+    }
+    if (!request?.url?.includes('robots933456.txt')) {
       // https://feedback.azure.com/forums/169385-web-apps/suggestions/32120617-document-healthcheck-url-requirement-for-custom-co
-      logger.error('SvcRequestFailure: ' + request.url, error)
+      logger.error(`SvcRequestFailure: ${request.url}`, error)
+    }
     response.status(error.status || 500)
     const propertiesToSerialize = ['success', 'message']
     if (app.get('env') !== 'production') {

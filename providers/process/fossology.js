@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractProcessor = require('./abstractProcessor')
-const { promisify } = require('util')
-const child_process = require('child_process')
+const { promisify } = require('node:util')
+const child_process = require('node:child_process')
 const execFile = promisify(child_process.execFile)
 const spawn = child_process.spawn
-const path = require('path')
+const path = require('node:path')
 
 class FossologyProcessor extends AbstractProcessor {
   constructor(options) {
@@ -28,8 +28,12 @@ class FossologyProcessor extends AbstractProcessor {
   }
 
   async handle(request) {
-    if (this.options.disabled) return request.markSkip('Disabled  ')
-    if (!(await this._versionPromise)) return request.markSkip('FOSSology tools not properly configured')
+    if (this.options.disabled) {
+      return request.markSkip('Disabled  ')
+    }
+    if (!(await this._versionPromise)) {
+      return request.markSkip('FOSSology tools not properly configured')
+    }
     super.handle(request)
     this.logger.info(`Analyzing ${request.toString()} using FOSSology. input: ${request.document.location}`)
     await this._createDocument(request)
@@ -42,11 +46,18 @@ class FossologyProcessor extends AbstractProcessor {
     const copyrightOutput = await this._runCopyright(request, files, request.document.location)
     const monkOutput = await this._runMonk(request, files, request.document.location)
     request.document = this.clone(request.document)
-    if (!nomosOutput && !copyrightOutput && !monkOutput)
+    if (!nomosOutput && !copyrightOutput && !monkOutput) {
       request.markDead('Error', 'FOSSology run failed with no results')
-    if (nomosOutput) request.document.nomos = nomosOutput
-    if (copyrightOutput) request.document.copyright = copyrightOutput
-    if (monkOutput) request.document.monk = monkOutput
+    }
+    if (nomosOutput) {
+      request.document.nomos = nomosOutput
+    }
+    if (copyrightOutput) {
+      request.document.copyright = copyrightOutput
+    }
+    if (monkOutput) {
+      request.document.monk = monkOutput
+    }
   }
 
   async _runNomos(request) {
@@ -59,8 +70,11 @@ class FossologyProcessor extends AbstractProcessor {
         ...parameters
       ])
       nomos.stdout.on('data', chunk => {
-        if (data) data += chunk
-        else data = chunk
+        if (data) {
+          data += chunk
+        } else {
+          data = chunk
+        }
       })
       nomos
         .on('error', error => {
@@ -83,7 +97,9 @@ class FossologyProcessor extends AbstractProcessor {
     for (const file of files) {
       try {
         const output = await runner(file)
-        if (output) results.push({ path: file, output: JSON.parse(output) })
+        if (output) {
+          results.push({ path: file, output: JSON.parse(output) })
+        }
       } catch (error) {
         this.logger.error(error)
       }
@@ -99,7 +115,7 @@ class FossologyProcessor extends AbstractProcessor {
     return { version: this._copyrightVersion, parameters, output }
   }
 
-  async _runCopyrightOnFile(request, file, parameters = []) {
+  async _runCopyrightOnFile(_request, file, parameters = []) {
     try {
       const { stdout } = await execFile(
         `${this.options.installDir}/copyright/agent/copyright`,
@@ -130,8 +146,11 @@ class FossologyProcessor extends AbstractProcessor {
           cwd: `${this.options.installDir}/monk/agent`
         })
         monk.stdout.on('data', chunk => {
-          if (data) data += chunk
-          else data = chunk
+          if (data) {
+            data += chunk
+          } else {
+            data = chunk
+          }
         })
         monk
           .on('error', error => {
@@ -145,12 +164,16 @@ class FossologyProcessor extends AbstractProcessor {
       output.content += result.replace(new RegExp(`${request.document.location}/`, 'g'), '')
     }
 
-    if (output.content) return { version: this._monkVersion, parameters, output }
+    if (output.content) {
+      return { version: this._monkVersion, parameters, output }
+    }
     return null
   }
 
   async _detectVersion() {
-    if (this._versionPromise) return this._versionPromise
+    if (this._versionPromise) {
+      return this._versionPromise
+    }
     try {
       this._nomosVersion = await this._detectNomosVersion()
       this._copyrightVersion = await this._detectCopyrightVersion()

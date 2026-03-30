@@ -6,8 +6,8 @@ const sinon = require('sinon')
 const NuGetFetch = require('../../../../providers/fetch/nugetFetch')
 const proxyquire = require('proxyquire')
 const Request = require('../../../../ghcrawler').request
-const PassThrough = require('stream').PassThrough
-const fs = require('fs')
+const PassThrough = require('node:stream').PassThrough
+const fs = require('node:fs')
 
 describe('NuGet fetch', () => {
   it('should normalize version correctly', () => {
@@ -38,12 +38,24 @@ const hashes = {
 }
 
 function pickFile(url) {
-  if (url.includes('catalog')) return 'xunit.core.2.4.1.catalog.json'
-  if (url.endsWith('index.json')) return 'xunit.core.index.json'
-  if (url.endsWith('.json')) return 'xunit.core.2.4.1.json'
-  if (url.endsWith('.nuspec')) return 'xunit.core.2.4.1.nuspec'
-  if (url.endsWith('.nupkg')) return 'xunit.core.2.4.1.nupkg'
-  if (url.endsWith('license.txt')) return 'license.txt'
+  if (url.includes('catalog')) {
+    return 'xunit.core.2.4.1.catalog.json'
+  }
+  if (url.endsWith('index.json')) {
+    return 'xunit.core.index.json'
+  }
+  if (url.endsWith('.json')) {
+    return 'xunit.core.2.4.1.json'
+  }
+  if (url.endsWith('.nuspec')) {
+    return 'xunit.core.2.4.1.nuspec'
+  }
+  if (url.endsWith('.nupkg')) {
+    return 'xunit.core.2.4.1.nupkg'
+  }
+  if (url.endsWith('license.txt')) {
+    return 'license.txt'
+  }
   return null
 }
 
@@ -51,17 +63,25 @@ describe('', () => {
   beforeEach(() => {
     const get = (url, options) => {
       if (url) {
-        if (url.includes('error')) throw new Error('yikes')
-        if (url.includes('missing')) throw { statusCode: 404 }
+        if (url.includes('error')) {
+          throw new Error('yikes')
+        }
+        if (url.includes('missing')) {
+          throw { statusCode: 404 }
+        }
       }
       const body = fs.readFileSync(`test/fixtures/nuget/${pickFile(url)}`)
-      if (options && options.json) return Promise.resolve({ body: JSON.parse(body), statusCode: 200 })
+      if (options?.json) {
+        return Promise.resolve({ body: JSON.parse(body), statusCode: 200 })
+      }
       const response = new PassThrough()
       response.body = body
       response.write(response.body)
       response.end()
       response.statusCode = 200
-      if (options?.encoding === null) return Promise.resolve({ body: response, statusCode: 200 })
+      if (options?.encoding === null) {
+        return Promise.resolve({ body: response, statusCode: 200 })
+      }
       return response
     }
     Fetch = proxyquire('../../../../providers/fetch/nugetFetch', {
@@ -77,8 +97,8 @@ describe('', () => {
     const handler = setup()
     const request = await handler.handle(new Request('test', 'cd:/nuget/nuget/-/xunit.core/2.4.1'))
     request.fetchResult.copyTo(request)
-    expect(request.document.hashes.sha1).to.be.equal(hashes['xunit.core.2.4.1.nupkg']['sha1'])
-    expect(request.document.hashes.sha256).to.be.equal(hashes['xunit.core.2.4.1.nupkg']['sha256'])
+    expect(request.document.hashes.sha1).to.be.equal(hashes['xunit.core.2.4.1.nupkg'].sha1)
+    expect(request.document.hashes.sha256).to.be.equal(hashes['xunit.core.2.4.1.nupkg'].sha256)
     expect(request.document.releaseDate).to.equal('2018-10-29T04:18:45.803Z')
     expect(request.document.metadataLocation).to.have.keys(['manifest', 'nuspec', 'latestNuspec'])
     expect(request.document.location).to.not.be.undefined
@@ -88,8 +108,8 @@ describe('', () => {
     const handler = setup()
     const request = await handler.handle(new Request('test', 'cd:/nuget/nuget/-/xunit.core'))
     request.fetchResult.copyTo(request)
-    expect(request.document.hashes.sha1).to.be.equal(hashes['xunit.core.2.4.1.nupkg']['sha1'])
-    expect(request.document.hashes.sha256).to.be.equal(hashes['xunit.core.2.4.1.nupkg']['sha256'])
+    expect(request.document.hashes.sha1).to.be.equal(hashes['xunit.core.2.4.1.nupkg'].sha1)
+    expect(request.document.hashes.sha256).to.be.equal(hashes['xunit.core.2.4.1.nupkg'].sha256)
     expect(request.document.releaseDate).to.equal('2018-10-29T04:18:45.803Z')
     expect(request.document.metadataLocation).to.have.keys(['manifest', 'nuspec', 'latestNuspec'])
     expect(request.document.location).to.not.be.undefined

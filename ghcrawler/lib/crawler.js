@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 const debug = require('debug')('crawler:crawler')
-const fs = require('fs')
+const fs = require('node:fs')
 const { DateTime } = require('luxon')
 const Request = require('./request')
-const sleep = require('util').promisify(setTimeout)
+const sleep = require('node:util').promisify(setTimeout)
 const uuid = require('node-uuid')
 const _ = require('lodash')
 
@@ -84,7 +84,7 @@ class Crawler {
     }
   }
 
-  _panic(context, error) {
+  _panic(_context, error) {
     this.logger.error(new Error('PANIC, we should not have gotten here'))
     this.logger.error(error)
   }
@@ -394,7 +394,9 @@ class Crawler {
 
   _getHandler(request, list) {
     for (const handler of list) {
-      if (handler.canHandle(request)) return handler
+      if (handler.canHandle(request)) {
+        return handler
+      }
     }
     return null
   }
@@ -447,7 +449,9 @@ class Crawler {
     if (Array.isArray(request.document)) {
       request.document = { elements: request.document }
     }
-    if (typeof request.document === 'string') console.log('got a string document')
+    if (typeof request.document === 'string') {
+      console.log('got a string document')
+    }
     request.document._metadata = metadata
     debug(`_convertToDocument(${loopName}:${request.toUniqueString()}): exit (success)`)
     return request
@@ -556,9 +560,10 @@ class Crawler {
 
   async _buildDocumentToStore(document) {
     const contentLocation = document._metadata.contentLocation
-    if (!contentLocation)
+    if (!contentLocation) {
       // no location indicates the content is inline in the document
       return document
+    }
 
     const contentType = document._metadata.contentType
     const buffer = await fs.promises.readFile(contentLocation)
@@ -591,7 +596,9 @@ class Crawler {
     // If the request is a drain then mute the signal somewhat. Ensure we log the first drain
     // after any non-drain.
     if (request.type === '_blank') {
-      if (this.options.drainPulse && this.drainCount++ % this.options.drainPulse) return request
+      if (this.options.drainPulse && this.drainCount++ % this.options.drainPulse) {
+        return request
+      }
     } else {
       this.drainCount = 0
     }
@@ -630,7 +637,8 @@ class Crawler {
 
   _createDeadletter(request, reason) {
     const deadDocument = request.createRequeuable()
-    const metadata = (deadDocument._metadata = {})
+    deadDocument._metadata = {}
+    const metadata = deadDocument._metadata
     if (request._error) {
       metadata.errorMessage = request._error.message
       metadata.errorStack = request._error.stack

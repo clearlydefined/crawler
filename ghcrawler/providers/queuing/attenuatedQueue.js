@@ -16,7 +16,9 @@ class AttenuatedQueue extends NestedQueue {
     return super.done(request).then(() => {
       const key = this._getCacheKey(request)
       const deleted = memoryCache.del(key)
-      if (deleted) this.logger.verbose(`Deleted ${key}`)
+      if (deleted) {
+        this.logger.verbose(`Deleted ${key}`)
+      }
     })
   }
 
@@ -56,7 +58,7 @@ class AttenuatedQueue extends NestedQueue {
       timestamp: Date.now(),
       promise: this.queue.push(request)
     }
-    const ttl = (this.options.attenuation && this.options.attenuation.ttl) || 1000
+    const ttl = this.options.attenuation?.ttl || 1000
     memoryCache.put(key, entry, ttl)
     return entry.promise
   }

@@ -16,7 +16,7 @@ class TestMemoryCache extends MemoryCache {
   }
 
   _wrapTimeoutCallback(timeoutCallback, key, value) {
-    timeoutCallback && timeoutCallback(key, value)
+    timeoutCallback?.(key, value)
     this._verify()
   }
 

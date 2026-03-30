@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: MIT
 
 const AbstractProcessor = require('./abstractProcessor')
-const fs = require('fs')
-const { promisify } = require('util')
-const child_process = require('child_process')
+const fs = require('node:fs')
+const { promisify } = require('node:util')
+const child_process = require('node:child_process')
 const execFile = promisify(child_process.execFile)
 
 class ScanCodeProcessor extends AbstractProcessor {
@@ -27,7 +27,9 @@ class ScanCodeProcessor extends AbstractProcessor {
   }
 
   async handle(request) {
-    if (!(await this._versionPromise)) return request.markSkip('ScanCode not found')
+    if (!(await this._versionPromise)) {
+      return request.markSkip('ScanCode not found')
+    }
     super.handle(request)
     const file = this.createTempFile(request)
     await this._runScancode(request, file)
@@ -75,9 +77,11 @@ class ScanCodeProcessor extends AbstractProcessor {
     const packages = output.files.reduce((result, file) => {
       file.package_data.forEach(entry => {
         // in this case the manifest_path contains a subpath pointing to the corresponding file
-        if (file.type === 'directory' && entry.manifest_path)
-          result.push(`${file.path ? file.path + '/' : ''}${entry.manifest_path}`)
-        else result.push(file.path)
+        if (file.type === 'directory' && entry.manifest_path) {
+          result.push(`${file.path ? `${file.path}/` : ''}${entry.manifest_path}`)
+        } else {
+          result.push(file.path)
+        }
       })
       return result
     }, [])
@@ -86,7 +90,7 @@ class ScanCodeProcessor extends AbstractProcessor {
 
   // Workaround until https://github.com/nexB/scancode-toolkit/issues/983 is resolved
   _isRealError(error) {
-    return error && error.message && !error.message.includes('Some files failed to scan properly')
+    return error?.message && !error.message.includes('Some files failed to scan properly')
   }
 
   // Scan the results file for any errors that are not just timeouts or other known errors
@@ -94,17 +98,15 @@ class ScanCodeProcessor extends AbstractProcessor {
   async _hasRealErrors(resultFile) {
     try {
       const results = JSON.parse(await fs.promises.readFile(resultFile, 'utf8'))
-      return results.files.some(
-        file =>
-          file.scan_errors &&
-          file.scan_errors.some(error => {
-            return !(
-              error.includes('ERROR: Processing interrupted: timeout after') ||
-              error.includes('ValueError:') ||
-              error.includes('package.json') ||
-              error.includes('UnicodeDecodeError')
-            )
-          })
+      return results.files.some(file =>
+        file.scan_errors?.some(error => {
+          return !(
+            error.includes('ERROR: Processing interrupted: timeout after') ||
+            error.includes('ValueError:') ||
+            error.includes('package.json') ||
+            error.includes('UnicodeDecodeError')
+          )
+        })
       )
     } catch (e) {
       // This might happen if the results file is >512mb, but regardless our error handling should not fail.
@@ -115,7 +117,9 @@ class ScanCodeProcessor extends AbstractProcessor {
   }
 
   _detectVersion() {
-    if (this._versionPromise) return this._versionPromise
+    if (this._versionPromise) {
+      return this._versionPromise
+    }
     this._versionPromise = execFile(`${this.options.installDir}/scancode`, ['--version'])
       .then(result => {
         this.logger.info('Detecting ScanCode version')

@@ -8,7 +8,7 @@ const ScopedQueueSets = require('../../../../ghcrawler/providers/queuing/scopedQ
 const AttenuatedQueue = require('../../../../ghcrawler/providers/queuing/attenuatedQueue')
 const InMemoryCrawlQueue = require('../../../../ghcrawler/providers/queuing/inmemorycrawlqueue')
 const QueueSet = require('../../../../ghcrawler/providers/queuing/queueSet.js')
-const EventEmitter = require('events')
+const EventEmitter = require('node:events')
 
 describe('scopedQueueSets', () => {
   describe('subscription management', () => {
@@ -165,7 +165,10 @@ describe('scopedQueueSets', () => {
 
   describe('repush', () => {
     let scopedQueues
-    let globalQueues, globalQueue, localQueues, localQueue
+    let globalQueues
+    let globalQueue
+    let localQueues
+    let localQueue
 
     beforeEach(() => {
       globalQueue = mockQueue('normal')
@@ -206,7 +209,10 @@ describe('scopedQueueSets', () => {
 
   describe('publish', () => {
     let scopedQueues
-    let globalQueues, globalQueue, localQueues, localQueue
+    let globalQueues
+    let globalQueue
+    let localQueues
+    let localQueue
 
     beforeEach(() => {
       globalQueue = mockQueue('normal')

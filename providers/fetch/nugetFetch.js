@@ -3,10 +3,10 @@
 
 const AbstractFetch = require('./abstractFetch')
 const { trimStart, clone, get } = require('lodash')
-const fs = require('fs')
+const fs = require('node:fs')
 const { mkdirp } = require('mkdirp')
-const path = require('path')
-const { promisify } = require('util')
+const path = require('node:path')
+const { promisify } = require('node:util')
 const { callFetchWithRetry: requestRetry } = require('../../lib/fetch')
 const FetchResult = require('../../lib/fetchResult')
 
@@ -29,7 +29,9 @@ class NuGetFetch extends AbstractFetch {
     const manifest = registryData ? await this._getManifest(registryData.catalogEntry) : null
     const nuspec = manifest ? await this._getNuspec(spec) : null
     let latestNuspec = null
-    if (!registryData || !nuspec || !manifest) return this.markSkip(request)
+    if (!registryData || !nuspec || !manifest) {
+      return this.markSkip(request)
+    }
     // Improve source location lookup by checking the latest version:
     if (nuspec && !nuspec.includes('<repository type=')) {
       const latestSpec = clone(spec)
@@ -110,7 +112,9 @@ class NuGetFetch extends AbstractFetch {
   async _getManifest(catalogEntryUrl) {
     // Example: https://api.nuget.org/v3/catalog0/data/2018.10.29.04.23.22/xunit.core.2.4.1.json
     const { body, statusCode } = await requestRetry(catalogEntryUrl)
-    if (statusCode !== 200) return null
+    if (statusCode !== 200) {
+      return null
+    }
     return JSON.parse(body)
   }
 
@@ -121,7 +125,9 @@ class NuGetFetch extends AbstractFetch {
     const { body, statusCode } = await requestRetry(
       `https://api.nuget.org/v3-flatcontainer/${spec.name.toLowerCase()}/${spec.revision}/${spec.name.toLowerCase()}.nuspec`
     )
-    if (statusCode !== 200) return null
+    if (statusCode !== 200) {
+      return null
+    }
     return body
   }
 
@@ -142,11 +148,15 @@ class NuGetFetch extends AbstractFetch {
   }
 
   async _downloadLicense({ dirName, licenseUrl }) {
-    if (licenseUrl.toLowerCase().includes('license_url_here_or_delete_this_line')) return
+    if (licenseUrl.toLowerCase().includes('license_url_here_or_delete_this_line')) {
+      return
+    }
     const downloadedLicenseDirName = path.join(dirName, 'clearlydefined', 'downloaded')
     await mkdirp(downloadedLicenseDirName)
     const { body, statusCode } = await requestRetry(licenseUrl)
-    if (statusCode !== 200) return
+    if (statusCode !== 200) {
+      return
+    }
     await promisify(fs.writeFile)(path.join(downloadedLicenseDirName, 'LICENSE'), body)
   }
 }

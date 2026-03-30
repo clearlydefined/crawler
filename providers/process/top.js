@@ -5,10 +5,10 @@ const AbstractProcessor = require('./abstractProcessor')
 const config = require('painless-config')
 const DebianFetch = require('../fetch/debianFetch')
 const CondaFetch = require('../fetch/condaFetch')
-const fs = require('fs')
+const fs = require('node:fs')
 const ghrequestor = require('ghrequestor')
 const linebyline = require('linebyline')
-const path = require('path')
+const path = require('node:path')
 const Request = require('../../ghcrawler').request
 const requestRetry = require('../../lib/fetch').callFetchWithRetry
 const defaultOptions = { json: true, resolveWithFullResponse: false }
@@ -86,8 +86,12 @@ class TopProcessor extends AbstractProcessor {
   */
   async _processTopNpms(request) {
     let { start, end } = request.document
-    if (!start || start < 0) start = 0
-    if (!end || end - start <= 0) end = start + 1000
+    if (!start || start < 0) {
+      start = 0
+    }
+    if (!end || end - start <= 0) {
+      end = start + 1000
+    }
     const initialOffset = Math.floor(start / 36) * 36
     for (let offset = initialOffset; offset < end; offset += 36) {
       const response = await requestRetry(`https://www.npmjs.com/browse/depended?offset=${offset}`, {
@@ -123,8 +127,12 @@ class TopProcessor extends AbstractProcessor {
   */
   async _processTopCocoapods(request) {
     let { start, end } = request.document
-    if (!start || start < 0) start = 0
-    if (!end || end - start <= 0) end = start + 1000
+    if (!start || start < 0) {
+      start = 0
+    }
+    if (!end || end - start <= 0) {
+      end = start + 1000
+    }
     for (let offset = start; offset < end; offset += 100) {
       // const page = offset / 100 + 1
       // const response = await requestRetry.get(
@@ -152,8 +160,12 @@ class TopProcessor extends AbstractProcessor {
   */
   async _processTopCrates(request) {
     let { start, end } = request.document
-    if (!start || start < 0) start = 0
-    if (!end || end - start <= 0) end = start + 1000
+    if (!start || start < 0) {
+      start = 0
+    }
+    if (!end || end - start <= 0) {
+      end = start + 1000
+    }
     for (let offset = start; offset < end; offset += 100) {
       const page = offset / 100 + 1
       const response = await requestRetry(
@@ -183,15 +195,21 @@ class TopProcessor extends AbstractProcessor {
   async _processTopConda(request) {
     const spec = this.toSpec(request)
     let { start, end } = request.document
-    if (!start || start < 0) start = 0
-    if (!end || end - start <= 0) end = start + 1000
+    if (!start || start < 0) {
+      start = 0
+    }
+    if (!end || end - start <= 0) {
+      end = start + 1000
+    }
 
     const condaFetch = CondaFetch({
       logger: this.logger,
       cdFileLocation: config.get('FILE_STORE_LOCATION') || (process.platform === 'win32' ? 'c:/temp/cd' : '/tmp/cd')
     })
 
-    if (!condaFetch.channels[spec.provider]) return request.markSkip(`Unrecognized conda channel ${spec.provider}`)
+    if (!condaFetch.channels[spec.provider]) {
+      return request.markSkip(`Unrecognized conda channel ${spec.provider}`)
+    }
     const channelUrl = condaFetch.channels[spec.provider]
     const channelData = await condaFetch.getChannelData(channelUrl, spec.provider)
     let packagesCoordinates = []
@@ -316,8 +334,12 @@ class TopProcessor extends AbstractProcessor {
     // Example: https://api-v2v3search-0.nuget.org/query?prerelease=false&skip=5&take=10
     const pageSize = 20
     let { start, end } = request.document
-    if (!start || start < 0) start = 0
-    if (!end || end - start <= 0) end = start + 1000
+    if (!start || start < 0) {
+      start = 0
+    }
+    if (!end || end - start <= 0) {
+      end = start + 1000
+    }
     for (let offset = start; offset < end; offset += pageSize) {
       const topComponents = await requestRetry(
         `https://api-v2v3search-0.nuget.org/query?prerelease=false&skip=${offset}&take=${pageSize}`,
@@ -346,7 +368,9 @@ class TopProcessor extends AbstractProcessor {
       'User-Agent': 'clearlydefined/scanning'
     }
     const token = this.options.githubToken
-    if (token) headers.Authorization = 'token ' + token
+    if (token) {
+      headers.Authorization = `token ${token}`
+    }
     const repos = await ghrequestor.getAll(`https://api.github.com/orgs/${namespace}/repos`, {
       headers,
       tokenLowerBound: 10
@@ -379,8 +403,12 @@ class TopProcessor extends AbstractProcessor {
   */
   async _processTopDebians(request) {
     let { start, end } = request.document
-    if (!start || start < 0) start = 0
-    if (!end || end - start <= 0) end = start + 100
+    if (!start || start < 0) {
+      start = 0
+    }
+    if (!end || end - start <= 0) {
+      end = start + 100
+    }
     const debianFetch = DebianFetch({
       logger: this.logger,
       cdFileLocation: config.get('FILE_STORE_LOCATION') || (process.platform === 'win32' ? 'c:/temp/cd' : '/tmp/cd')

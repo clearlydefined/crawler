@@ -3,12 +3,12 @@
 
 const chai = require('chai')
 const sinon = require('sinon')
-const fs = require('fs')
-const PassThrough = require('stream').PassThrough
+const fs = require('node:fs')
+const PassThrough = require('node:stream').PassThrough
 const proxyquire = require('proxyquire')
 
 const Request = require('../../../../ghcrawler').request
-const { promisify } = require('util')
+const { promisify } = require('node:util')
 
 const expect = chai.expect
 
@@ -111,10 +111,18 @@ describe('fetchDispatcher cache fetch result', () => {
     function setupMavenFetch() {
       const fileSupplier = url => {
         let fileName
-        if (url.includes('solrsearch')) fileName = 'swt-3.3.0-v3346.json'
-        if (url.endsWith('.pom')) fileName = 'swt-3.3.0-v3346.pom'
-        if (url.endsWith('-sources.jar')) fileName = 'swt-3.3.0-v3346.jar'
-        if (url.endsWith('.jar')) fileName = 'swt-3.3.0-v3346.jar'
+        if (url.includes('solrsearch')) {
+          fileName = 'swt-3.3.0-v3346.json'
+        }
+        if (url.endsWith('.pom')) {
+          fileName = 'swt-3.3.0-v3346.pom'
+        }
+        if (url.endsWith('-sources.jar')) {
+          fileName = 'swt-3.3.0-v3346.jar'
+        }
+        if (url.endsWith('.jar')) {
+          fileName = 'swt-3.3.0-v3346.jar'
+        }
         return `/maven/${fileName}`
       }
       return MavenFetch({
@@ -172,7 +180,7 @@ describe('fetchDispatcher cache fetch result', () => {
 
     beforeEach(() => {
       pypiFetch = PypiFetch({ logger: { log: sinon.stub() } })
-      pypiFetch._getPackage = sinon.stub().callsFake(async (spec, registryData, destination) => {
+      pypiFetch._getPackage = sinon.stub().callsFake(async (_spec, _registryData, destination) => {
         await getPacakgeStub('test/fixtures/maven/swt-3.3.0-v3346.jar', destination)
         return true
       })
@@ -215,7 +223,7 @@ describe('fetchDispatcher cache fetch result', () => {
       const npmFetch = NpmFetch({ logger: { log: sinon.stub() } })
       npmFetch._getPackage = sinon
         .stub()
-        .callsFake(async (spec, destination) => await getPacakgeStub('test/fixtures/npm/redie-0.3.0.tgz', destination))
+        .callsFake(async (_spec, destination) => await getPacakgeStub('test/fixtures/npm/redie-0.3.0.tgz', destination))
 
       fetchDispatcher = setupDispatcher(npmFetch)
     })
@@ -237,7 +245,9 @@ describe('fetchDispatcher cache fetch result', () => {
       })
       rubyGemsFetch._getPackage = sinon
         .stub()
-        .callsFake(async (spec, destination) => await getPacakgeStub('test/fixtures/ruby/small-0.5.1.gem', destination))
+        .callsFake(
+          async (_spec, destination) => await getPacakgeStub('test/fixtures/ruby/small-0.5.1.gem', destination)
+        )
 
       fetchDispatcher = setupDispatcher(rubyGemsFetch)
     })
@@ -269,7 +279,7 @@ describe('fetchDispatcher cache fetch result', () => {
       packagistFetch._getPackage = sinon
         .stub()
         .callsFake(
-          async (spec, registryData, destination) =>
+          async (_spec, _registryData, destination) =>
             await getPacakgeStub('test/fixtures/composer/symfony-polyfill-mbstring-v1.11.0-0-gfe5e94c.zip', destination)
         )
 
@@ -284,7 +294,9 @@ describe('fetchDispatcher cache fetch result', () => {
   describe('cache CrateioFetch result', () => {
     const requestPromiseStub = options => {
       const body = fs.readFileSync('test/fixtures/crates/bitflags.json')
-      if (options && options.json) return JSON.parse(body)
+      if (options?.json) {
+        return JSON.parse(body)
+      }
       const response = new PassThrough()
       response.write(fs.readFileSync('test/fixtures/crates/bitflags-1.0.4.crate'))
       response.statusCode = 200
@@ -316,7 +328,7 @@ describe('fetchDispatcher cache fetch result', () => {
         'memory-cache': memCacheStub
       })
       const fetch = DebianFetch({ logger: { info: sinon.stub() }, cdFileLocation: 'test/fixtures/debian/fragment' })
-      fetch._download = async (downloadUrl, destination) =>
+      fetch._download = async (_downloadUrl, destination) =>
         getPacakgeStub('test/fixtures/debian/0ad_0.0.17-1_armhf.deb', destination)
       fetch._getDeclaredLicenses = async () => {
         return ['MIT', 'BSD-3-clause']
@@ -361,24 +373,40 @@ describe('fetchDispatcher cache fetch result', () => {
   describe('cache NugetFetch result', () => {
     const fileSupplier = url => {
       let fileName = null
-      if (url.includes('catalog')) fileName = 'xunit.core.2.4.1.catalog.json'
-      if (url.endsWith('index.json')) fileName = 'xunit.core.index.json'
-      if (url.endsWith('.json')) fileName = 'xunit.core.2.4.1.json'
-      if (url.endsWith('.nuspec')) fileName = 'xunit.core.2.4.1.nuspec'
-      if (url.endsWith('.nupkg')) fileName = 'xunit.core.2.4.1.nupkg'
-      if (url.endsWith('license.txt')) fileName = 'license.txt'
+      if (url.includes('catalog')) {
+        fileName = 'xunit.core.2.4.1.catalog.json'
+      }
+      if (url.endsWith('index.json')) {
+        fileName = 'xunit.core.index.json'
+      }
+      if (url.endsWith('.json')) {
+        fileName = 'xunit.core.2.4.1.json'
+      }
+      if (url.endsWith('.nuspec')) {
+        fileName = 'xunit.core.2.4.1.nuspec'
+      }
+      if (url.endsWith('.nupkg')) {
+        fileName = 'xunit.core.2.4.1.nupkg'
+      }
+      if (url.endsWith('license.txt')) {
+        fileName = 'license.txt'
+      }
       return `nuget/${fileName}`
     }
 
     const requestPromiseStub = (url, options) => {
       const body = fs.readFileSync(`test/fixtures/${fileSupplier(url)}`)
-      if (options?.json) return Promise.resolve({ body: JSON.parse(body), statusCode: 200 })
+      if (options?.json) {
+        return Promise.resolve({ body: JSON.parse(body), statusCode: 200 })
+      }
       const response = new PassThrough()
       response.body = body
       response.write(body)
       response.statusCode = 200
       response.end()
-      if (options?.encoding === null) return Promise.resolve({ body: response, statusCode: 200 })
+      if (options?.encoding === null) {
+        return Promise.resolve({ body: response, statusCode: 200 })
+      }
       return Promise.resolve(response)
     }
 
@@ -420,9 +448,15 @@ describe('fetchDispatcher cache fetch result', () => {
 const createRequestPromiseStub = fileSupplier => {
   return options => {
     if (options.url) {
-      if (options.url.includes('error')) throw new Error('yikes')
-      if (options.url.includes('code')) throw { statusCode: 500, message: 'Code' }
-      if (options.url.includes('missing')) throw { statusCode: 404 }
+      if (options.url.includes('error')) {
+        throw new Error('yikes')
+      }
+      if (options.url.includes('code')) {
+        throw { statusCode: 500, message: 'Code' }
+      }
+      if (options.url.includes('missing')) {
+        throw { statusCode: 404 }
+      }
     }
     const content = fs.readFileSync(`test/fixtures/${fileSupplier(options.url)}`)
     return options.json ? JSON.parse(content) : content

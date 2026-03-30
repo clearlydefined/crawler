@@ -4,8 +4,8 @@
 const { clone } = require('lodash')
 const AbstractFetch = require('./abstractFetch')
 const { callFetch: request } = require('../../lib/fetch')
-const fs = require('fs')
-const path = require('path')
+const fs = require('node:fs')
+const path = require('node:path')
 const FetchResult = require('../../lib/fetchResult')
 
 class CratesioFetch extends AbstractFetch {
@@ -17,7 +17,9 @@ class CratesioFetch extends AbstractFetch {
   async handle(request) {
     const spec = this.toSpec(request)
     const registryData = await this._getRegistryData(spec)
-    if (!registryData || !registryData.version) return this.markSkip(request)
+    if (!registryData || !registryData.version) {
+      return this.markSkip(request)
+    }
     const version = registryData.version
     spec.revision = version.num
     request.url = spec.toUrl()
@@ -54,10 +56,14 @@ class CratesioFetch extends AbstractFetch {
         json: true
       })
     } catch (exception) {
-      if (exception.statusCode !== 404) throw exception
+      if (exception.statusCode !== 404) {
+        throw exception
+      }
       return null
     }
-    if (!registryData.versions) return null
+    if (!registryData.versions) {
+      return null
+    }
     const version = spec.revision || this.getLatestVersion(registryData.versions.map(x => x.num))
     return {
       manifest: registryData.crate,

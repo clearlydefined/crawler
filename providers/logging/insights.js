@@ -44,7 +44,9 @@ class Insights {
 
   static setup(tattoos, connectionString = 'mock', echo = true) {
     // exit if we are already setup
-    if (_client instanceof Insights) return
+    if (_client instanceof Insights) {
+      return
+    }
     if (!connectionString || connectionString === 'mock') {
       _client = new Insights(tattoos, null, echo)
     } else {
@@ -62,12 +64,14 @@ class Insights {
 
   trackException(exceptionTelemetry) {
     this.tattoo(exceptionTelemetry)
-    if (exceptionTelemetry.exception && exceptionTelemetry.exception._type) {
+    if (exceptionTelemetry.exception?._type) {
       exceptionTelemetry.properties.type = exceptionTelemetry.exception._type
       exceptionTelemetry.properties.url = exceptionTelemetry.exception._url
       exceptionTelemetry.properties.cid = exceptionTelemetry.exception._cid
     }
-    if (this.client) this.client.trackException(exceptionTelemetry)
+    if (this.client) {
+      this.client.trackException(exceptionTelemetry)
+    }
     if (this.echo) {
       console.log('trackException:')
       console.dir(exceptionTelemetry.exception)
@@ -80,8 +84,12 @@ class Insights {
     const propertyString = hasProperties ? ` ${safeStringify(traceTelemetry.properties)}` : ''
     const severity = traceTelemetry.severity
     const severityChar = severityMap[severity] || '?'
-    if (this.client) this.client.trackTrace(traceTelemetry)
-    if (this.echo) console.log(`[${severityChar}] ${traceTelemetry.message}${propertyString}`)
+    if (this.client) {
+      this.client.trackTrace(traceTelemetry)
+    }
+    if (this.echo) {
+      console.log(`[${severityChar}] ${traceTelemetry.message}${propertyString}`)
+    }
   }
 
   tattoo(telemetry) {

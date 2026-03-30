@@ -81,7 +81,7 @@ class VisitorMap {
   /** @param {string} next */
   getNextMap(next) {
     const separator = this.path.endsWith('/') ? '' : '/'
-    return this.hasNextStep(next) ? new VisitorMap(this.name, this.path + `${separator}${next}`) : null
+    return this.hasNextStep(next) ? new VisitorMap(this.name, `${this.path}${separator}${next}`) : null
   }
 
   /** @param {string} next */

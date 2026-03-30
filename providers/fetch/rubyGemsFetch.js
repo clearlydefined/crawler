@@ -4,9 +4,9 @@
 const AbstractFetch = require('./abstractFetch')
 const { getStream } = require('../../lib/fetch')
 const requestRetry = require('../../lib/fetch').callFetchWithRetry
-const fs = require('fs')
-const zlib = require('zlib')
-const path = require('path')
+const fs = require('node:fs')
+const zlib = require('node:zlib')
+const path = require('node:path')
 const { clone, get } = require('lodash')
 const FetchResult = require('../../lib/fetchResult')
 const { extractDate } = require('../../lib/utils')
@@ -24,9 +24,13 @@ class RubyGemsFetch extends AbstractFetch {
   async handle(request) {
     const spec = this.toSpec(request)
     const registryData = await this._getRegistryData(spec)
-    if (!registryData) return request.markSkip('Missing registryData')
+    if (!registryData) {
+      return request.markSkip('Missing registryData')
+    }
     spec.revision = spec.revision || registryData.version
-    if (!spec.revision) return request.markSkip('Missing revision')
+    if (!spec.revision) {
+      return request.markSkip('Missing revision')
+    }
     request.url = spec.toUrl()
     super.handle(request)
     const file = this.createTempFile(request)
@@ -58,7 +62,9 @@ class RubyGemsFetch extends AbstractFetch {
     const fullName = spec.namespace ? `${spec.namespace}/${spec.name}` : spec.name
     const gemUrl = `${providerMap.rubyGems}/gems/${fullName}-${spec.revision}.gem`
     const response = await getStream(gemUrl)
-    if (response.statusCode !== 200) throw new Error(`${response.statusCode} ${response.message}`)
+    if (response.statusCode !== 200) {
+      throw new Error(`${response.statusCode} ${response.message}`)
+    }
     await new Promise(resolve => {
       response.data.pipe(fs.createWriteStream(destination)).on('finish', () => resolve(null))
     })
@@ -66,7 +72,7 @@ class RubyGemsFetch extends AbstractFetch {
 
   async _createDocument(dir, registryData, hashes) {
     const releaseDate = await this._extractReleaseDate(dir.name)
-    return { location: dir.name + '/data', registryData, releaseDate, hashes }
+    return { location: `${dir.name}/data`, registryData, releaseDate, hashes }
   }
 
   async _extractFiles(dirName) {
@@ -76,14 +82,17 @@ class RubyGemsFetch extends AbstractFetch {
           .pipe(zlib.createGunzip())
           .on('data', data => {
             fs.writeFile(`${dirName}/metadata.txt`, data, error => {
-              if (error) return reject(error)
+              if (error) {
+                return reject(error)
+              }
               return resolve()
             })
           })
       })
     }
-    if (fs.existsSync(path.join(dirName, 'data.tar.gz')))
+    if (fs.existsSync(path.join(dirName, 'data.tar.gz'))) {
       await this.decompress(`${dirName}/data.tar.gz`, `${dirName}/data`)
+    }
   }
 
   async _extractReleaseDate(dirName) {
@@ -92,7 +101,9 @@ class RubyGemsFetch extends AbstractFetch {
       const regexp = /date:\s\d{4}-\d{1,2}-\d{1,2}/
       const releaseDate = file.match(regexp)
       const validReleaseDate = releaseDate && extractDate(releaseDate[0]?.substring(5).trim())
-      if (validReleaseDate) return validReleaseDate.toJSDate().toISOString()
+      if (validReleaseDate) {
+        return validReleaseDate.toJSDate().toISOString()
+      }
 
       //infer the release date from mTime of the decompressed metadata.gz
       const metadata = path.join(dirName, 'metadata.gz')

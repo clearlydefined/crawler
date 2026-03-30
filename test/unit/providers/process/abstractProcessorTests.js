@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 const proxyquire = require('proxyquire')
-const path = require('path')
+const path = require('node:path')
 const sinon = require('sinon')
 const sandbox = sinon.createSandbox()
 const chai = require('chai')
@@ -72,7 +72,7 @@ describe('AbstractProcessor attach files', () => {
       }
     }
     const handlerClass = proxyquire('../../../../providers/process/abstractProcessor', {
-      fs: fsStub
+      'node:fs': fsStub
     })
     Handler = new handlerClass({})
   })
@@ -229,5 +229,7 @@ function validateAttachedFile(name, list, checkContent = false) {
   const entry = find(list, entry => entry.path === name)
   expect(!!entry).to.be.true
   expect(entry.token).to.eq(token)
-  if (checkContent) expect(entry.attachment).to.eq(attachment)
+  if (checkContent) {
+    expect(entry.attachment).to.eq(attachment)
+  }
 }

@@ -20,8 +20,8 @@ describe('AttachmentStore', () => {
     const baseStore = store.baseStore
     expect(baseStore.upsert.calledThrice).to.be.true
 
-    var storedDoc = baseStore.upsert.getCall(0).args[0]
-    var metadata = storedDoc._metadata
+    let storedDoc = baseStore.upsert.getCall(0).args[0]
+    let metadata = storedDoc._metadata
     expect(metadata.type).to.be.eq('test')
     expect(metadata.extra).to.be.eq('value')
 
@@ -33,7 +33,7 @@ describe('AttachmentStore', () => {
     expect(metadata.extra).to.be.undefined
     expect(metadata.links.self.href).to.be.eq('urn:attachment:42')
     expect(metadata.url).to.be.eq('cd:/attachment/42')
-    var attachment = storedDoc.attachment
+    let attachment = storedDoc.attachment
     expect(attachment).to.be.eq('42 attachment')
 
     storedDoc = baseStore.upsert.getCall(2).args[0]
@@ -56,8 +56,8 @@ describe('AttachmentStore', () => {
     await store.upsert(document)
     const baseStore = store.baseStore
     expect(baseStore.upsert.calledOnce).to.be.true
-    var storedDoc = baseStore.upsert.getCall(0).args[0]
-    var metadata = storedDoc._metadata
+    const storedDoc = baseStore.upsert.getCall(0).args[0]
+    const metadata = storedDoc._metadata
     expect(metadata.type).to.be.eq('test')
     expect(metadata.extra).to.be.eq('value')
   })

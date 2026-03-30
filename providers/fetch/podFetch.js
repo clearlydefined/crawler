@@ -4,10 +4,10 @@
 const { clone, get } = require('lodash')
 const AbstractFetch = require('./abstractFetch')
 const { callFetch: request, callFetchWithRetry: requestRetry } = require('../../lib/fetch')
-const fs = require('fs')
-const path = require('path')
-const crypto = require('crypto')
-const { exec } = require('child_process')
+const fs = require('node:fs')
+const path = require('node:path')
+const crypto = require('node:crypto')
+const { exec } = require('node:child_process')
 const FetchResult = require('../../lib/fetchResult')
 
 const services = {
@@ -26,17 +26,23 @@ class PodFetch extends AbstractFetch {
 
     // Ensure we have a spec revision, we can't get the registry data without one
     const version = await this._getVersion(spec)
-    if (!version || !version.name) return request.markSkip('Missing  ')
+    if (!version || !version.name) {
+      return request.markSkip('Missing  ')
+    }
     spec.revision = version.name
 
     // Get the registry data/manifest
     const registryData = await this._getRegistryData(spec)
-    if (!registryData) return request.markSkip('Missing  ')
+    if (!registryData) {
+      return request.markSkip('Missing  ')
+    }
 
     // Download the package/source
     const dir = this.createTempDir(request)
     const location = await this._getPackage(dir, registryData)
-    if (!location) return request.markSkip('Missing  ')
+    if (!location) {
+      return request.markSkip('Missing  ')
+    }
 
     const fetchResult = new FetchResult(spec.toUrl())
     fetchResult.document = {
@@ -64,7 +70,9 @@ class PodFetch extends AbstractFetch {
         json: true
       })
     } catch (exception) {
-      if (exception.statusCode !== 404) throw exception
+      if (exception.statusCode !== 404) {
+        throw exception
+      }
       return null
     }
 
@@ -76,13 +84,13 @@ class PodFetch extends AbstractFetch {
     const gitSource = get(podspec, 'source.git')
     if (httpSource) {
       return await this._getSourceArchive(dir, httpSource, podspec)
-    } else if (gitSource) {
-      return await this._getGitRepo(dir, gitSource, podspec)
-    } else {
-      // Unsupported source (e.g. SVN and Mercurial)
-      // https://guides.cocoapods.org/syntax/podspec.html#source
-      return null
     }
+    if (gitSource) {
+      return await this._getGitRepo(dir, gitSource, podspec)
+    }
+    // Unsupported source (e.g. SVN and Mercurial)
+    // https://guides.cocoapods.org/syntax/podspec.html#source
+    return null
   }
 
   async _getSourceArchive(dir, url, podspec) {
@@ -139,16 +147,14 @@ class PodFetch extends AbstractFetch {
 
       if (spec.revision) {
         return versions.find(version => version.name === spec.revision)
-      } else {
-        return versions.sort((a, b) => {
-          const aDate = typeof a.created_at === 'string' ? a.created_at : ''
-          const bDate = typeof b.created_at === 'string' ? b.created_at : ''
-          return bDate.localeCompare(aDate)
-        })[0]
       }
-    } else {
-      return null
+      return versions.sort((a, b) => {
+        const aDate = typeof a.created_at === 'string' ? a.created_at : ''
+        const bDate = typeof b.created_at === 'string' ? b.created_at : ''
+        return bDate.localeCompare(aDate)
+      })[0]
     }
+    return null
   }
 
   _masterRepoPathFragment(spec, prefixLengths) {

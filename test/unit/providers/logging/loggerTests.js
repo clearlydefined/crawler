@@ -10,7 +10,8 @@ describe('logger', function () {
   this.timeout(10000)
 
   let factory
-  let trackTrace, trackException
+  let trackTrace
+  let trackException
   let clock
 
   before(() => {

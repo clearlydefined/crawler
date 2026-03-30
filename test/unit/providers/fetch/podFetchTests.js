@@ -1,6 +1,6 @@
 const expect = require('chai').expect
 const sinon = require('sinon')
-const fs = require('fs')
+const fs = require('node:fs')
 const proxyquire = require('proxyquire')
 
 const Request = require('../../../../ghcrawler/lib/request.js')

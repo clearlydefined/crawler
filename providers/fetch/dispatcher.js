@@ -23,11 +23,15 @@ class FetchDispatcher extends AbstractFetch {
   async handle(request) {
     const start = Date.now()
     const processor = this._getProcessor(request)
-    if (!processor.shouldFetch(request)) return request.markNoSave()
+    if (!processor.shouldFetch(request)) {
+      return request.markNoSave()
+    }
     const documentKey = processor.getUrnFor(request)
     try {
       const document = await this.store.get(request.type, documentKey)
-      if (!document) return this._fetchMissing(request)
+      if (!document) {
+        return this._fetchMissing(request)
+      }
       request.addMeta({ read: Date.now() - start })
       request.response = { headers: {} }
       request.document = document
@@ -41,19 +45,25 @@ class FetchDispatcher extends AbstractFetch {
 
   _getProcessor(request) {
     const processor = this._getHandler(request, this.processors)
-    if (!processor) throw new Error(`No processor found for ${request.toString()}`)
+    if (!processor) {
+      throw new Error(`No processor found for ${request.toString()}`)
+    }
     return processor
   }
 
   async _fetchMissing(request) {
     // The doc could not be loaded from storage. Either storage has failed somehow or this
     // is a new processing path. Decide if we should use the origin store, or skip.
-    if (this.filter.shouldFetchMissing(request)) return this._dispatchFetch(request)
+    if (this.filter.shouldFetchMissing(request)) {
+      return this._dispatchFetch(request)
+    }
     return request.markSkip('Unreachable for reprocessing')
   }
 
   async _dispatchFetch(request, force = false) {
-    if (!force && this.filter && !this.filter.shouldFetch(request)) return request
+    if (!force && this.filter && !this.filter.shouldFetch(request)) {
+      return request
+    }
     // get the right real fetcher for this request and dispatch
     const handler = this._getHandler(request, this.fetchers)
     if (!handler) {
@@ -71,10 +81,10 @@ class FetchDispatcher extends AbstractFetch {
   }
 
   _fetchPromise(handler, request, cacheKey) {
-    return (
-      this.inProgressFetches[cacheKey] ||
-      (this.inProgressFetches[cacheKey] = this._createFetchPromise(handler, request, cacheKey))
-    )
+    if (!this.inProgressFetches[cacheKey]) {
+      this.inProgressFetches[cacheKey] = this._createFetchPromise(handler, request, cacheKey)
+    }
+    return this.inProgressFetches[cacheKey]
   }
 
   _createFetchPromise(handler, request, cacheKey) {
@@ -85,8 +95,11 @@ class FetchDispatcher extends AbstractFetch {
     this.logger.debug(`---Start Fetch: ${cacheKey} at ${new Date().toISOString()}`)
     await handler.handle(request)
     const fetchResult = request.fetchResult
+    // biome-ignore lint/performance/noDelete: setting to undefined changes semantics for deep-equal checks
     delete request.fetchResult
-    if (fetchResult) this._addToCache(cacheKey, fetchResult)
+    if (fetchResult) {
+      this._addToCache(cacheKey, fetchResult)
+    }
 
     this.logger.debug(`---End Fetch: ${cacheKey} at ${new Date().toISOString()}`)
     return fetchResult
@@ -97,7 +110,7 @@ class FetchDispatcher extends AbstractFetch {
       cacheKey,
       fetchResult,
       this._cleanupResult.bind(this),
-      (key, result) => !result.isInUse()
+      (_key, result) => !result.isInUse()
     )
   }
 

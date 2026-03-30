@@ -22,12 +22,15 @@ class QueueSet {
   }
 
   addQueue(queue, location = 'beginning') {
-    if (location === 'beginning') this.queues.unshift(queue)
-    else this.queues.push(queue)
+    if (location === 'beginning') {
+      this.queues.unshift(queue)
+    } else {
+      this.queues.push(queue)
+    }
     this._configureQueues()
   }
 
-  _reconfigure(current, changes) {
+  _reconfigure(_current, changes) {
     if (changes.some(patch => patch.path.includes('/weights'))) {
       this._startMap = this._createStartMap(this.options.weights)
     }

@@ -28,5 +28,5 @@ function partialHtml(title, html) {
   this.context.response
     .type('html')
     .status(200)
-    .end('<html><head><title>' + htmlencode(title) + '</title></head><body>' + html + '</body></html>')
+    .end(`<html><head><title>${htmlencode(title)}</title></head><body>${html}</body></html>`)
 }

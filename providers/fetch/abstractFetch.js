@@ -21,7 +21,7 @@ class AbstractFetch extends BaseHandler {
   }
 
   // eslint-disable-next-line no-unused-vars
-  canHandle(request) {
+  canHandle(_request) {
     return false
   }
 

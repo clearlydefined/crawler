@@ -2,10 +2,6 @@ const AbstractClearlyDefinedProcessor = require('./abstractClearlyDefinedProcess
 const { merge } = require('lodash')
 
 class CondaSrcExtract extends AbstractClearlyDefinedProcessor {
-  constructor(options) {
-    super(options)
-  }
-
   get toolVersion() {
     return '0.0.1'
   }
