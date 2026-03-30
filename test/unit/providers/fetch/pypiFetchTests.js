@@ -68,7 +68,117 @@ describe('pypiFetch handle function', () => {
     expect(result.outcome).to.be.equal('Missing  ')
   })
 
+  describe('extractLicenseExpression (PEP-639)', () => {
+    it('returns license_expression when present', () => {
+      const registryData = { info: { license_expression: 'MIT' } }
+      const result = fetch._extractLicenseExpression(registryData)
+      expect(result).to.be.equal('MIT')
+    })
+
+    it('returns null when license_expression is missing', () => {
+      const registryData = { info: { license: 'MIT' } }
+      const result = fetch._extractLicenseExpression(registryData)
+      expect(result).to.be.null
+    })
+
+    it('returns null when license_expression is null', () => {
+      const registryData = { info: { license_expression: null } }
+      const result = fetch._extractLicenseExpression(registryData)
+      expect(result).to.be.null
+    })
+
+    it('returns null when license_expression is empty string', () => {
+      const registryData = { info: { license_expression: '' } }
+      const result = fetch._extractLicenseExpression(registryData)
+      expect(result).to.be.null
+    })
+
+    it('returns null when license_expression is not a string', () => {
+      const registryData = { info: { license_expression: 123 } }
+      const result = fetch._extractLicenseExpression(registryData)
+      expect(result).to.be.null
+    })
+  })
+
   describe('extractDeclaredLicense', () => {
+    it('prioritizes license_expression over info.license (PEP-639)', () => {
+      const registryData = {
+        info: {
+          license_expression: 'MIT',
+          license: 'Apache-2.0'
+        }
+      }
+      const declared = fetch._extractDeclaredLicense(registryData)
+      expect(declared).to.be.equal('MIT')
+    })
+
+    it('prioritizes license_expression over classifiers (PEP-639)', () => {
+      const registryData = {
+        info: {
+          license_expression: 'BSD-3-Clause',
+          license: null,
+          classifiers: ['License :: OSI Approved :: MIT License']
+        }
+      }
+      const declared = fetch._extractDeclaredLicense(registryData)
+      expect(declared).to.be.equal('BSD-3-Clause')
+    })
+
+    it('normalizes compound SPDX expressions with LicenseRef', () => {
+      const registryData = { info: { license_expression: 'MIT AND LicenseRef-proprietary' } }
+      const declared = fetch._extractDeclaredLicense(registryData)
+      expect(declared).to.be.equal('MIT AND LicenseRef-proprietary')
+    })
+
+    it('normalizes expressions with WITH clause', () => {
+      const registryData = { info: { license_expression: 'GPL-2.0-or-later WITH Classpath-exception-2.0' } }
+      const declared = fetch._extractDeclaredLicense(registryData)
+      expect(declared).to.be.equal('GPL-2.0-or-later WITH Classpath-exception-2.0')
+    })
+
+    it('returns NOASSERTION for invalid exception in WITH clause', () => {
+      const registryData = { info: { license_expression: 'Apache-2.0 WITH commons-clause' } }
+      const declared = fetch._extractDeclaredLicense(registryData)
+      // SPDX.normalize collapses entire expression to NOASSERTION for invalid exceptions,
+      // not just the exception part (e.g., not "Apache-2.0 WITH NOASSERTION")
+      expect(declared).to.be.equal('NOASSERTION')
+    })
+
+    it('returns NOASSERTION for invalid parts in compound license_expression', () => {
+      const registryData = {
+        info: {
+          license_expression: 'MIT OR UNKNOWN'
+        }
+      }
+      const declared = fetch._extractDeclaredLicense(registryData)
+      expect(declared).to.be.equal('MIT OR NOASSERTION')
+    })
+
+    it('does not fallback to info.license when license_expression is invalid (PEP-639)', () => {
+      const registryData = {
+        info: {
+          license_expression: 'Proprietary - see LICENSE',
+          license: 'MIT',
+          classifiers: ['License :: OSI Approved :: Apache Software License']
+        }
+      }
+      const declared = fetch._extractDeclaredLicense(registryData)
+      // PEP 639: license_expression is authoritative, even if invalid.
+      // No fallback to legacy fields (info.license or classifiers)
+      expect(declared).to.be.equal('NOASSERTION')
+    })
+
+    it('falls back to info.license when license_expression is missing', () => {
+      const registryData = {
+        info: {
+          license: 'MIT',
+          classifiers: []
+        }
+      }
+      const declared = fetch._extractDeclaredLicense(registryData)
+      expect(declared).to.be.equal('MIT')
+    })
+
     it('parses LGPL-2.1-only: info.license over classifiers (crawler/issues/523)', () => {
       const registryData = JSON.parse(fs.readFileSync('test/fixtures/pypi/registryData_lgpl2.json'))
       const declared = fetch._extractDeclaredLicense(registryData)
