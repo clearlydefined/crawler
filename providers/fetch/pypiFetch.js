@@ -108,6 +108,9 @@ class PyPiFetch extends AbstractFetch {
   _extractDeclaredLicense(registryData) {
     const licenseExpression = this._extractLicenseExpression(registryData)
     if (licenseExpression) {
+      // PEP 639: license_expression is authoritative, no fallback to legacy fields
+      // Even if SPDX.normalize returns NOASSERTION for invalid expressions, we don't
+      // fall back to info.license or classifiers to maintain PEP 639 compliance
       return SPDX.normalize(licenseExpression)
     }
 

@@ -136,6 +136,14 @@ describe('pypiFetch handle function', () => {
       expect(declared).to.be.equal('GPL-2.0-or-later WITH Classpath-exception-2.0')
     })
 
+    it('returns NOASSERTION for invalid exception in WITH clause', () => {
+      const registryData = { info: { license_expression: 'Apache-2.0 WITH commons-clause' } }
+      const declared = fetch._extractDeclaredLicense(registryData)
+      // SPDX.normalize collapses entire expression to NOASSERTION for invalid exceptions,
+      // not just the exception part (e.g., not "Apache-2.0 WITH NOASSERTION")
+      expect(declared).to.be.equal('NOASSERTION')
+    })
+
     it('returns NOASSERTION for invalid parts in compound license_expression', () => {
       const registryData = {
         info: {
@@ -144,6 +152,20 @@ describe('pypiFetch handle function', () => {
       }
       const declared = fetch._extractDeclaredLicense(registryData)
       expect(declared).to.be.equal('MIT OR NOASSERTION')
+    })
+
+    it('does not fallback to info.license when license_expression is invalid (PEP-639)', () => {
+      const registryData = {
+        info: {
+          license_expression: 'Proprietary - see LICENSE',
+          license: 'MIT',
+          classifiers: ['License :: OSI Approved :: Apache Software License']
+        }
+      }
+      const declared = fetch._extractDeclaredLicense(registryData)
+      // PEP 639: license_expression is authoritative, even if invalid.
+      // No fallback to legacy fields (info.license or classifiers)
+      expect(declared).to.be.equal('NOASSERTION')
     })
 
     it('falls back to info.license when license_expression is missing', () => {
