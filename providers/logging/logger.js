@@ -1,11 +1,9 @@
 // Copyright (c) Microsoft Corporation and others. Licensed under the MIT license.
 // SPDX-License-Identifier: MIT
 
-const config = require('painless-config')
 const appInsights = require('applicationinsights')
 const winston = require('winston')
 const Transport = require('winston-transport')
-const Insights = require('./insights')
 const safeStringify = require('safe-stable-stringify')
 const { sanitizeMeta, buildProperties } = require('./loggerUtils')
 
@@ -84,17 +82,8 @@ const sanitizeFormat = winston.format(info => {
   return info
 })
 
-function factory(tattoos) {
-  const connectionString = config.get('CRAWLER_INSIGHTS_CONNECTION_STRING')
-  const rawEcho = config.get('CRAWLER_ECHO')
-  const echo =
-    String(rawEcho ?? '')
-      .trim()
-      .toLowerCase() === 'true'
-
-  Insights.setup(tattoos, connectionString, echo)
-  const aiClient = Insights.getClient()
-
+function factory({ aiClient, level = 'info' } = {}) {
+  const echo = aiClient?.echo ?? false
   const logFormat = winston.format.combine(sanitizeFormat(), winston.format.errors({ stack: true }))
 
   const consoleFormat = winston.format.combine(
@@ -107,7 +96,7 @@ function factory(tattoos) {
   )
 
   const logger = winston.createLogger({
-    level: 'info',
+    level,
     format: logFormat,
     transports: [
       new winston.transports.Console({

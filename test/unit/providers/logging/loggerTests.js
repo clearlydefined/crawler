@@ -3,37 +3,21 @@
 
 const chai = require('chai')
 const expect = chai.expect
-const proxyquire = require('proxyquire')
 const sinon = require('sinon')
+const factory = require('../../../../providers/logging/logger')
 
 describe('logger', function () {
   this.timeout(10000)
 
-  let factory
   let trackTrace
   let trackException
+  let aiClient
   let clock
-
-  before(() => {
-    const Insights = {
-      setup: sinon.stub(),
-      getClient: () => ({ trackTrace, trackException })
-    }
-    factory = proxyquire('../../../../providers/logging/logger', {
-      'painless-config': {
-        get: key =>
-          ({
-            CRAWLER_INSIGHTS_CONNECTION_STRING: 'mock',
-            CRAWLER_ECHO: 'false'
-          })[key]
-      },
-      './insights': Insights
-    })
-  })
 
   beforeEach(() => {
     trackTrace = sinon.stub()
     trackException = sinon.stub()
+    aiClient = { trackTrace, trackException, echo: false }
     clock = sinon.useFakeTimers({ toFake: ['setImmediate', 'setTimeout'] })
   })
 
@@ -42,7 +26,7 @@ describe('logger', function () {
   })
 
   it('does not forward debug or verbose when logger level is info', () => {
-    const logger = factory({ service: 'test' })
+    const logger = factory({ aiClient })
     logger.debug('debug should not be sent')
     logger.verbose('verbose should not be sent')
     logger.info('info should be sent')
@@ -55,7 +39,7 @@ describe('logger', function () {
   })
 
   it('forwards errors to exception telemetry when stack is present', () => {
-    const logger = factory({ service: 'test' })
+    const logger = factory({ aiClient })
     logger.log({
       level: 'error',
       message: 'boom',
@@ -70,7 +54,7 @@ describe('logger', function () {
   })
 
   it('forwards errors to trace telemetry with Error severity when no stack is present', () => {
-    const logger = factory({ service: 'test' })
+    const logger = factory({ aiClient })
     logger.error('plain error without stack')
     clock.runAll()
 
