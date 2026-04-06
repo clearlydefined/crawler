@@ -66,7 +66,7 @@
     "node-html-parser": "^7.1.0",
     "node-uuid": "^1.4.8",
     "painless-config": "^0.1.2",
-    "parse-github-url": "^1.0.3",
+    "parse-github-url": "^1.0.4",
     "patch-package": "^8.0.1",
     "qlimit": "^0.1.1",
     "safe-stable-stringify": "^2.5.0",
