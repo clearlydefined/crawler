@@ -75,7 +75,7 @@ class NpmFetch extends AbstractFetch {
       }
       return null
     }
-    if (!registryData || !registryData.versions) {
+    if (!registryData?.versions) {
       return null
     }
     const version = spec.revision || this.getLatestVersion(Object.keys(registryData.versions))
@@ -102,7 +102,7 @@ class NpmFetch extends AbstractFetch {
   }
 
   _getCasedSpec(spec, registryData) {
-    if (!registryData || !registryData.name) {
+    if (!registryData?.name) {
       return false
     }
     const parts = registryData.name.split('/')

@@ -150,7 +150,7 @@ class MavenBasedFetch extends AbstractFetch {
   }
 
   _buildParentSpec(pom, spec) {
-    if (!pom || !pom.project || !pom.project.parent) {
+    if (!pom?.project?.parent) {
       return null
     }
     const parent = pom.project.parent[0]

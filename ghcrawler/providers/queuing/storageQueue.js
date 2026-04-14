@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation and others. Made available under the MIT license.
 // SPDX-License-Identifier: MIT
 
-// eslint-disable-next-line no-unused-vars
-const { QueueServiceClient } = require('@azure/storage-queue')
+/** @typedef {import('@azure/storage-queue').QueueServiceClient} QueueServiceClient */
 const qlimit = require('qlimit')
 const { cloneDeep } = require('lodash')
 
@@ -87,7 +86,7 @@ class StorageQueue {
   }
 
   async done(request) {
-    if (!request || !request._message) {
+    if (!request?._message) {
       return
     }
     await this.queueClient.deleteMessage(request._message.messageId, request._message.popReceipt)
@@ -99,7 +98,7 @@ class StorageQueue {
   }
 
   async abandon(request) {
-    if (!request || !request._message) {
+    if (!request?._message) {
       return
     }
     await this.updateVisibilityTimeout(request)

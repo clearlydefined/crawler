@@ -225,12 +225,7 @@ class TraversalPolicy {
       return TraversalPolicy._hasExpired(request.document?._metadata?.processedAt, this.freshness * 24, 'hours')
     }
     if (this.freshness === 'version' || this.freshness === 'matchOrVersion') {
-      return (
-        !request.document ||
-        !request.document._metadata ||
-        !request.document._metadata.version ||
-        request.document._metadata.version < version
-      )
+      return !request.document?._metadata?.version || request.document._metadata.version < version
     }
     throw new Error('Invalid freshness in traversal policy')
   }
