@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-// eslint-disable-next-line no-unused-vars
-const { ContainerClient } = require('@azure/storage-blob')
+/** @typedef {import('@azure/storage-blob').ContainerClient} ContainerClient */
 const memoryCache = require('memory-cache')
 const URL = require('node:url')
 

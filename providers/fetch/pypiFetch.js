@@ -60,7 +60,7 @@ class PyPiFetch extends AbstractFetch {
   }
 
   _getRevision(registryData) {
-    if (!registryData || !registryData.releases) {
+    if (!registryData?.releases) {
       return null
     }
     return findLastKey(registryData.releases)

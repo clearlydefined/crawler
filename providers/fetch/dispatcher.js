@@ -95,7 +95,6 @@ class FetchDispatcher extends AbstractFetch {
     this.logger.debug(`---Start Fetch: ${cacheKey} at ${new Date().toISOString()}`)
     await handler.handle(request)
     const fetchResult = request.fetchResult
-    // biome-ignore lint/performance/noDelete: setting to undefined changes semantics for deep-equal checks
     delete request.fetchResult
     if (fetchResult) {
       this._addToCache(cacheKey, fetchResult)

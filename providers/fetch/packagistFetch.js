@@ -22,7 +22,7 @@ class PackagistFetch extends AbstractFetch {
   async handle(request) {
     const spec = this.toSpec(request)
     const registryData = await this._getRegistryData(spec)
-    if (!registryData || !registryData.manifest) {
+    if (!registryData?.manifest) {
       return this.markSkip(request)
     }
     super.handle(request)

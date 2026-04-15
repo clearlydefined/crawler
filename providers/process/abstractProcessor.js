@@ -95,7 +95,7 @@ class AbstractProcessor extends BaseHandler {
    * @param {string} location - Root filesystem path that hosts the files to be attached
    */
   async attachFiles(document, files, location = '') {
-    if (!files || !files.length) {
+    if (!files?.length) {
       return
     }
     if (!document._attachments) {

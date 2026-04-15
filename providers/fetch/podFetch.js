@@ -26,7 +26,7 @@ class PodFetch extends AbstractFetch {
 
     // Ensure we have a spec revision, we can't get the registry data without one
     const version = await this._getVersion(spec)
-    if (!version || !version.name) {
+    if (!version?.name) {
       return request.markSkip('Missing  ')
     }
     spec.revision = version.name
