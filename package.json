@@ -80,7 +80,7 @@
     "xml2js": "0.6.2"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.11",
+    "@biomejs/biome": "2.4.12",
     "@tsconfig/node-ts": "23.6.4",
     "@tsconfig/node24": "24.0.4",
     "@tsconfig/strictest": "2.0.8",
@@ -106,11 +106,11 @@
     "chai-as-promised": "8.0.2",
     "chai-spies": "1.1.0",
     "mocha": "11.7.5",
-    "mockttp": "4.3.0",
+    "mockttp": "4.3.1",
     "nyc": "18.0.0",
     "proxyquire": "2.1.3",
     "sinon": "21.1.2",
-    "typescript": "6.0.2"
+    "typescript": "6.0.3"
   },
   "overrides": {
     "lzma-native": "8.0.6"
