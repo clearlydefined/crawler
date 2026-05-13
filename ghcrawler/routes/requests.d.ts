@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 import type { Router } from 'express'
+
 import CrawlerService = require('../lib/crawlerService')
 
 declare function setup(service: CrawlerService): Router

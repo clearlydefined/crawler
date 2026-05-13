@@ -3,6 +3,7 @@
 
 import type { QueueServiceClient } from '@azure/storage-queue'
 import type { CrawlQueue } from './nestedQueue'
+
 import Request = require('../../lib/request')
 
 interface StorageQueueOptions {

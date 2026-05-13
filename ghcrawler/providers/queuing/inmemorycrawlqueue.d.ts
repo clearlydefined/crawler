@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 import Request = require('../../lib/request')
+
 import type { CrawlQueue } from './nestedQueue'
 
 interface InMemoryQueueOptions {

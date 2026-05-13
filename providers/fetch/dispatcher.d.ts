@@ -5,6 +5,7 @@ import AbstractFetch = require('./abstractFetch')
 import Request = require('../../ghcrawler/lib/request')
 import FetchResult = require('../../lib/fetchResult')
 import MemoryCache = require('../../lib/memoryCache')
+
 import type { Handler } from '../../ghcrawler/lib/crawler'
 import type { DocStore } from '../../ghcrawler/types/docStore'
 import type { BaseHandlerOptions } from '../../lib/baseHandler'

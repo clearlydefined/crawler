@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 import CrawlerService = require('../lib/crawlerService')
+
 import type { Server } from 'node:http'
 import type { Logger } from '../lib/request'
 

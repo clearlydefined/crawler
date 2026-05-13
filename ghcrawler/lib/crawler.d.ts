@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 import Request = require('./request')
+
 import { DocStore, StoredDocument } from '../types/docStore'
 
 interface CrawlerOptions {

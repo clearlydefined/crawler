@@ -3,6 +3,7 @@
 
 import Request = require('../../lib/request')
 import NestedQueue = require('./nestedQueue')
+
 import type { CrawlQueue } from './nestedQueue'
 
 interface AttenuatedQueueOptions {

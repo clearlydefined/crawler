@@ -8,15 +8,16 @@ import TraversalPolicy = require('./lib/traversalPolicy')
 import QueueSet = require('./providers/queuing/queueSet')
 import Request = require('./lib/request')
 import VisitorMap = require('./lib/visitorMap')
+
 import type { CrawlerOptions } from './lib/crawler'
 
 export {
   Crawler as crawler,
   CrawlerFactory as crawlerFactory,
   CrawlerService as crawlerService,
-  TraversalPolicy as policy,
   QueueSet as queueSet,
   Request as request,
+  TraversalPolicy as policy,
   TraversalPolicy as traversalPolicy,
   VisitorMap as visitorMap
 }

@@ -1,6 +1,8 @@
 import AbstractProcessor = require('../process/abstractProcessor')
+
 import type { Handler } from '../../ghcrawler/lib/crawler'
 import type { BaseHandlerOptions } from '../../lib/baseHandler'
+
 import Request = require('../../ghcrawler/lib/request')
 import EntitySpec = require('../../lib/entitySpec')
 

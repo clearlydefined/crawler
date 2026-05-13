@@ -3,6 +3,7 @@
 
 import type { Express } from 'express'
 import type { CrawlerOptions } from './lib/crawler'
+
 import CrawlerService = require('./lib/crawlerService')
 
 declare function configureApp(service: CrawlerService, logger: CrawlerOptions['logger']): Express
