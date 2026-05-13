@@ -1,5 +1,6 @@
 import AbstractProcessor = require('./abstractProcessor')
 import SourceSpec = require('../../lib/sourceSpec')
+
 import type { BaseHandlerOptions } from '../../lib/baseHandler'
 
 declare function createProcessor(

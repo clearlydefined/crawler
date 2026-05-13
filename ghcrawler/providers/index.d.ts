@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 import ScopedQueueSets = require('./queuing/scopedQueueSets')
+
 import type { Locker } from '../lib/crawler'
 import type { DocStore } from '../types/docStore'
 

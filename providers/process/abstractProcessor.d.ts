@@ -4,6 +4,7 @@
 import BaseHandler = require('../../lib/baseHandler')
 import Request = require('../../ghcrawler/lib/request')
 import EntitySpec = require('../../lib/entitySpec')
+
 import type { StoredDocument } from '../../ghcrawler/types/docStore'
 
 declare class AbstractProcessor extends BaseHandler {

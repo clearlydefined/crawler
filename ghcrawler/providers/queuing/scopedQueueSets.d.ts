@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 import Request = require('../../lib/request')
+
 import type { CrawlQueue } from './nestedQueue'
 
 declare class ScopedQueueSets {

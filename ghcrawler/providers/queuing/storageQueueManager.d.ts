@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 import type { QueueServiceClient } from '@azure/storage-queue'
+
 import StorageQueue = require('./storageQueue')
 import AttenuatedQueue = require('./attenuatedQueue')
 import Request = require('../../lib/request')

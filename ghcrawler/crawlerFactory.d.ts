@@ -5,6 +5,7 @@ import Crawler = require('./lib/crawler')
 import CrawlerService = require('./lib/crawlerService')
 import QueueSet = require('./providers/queuing/queueSet')
 import ScopedQueueSets = require('./providers/queuing/scopedQueueSets')
+
 import type { CrawlerOptions, Handler, Locker } from './lib/crawler'
 import type { CrawlQueue } from './providers/queuing/nestedQueue'
 import type { DocStore } from './types/docStore'
