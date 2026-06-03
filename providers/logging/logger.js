@@ -60,6 +60,8 @@ class ApplicationInsightsTransport extends Transport {
           properties
         })
       }
+    } catch (err) {
+      console.error('ApplicationInsights telemetry failed', err)
     } finally {
       callback()
     }
