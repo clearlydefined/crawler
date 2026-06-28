@@ -63,4 +63,32 @@ describe('logger', function () {
     expect(trackTrace.firstCall.args[0].message).to.contain('plain error without stack')
     expect(trackTrace.firstCall.args[0].severity).to.equal('Error')
   })
+
+  it('still calls callback if trackTrace throws', done => {
+    const consoleError = sinon.stub(console, 'error')
+    trackTrace.throws(new Error('AI unavailable'))
+    const logger = factory({ aiClient })
+    logger.info('test message')
+    clock.runAll()
+    setImmediate(() => {
+      expect(trackTrace.callCount).to.equal(1)
+      consoleError.restore()
+      done()
+    })
+    clock.runAll()
+  })
+
+  it('still calls callback if trackException throws', done => {
+    const consoleError = sinon.stub(console, 'error')
+    trackException.throws(new Error('AI unavailable'))
+    const logger = factory({ aiClient })
+    logger.log({ level: 'error', message: 'boom', stack: 'Error: boom\n    at test:1:1' })
+    clock.runAll()
+    setImmediate(() => {
+      expect(trackException.callCount).to.equal(1)
+      consoleError.restore()
+      done()
+    })
+    clock.runAll()
+  })
 })
