@@ -70,7 +70,7 @@
     "patch-package": "8.0.1",
     "qlimit": "0.1.1",
     "safe-stable-stringify": "2.5.0",
-    "semver": "7.8.1",
+    "semver": "7.8.5",
     "sha.js": "2.4.12",
     "spdx-correct": "3.2.0",
     "throat": "6.0.2",
