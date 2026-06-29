@@ -40,7 +40,7 @@
     "ar-async": "0.1.4",
     "axios": "1.16.1",
     "axios-retry": "4.5.0",
-    "body-parser": "2.2.2",
+    "body-parser": "2.3.0",
     "debug": "4.4.3",
     "decompress": "4.2.1",
     "decompress-tar": "4.1.1",
