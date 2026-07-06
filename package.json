@@ -80,7 +80,7 @@
     "xml2js": "0.6.2"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.1",
+    "@biomejs/biome": "2.5.2",
     "@tsconfig/node-ts": "23.6.4",
     "@tsconfig/node24": "24.0.4",
     "@tsconfig/strictest": "2.0.8",
@@ -95,11 +95,11 @@
     "@types/memory-cache": "0.2.6",
     "@types/mocha": "10.0.10",
     "@types/morgan": "1.9.10",
-    "@types/node": "26.0.1",
+    "@types/node": "26.1.0",
     "@types/node-uuid": "0.0.32",
     "@types/parse-github-url": "1.0.3",
     "@types/semver": "7.7.1",
-    "@types/sinon": "21.0.1",
+    "@types/sinon": "22.0.0",
     "@types/tmp": "0.2.6",
     "@types/xml2js": "0.4.14",
     "chai": "6.2.2",
