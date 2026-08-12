@@ -113,7 +113,7 @@ module.exports = {
         '--tallies-key-files'
         // '--quiet'
       ],
-      timeout: 1000,
+      timeout: 120,
       processes: Number(config.get('CRAWLER_SCANCODE_PARALLELISM') || process.env.CRAWLER_SCANCODE_PARALLELISM) || 2,
       format: '--json-pp'
     },
