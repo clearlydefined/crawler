@@ -39,28 +39,32 @@ class ApplicationInsightsTransport extends Transport {
       return
     }
 
-    const properties = buildProperties(info)
-    if (info.level === 'error') {
-      if (info.stack) {
-        const err = new Error(info.message)
-        err.stack = info.stack
-        this.aiClient.trackException({ exception: err, properties })
+    try {
+      const properties = buildProperties(info)
+      if (info.level === 'error') {
+        if (info.stack) {
+          const err = new Error(info.message)
+          err.stack = info.stack
+          this.aiClient.trackException({ exception: err, properties })
+        } else {
+          this.aiClient.trackTrace({
+            message: info.message,
+            severity: appInsights.KnownSeverityLevel.Error,
+            properties
+          })
+        }
       } else {
         this.aiClient.trackTrace({
           message: info.message,
-          severity: appInsights.KnownSeverityLevel.Error,
+          severity: mapLevel(info.level),
           properties
         })
       }
-    } else {
-      this.aiClient.trackTrace({
-        message: info.message,
-        severity: mapLevel(info.level),
-        properties
-      })
+    } catch (err) {
+      console.error('ApplicationInsights telemetry failed', err)
+    } finally {
+      callback()
     }
-
-    callback()
   }
 }
 
